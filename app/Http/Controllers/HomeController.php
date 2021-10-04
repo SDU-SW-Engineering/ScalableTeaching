@@ -50,7 +50,7 @@ class HomeController extends Controller
 
         $projectId    = $this->createProject($gitLabManager, $username);
         $gitlabUserId = $gitlabUser->first()['id'];
-        $added        = false;
+        $added        = true;
         try
         {
             $gitLabManager->projects()->addMember($projectId, $gitlabUserId, 40);
