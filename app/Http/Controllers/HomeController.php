@@ -101,7 +101,7 @@ class HomeController extends Controller
         $project = collect($manager->groups()->projects(1167))->firstWhere('name', $username);
         if ($project == null)
             $project = $this->forkProject($manager, $username);
-
+        /*
         $currentHooks = collect($manager->projects()->hooks($project['id']));
         if ($currentHooks->isEmpty())
         {
@@ -109,7 +109,7 @@ class HomeController extends Controller
                 'job_events' => true,
                 'token'      => md5(strtolower($project['name']) . "webtechf21"),
             ]);
-        }
+        }*/
 
         return $project['id'];
     }
