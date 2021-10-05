@@ -101,15 +101,16 @@ class HomeController extends Controller
         $project = collect($manager->groups()->projects(1167))->firstWhere('name', $username);
         if ($project == null)
             $project = $this->forkProject($manager, $username);
-        /*
+
         $currentHooks = collect($manager->projects()->hooks($project['id']));
         if ($currentHooks->isEmpty())
         {
-            $manager->projects()->addHook($project['id'], 'https://webtech.sdu.dk/api/reporter', [
-                'job_events' => true,
-                'token'      => md5(strtolower($project['name']) . "webtechf21"),
+            $manager->projects()->addHook($project['id'], 'http://23.88.33.213/forwarder.php', [
+                'job_events'              => true,
+                'token'                   => md5(strtolower($project['name']) . "webtechf21"),
+                'enable_ssl_verification' => false
             ]);
-        }*/
+        }
 
         return $project['id'];
     }
