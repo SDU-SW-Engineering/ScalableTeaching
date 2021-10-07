@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JobStatus;
 use Carbon\Carbon;
 use Gitlab\Client;
+use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\Facades\GitLab;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Http\Request;
@@ -98,7 +99,9 @@ class HomeController extends Controller
      */
     private function createProject(GitLabManager $manager, $username) : int
     {
-        $project = collect($manager->groups()->projects(1167))->firstWhere('name', $username);
+        $resultPager = new ResultPager($manager->connection());
+        $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [1167]));
+        $project     = $projects->firstWhere('name', $username);
         if ($project == null)
             $project = $this->forkProject($manager, $username);
 
