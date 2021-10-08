@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\JobStatus;
+use App\Models\Project;
+use App\Models\Task;
 use Carbon\Carbon;
 use Gitlab\Client;
 use Gitlab\ResultPager;
@@ -103,7 +105,16 @@ class HomeController extends Controller
         $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [1167]));
         $project     = $projects->firstWhere('name', $username);
         if ($project == null)
+        {
             $project = $this->forkProject($manager, $username);
+        }
+
+        Project::updateOrCreate([
+            'project_id' => $project['id']
+        ], [
+            'task_id'   => Task::first()->id,
+            'repo_name' => $project['name']
+        ]);
 
         $currentHooks = collect($manager->projects()->hooks($project['id']));
         if ($currentHooks->isEmpty())

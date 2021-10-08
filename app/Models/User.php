@@ -36,6 +36,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string $guid
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereGuid($value)
  */
 class User extends Authenticatable
 {
@@ -47,9 +49,9 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $fillable = [
+        'guid',
         'name',
         'email',
-        'password',
     ];
 
     /**
