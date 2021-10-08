@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.bg-blob {
+    background-image: url('/svgs/blob.svg')
+}
+
+@media (prefers-color-scheme: dark) {
+    .bg-blob {
+        background-image: url('/svgs/blob-dark.svg')
+    }
+}

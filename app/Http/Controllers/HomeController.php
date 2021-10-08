@@ -18,7 +18,7 @@ class HomeController extends Controller
 {
     public function index(GitLabManager $gitLabManager)
     {
-        return view('home');
+        return view('home', ['hideHeader' => true]);
     }
 
     public function start(GitLabManager $gitLabManager)
