@@ -8,7 +8,7 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                limeGreen: {
+                'lime-green': {
                     50: '#F2FDE0',
                     100: '#E2F7C2',
                     200: '#C7EA8F',
@@ -24,7 +24,10 @@ module.exports = {
         },
     },
     variants: {
-        extend: {},
+        extend: {
+            borderStyle: ['dark', 'hover'],
+            borderWidth: ['hover']
+        },
     },
     plugins: [],
 }

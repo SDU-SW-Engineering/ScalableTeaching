@@ -11,3 +11,7 @@
         background-image: url('/svgs/blob-dark.svg')
     }
 }
+
+.hero-waves {
+    background-image: url('/svgs/hero-waves.svg')
+}
