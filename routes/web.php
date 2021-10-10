@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,4 +26,9 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.'], function ()
 {
     Route::get('/', [CourseController::class, 'index'])->name('index');
     Route::get('{course}', [CourseController::class, 'show'])->name('show');
+
+    Route::group(['prefix' => '{course}/tasks', 'as' => 'tasks.'], function ()
+    {
+        Route::get('{task}', [TaskController::class, 'show'])->name('show');
+    });
 });

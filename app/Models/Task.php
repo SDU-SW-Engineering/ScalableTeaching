@@ -32,4 +32,6 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     use HasFactory;
+
+    protected $dates = ['ends_at', 'starts_at'];
 }

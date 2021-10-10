@@ -10,14 +10,18 @@ class CourseController extends Controller
     public function index()
     {
         $courses = Course::all();
-        return view('courses.index', compact('courses'));
+        return view('courses.index', [
+            'courses' => $courses,
+            'bg' => 'bg-gray-50 dark:bg-gray-600'
+        ]);
     }
 
     public function show(Course $course)
     {
+        $course->load('tasks');
         return view('courses.show', [
             'course' => $course,
-            'bg' => 'bg-gray-100 dark:bg-gray-600'
+            'bg'     => 'bg-gray-50 dark:bg-gray-600'
         ]);
     }
 }
