@@ -15,6 +15,9 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        return view('courses.show', compact('course'));
+        return view('courses.show', [
+            'course' => $course,
+            'bg' => 'bg-gray-100 dark:bg-gray-600'
+        ]);
     }
 }

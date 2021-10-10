@@ -9,7 +9,7 @@
     <script type="text/javascript" src="{{ asset('js/app.js') }}" defer></script>
 
 </head>
-<body class="bg-white dark:bg-gray-800 h-screen">
+<body class="{{ $bg ?? 'bg-white dark:bg-gray-800' }} h-screen">
 @includeUnless(isset($hideHeader), 'partials.navbar')
 @yield('content')
 
