@@ -15,10 +15,12 @@ class CreateProjectsTable extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('task_id');
+            $table->unsignedBigInteger('ownable_id')->nullable();
+            $table->string('ownable_type')->nullable();
+            $table->unsignedBigInteger('project_id');
             $table->string('repo_name');
-            $table->enum('status', ['suspended', 'active', 'finished'])->default('active');
+            $table->enum('status', ['overdue', 'active', 'finished'])->default('active');
             $table->timestamps();
 
             $table->foreign('task_id')->references('id')->on('tasks');

@@ -20,6 +20,8 @@ class CreateJobStatusesTable extends Migration
             $table->string('status');
             $table->string('repo_name');
             $table->string('repo_branch');
+            $table->string('user_name');
+            $table->string('user_email');
             $table->string('runner')->nullable();
             $table->decimal('duration')->nullable();
             $table->decimal('queue_duration')->nullable();
