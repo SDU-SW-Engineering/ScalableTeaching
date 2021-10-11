@@ -2,14 +2,14 @@
 
 @section('content')
     <div class="bg-lime-green-500">
-        <div class="container px-6 py-12">
+        <div class="container mx-auto px-6 py-12">
             <h1 class="text-3xl font-bold text-gray-100 dark:text-gray-100">Courses</h1>
             <h2 class="text-lime-green-100 dark:text-lime-green-900 font-light">Currently enrolled in <b>%</b> courses
             </h2>
         </div>
     </div>
     <div class="bg-gray-100 dark:bg-gray-700">
-        <div class="container px-6 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="container mx-auto px-6 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
         @foreach($courses as $course)
                 <div class="shadow-lg hover:shadow-xl rounded-xl p-4 bg-white relative overflow-hidden dark:bg-gray-800">
                     <a href="{{ route('courses.show', [$course->id]) }}" class="w-full h-full block">

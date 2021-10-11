@@ -2,7 +2,7 @@
 
 @section('content')
     @include('partials.subnavbar')
-    <div class="px-6 pt-4 container">
+    <div class="px-6 pt-4 container mx-auto">
         <div class="flex gap-6 flex-wrap-reverse">
             <div class="flex-1 w-full lg:w-2/3 xl:w-3/4">
                 <div class="mb-4">
@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="w-full lg:w-1/3 xl:w-1/4">
-                <div class="bg-white rounded-lg shadow-md dark:bg-gray-800 flex p-4">
+                <div class="bg-white rounded-lg shadow-md dark:bg-gray-800 flex p-4 items-center">
                     <div class="w-16 h-16">
                         <simple-doughnut-chart :data="[2,2, 1]"></simple-doughnut-chart>
                     </div>
