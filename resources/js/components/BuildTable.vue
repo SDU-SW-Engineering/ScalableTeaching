@@ -23,6 +23,10 @@
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Run Time
                                 </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    When
+                                </th>
                             </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-500">
@@ -83,6 +87,14 @@
                                     </div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">
                                         Queued for 2:22 minutes
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
+                                        <span>2 day ago</span>
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        16/08/2021 22:22:03
                                     </div>
                                 </td>
                             </tr>
