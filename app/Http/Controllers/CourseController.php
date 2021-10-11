@@ -12,7 +12,7 @@ class CourseController extends Controller
         $courses = Course::all();
         return view('courses.index', [
             'courses' => $courses,
-            'bg' => 'bg-gray-50 dark:bg-gray-600'
+            'bg' => 'bg-gray-50 dark:bg-gray-700'
         ]);
     }
 

@@ -27,7 +27,7 @@ class CreateJobStatusesTable extends Migration
             $table->decimal('queue_duration')->nullable();
             $table->json('history');
             $table->json('log');
-            $table->timestamps();
+            $table->timestampsTz();
 
             $table->foreign('project_id')->references('id')->on('projects');
         });

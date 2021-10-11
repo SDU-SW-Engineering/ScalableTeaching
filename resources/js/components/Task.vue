@@ -46,7 +46,7 @@
                 </div>
                 <div v-show="tab === 'description'" class="relative">
                     <div
-                        class="absolute bg-white p-4 rounded-md shadow-md max-h-screen overflow-x-hidden overflow-scroll dark:bg-gray-800">
+                        class="absolute bg-white p-4 rounded-md shadow-md max-vh70 overflow-x-hidden overflow-scroll dark:bg-gray-800">
                         <div class="prose-sm dark:prose-light"
                              :class="[hideMissingAssignmentWarning ? '': 'filter blur-sm']" v-html="description"/>
                     </div>

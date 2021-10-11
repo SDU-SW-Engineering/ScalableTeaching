@@ -2,9 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Project;
+use App\Models\Task;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Console\Command;
+use function Clue\StreamFilter\fun;
 
 class LoadCurrentProjects extends Command
 {
@@ -39,10 +42,22 @@ class LoadCurrentProjects extends Command
      */
     public function handle()
     {
-        $groupId = $this->argument('group');
-        $manager = app(GitLabManager::class);
+        $groupId     = $this->argument('group');
+        $manager     = app(GitLabManager::class);
         $resultPager = new ResultPager($manager->connection());
         $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [1167]));
-        var_dump($projects);
+        $this->info("Discovered {$projects->count()} projects within the group.");
+        $task = Task::findOrFail($this->ask('What task does the projects belong to'));
+        $this->withProgressBar($projects, function ($project) use ($task)
+        {
+            $task->projects()->updateOrCreate([
+                'project_id' => $project['id']
+            ], [
+                'repo_name' => $project['name'],
+                'status'    => 'active'
+            ]);
+        });
+
+        return 0;
     }
 }

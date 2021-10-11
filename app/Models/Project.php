@@ -26,10 +26,27 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Project whereTaskId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Project whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property int|null $ownable_id
+ * @property string|null $ownable_type
+ * @method static \Illuminate\Database\Eloquent\Builder|Project whereOwnableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Project whereOwnableType($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\JobStatus[] $jobStatuses
+ * @property-read int|null $job_statuses_count
+ * @property-read Model|\Eloquent $ownable
  */
 class Project extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['project_id', 'task_id', 'repo_name'];
+    protected $fillable = ['project_id', 'task_id', 'repo_name', 'status'];
+
+    public function ownable()
+    {
+        return $this->morphTo();
+    }
+
+    public function jobStatuses()
+    {
+        return $this->hasMany(JobStatus::class);
+    }
 }

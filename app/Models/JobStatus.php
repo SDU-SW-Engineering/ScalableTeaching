@@ -38,6 +38,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|JobStatus whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|JobStatus whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string $user_name
+ * @property string $user_email
+ * @method static \Illuminate\Database\Eloquent\Builder|JobStatus whereUserEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|JobStatus whereUserName($value)
  */
 class JobStatus extends Model
 {

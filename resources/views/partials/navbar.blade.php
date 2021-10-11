@@ -19,8 +19,6 @@
         <div class="items-center md:flex">
             <div class="flex flex-col md:flex-row items-center">
                 <a class="my-1 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-500 dark:hover:text-indigo-400 md:mx-4 md:my-0" href="#">Courses</a>
-                <a class="my-1 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-500 dark:hover:text-indigo-400 md:mx-4 md:my-0" href="#">Assignments</a>
-                <a class="my-1 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-500 dark:hover:text-indigo-400 md:mx-4 md:my-0" href="#">Groups</a>
                 <a class="my-1 text-sm py-1 px-2 font-medium bg-lime-green-500 rounded hover:bg-lime-green-400 text-white hover:text-white md:ml-4 md:my-0" href="#">{{ auth()->user()->getAuthIdentifierName() }}</a>
             </div>
 

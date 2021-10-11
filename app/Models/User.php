@@ -38,6 +38,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @mixin \Eloquent
  * @property string $guid
  * @method static \Illuminate\Database\Eloquent\Builder|User whereGuid($value)
+ * @property-read mixed $username
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Project[] $projects
+ * @property-read int|null $projects_count
  */
 class User extends Authenticatable
 {
@@ -72,4 +75,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    protected $appends = ['username'];
+
+    public function getUsernameAttribute()
+    {
+        return explode('@', $this->email)[0];
+    }
+
+    public function projects()
+    {
+        return $this->morphMany(Project::class, 'ownable');
+    }
 }

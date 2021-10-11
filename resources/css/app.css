@@ -15,3 +15,27 @@
 .hero-waves {
     background-image: url('/svgs/hero-waves.svg')
 }
+
+.vh60 {
+    height: 60vh;
+}
+
+.max-vh60 {
+    max-height: 60vh;
+}
+
+.vh70 {
+    height: 70vh;
+}
+
+.max-vh70 {
+    max-height: 70vh;
+}
+
+.vh80 {
+    height: 80vh;
+}
+
+.max-vh80 {
+    max-height: 80vh;
+}
