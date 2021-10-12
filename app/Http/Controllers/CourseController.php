@@ -16,6 +16,7 @@ class CourseController extends Controller
     {
         $courses = $this->retrieveCourses()->get()->map(function ($course)
         {
+
             $deadline = $course->tasks->sort(function ($a, $b)
             {
                 $startsAtA = Carbon::parse($a->starts_at);
@@ -32,13 +33,14 @@ class CourseController extends Controller
                     return 1;
 
                 return now()->diffInSeconds($endsAtA) > now()->diffInSeconds($endsAtB) ? 1 : -1;
-            })->first()->ends_at;
+            })->first();
+
             return [
                 'id'            => $course->id,
                 'name'          => $course->name,
                 'taskCount'     => $course->tasks->count(),
                 'completed'     => $course->tasks->where('status', 'finished')->count(),
-                'next_deadline' => $deadline
+                'next_deadline' => $deadline == null ? null : $deadline->ends_at
             ];
         });
 

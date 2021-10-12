@@ -19,19 +19,26 @@
                             <p class="text-gray-800 dark:text-white text-xl font-medium mb-2">
                                 {{ $course['name'] }}
                             </p>
-                            <p class="text-lime-green-600 text-xs font-medium mb-2">
-                                Next Due Date: <b>{{ $course['next_deadline']->toFormattedDateString() }}
-                                    , {{ $course['next_deadline']->diffForHumans() }}</b>
-                            </p>
+                            @unless($course['next_deadline'] == null)
+                                <p class="text-lime-green-600 text-xs font-medium mb-2">
+                                    Next Due Date: <b>{{ $course['next_deadline']->toFormattedDateString() }}
+                                        , {{ $course['next_deadline']->diffForHumans() }}</b>
+                                </p>
+                            @endunless
                         </div>
                         <div class="flex items-center justify-between my-2">
                             <p class="text-gray-300 text-sm">
-                                {{ $course['completed'] }}/{{ $course['taskCount'] }} task completed
+                                @if ($course['taskCount'] == 0)
+                                    0
+                                @else
+                                    {{ $course['completed'] }}/{{ $course['taskCount'] }}
+                                @endif
+                                task completed
                             </p>
                         </div>
                         <div class="w-full h-2 bg-lime-green-200 rounded-full">
                             <div
-                                style="width: {{ number_format($course['completed'] / $course['taskCount'] * 100, 2) }}%"
+                                style="width: {{ $course['taskCount'] == 0 ? 0 : number_format($course['completed'] / $course['taskCount'] * 100, 2) }}%"
                                 class="h-full text-center text-xs text-white bg-lime-green-600 rounded-full">
                             </div>
                         </div>

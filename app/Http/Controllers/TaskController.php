@@ -24,8 +24,8 @@ class TaskController extends Controller
         $percent         = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
         $progress        = $percent > 100 ? 100 : $percent;
         $timeLeft        = $task->ends_at->isPast() ? '' : str_replace('from now', 'left', $task->ends_at->diffForHumans());
-        $dailyBuilds     = $task->dailyBuilds(null, true);
         $myBuilds        = $task->dailyBuilds($user->id);
+        $dailyBuilds     = $task->dailyBuilds(null, true);
         $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
 
         return view('tasks.show', [

@@ -14,6 +14,7 @@ use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Jobs\Job;
 use Illuminate\Support\Str;
+use function Clue\StreamFilter\remove;
 
 class HomeController extends Controller
 {
@@ -64,17 +65,39 @@ class HomeController extends Controller
         $tokenShouldBe = md5(strtolower(\request('repository.name')) . "webtechf21");
         abort_unless($token == $tokenShouldBe, 400, 'Token mismatch');
 
+        $project = Project::firstWhere('project_id', request('project_id'));
+        if ($project == null)
+            return "ignored";
+
+        if ($project->status == 'finished')
+            return "finished";
+
+        $startedAt = Carbon::parse(\request('build_created_at'))->setTimezone(config('app.timezone'));
+        if ($startedAt->isAfter($project->task->ends_at))
+        {
+            \Log::info('A user submitted a task over the deadline', [
+                'deadline'     => $project->task->ends_at,
+                'submitted_at' => $startedAt,
+                'request'      => request()->all()
+            ]);
+            return "overdue";
+        }
+
         $jobStatus             = JobStatus::where([
             'build_id'   => request('build_id'),
-            'project_id' => request('project_id')
+            'project_id' => $project->id
         ])->firstOrNew();
         $jobStatus->build_id   = request('build_id');
-        $jobStatus->project_id = request('project_id');
-        $jobStatus->status     = \request('build_status');
+        $jobStatus->project_id = $project->id;
+        $jobStatus->status     = request('build_status');
+        $jobStatus->user_name  = request('user.name');
+        $jobStatus->user_email = request('user.email');
         if ($jobStatus->log == null)
             $jobStatus->log = [];
         if ($jobStatus->history == null)
             $jobStatus->history = [];
+        if ($jobStatus->created_at == null)
+            $jobStatus->created_at = $startedAt;
         $jobStatus->repo_branch = request('ref');
         $jobStatus->repo_name   = \request('repository.name');
         if (\request('build_duration') != null)
@@ -97,6 +120,12 @@ class HomeController extends Controller
         $jobStatus->log     = $logs;
         $jobStatus->history = $history;
         $jobStatus->save();
+
+        if ($jobStatus->status == 'success')
+            $project->update([
+                'status'           => 'finished',
+                'final_commit_sha' => request('sha')
+            ]);
 
 
         return response("ok", 200);

@@ -40,7 +40,7 @@ class Project extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id'];
+    protected $fillable = ['project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id', 'final_commit_sha'];
 
     public function ownable()
     {
@@ -50,5 +50,10 @@ class Project extends Model
     public function jobStatuses()
     {
         return $this->hasMany(JobStatus::class);
+    }
+
+    public function task()
+    {
+        return $this->belongsTo(Task::class);
     }
 }

@@ -38,21 +38,23 @@ class LoadOldReports extends Command
      */
     public function handle()
     {
-        $content = stripslashes(file_get_contents(storage_path($this->argument('file'))));
-        $data    = collect(json_decode($content, true));
+        $content = file_get_contents(storage_path($this->argument('file')));
+        $data    = collect(json_decode($content, true)['RECORDS']);
 
         $this->info("File contains {$data->count()} entries.");
         $this->withProgressBar($data, function ($entry)
         {
             $repoProjectId = $entry['project_id'];
             $project       = Project::firstWhere(['project_id' => $repoProjectId]);
-            if ($project == null) {
+            if ($project == null)
+            {
                 $this->info("Skipping $repoProjectId as it doesn't exist.");
                 return;
             }
 
-            $logs          = json_decode(str_replace(["\n", "\r", "\t"], '',  stripslashes($entry['log'])),true);
-            $history       = json_decode(str_replace(["\n", "\r", "\t"], '',  stripslashes($entry['history'])),true);
+            $logs    = json_decode($entry['log'], true);
+            $history = json_decode($entry['history'], true);
+
             Project::unguarded(function () use ($history, $logs, $entry, $project)
             {
                 $project->jobStatuses()->updateOrCreate([
@@ -74,7 +76,7 @@ class LoadOldReports extends Command
             });
 
             if ($entry['status'] == 'success')
-                $project->update(['status' => 'finished']);
+                $project->update(['status' => 'finished', 'final_commit_sha' => $logs[0]['sha']]);
         });
 
         return 0;
