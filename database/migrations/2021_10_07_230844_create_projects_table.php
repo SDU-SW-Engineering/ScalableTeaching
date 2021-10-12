@@ -26,7 +26,7 @@ class CreateProjectsTable extends Migration
             $table->timestamps();
             $table->softDeletesTz();
 
-            $table->foreign('task_id')->references('id')->on('tasks');
+            //$table->foreign('task_id')->references('id')->on('tasks');
         });
     }
 

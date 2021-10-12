@@ -25,7 +25,7 @@ class CreateTasksTable extends Migration
             $table->dateTimeTz('ends_at');
             $table->timestamps();
 
-            $table->foreign('course_id')->references('id')->on('courses');
+            //$table->foreign('course_id')->references('id')->on('courses');
         });
     }
 
