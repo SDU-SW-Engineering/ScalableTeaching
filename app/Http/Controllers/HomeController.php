@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
-    public function index(GitLabManager $gitLabManager)
+    public function index()
     {
         $averageQueueTime = Cache::remember('queue1MonthAvg', 3600, function ()
         {
@@ -56,35 +56,6 @@ class HomeController extends Controller
         ]);
     }
 
-    public function start(GitLabManager $gitLabManager)
-    {
-        $username = explode('@', auth()->user()->getMail())[0];
-
-        $gitlabUser = collect($gitLabManager->users()->all([
-            'username' => $username
-        ]));
-
-        if ($gitlabUser->isEmpty())
-            return redirect()->home()->with('missing-gitlab-user', true);
-
-
-        $projectId    = $this->createProject($gitLabManager, $username);
-        $gitlabUserId = $gitlabUser->first()['id'];
-        $added        = true;
-        try
-        {
-            $gitLabManager->projects()->addMember($projectId, $gitlabUserId, 40);
-        }
-        catch (\Exception $e)
-        {
-            $added = Str::contains($e->getMessage(), 'Member already exists');
-        }
-
-        if ( ! $added)
-            return redirect()->home()->with('error', 'Unable to add you to the repository, try again later.');
-
-        return redirect()->home()->with('success', $projectId);
-    }
 
     public function reporter()
     {
@@ -129,47 +100,5 @@ class HomeController extends Controller
 
 
         return response("ok", 200);
-    }
-
-    /**
-     * @return int Project id
-     */
-    private function createProject(GitLabManager $manager, $username) : int
-    {
-        $resultPager = new ResultPager($manager->connection());
-        $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [1167]));
-        $project     = $projects->firstWhere('name', $username);
-        if ($project == null)
-        {
-            $project = $this->forkProject($manager, $username);
-        }
-
-        Project::updateOrCreate([
-            'project_id' => $project['id']
-        ], [
-            'task_id'   => Task::first()->id,
-            'repo_name' => $project['name']
-        ]);
-
-        $currentHooks = collect($manager->projects()->hooks($project['id']));
-        if ($currentHooks->isEmpty())
-        {
-            $manager->projects()->addHook($project['id'], 'http://23.88.33.213/forwarder.php', [
-                'job_events'              => true,
-                'token'                   => md5(strtolower($project['name']) . "webtechf21"),
-                'enable_ssl_verification' => false
-            ]);
-        }
-
-        return $project['id'];
-    }
-
-    private function forkProject(GitLabManager $manager, $username)
-    {
-        return $manager->projects()->fork(2557, [
-            'namespace' => 'webtech/assignment-1',
-            'name'      => $username,
-            'path'      => $username
-        ]);
     }
 }

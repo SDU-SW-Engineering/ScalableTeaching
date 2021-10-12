@@ -64,13 +64,18 @@
                                 <div>
                                     <h3 class="font-bold text-lg mb-4 dark:text-white">You haven't started your
                                         assignment!</h3>
+                                    <p class="bg-gray-100 text-red-700 dark:text-red-400 dark:bg-gray-900 rounded-md font-semibold px-2 py-2 text-sm max-w-xs mb-4 mt-2 text-center" v-text="errorMessage" v-show="errorMessage.length > 0"></p>
                                     <div class="flex justify-center gap-4">
-                                        <a href="#"
+                                        <button @click="startAssignment" :disabled="startingAssignment" :class="{'cursor-not-allowed': startingAssignment}"
                                            class="flex items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-lime-green-600 rounded-md hover:bg-lime-green-500 focus:outline-none focus:ring focus:ring-lime-green-300 focus:ring-opacity-80">
-                                            <span class="mx-1">Start Assignment</span>
-                                        </a>
+                                            <svg v-if="startingAssignment" class="animate-spin h-5 w-5 mr-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <span class="mx-1" v-text="startingAssignment ? 'Creating...' : 'Start Assignment'"></span>
+                                        </button>
 
-                                        <button @click="hideMissingAssignmentWarning = true"
+                                        <button v-if="!startingAssignment" @click="hideMissingAssignmentWarning = true"
                                                 class="flex items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-80">
                                             <span class="mx-1">Close</span>
                                         </button>
@@ -81,14 +86,14 @@
                     </div>
                 </div>
                 <div v-show="tab === 'builds'">
-                    <build-table v-if="project != null"></build-table>
+                    <build-table :project-id="project.id" v-if="project != null"></build-table>
                 </div>
                 <div v-show="tab === 'settings'">
                     <settings :project="project" v-if="project != null"></settings>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
-                <not-started v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
+                <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment" :starting-assignment="startingAssignment" v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
                 <started :project="project" :progress="progress" v-if="project != null && project.status === 'active'"></started>
                 <completed v-if="project != null && project.status === 'finished'"></completed>
                 <overdue v-if="project != null && project.status === 'overdue'"></overdue>
@@ -115,14 +120,34 @@ import NotStarted from "./Widgets/NotStarted";
 import Started from "./Widgets/Started";
 import Completed from "./Widgets/Completed";
 import Overdue from "./Widgets/Overdue";
+import Alert from "./Alert";
 
 export default {
-    components: {Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed},
-    props: ['description', 'project', 'myBuilds', 'builds', 'progress', 'totalMyBuilds', 'totalBuilds'],
+    components: {Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
+    props: ['description', 'project', 'myBuilds', 'builds', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf'],
+    methods: {
+      startAssignment: async function() {
+          this.startingAssignment = true;
+          this.errorMessage = "";
+          try {
+              let response = await axios.post(this.newProjectUrl, {
+                  _token: this.csrf
+              });
+              location.reload();
+          }
+          catch (e)
+          {
+              this.errorMessage = e.response.data.message;
+              this.startingAssignment = false;
+          }
+      }
+    },
     data: function () {
         return {
             tab: 'description',
+            errorMessage: '',
             hideMissingAssignmentWarning: false,
+            startingAssignment: false,
             datasets: [
                 {
                     borderColor: '#7BB026',

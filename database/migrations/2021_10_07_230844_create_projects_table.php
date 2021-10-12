@@ -20,8 +20,11 @@ class CreateProjectsTable extends Migration
             $table->string('ownable_type')->nullable();
             $table->unsignedBigInteger('project_id');
             $table->string('repo_name');
+            $table->boolean('verified')->default(false);
+            $table->string('final_commit_sha')->nullable();
             $table->enum('status', ['overdue', 'active', 'finished'])->default('active');
             $table->timestamps();
+            $table->softDeletesTz();
 
             $table->foreign('task_id')->references('id')->on('tasks');
         });

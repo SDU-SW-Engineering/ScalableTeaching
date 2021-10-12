@@ -29,7 +29,7 @@ class CreateJobStatusesTable extends Migration
             $table->json('log');
             $table->timestampsTz();
 
-            $table->foreign('project_id')->references('id')->on('projects');
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
         });
     }
 

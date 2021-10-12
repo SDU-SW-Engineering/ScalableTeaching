@@ -3,7 +3,7 @@
         <div class="flex flex-col">
             <div class="-my-1 overflow-x-auto">
                 <div class="py-2 align-middle inline-block min-w-full">
-                    <div class="shadow-md overflow-x-auto vh70 border-b border-gray-200 dark:border-gray-600 sm:rounded-lg">
+                    <div class="shadow-md overflow-x-auto max-vh70 border-b border-gray-200 dark:border-gray-600 sm:rounded-lg">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-500">
                             <thead class="bg-gray-100 dark:bg-gray-800">
                             <tr>
@@ -108,13 +108,14 @@
 
 <script>
 export default {
+    props: ['projectId'],
     data: function() {
         return {
             builds: []
         }
     },
     mounted: async function() {
-        let response = await axios.get('/projects/73/builds');
+        let response = await axios.get(`/projects/${this.projectId}/builds`);
         this.builds = response.data;
     }
 }

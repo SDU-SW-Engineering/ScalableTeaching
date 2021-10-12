@@ -70,7 +70,7 @@ class Task extends Model
         return $this->hasManyThrough(JobStatus::class, Project::class);
     }
 
-    public function dailyBuilds(?int $owner = null) : \Illuminate\Support\Collection
+    public function dailyBuilds(?int $owner = null, bool $withTrash = false) : \Illuminate\Support\Collection
     {
         $query = $this->jobs()
             ->select(
@@ -79,8 +79,11 @@ class Task extends Model
                 DB::raw('month(`job_statuses`.`created_at`) as created_at_month'),
                 DB::raw('year(`job_statuses`.`created_at`) as created_at_year'))
             ->groupBy('created_at_day', 'created_at_month', 'created_at_year', 'laravel_through_key');
+
         if ($owner != null)
             $query->where('projects.ownable_id', $owner);
+        if ($withTrash)
+            $query->withTrashedParents();
 
         $allBuilds = $query->get()->mapWithKeys(function ($task)
         {

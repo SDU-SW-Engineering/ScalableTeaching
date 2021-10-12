@@ -34,10 +34,12 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
     Route::group(['prefix' => '{course}/tasks', 'as' => 'tasks.'], function ()
     {
         Route::get('{task}', [TaskController::class, 'show'])->name('show');
+        Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
     });
 });
 
 Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => 'auth'], function ()
 {
     Route::get('{project}/builds', [ProjectController::class, 'builds']);
+    Route::get('{project}/reset', [ProjectController::class, 'reset']);
 });
