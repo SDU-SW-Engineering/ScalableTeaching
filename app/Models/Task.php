@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DB;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -62,6 +63,41 @@ class Task extends Model
             'description'          => $htmlReadme,
             'markdown_description' => $readme
         ]);
+    }
+
+    public function jobs()
+    {
+        return $this->hasManyThrough(JobStatus::class, Project::class);
+    }
+
+    public function dailyBuilds(?int $owner = null) : \Illuminate\Support\Collection
+    {
+        $query = $this->jobs()
+            ->select(
+                DB::raw('count(*) as c'),
+                DB::raw('day(`job_statuses`.`created_at`) as created_at_day'),
+                DB::raw('month(`job_statuses`.`created_at`) as created_at_month'),
+                DB::raw('year(`job_statuses`.`created_at`) as created_at_year'))
+            ->groupBy('created_at_day', 'created_at_month', 'created_at_year', 'laravel_through_key');
+        if ($owner != null)
+            $query->where('projects.ownable_id', $owner);
+
+        $allBuilds = $query->get()->mapWithKeys(function ($task)
+        {
+            return ["$task->created_at_year-$task->created_at_month-$task->created_at_day" => $task->c];
+        });
+
+        $builds = collect();
+        foreach ($this->starts_at->daysUntil(now()) as $day)
+        {
+            /** @var Carbon $day */
+            $date = $day->format('Y-n-j');
+            if ($day->isToday())
+                continue;
+            $builds[] = $allBuilds->has($date) ? $allBuilds[$date] : 0;
+        }
+
+        return $builds;
     }
 
     public function projects()

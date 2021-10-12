@@ -72,6 +72,9 @@ class LoadOldReports extends Command
                     'updated_at'     => $entry['updated_at']
                 ]);
             });
+
+            if ($entry['status'] == 'success')
+                $project->update(['status' => 'finished']);
         });
 
         return 0;

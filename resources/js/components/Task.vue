@@ -15,7 +15,7 @@
                             Description
                         </span>
                     </button>
-                    <button @click="tab = 'builds'"
+                    <button v-if="project != null" @click="tab = 'builds'"
                             :class="[tab === 'builds' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
                             class="py-2 px-3 rounded-md font-semibold flex">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24"
@@ -29,7 +29,7 @@
                             Builds
                         </span>
                     </button>
-                    <button @click="tab = 'settings'"
+                    <button v-if="project != null" @click="tab = 'settings'"
                             :class="[tab === 'settings' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
                             class="py-2 px-3 rounded-md font-semibold flex">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24"
@@ -48,9 +48,9 @@
                     <div
                         class="absolute bg-white p-4 rounded-md shadow-md max-vh70 overflow-x-hidden overflow-scroll dark:bg-gray-800">
                         <div class="prose-sm dark:prose-light"
-                             :class="[hideMissingAssignmentWarning ? '': 'filter blur-sm']" v-html="description"/>
+                             :class="[hideMissingAssignmentWarning || project != null ? '': 'filter blur-sm']" v-html="description"/>
                     </div>
-                    <div class="absolute flex w-full justify-center" v-if="!hideMissingAssignmentWarning">
+                    <div class="absolute flex w-full justify-center" v-if="!hideMissingAssignmentWarning && project == null">
                         <div
                             class="bg-white shadow-lg border border-lime-green-600 dark:border-lime-green-400 px-4 py-6 rounded-md mt-8 dark:bg-gray-800">
                             <div class="flex justify-center items-center">
@@ -81,26 +81,26 @@
                     </div>
                 </div>
                 <div v-show="tab === 'builds'">
-                    <build-table></build-table>
+                    <build-table v-if="project != null"></build-table>
                 </div>
                 <div v-show="tab === 'settings'">
-                    <settings></settings>
+                    <settings :project="project" v-if="project != null"></settings>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
-                <not-started v-if="hideMissingAssignmentWarning || tab !== 'description'"></not-started>
-                <started></started>
-                <completed></completed>
-                <overdue></overdue>
+                <not-started v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
+                <started :project="project" :progress="progress" v-if="project != null && project.status === 'active'"></started>
+                <completed v-if="project != null && project.status === 'finished'"></completed>
+                <overdue v-if="project != null && project.status === 'overdue'"></overdue>
                 <div class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>
                         <line-chart :height="200" :data="datasets"></line-chart>
                     </div>
                     <p class="dark:text-gray-300">A total of <b
-                        class="text-lime-green-400 dark:text-lime-green-500">322</b> builds have
+                        class="text-lime-green-400 dark:text-lime-green-500">{{ totalBuilds }}</b> builds have
                         completed during the task, of which
-                        you account for <b class="text-lime-green-400 dark:text-lime-green-500">44</b>.</p>
+                        you account for <b class="text-lime-green-400 dark:text-lime-green-500">{{ totalMyBuilds }}</b>.</p>
                 </div>
             </div>
         </div>
@@ -118,7 +118,7 @@ import Overdue from "./Widgets/Overdue";
 
 export default {
     components: {Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed},
-    props: ['description'],
+    props: ['description', 'project', 'myBuilds', 'builds', 'progress', 'totalMyBuilds', 'totalBuilds'],
     data: function () {
         return {
             tab: 'description',
@@ -127,16 +127,15 @@ export default {
                 {
                     borderColor: '#7BB026',
                     backgroundColor: '#7BB02644',
-                    label: "Yours",
-                    data: [1, 3, 5, 7, 0, 2, 0]
+                    label: "You",
+                    data: this.myBuilds
                 },
                 {
                     borderColor: '#6B7280',
                     backgroundColor: '#6B728077',
                     label: "Total",
-                    data: [10, 32, 28, 33, 3, 11, 32]
+                    data: this.builds
                 },
-
             ]
         }
     }
