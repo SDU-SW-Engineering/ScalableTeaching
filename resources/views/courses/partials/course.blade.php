@@ -1,16 +1,33 @@
 <div class="mb-4">
-    <div class="px-8 py-4 mx-auto bg-white rounded-t-lg shadow-md dark:bg-gray-800">
+    <div @class([
+        'px-8 py-4 mx-auto bg-white shadow-md dark:bg-gray-800',
+        'rounded-t-lg' => !isset($cantOpen),
+        'rounded-lg' => isset($cantOpen)
+        ]) class="">
         <div class="flex items-center justify-between">
-            <span class="text-2xl font-bold text-gray-700 dark:text-white">{{ $task->name }}</span>
-            <span class="px-3 py-1 text-sm font-bold text-gray-100 transform bg-lime-green-600 rounded">
-                Completed
+            <span class="text-2xl font-bold text-gray-700 dark:text-white">{{ $task['name'] }}</span>
+            <span @class([
+                    'px-3 py-1 text-sm font-bold text-gray-100 transform rounded',
+                    'bg-lime-green-600' => $task['status'] == 'finished',
+                    'bg-red-500' => $task['status'] == 'overdue',
+                    'bg-gray-500' => $task['status'] == 'active'
+                ])>
+                @switch($task['status'])
+                    @case('finished')
+                    Passed
+                    @break
+                    @case('overdue')
+                    Failed
+                    @break
+                    @case('active')
+                    Active
+                    @break
+                @endswitch
             </span>
         </div>
 
         <div class="mt-2">
-            <p class="mt-2 text-gray-600 dark:text-gray-300">Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                Tempora expedita dicta totam aspernatur doloremque. Excepturi iste iusto eos enim reprehenderit nisi,
-                accusamus delectus nihil quis facere in modi ratione libero!</p>
+            <p class="mt-2 text-gray-600 dark:text-gray-300 h-12 overflow-hidden overflow-ellipsis">{{ $task['short_description'] }}</p>
         </div>
 
         <div class="flex items-end justify-between mt-4">
@@ -32,12 +49,19 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span>{{ $task->ends_at->diffForHumans() }}</span>
+                @if ($task->starts_at->isFuture())
+                    <span>{{ $task->starts_at->diffForHumans() }}</span>
+                @else
+                    <span>{{ $task->ends_at->diffForHumans() }}</span>
+                @endif
             </div>
         </div>
     </div>
-    <a href="{{ route('courses.tasks.show', [$course->id, $task->id]) }}"
-       class="shadow-lg bg-gray-200 dark:bg-gray-500 py-2 dark:text-white text-gray-600 hover:text-gray-700 dark:hover:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-400 transition-colors rounded-b-lg flex items-center justify-center">
-        Open Task
-    </a>
+    @isset($cantOpen)
+    @else
+        <a href="{{ route('courses.tasks.show', [$course->id, $task->id]) }}"
+           class="shadow-lg bg-gray-200 dark:bg-gray-500 py-2 dark:text-white text-gray-600 hover:text-gray-700 dark:hover:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-400 transition-colors rounded-b-lg flex items-center justify-center">
+            Open Task
+        </a>
+    @endif
 </div>

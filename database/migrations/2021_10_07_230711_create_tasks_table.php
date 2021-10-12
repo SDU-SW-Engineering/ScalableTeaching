@@ -21,7 +21,7 @@ class CreateTasksTable extends Migration
             $table->text('short_description')->nullable();
             $table->text('description')->nullable();
             $table->text('markdown_description')->nullable();
-            $table->dateTimeTz('starts_at')->nullable();
+            $table->dateTimeTz('starts_at');
             $table->dateTimeTz('ends_at');
             $table->timestamps();
 

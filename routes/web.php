@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +23,9 @@ Route::get('start', [HomeController::class, 'start'])->middleware('auth')->name(
 
 Route::get('status', [HomeController::class, 'status'])->middleware('auth')->name('status');
 
-Route::group(['prefix' => 'courses', 'as' => 'courses.'], function ()
+Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
+
+Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth'], function ()
 {
     Route::get('/', [CourseController::class, 'index'])->name('index');
     Route::get('{course}', [CourseController::class, 'show'])->name('show');

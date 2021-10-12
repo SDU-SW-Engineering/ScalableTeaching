@@ -1,7 +1,7 @@
 <nav class="bg-gray-100 dark:bg-gray-700 border-b-4 border-lime-green-300 dark:border-lime-green-600">
     <div class="container px-6 py-3 mx-auto md:flex md:justify-between md:items-center">
         <div class="flex justify-between w-full items-center">
-            <a href="{{ route('courses.index') }}"
+            <a href="{{ $previousRoute }}"
                class="text-lime-green-700 hover:text-lime-green-300 dark:text-lime-green-500 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
