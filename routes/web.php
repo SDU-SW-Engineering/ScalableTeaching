@@ -38,8 +38,8 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
     });
 });
 
-Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => 'auth'], function ()
+Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['auth']], function ()
 {
-    Route::get('{project}/builds', [ProjectController::class, 'builds']);
-    Route::get('{project}/reset', [ProjectController::class, 'reset']);
+    Route::get('{project}/builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
+    Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
 });
