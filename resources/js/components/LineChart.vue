@@ -9,6 +9,11 @@ export default {
             datasets: this.data,
             labels: this.labels
         }, {
+            elements: {
+                line: {
+                    tension:0
+                }
+            },
             responsive: true,
             maintainAspectRatio: false,
             legend: {
