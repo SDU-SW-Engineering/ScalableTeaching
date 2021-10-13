@@ -53,7 +53,6 @@ class CourseController extends Controller
     public function show(Course $course)
     {
         $course = $this->retrieveCourses(true, false)->findOrFail($course->id);
-
         $inProgress = $course->tasks->filter(function ($task)
         {
             return now()->isBetween($task->starts_at, $task->ends_at);
@@ -96,6 +95,7 @@ class CourseController extends Controller
         $statuses = \DB::table('projects')
             ->select('task_id', 'status')
             ->where('ownable_id', $user->id)
+            ->whereNull('deleted_at')
             ->groupBy('task_id', 'status');
         if ($finishedOnly)
             $statuses->where('status', 'finished');
