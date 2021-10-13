@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Project;
+use App\Models\User as UserModel;
 use App\Policies\ProjectPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -27,6 +28,10 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        Gate::before(function($user, $ability) {
+            $dbUser = UserModel::firstWhere(['guid' => $user->id]);
+            if ($dbUser != null && $dbUser->is_admin)
+                return true;
+        });
     }
 }

@@ -48,9 +48,11 @@
                     <div
                         class="absolute bg-white p-4 rounded-md shadow-md max-vh70 overflow-x-hidden overflow-scroll dark:bg-gray-800">
                         <div class="prose-sm dark:prose-light"
-                             :class="[hideMissingAssignmentWarning || project != null ? '': 'filter blur-sm']" v-html="description"/>
+                             :class="[hideMissingAssignmentWarning || project != null ? '': 'filter blur-sm']"
+                             v-html="description"/>
                     </div>
-                    <div class="absolute flex w-full justify-center" v-if="!hideMissingAssignmentWarning && project == null">
+                    <div class="absolute flex w-full justify-center"
+                         v-if="!hideMissingAssignmentWarning && project == null">
                         <div
                             class="bg-white shadow-lg border border-lime-green-600 dark:border-lime-green-400 px-4 py-6 rounded-md mt-8 dark:bg-gray-800">
                             <div class="flex justify-center items-center">
@@ -64,15 +66,21 @@
                                 <div>
                                     <h3 class="font-bold text-lg mb-4 dark:text-white">You haven't started your
                                         assignment!</h3>
-                                    <p class="bg-gray-100 text-red-700 dark:text-red-400 dark:bg-gray-900 rounded-md font-semibold px-2 py-2 text-sm max-w-xs mb-4 mt-2 text-center" v-text="errorMessage" v-show="errorMessage.length > 0"></p>
+                                    <p class="bg-gray-100 text-red-700 dark:text-red-400 dark:bg-gray-900 rounded-md font-semibold px-2 py-2 text-sm max-w-xs mb-4 mt-2 text-center"
+                                       v-text="errorMessage" v-show="errorMessage.length > 0"></p>
                                     <div class="flex justify-center gap-4">
-                                        <button @click="startAssignment" :disabled="startingAssignment" :class="{'cursor-not-allowed': startingAssignment}"
-                                           class="flex items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-lime-green-600 rounded-md hover:bg-lime-green-500 focus:outline-none focus:ring focus:ring-lime-green-300 focus:ring-opacity-80">
-                                            <svg v-if="startingAssignment" class="animate-spin h-5 w-5 mr-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        <button @click="startAssignment" :disabled="startingAssignment"
+                                                :class="{'cursor-not-allowed': startingAssignment}"
+                                                class="flex items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-lime-green-600 rounded-md hover:bg-lime-green-500 focus:outline-none focus:ring focus:ring-lime-green-300 focus:ring-opacity-80">
+                                            <svg v-if="startingAssignment" class="animate-spin h-5 w-5 mr-1 text-white"
+                                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                        stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            <span class="mx-1" v-text="startingAssignment ? 'Creating...' : 'Start Assignment'"></span>
+                                            <span class="mx-1"
+                                                  v-text="startingAssignment ? 'Creating...' : 'Start Assignment'"></span>
                                         </button>
 
                                         <button v-if="!startingAssignment" @click="hideMissingAssignmentWarning = true"
@@ -93,19 +101,23 @@
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
-                <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment" :starting-assignment="startingAssignment" v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
-                <started :project="project" :progress="progress" v-if="project != null && project.status === 'active'"></started>
+                <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
+                             :starting-assignment="startingAssignment"
+                             v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
+                <started :project="project" :progress="progress"
+                         v-if="project != null && project.status === 'active'"></started>
                 <completed v-if="project != null && project.status === 'finished'"></completed>
                 <overdue v-if="project != null && project.status === 'overdue'"></overdue>
                 <div class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>
-                        <line-chart :height="200" :data="datasets"></line-chart>
+                        <line-chart :height="200" :data="datasets" :labels="labels"></line-chart>
                     </div>
                     <p class="dark:text-gray-300">A total of <b
                         class="text-lime-green-400 dark:text-lime-green-500">{{ totalBuilds }}</b> builds have
                         completed during the task, of which
-                        you account for <b class="text-lime-green-400 dark:text-lime-green-500">{{ totalMyBuilds }}</b>.</p>
+                        you account for <b class="text-lime-green-400 dark:text-lime-green-500">{{ totalMyBuilds }}</b>.
+                    </p>
                 </div>
             </div>
         </div>
@@ -126,21 +138,19 @@ export default {
     components: {Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
     props: ['description', 'project', 'myBuilds', 'builds', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf'],
     methods: {
-      startAssignment: async function() {
-          this.startingAssignment = true;
-          this.errorMessage = "";
-          try {
-              let response = await axios.post(this.newProjectUrl, {
-                  _token: this.csrf
-              });
-              location.reload();
-          }
-          catch (e)
-          {
-              this.errorMessage = e.response.data.message;
-              this.startingAssignment = false;
-          }
-      }
+        startAssignment: async function () {
+            this.startingAssignment = true;
+            this.errorMessage = "";
+            try {
+                let response = await axios.post(this.newProjectUrl, {
+                    _token: this.csrf
+                });
+                location.reload();
+            } catch (e) {
+                this.errorMessage = e.response.data.message;
+                this.startingAssignment = false;
+            }
+        },
     },
     data: function () {
         return {
@@ -148,6 +158,7 @@ export default {
             errorMessage: '',
             hideMissingAssignmentWarning: false,
             startingAssignment: false,
+            labels: Array(this.myBuilds.length).fill("Day").map((e, i) => e + " " + (i + 1)),
             datasets: [
                 {
                     borderColor: '#7BB026',

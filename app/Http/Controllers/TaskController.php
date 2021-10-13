@@ -8,6 +8,8 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use DB;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Http\Request;
@@ -117,5 +119,99 @@ class TaskController extends Controller
             'name'      => $username,
             'path'      => $username
         ]);
+    }
+
+    public function analytics(Course $course, Task $task)
+    {
+        $projectCount    = $task->projects()->count();
+        $projectsToday   = $task->projects()->whereRaw('date(created_at) = curdate()')->count();
+        $finishedCount   = $task->projects()->where('status', 'finished')->count();
+        $finishedPercent = $finishedCount / $projectCount * 100;
+        $failedCount     = $task->projects()->where('status', 'failed')->count();
+        $failedPercent   = $failedCount / $projectCount * 100;
+        $buildCount      = $task->jobs()->count();
+        $buildsToday     = $task->jobs()->whereRaw('date(job_statuses.created_at) = curdate()')->withTrashedParents()->count();
+
+        $projectsCreatedPerDay      = $this->projectsPerDay($task);
+        $projectsCreatedPerDayGraph = collect([
+            'data'   => $projectsCreatedPerDay->pluck('count'),
+            'labels' => $projectsCreatedPerDay->pluck('date')
+        ]);
+
+        $projectsCompletedPerDay      = $this->projectsCompletedPerDay($task, $projectCount);
+        $projectsCompletedPerDayGraph = collect([
+            'data'   => $projectsCompletedPerDay->pluck('percent'),
+            'labels' => $projectsCompletedPerDay->pluck('date')
+        ]);
+
+        $dailyBuilds      = $task->dailyBuilds(null, true, true);
+        $dailyBuildsGraph = collect([
+            'data'   => $dailyBuilds,
+            'labels' => $dailyBuilds->map(function ($val, $index)
+            {
+                return "Day " . ($index + 1);
+            })
+        ]);
+
+        return view('tasks.analytics', compact('course', 'task', 'projectCount',
+            'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday', 'projectsCompletedPerDayGraph', 'dailyBuildsGraph', 'projectsCreatedPerDayGraph'));
+    }
+
+    private function projectsPerDay(Task $task)
+    {
+        $projectsPerDay = $task->projects()->select(
+            DB::raw('count(*) as c'),
+            DB::raw('day(`projects`.`created_at`) as created_at_day'),
+            DB::raw('month(`projects`.`created_at`) as created_at_month'),
+            DB::raw('year(`projects`.`created_at`) as created_at_year'))
+            ->groupBy('created_at_day', 'created_at_month', 'created_at_year')->withTrashed()->get()->mapWithKeys(function ($task)
+            {
+                return ["$task->created_at_year-$task->created_at_month-$task->created_at_day" => $task->c];
+            });
+        $projects       = collect();
+        $endsAt         = now()->isAfter($task->ends_at) ? $task->ends_at : now();
+        $dates          = CarbonPeriod::create($task->starts_at, $endsAt)->toArray();
+
+        foreach ($dates as $date)
+        {
+            $dateString = $date->format('Y-n-j');
+            $projects[] = [
+                'date'  => $date->toDateString(),
+                'count' => $projectsPerDay->has($dateString) ? $projectsPerDay[$dateString] : 0
+            ];
+        }
+
+        return $projects;
+    }
+
+    private function projectsCompletedPerDay(Task $task, int $projectCount)
+    {
+        $projectsPerDay = $task->projects()->select(
+            DB::raw('count(*) as c'),
+            DB::raw('day(`projects`.`finished_at`) as finished_at_day'),
+            DB::raw('month(`projects`.`finished_at`) as finished_at_month'),
+            DB::raw('year(`projects`.`finished_at`) as finished_at_year'))
+            ->groupBy('finished_at_day', 'finished_at_month', 'finished_at_year')->where('status', 'finished')->withTrashed()->get()->mapWithKeys(function ($task)
+            {
+                return ["$task->finished_at_year-$task->finished_at_month-$task->finished_at_day" => $task->c];
+            });
+        $projects       = collect();
+        $endsAt         = now()->isAfter($task->ends_at) ? $task->ends_at : now();
+        $dates          = CarbonPeriod::create($task->starts_at, $endsAt)->toArray();
+
+        $carry = 0;
+        foreach ($dates as $date)
+        {
+            $dateString = $date->format('Y-n-j');
+            if ($projectsPerDay->has($dateString))
+                $carry += $projectsPerDay[$dateString];
+
+            $projects[] = [
+                'date'    => $date->toDateString(),
+                'percent' => round($carry / $projectCount * 100, 2, PHP_ROUND_HALF_UP)
+            ];
+        }
+
+        return $projects;
     }
 }

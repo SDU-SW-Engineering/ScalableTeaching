@@ -3,16 +3,11 @@ import {Line} from 'vue-chartjs'
 
 export default {
     extends: Line,
-    props: ['data'],
-    methods: {
-        days: function(count) {
-
-        }
-    },
+    props: ['data', 'labels'],
     mounted() {
         this.renderChart({
             datasets: this.data,
-            labels: Array(this.data[0].data.length).fill("Day").map((e, i) => e + " " + (i+1))
+            labels: this.labels
         }, {
             responsive: true,
             maintainAspectRatio: false,

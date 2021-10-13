@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonPeriod;
 use DB;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Database\Eloquent\Builder;
@@ -70,7 +71,7 @@ class Task extends Model
         return $this->hasManyThrough(JobStatus::class, Project::class);
     }
 
-    public function dailyBuilds(?int $owner = null, bool $withTrash = false) : \Illuminate\Support\Collection
+    public function dailyBuilds(?int $owner = null, bool $withTrash = false, $withToday = false) : \Illuminate\Support\Collection
     {
         $query = $this->jobs()
             ->select(
@@ -91,11 +92,15 @@ class Task extends Model
         });
 
         $builds = collect();
-        foreach ($this->starts_at->daysUntil(now()) as $day)
+
+        $endsAt         = now()->isAfter($this->ends_at) ? $this->ends_at : now();
+        $dates          = CarbonPeriod::create($this->starts_at, $endsAt)->toArray();
+
+        foreach ($dates as $day)
         {
             /** @var Carbon $day */
             $date = $day->format('Y-n-j');
-            if ($day->isToday())
+            if ($day->isToday() && !$withToday)
                 continue;
             $builds[] = $allBuilds->has($date) ? $allBuilds[$date] : 0;
         }

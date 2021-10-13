@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Project;
 use App\Models\Task;
+use Carbon\Carbon;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Console\Command;
@@ -45,7 +46,7 @@ class LoadCurrentProjects extends Command
         $groupId     = $this->argument('group');
         $manager     = app(GitLabManager::class);
         $resultPager = new ResultPager($manager->connection());
-        $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [1167]));
+        $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [$groupId]));
         $this->info("Discovered {$projects->count()} projects within the group.");
         $task = Task::findOrFail($this->ask('What task does the projects belong to'));
         $this->withProgressBar($projects, function ($project) use ($task)
@@ -53,8 +54,8 @@ class LoadCurrentProjects extends Command
             $task->projects()->updateOrCreate([
                 'project_id' => $project['id']
             ], [
-                'repo_name' => $project['name'],
-                'status'    => 'active'
+                'repo_name'  => $project['name'],
+                'created_at' => Carbon::parse($project['created_at'])->setTimezone(config('app.timezone'))
             ]);
         });
 

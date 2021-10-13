@@ -35,6 +35,7 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
     {
         Route::get('{task}', [TaskController::class, 'show'])->name('show');
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
+        Route::get('{task}/analytics', [TaskController::class, 'analytics'])->name('analytics')->middleware('can:view,task');
     });
 });
 

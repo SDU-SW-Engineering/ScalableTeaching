@@ -57,6 +57,27 @@
             </div>
         </div>
     </div>
+    @canany(['view-analytics', 'update'], $task)
+        <div class="bg-gray-100 dark:bg-gray-700 flex px-8 py-2 gap-2">
+            @can('view-analytics', $task)
+                <a href="{{ route('courses.tasks.analytics', [$course->id, $task->id]) }}"
+                   class="flex items-cente px-2 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-gray-300 dark:bg-gray-600 rounded-md text-gray-700 dark:text-white dark:hover:bg-gray-500 hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-80">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                    </svg>
+                </a>
+            @endcan
+            @can('update', $task)
+                <a href="#"
+                   class="flex items-center px-2 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-gray-300 dark:bg-gray-600 rounded-md text-gray-700 dark:text-white dark:hover:bg-gray-500 hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-80">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                </a>
+            @endcan
+        </div>
+    @endcanany
     @isset($cantOpen)
     @else
         <a href="{{ route('courses.tasks.show', [$course->id, $task->id]) }}"
