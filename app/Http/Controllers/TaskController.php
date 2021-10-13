@@ -130,7 +130,7 @@ class TaskController extends Controller
         $failedCount     = $task->projects()->where('status', 'failed')->count();
         $failedPercent   = $failedCount / $projectCount * 100;
         $buildCount      = $task->jobs()->count();
-        $buildsToday     = $task->jobs()->whereRaw('date(job_statuses.created_at) = curdate()')->withTrashedParents()->count();
+        $buildsToday     = $task->jobs()->whereRaw("date(job_statuses.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
 
         $projectsCreatedPerDay      = $this->projectsPerDay($task);
         $projectsCreatedPerDayGraph = collect([
@@ -170,7 +170,7 @@ class TaskController extends Controller
             });
         $projects       = collect();
         $endsAt         = now()->isAfter($task->ends_at) ? $task->ends_at : now();
-        $dates          = CarbonPeriod::create($task->starts_at, $endsAt)->toArray();
+        $dates          = CarbonPeriod::create($task->starts_at->startOfDay(), $endsAt->endOfDay())->toArray();
 
         foreach ($dates as $date)
         {
@@ -197,7 +197,7 @@ class TaskController extends Controller
             });
         $projects       = collect();
         $endsAt         = now()->isAfter($task->ends_at) ? $task->ends_at : now();
-        $dates          = CarbonPeriod::create($task->starts_at, $endsAt)->toArray();
+        $dates          = CarbonPeriod::create($task->starts_at->startOfDay(), $endsAt->endOfDay())->toArray();
 
         $carry = 0;
         foreach ($dates as $date)

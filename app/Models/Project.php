@@ -40,7 +40,9 @@ class Project extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ['project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id', 'final_commit_sha','created_at'];
+    protected $dates = ['finished_at'];
+
+    protected $fillable = ['project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id', 'final_commit_sha','created_at', 'finished_at'];
 
     public function ownable()
     {

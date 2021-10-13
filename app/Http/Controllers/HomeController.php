@@ -124,7 +124,8 @@ class HomeController extends Controller
         if ($jobStatus->status == 'success')
             $project->update([
                 'status'           => 'finished',
-                'final_commit_sha' => request('sha')
+                'final_commit_sha' => request('sha'),
+                'finished_at'      => now()
             ]);
 
 

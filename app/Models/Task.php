@@ -94,7 +94,7 @@ class Task extends Model
         $builds = collect();
 
         $endsAt         = now()->isAfter($this->ends_at) ? $this->ends_at : now();
-        $dates          = CarbonPeriod::create($this->starts_at, $endsAt)->toArray();
+        $dates          = CarbonPeriod::create($this->starts_at->startOfDay(), $endsAt->endOfDay())->toArray();
 
         foreach ($dates as $day)
         {
