@@ -8,7 +8,7 @@
     <script type="text/javascript" src="{{ mix('js/app.js') }}" defer></script>
 
 </head>
-<body class="{{ $bg ?? 'bg-white dark:bg-gray-800' }} h-screen">
+<body class="bg-gray-50 dark:bg-gray-700 h-screen">
 <div id="app">
     @includeUnless(isset($hideHeader), 'partials.navbar')
     @yield('content')

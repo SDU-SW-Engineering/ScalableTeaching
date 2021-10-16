@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
@@ -43,4 +44,9 @@ Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['aut
 {
     Route::get('{project}/builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
     Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
+});
+
+Route::group(['prefix' => 'groups', 'as' => 'groups.', 'middleware' => ['auth']], function() {
+
+    Route::get('/', [GroupController::class, 'index'])->name('index');
 });

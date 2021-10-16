@@ -1,7 +1,6 @@
 @extends('master')
 
 @section('content')
-    @include('partials.subnavbar', ['title' => $task->name, 'previousRoute' => route('courses.show', $task->course_id)])
     <div class="container mx-auto px-6 pt-4">
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-4">
             <x-widget>

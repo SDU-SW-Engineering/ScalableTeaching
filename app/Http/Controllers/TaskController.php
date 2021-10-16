@@ -48,7 +48,12 @@ class TaskController extends Controller
             'builds'          => $dailyBuilds,
             'myBuilds'        => $myBuilds,
             'buildGraph'      => $dailyBuildsGraph,
-            'newProjectRoute' => $newProjectRoute
+            'newProjectRoute' => $newProjectRoute,
+            'breadcrumbs'     => [
+                'Courses'     => route('courses.index'),
+                $course->name => route('courses.show', $course->id),
+                $task->name   => null
+            ]
         ]);
     }
 
@@ -145,8 +150,14 @@ class TaskController extends Controller
 
         $dailyBuilds      = $task->dailyBuilds(null, true, true);
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B"));
+        $breadcrumbs      = [
+            'Courses'     => route('courses.index'),
+            $course->name => route('courses.show', $course->id),
+            $task->name   => route('courses.tasks.show', [$course->id, $task->id]),
+            'Analytics'   => null
+        ];
 
-        return view('tasks.analytics', compact('course', 'task', 'projectCount',
+        return view('tasks.analytics', compact('course', 'task', 'projectCount', 'breadcrumbs',
             'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday', 'totalProjectsPerDayGraph', 'dailyBuildsGraph'));
     }
 }

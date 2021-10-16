@@ -1,7 +1,6 @@
 @extends('master')
 
 @section('content')
-    @include('partials.subnavbar', ['previousRoute' => route('courses.index')])
     <div class="px-6 pt-4 container mx-auto">
         <div class="flex gap-6 flex-wrap-reverse">
             <div class="flex-1 w-full lg:w-2/3 xl:w-3/4">

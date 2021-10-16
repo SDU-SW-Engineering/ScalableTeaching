@@ -45,14 +45,17 @@ class CourseController extends Controller
         });
 
         return view('courses.index', [
-            'courses' => $courses,
-            'bg'      => 'bg-gray-100 dark:bg-gray-700'
+            'courses'     => $courses,
+            'bg'          => 'bg-gray-100 dark:bg-gray-700',
+            'breadcrumbs' => [
+                'Courses' => null
+            ]
         ]);
     }
 
     public function show(Course $course)
     {
-        $course = $this->retrieveCourses(true, false)->findOrFail($course->id);
+        $course     = $this->retrieveCourses(true, false)->findOrFail($course->id);
         $inProgress = $course->tasks->filter(function ($task)
         {
             return now()->isBetween($task->starts_at, $task->ends_at);
@@ -85,7 +88,11 @@ class CourseController extends Controller
             'taskCount'          => $taskCount,
             'remainingTaskCount' => $taskCount - $failed - $approved,
             'failedCount'        => $failed,
-            'approvedCount'      => $approved
+            'approvedCount'      => $approved,
+            'breadcrumbs'        => [
+                'Courses'     => route('courses.index'),
+                $course->name => null
+            ]
         ]);
     }
 
