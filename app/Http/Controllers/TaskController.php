@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
@@ -23,7 +24,7 @@ class TaskController extends Controller
         $endDay      = $task->ends_at->format("j/n");
         $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
         $progress    = $percent > 100 ? 100 : $percent;
-        $timeLeft    = $task->ends_at->isPast() ? '' : str_replace('from now', 'left', $task->ends_at->diffForHumans());
+        $timeLeft    = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
         $myBuilds    = $task->dailyBuilds($user->id, false, false);
         $dailyBuilds = $task->dailyBuilds(null, true, false);
 
