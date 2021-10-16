@@ -1,31 +1,26 @@
 <script>
-import {Line} from 'vue-chartjs'
+import {Bar} from 'vue-chartjs'
 
 export default {
-    extends: Line,
+    extends: Bar,
     props: ['data', 'labels'],
     mounted() {
         this.renderChart({
             datasets: this.data,
             labels: this.labels
         }, {
-            elements: {
-                line: {
-                    tension:0
-                }
-            },
             responsive: true,
             maintainAspectRatio: false,
+            tooltips: {
+                mode: "index",
+            },
             legend: {
                 display: false
-            },
-            tooltips: {
-                mode: "nearest",
-                intersect: false
             },
             scales: {
                 xAxes: [
                     {
+                        stacked: true,
                         ticks: {
                             display: false
                         },
@@ -36,6 +31,7 @@ export default {
                 ],
                 yAxes: [
                     {
+                        stacked: true,
                         gridLines: {}
                     }
                 ]

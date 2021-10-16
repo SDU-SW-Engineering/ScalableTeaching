@@ -23,6 +23,7 @@ window.Vue = require('vue').default;
 Vue.component('simple-doughnut-chart', require('./components/SimpleDoughnutChart').default);
 Vue.component('task', require('./components/Task').default);
 Vue.component('line-chart', require('./components/LineChart').default);
+Vue.component('bar-chart', require('./components/BarChart').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

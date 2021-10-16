@@ -66,7 +66,7 @@
                 <div class="bg-white shadow-lg p-4 rounded-md mt-2 dark:bg-gray-900 border dark:border-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds Per Day</h3>
                     <div>
-                        <line-chart :height="300" :labels="{{ $dailyBuildsGraph->labels() }}" :data="{{ $dailyBuildsGraph->datasets()  }}"></line-chart>
+                        <bar-chart :height="300" :labels="{{ $dailyBuildsGraph->labels() }}" :data="{{ $dailyBuildsGraph->datasets()  }}"></bar-chart>
                     </div>
                 </div>
             </div>

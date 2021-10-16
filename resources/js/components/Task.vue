@@ -111,7 +111,7 @@
                 <div class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>
-                        <line-chart :height="200" :data="datasets" :labels="labels"></line-chart>
+                        <bar-chart :height="200" :data="datasets" :labels="labels"></bar-chart>
                     </div>
                     <p class="dark:text-gray-300">A total of <b
                         class="text-lime-green-400 dark:text-lime-green-500">{{ totalBuilds }}</b> builds have
@@ -133,9 +133,10 @@ import Started from "./Widgets/Started";
 import Completed from "./Widgets/Completed";
 import Overdue from "./Widgets/Overdue";
 import Alert from "./Alert";
+import BarChart from "./BarChart";
 
 export default {
-    components: {Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
+    components: {BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
     props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph'],
     methods: {
         startAssignment: async function () {

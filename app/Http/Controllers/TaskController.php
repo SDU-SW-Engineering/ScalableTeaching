@@ -32,8 +32,8 @@ class TaskController extends Controller
         $dailyBuilds = $task->dailyBuilds(null, true, false);
 
         $dailyBuildsGraph = new LineGraph($dailyBuilds->keys(),
-            new LineDataSet("You", $myBuilds, "#7BB026"),
-            new LineDataSet("Total", $dailyBuilds, "#6B7280")
+            new LineDataSet("Total", $dailyBuilds, "#6B7280"),
+            new LineDataSet("You", $myBuilds, "#7BB026")
         );
         $newProjectRoute  = route('courses.tasks.createProject', [$course->id, $task->id]);
 
@@ -148,7 +148,7 @@ class TaskController extends Controller
 
 
         $dailyBuilds      = $task->dailyBuilds(null, true, true);
-        $dailyBuildsGraph = new LineGraph($dailyBuilds->keys(), new LineDataSet("Builds", $dailyBuilds, "#7BB026"));
+        $dailyBuildsGraph = new LineGraph($dailyBuilds->keys(), new LineDataSet("Builds", $dailyBuilds, "#6B7280"));
 
         return view('tasks.analytics', compact('course', 'task', 'projectCount',
             'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday', 'totalProjectsPerDayGraph', 'dailyBuildsGraph'));
