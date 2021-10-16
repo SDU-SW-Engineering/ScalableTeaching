@@ -1,11 +1,12 @@
 <?php
 
-namespace Domain\Analytics\Graph\Line;
+namespace Domain\Analytics\Graph;
 
+use Domain\Analytics\Graph\DataSets\DataSet;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
 
-class LineGraph implements Arrayable
+class Graph implements Arrayable
 {
     private $dataSets = [];
     /**
@@ -13,13 +14,13 @@ class LineGraph implements Arrayable
      */
     private $labels;
 
-    public function __construct(Collection $labels, LineDataSet ...$dataSets)
+    public function __construct(Collection $labels, DataSet ...$dataSets)
     {
         $this->labels   = $labels;
         $this->dataSets = collect($dataSets);
     }
 
-    public function addDataSet(LineDataSet $dataSet)
+    public function addDataSet(DataSet $dataSet)
     {
         $this->dataSets->add($dataSet);
     }
@@ -31,7 +32,7 @@ class LineGraph implements Arrayable
 
     public function datasets() : Collection
     {
-        return $this->dataSets->map(function (LineDataSet $dataSet)
+        return $this->dataSets->map(function (DataSet $dataSet)
         {
             return $dataSet->toArray();
         });
