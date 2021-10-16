@@ -1,11 +1,11 @@
 <?php
 
-namespace Domain\Analytics\Graph\Line;
+namespace Domain\Analytics\Graph\DataSets;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
 
-class LineDataSet implements Arrayable
+class DataSet implements Arrayable
 {
     private $borderColor;
 
@@ -15,12 +15,12 @@ class LineDataSet implements Arrayable
 
     private $data;
 
-    public function __construct($label, Collection $data, $color)
+    public function __construct($label, Collection $data, $color, $transparent = false)
     {
         $this->label = $label;
         $this->data  = $data->values();
         $this->borderColor = $color;
-        $this->backgroundColor = $color . "44";
+        $this->backgroundColor = $color . ($transparent ? "44" : "");
     }
 
     public function toArray()
