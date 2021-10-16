@@ -13,9 +13,9 @@
                     </div>
                 </div>
                 <div class="text-gray-500 dark:text-gray-400 text-sm mb-4 flex justify-between">
-                    <span>{{ progress.startDay }}</span>
+                    <span class="font-semibold">{{ progress.startDay }}</span>
                     <span>{{ progress.timeLeft }}</span>
-                    <span>{{ progress.endDay }}</span>
+                    <span class="font-semibold">{{ progress.endDay }}</span>
                 </div>
                 <div class="flex justify-start gap-4">
                     <a :href="'https://gitlab.sdu.dk/projects/' +  project.project_id" target="_blank"

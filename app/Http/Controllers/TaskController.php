@@ -3,18 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Models\JobStatus;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
-use DB;
-use Domain\Analytics\Graph\Line\LineDataSet;
-use Domain\Analytics\Graph\Line\LineGraph;
+use Carbon\CarbonInterface;
+use Domain\Analytics\Graph\DataSets\BarDataSet;
+use Domain\Analytics\Graph\DataSets\LineDataSet;
+use Domain\Analytics\Graph\Graph;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class TaskController extends Controller
@@ -27,13 +24,13 @@ class TaskController extends Controller
         $endDay      = $task->ends_at->format("j/n");
         $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
         $progress    = $percent > 100 ? 100 : $percent;
-        $timeLeft    = $task->ends_at->isPast() ? '' : str_replace('from now', 'left', $task->ends_at->diffForHumans());
+        $timeLeft    = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
         $myBuilds    = $task->dailyBuilds($user->id, false, false);
         $dailyBuilds = $task->dailyBuilds(null, true, false);
 
-        $dailyBuildsGraph = new LineGraph($dailyBuilds->keys(),
-            new LineDataSet("Total", $dailyBuilds, "#6B7280"),
-            new LineDataSet("You", $myBuilds, "#7BB026")
+        $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
+            new BarDataSet("Total", $dailyBuilds->subtractByKey($myBuilds), "#6B7280"),
+            new BarDataSet("You", $myBuilds, "#7BB026")
         );
         $newProjectRoute  = route('courses.tasks.createProject', [$course->id, $task->id]);
 
@@ -141,14 +138,13 @@ class TaskController extends Controller
 
         $totalProjectsPerDay      = $task->totalProjectsPerDay;
         $projectsCompletedPerDay  = $task->totalCompletedTasksPerDay;
-        $totalProjectsPerDayGraph = new LineGraph($totalProjectsPerDay->keys(),
-            new LineDataSet("Projects", $totalProjectsPerDay, "#266ab0"),
-            new LineDataSet("Completed", $projectsCompletedPerDay, "#7BB026")
+        $totalProjectsPerDayGraph = new Graph($totalProjectsPerDay->keys(),
+            new LineDataSet("Projects", $totalProjectsPerDay, "#266ab0", true),
+            new LineDataSet("Completed", $projectsCompletedPerDay, "#7BB026", true)
         );
 
-
         $dailyBuilds      = $task->dailyBuilds(null, true, true);
-        $dailyBuildsGraph = new LineGraph($dailyBuilds->keys(), new LineDataSet("Builds", $dailyBuilds, "#6B7280"));
+        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B"));
 
         return view('tasks.analytics', compact('course', 'task', 'projectCount',
             'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday', 'totalProjectsPerDayGraph', 'dailyBuildsGraph'));
