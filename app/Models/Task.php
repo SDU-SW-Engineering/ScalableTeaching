@@ -80,7 +80,7 @@ class Task extends Model
         if ($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at, $this->earliestEndDate(!$withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 
     public function projects()

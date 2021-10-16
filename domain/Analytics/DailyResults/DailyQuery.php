@@ -27,8 +27,11 @@ class DailyQuery
 
     public function daily(Carbon $start, Carbon $end) : DailyResults
     {
+        $start             = $start->startOfDay();
+        $end               = $end->endOfDay();
         $occurrencesPerDay = $this->query
             ->select($this->selection())
+            ->whereBetween("{$this->query->getQuery()->from}.$this->column", [$start, $end])
             ->groupBy('date')
             ->orderBy('date')
             ->pluck('count', 'date');
@@ -46,7 +49,7 @@ class DailyQuery
 
     private function fillGaps(Collection $occurrencesPerDay, Carbon $start, Carbon $end) : Collection
     {
-        $dates = CarbonPeriod::create($start->startOfDay(), $end->endOfDay())->toArray();
+        $dates = CarbonPeriod::create($start, $end)->toArray();
         foreach ($dates as $date)
         {
             $dateString = $date->format('Y-m-d');
