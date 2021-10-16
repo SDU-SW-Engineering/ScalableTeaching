@@ -4,18 +4,14 @@ namespace Domain\Analytics\DailyResults;
 
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-use DateTime;
 use DB;
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Str;
 
 class DailyQuery
 {
     /**
-     * @var HasMany
+     * @var Builder
      */
     private $query;
     /**
@@ -44,7 +40,7 @@ class DailyQuery
     {
         return [
             DB::raw('count(*) as count'),
-            DB::raw("date(`{$this->query->from}`.`{$this->column}`) as date")
+            DB::raw("date(`{$this->query->getQuery()->from}`.`{$this->column}`) as date")
         ];
     }
 
