@@ -136,7 +136,7 @@ import Alert from "./Alert";
 
 export default {
     components: {Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
-    props: ['description', 'project', 'myBuilds', 'builds', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf'],
+    props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph'],
     methods: {
         startAssignment: async function () {
             this.startingAssignment = true;
@@ -158,21 +158,8 @@ export default {
             errorMessage: '',
             hideMissingAssignmentWarning: false,
             startingAssignment: false,
-            labels: Array(this.myBuilds.length).fill("Day").map((e, i) => e + " " + (i + 1)),
-            datasets: [
-                {
-                    borderColor: '#7BB026',
-                    backgroundColor: '#7BB02644',
-                    label: "You",
-                    data: this.myBuilds
-                },
-                {
-                    borderColor: '#6B7280',
-                    backgroundColor: '#6B728077',
-                    label: "Total",
-                    data: this.builds
-                },
-            ]
+            labels: this.buildGraph.labels,
+            datasets: this.buildGraph.datasets
         }
     }
 }

@@ -55,29 +55,10 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
                 <div class="bg-white shadow-lg p-4 rounded-md mt-2 dark:bg-gray-900 border dark:border-gray-800">
-                    <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Created Projects Per Day</h3>
+                    <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Total Projects Per
+                        Day</h3>
                     <div>
-                        <line-chart :height="300" :labels="{{ $projectsCreatedPerDayGraph['labels'] }}" :data="{{ json_encode([
-    [
-        'borderColor'=> '#7BB026',
-        'backgroundColor' => '#7BB02644',
-        'label' => 'test',
-        'data' => $projectsCreatedPerDayGraph['data']]
-    ]) }}"></line-chart>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <div class="bg-white shadow-lg p-4 rounded-md mt-2 dark:bg-gray-900 border dark:border-gray-800">
-                    <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Total Completed Projects</h3>
-                    <div>
-                        <line-chart :height="300" :labels="{{ $projectsCompletedPerDayGraph['labels'] }}" :data="{{ json_encode([
-    [
-        'borderColor'=> '#7BB026',
-        'backgroundColor' => '#7BB02644',
-        'label' => 'Complete %',
-        'data' => $projectsCompletedPerDayGraph['data']]
-    ]) }}"></line-chart>
+                        <line-chart :height="300" :labels="{{ $totalProjectsPerDayGraph->labels()  }}" :data="{{ $totalProjectsPerDayGraph->datasets()  }}"></line-chart>
                     </div>
                 </div>
             </div>
@@ -85,13 +66,7 @@
                 <div class="bg-white shadow-lg p-4 rounded-md mt-2 dark:bg-gray-900 border dark:border-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds Per Day</h3>
                     <div>
-                        <line-chart :height="300" :labels="{{ $dailyBuildsGraph['labels'] }}" :data="{{ json_encode([
-    [
-        'borderColor'=> '#7BB026',
-        'backgroundColor' => '#7BB02644',
-        'label' => 'Builds',
-        'data' => $dailyBuildsGraph['data']]
-    ]) }}"></line-chart>
+                        <line-chart :height="300" :labels="{{ $dailyBuildsGraph->labels() }}" :data="{{ $dailyBuildsGraph->datasets()  }}"></line-chart>
                     </div>
                 </div>
             </div>

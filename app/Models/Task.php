@@ -73,43 +73,42 @@ class Task extends Model
 
     public function dailyBuilds(?int $owner = null, bool $withTrash = false, $withToday = false) : \Illuminate\Support\Collection
     {
-        $query = $this->jobs()
-            ->select(
-                DB::raw('count(*) as c'),
-                DB::raw('day(`job_statuses`.`created_at`) as created_at_day'),
-                DB::raw('month(`job_statuses`.`created_at`) as created_at_month'),
-                DB::raw('year(`job_statuses`.`created_at`) as created_at_year'))
-            ->groupBy('created_at_day', 'created_at_month', 'created_at_year', 'laravel_through_key');
+        $query = $this->jobs();
 
         if ($owner != null)
             $query->where('projects.ownable_id', $owner);
         if ($withTrash)
             $query->withTrashedParents();
 
-        $allBuilds = $query->get()->mapWithKeys(function ($task)
-        {
-            return ["$task->created_at_year-$task->created_at_month-$task->created_at_day" => $task->c];
-        });
-
-        $builds = collect();
-
-        $endsAt         = now()->isAfter($this->ends_at) ? $this->ends_at : now();
-        $dates          = CarbonPeriod::create($this->starts_at->startOfDay(), $endsAt->endOfDay())->toArray();
-
-        foreach ($dates as $day)
-        {
-            /** @var Carbon $day */
-            $date = $day->format('Y-n-j');
-            if ($day->isToday() && !$withToday)
-                continue;
-            $builds[] = $allBuilds->has($date) ? $allBuilds[$date] : 0;
-        }
-
-        return $builds;
+        return $query->daily($this->starts_at, $this->earliestEndDate(!$withToday))->get();
     }
 
     public function projects()
     {
         return $this->hasMany(Project::class);
+    }
+
+    public function getProjectsPerDayAttribute()
+    {
+        return $this->projects()->withTrashed()->daily($this->starts_at, $this->earliestEndDate())->get();
+    }
+
+    public function getTotalProjectsPerDayAttribute()
+    {
+        return $this->projects()->withTrashed()->daily($this->starts_at, $this->earliestEndDate())->total();
+    }
+
+    public function getTotalCompletedTasksPerDayAttribute()
+    {
+        return $this->projects()
+            ->withTrashed()
+            ->where('status', 'finished')
+            ->daily($this->starts_at, $this->earliestEndDate(), 'finished_at')
+            ->total();
+    }
+
+    private function earliestEndDate($excludeToday = false)
+    {
+        return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
     }
 }

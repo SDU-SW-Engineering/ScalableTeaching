@@ -10,6 +10,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use DB;
+use Domain\Analytics\Graph\Line\LineDataSet;
+use Domain\Analytics\Graph\Line\LineGraph;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Http\Request;
@@ -19,16 +21,21 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task)
     {
-        $user            = User::firstWhere(['guid' => auth()->id()]);
-        $project         = $task->projects()->firstWhere('ownable_id', $user->id);
-        $startDay        = $task->starts_at->format("j/n");
-        $endDay          = $task->ends_at->format("j/n");
-        $percent         = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
-        $progress        = $percent > 100 ? 100 : $percent;
-        $timeLeft        = $task->ends_at->isPast() ? '' : str_replace('from now', 'left', $task->ends_at->diffForHumans());
-        $myBuilds        = $task->dailyBuilds($user->id);
-        $dailyBuilds     = $task->dailyBuilds(null, true);
-        $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
+        $user        = User::firstWhere(['guid' => auth()->id()]);
+        $project     = $task->projects()->firstWhere('ownable_id', $user->id);
+        $startDay    = $task->starts_at->format("j/n");
+        $endDay      = $task->ends_at->format("j/n");
+        $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
+        $progress    = $percent > 100 ? 100 : $percent;
+        $timeLeft    = $task->ends_at->isPast() ? '' : str_replace('from now', 'left', $task->ends_at->diffForHumans());
+        $myBuilds    = $task->dailyBuilds($user->id, false, false);
+        $dailyBuilds = $task->dailyBuilds(null, true, false);
+
+        $dailyBuildsGraph = new LineGraph($dailyBuilds->keys(),
+            new LineDataSet("You", $myBuilds, "#7BB026"),
+            new LineDataSet("Total", $dailyBuilds, "#6B7280")
+        );
+        $newProjectRoute  = route('courses.tasks.createProject', [$course->id, $task->id]);
 
         return view('tasks.show', [
             'course'          => $course,
@@ -43,6 +50,7 @@ class TaskController extends Controller
             ],
             'builds'          => $dailyBuilds,
             'myBuilds'        => $myBuilds,
+            'buildGraph'      => $dailyBuildsGraph,
             'newProjectRoute' => $newProjectRoute
         ]);
     }
@@ -56,7 +64,6 @@ class TaskController extends Controller
         $gitlabUser = collect($gitLabManager->users()->all([
             'username' => $user->username
         ]));
-
 
         abort_if($gitlabUser->isEmpty(), 409, 'Could not find your gitlab user. Log in to gitlab.sdu.dk and try again.');
 
@@ -124,7 +131,7 @@ class TaskController extends Controller
     public function analytics(Course $course, Task $task)
     {
         $projectCount    = $task->projects()->count();
-        $projectsToday   = $task->projects()->whereRaw('date(created_at) = curdate()')->count();
+        $projectsToday   = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
         $finishedCount   = $task->projects()->where('status', 'finished')->count();
         $finishedPercent = $finishedCount / $projectCount * 100;
         $failedCount     = $task->projects()->where('status', 'failed')->count();
@@ -132,86 +139,18 @@ class TaskController extends Controller
         $buildCount      = $task->jobs()->count();
         $buildsToday     = $task->jobs()->whereRaw("date(job_statuses.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
 
-        $projectsCreatedPerDay      = $this->projectsPerDay($task);
-        $projectsCreatedPerDayGraph = collect([
-            'data'   => $projectsCreatedPerDay->pluck('count'),
-            'labels' => $projectsCreatedPerDay->pluck('date')
-        ]);
+        $totalProjectsPerDay      = $task->totalProjectsPerDay;
+        $projectsCompletedPerDay  = $task->totalCompletedTasksPerDay;
+        $totalProjectsPerDayGraph = new LineGraph($totalProjectsPerDay->keys(),
+            new LineDataSet("Projects", $totalProjectsPerDay, "#266ab0"),
+            new LineDataSet("Completed", $projectsCompletedPerDay, "#7BB026")
+        );
 
-        $projectsCompletedPerDay      = $this->projectsCompletedPerDay($task, $projectCount);
-        $projectsCompletedPerDayGraph = collect([
-            'data'   => $projectsCompletedPerDay->pluck('percent'),
-            'labels' => $projectsCompletedPerDay->pluck('date')
-        ]);
 
         $dailyBuilds      = $task->dailyBuilds(null, true, true);
-        $dailyBuildsGraph = collect([
-            'data'   => $dailyBuilds,
-            'labels' => $dailyBuilds->map(function ($val, $index)
-            {
-                return "Day " . ($index + 1);
-            })
-        ]);
+        $dailyBuildsGraph = new LineGraph($dailyBuilds->keys(), new LineDataSet("Builds", $dailyBuilds, "#7BB026"));
 
         return view('tasks.analytics', compact('course', 'task', 'projectCount',
-            'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday', 'projectsCompletedPerDayGraph', 'dailyBuildsGraph', 'projectsCreatedPerDayGraph'));
-    }
-
-    private function projectsPerDay(Task $task)
-    {
-        $projectsPerDay = $task->projects()->select(
-            DB::raw('count(*) as c'),
-            DB::raw('day(`projects`.`created_at`) as created_at_day'),
-            DB::raw('month(`projects`.`created_at`) as created_at_month'),
-            DB::raw('year(`projects`.`created_at`) as created_at_year'))
-            ->groupBy('created_at_day', 'created_at_month', 'created_at_year')->withTrashed()->get()->mapWithKeys(function ($task)
-            {
-                return ["$task->created_at_year-$task->created_at_month-$task->created_at_day" => $task->c];
-            });
-        $projects       = collect();
-        $endsAt         = now()->isAfter($task->ends_at) ? $task->ends_at : now();
-        $dates          = CarbonPeriod::create($task->starts_at->startOfDay(), $endsAt->endOfDay())->toArray();
-
-        foreach ($dates as $date)
-        {
-            $dateString = $date->format('Y-n-j');
-            $projects[] = [
-                'date'  => $date->toDateString(),
-                'count' => $projectsPerDay->has($dateString) ? $projectsPerDay[$dateString] : 0
-            ];
-        }
-
-        return $projects;
-    }
-
-    private function projectsCompletedPerDay(Task $task, int $projectCount)
-    {
-        $projectsPerDay = $task->projects()->select(
-            DB::raw('count(*) as c'),
-            DB::raw('day(`projects`.`finished_at`) as finished_at_day'),
-            DB::raw('month(`projects`.`finished_at`) as finished_at_month'),
-            DB::raw('year(`projects`.`finished_at`) as finished_at_year'))
-            ->groupBy('finished_at_day', 'finished_at_month', 'finished_at_year')->where('status', 'finished')->withTrashed()->get()->mapWithKeys(function ($task)
-            {
-                return ["$task->finished_at_year-$task->finished_at_month-$task->finished_at_day" => $task->c];
-            });
-        $projects       = collect();
-        $endsAt         = now()->isAfter($task->ends_at) ? $task->ends_at : now();
-        $dates          = CarbonPeriod::create($task->starts_at->startOfDay(), $endsAt->endOfDay())->toArray();
-
-        $carry = 0;
-        foreach ($dates as $date)
-        {
-            $dateString = $date->format('Y-n-j');
-            if ($projectsPerDay->has($dateString))
-                $carry += $projectsPerDay[$dateString];
-
-            $projects[] = [
-                'date'    => $date->toDateString(),
-                'percent' => round($carry / $projectCount * 100, 2, PHP_ROUND_HALF_UP)
-            ];
-        }
-
-        return $projects;
+            'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday', 'totalProjectsPerDayGraph', 'dailyBuildsGraph'));
     }
 }
