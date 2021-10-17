@@ -57,7 +57,7 @@
 import ModalButton from "./ModalButton";
 export default {
     components: {ModalButton},
-    props: ['type', 'confirmButtonText', 'content', 'title', 'url', 'isLoading'],
+    props: ['type', 'title', 'isLoading'],
     data: function () {
         return {
             loading: false
