@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "310b925bafab391d23a3d52f5e588007",
+    "content-hash": "8eb2bda92fa609cfe5469fd7dfb13278",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -61,6 +61,53 @@
                 "source": "https://github.com/asm89/stack-cors/tree/v2.0.3"
             },
             "time": "2021-03-11T06:42:03+00:00"
+        },
+        {
+            "name": "badcow/phrase-generator",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/samuelwilliams/PhraseGenerator.git",
+                "reference": "d05bddcf9e206707dca52230bda121c09f88ed28"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/samuelwilliams/PhraseGenerator/zipball/d05bddcf9e206707dca52230bda121c09f88ed28",
+                "reference": "d05bddcf9e206707dca52230bda121c09f88ed28",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3 || ^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.16",
+                "php-coveralls/php-coveralls": "~2.1",
+                "phpstan/phpstan": "^0.12",
+                "phpunit/phpunit": "^9.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Badcow\\PhraseGenerator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Samuel Williams",
+                    "email": "sam@badcow.co"
+                }
+            ],
+            "description": "Generate an English adjective-noun pair as a phrase (e.g. SubmissiveMonkey).",
+            "support": {
+                "issues": "https://github.com/samuelwilliams/PhraseGenerator/issues",
+                "source": "https://github.com/samuelwilliams/PhraseGenerator/tree/master"
+            },
+            "time": "2021-02-07T22:41:34+00:00"
         },
         {
             "name": "barryvdh/laravel-ide-helper",
@@ -10588,11 +10635,14 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "badcow/phrase-generator": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.3|^8.0"
+        "php": "^7.3|^8.0",
+        "ext-json": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.1.0"

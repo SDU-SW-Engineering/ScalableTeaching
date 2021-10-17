@@ -24,6 +24,7 @@ Vue.component('simple-doughnut-chart', require('./components/SimpleDoughnutChart
 Vue.component('task', require('./components/Task').default);
 Vue.component('line-chart', require('./components/LineChart').default);
 Vue.component('bar-chart', require('./components/BarChart').default);
+Vue.component('groups', require('./components/Groups').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

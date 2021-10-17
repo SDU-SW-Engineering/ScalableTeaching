@@ -92,7 +92,9 @@ module.exports = {
             borderWidth: ['hover'],
             typography: ['dark'],
             margin: ['last'],
-            dropShadow: ['dark']
+            dropShadow: ['dark'],
+            opacity: ['disabled'],
+            backgroundColor: ['disabled']
         },
     },
     plugins: [

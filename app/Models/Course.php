@@ -31,4 +31,18 @@ class Course extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function groups()
+    {
+        return $this->hasMany(Group::class);
+    }
+
+    public function userGroups($userId)
+    {
+        return $this->groups()
+            ->with('users')
+            ->whereRelation('users', 'user_id', $userId)
+            ->latest()
+            ->get();
+    }
 }

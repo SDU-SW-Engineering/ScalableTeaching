@@ -9,6 +9,8 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "ext-json": "*",
+        "badcow/phrase-generator": "dev-master",
         "barryvdh/laravel-ide-helper": "^2.10",
         "erusev/parsedown": "^1.7",
         "fruitcake/laravel-cors": "^2.0",
@@ -18,8 +20,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.3",
-        "sdu/laravel-mfa": "^0.9.1",
-        "ext-json": "*"
+        "sdu/laravel-mfa": "^0.9.1"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

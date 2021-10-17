@@ -6,18 +6,8 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
 
 Route::get('/', [HomeController::class, 'index'])->middleware('auth')->name('home');
 
@@ -38,6 +28,11 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
         Route::get('{task}/analytics', [TaskController::class, 'analytics'])->name('analytics')->middleware('can:view,task');
     });
+
+    Route::group(['prefix' => '{course}/groups', 'as' => 'groups.'], function() {
+        Route::get('/', [GroupController::class, 'index'])->name('index');
+        Route::post('/', [GroupController::class, 'create'])->name('create');
+    });
 });
 
 Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['auth']], function ()
@@ -46,7 +41,6 @@ Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['aut
     Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
 });
 
-Route::group(['prefix' => 'groups', 'as' => 'groups.', 'middleware' => ['auth']], function() {
-
-    Route::get('/', [GroupController::class, 'index'])->name('index');
-});
+Route::get('random-name', function() {
+    return PhraseGenerator::generate();
+})->middleware('auth');
