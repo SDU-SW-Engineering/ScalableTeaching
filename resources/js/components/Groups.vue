@@ -30,11 +30,12 @@ export default {
     },
     methods: {
         open: function (group) {
+            console.log(group);
             this.openedGroup = group;
         },
         loadGroups: function (groups)
         {
-            this.openedGroup = groups;
+            this.groups = groups;
         }
     },
     mounted() {

@@ -13,7 +13,11 @@ class GroupController extends Controller
 {
     public function index(Course $course)
     {
+        dd(auth()->user());
         $user = UserModel::firstWhere(['guid' => auth()->id()]);
+
+        $canCreateMoreCourses = $user->can('createGroup', $course);
+        dd($canCreateMoreCourses);
         return view('groups.index', [
             'course'      => $course,
             'breadcrumbs' => [

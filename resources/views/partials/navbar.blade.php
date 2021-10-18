@@ -23,7 +23,7 @@
                 <a href="{{ route('courses.index') }}"
                    class="py-5 px-2 box-border text-sm border-b-4 border-lime-green-400 font-medium text-gray-700 dark:text-gray-200 md:mx-4 md:my-0">Courses</a>
                 <a class="my-1 text-sm py-1 px-2 font-medium bg-lime-green-500 rounded hover:bg-lime-green-400 text-white hover:text-white md:ml-4 md:my-0"
-                   href="#">{{ auth()->user()->getAuthIdentifierName() }}</a>
+                   href="#">{{ auth()->user()->name }}</a>
             </div>
 
         </div>

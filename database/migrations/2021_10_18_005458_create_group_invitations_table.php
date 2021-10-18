@@ -15,6 +15,9 @@ class CreateGroupInvitationsTable extends Migration
     {
         Schema::create('group_invitations', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('group_id');
+            $table->unsignedBigInteger('recipient_user_id');
+            $table->unsignedBigInteger('invited_by_user_id');
             $table->timestamps();
         });
     }

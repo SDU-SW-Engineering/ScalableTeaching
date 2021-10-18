@@ -6,10 +6,11 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SaveUserToDatabase
+class AddProjectsToExistingUsers
 {
     /**
      * Create the event listener.
@@ -29,24 +30,15 @@ class SaveUserToDatabase
      */
     public function handle(Login $event)
     {
-        /** @var \SDU\MFA\Azure\User $user */
-        $user   = $event->user;
-        $dbUser = User::updateOrCreate([
-            'guid' => $user->getId(),
-        ], [
-            'name'  => $user->getDisplayName(),
-            'email' => $user->getMail()
-        ]);
-
-        $this->addExistingProjects($dbUser);
+        $this->addExistingProjects($event->user);
     }
 
-    private function addExistingProjects(User $user)
+    private function addExistingProjects(Authenticatable $user)
     {
         Project::whereNull('ownable_id')
             ->where('repo_name', $user->username)
             ->update([
-                'ownable_id'   => $user->id,
+                'ownable_id'   => $user->getAuthIdentifier(),
                 'ownable_type' => User::class
             ]);
     }

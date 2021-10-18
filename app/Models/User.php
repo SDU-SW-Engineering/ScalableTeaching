@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use SDU\MFA\SDUUser;
 
 /**
  * App\Models\User
@@ -44,7 +45,7 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SDUUser;
 
     /**
      * The attributes that are mass assignable.
@@ -79,11 +80,6 @@ class User extends Authenticatable
     ];
 
     protected $appends = ['username'];
-
-    public function getUsernameAttribute()
-    {
-        return explode('@', $this->email)[0];
-    }
 
     public function projects()
     {

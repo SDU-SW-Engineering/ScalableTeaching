@@ -2,12 +2,12 @@
 
 namespace App\Policies;
 
-use App\Models\Task;
-use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\Group;
 use Illuminate\Auth\Access\Response;
+use SDU\MFA\Azure\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
-class TaskPolicy
+class GroupPolicy
 {
     use HandlesAuthorization;
 
@@ -26,10 +26,10 @@ class TaskPolicy
      * Determine whether the user can view the model.
      *
      * @param User $user
-     * @param Task $task
+     * @param Group $group
      * @return Response|bool
      */
-    public function view(User $user, Task $task)
+    public function view(User $user, Group $group)
     {
         //
     }
@@ -49,25 +49,22 @@ class TaskPolicy
      * Determine whether the user can update the model.
      *
      * @param User $user
-     * @param Task $task
+     * @param Group $group
      * @return Response|bool
      */
-    public function update(User $user, Task $task)
+    public function update(User $user, Group $group)
     {
-    }
-
-    public function viewAnalytics(User $user, Task $task)
-    {
+        //
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param User $user
-     * @param Task $task
+     * @param Group $group
      * @return Response|bool
      */
-    public function delete(User $user, Task $task)
+    public function delete(User $user, Group $group)
     {
         //
     }
@@ -75,11 +72,11 @@ class TaskPolicy
     /**
      * Determine whether the user can restore the model.
      *
-     * @param User $user
-     * @param Task $task
+     * @param  \App\Models\User  $user
+     * @param Group $group
      * @return Response|bool
      */
-    public function restore(User $user, Task $task)
+    public function restore(User $user, Group $group)
     {
         //
     }
@@ -87,11 +84,11 @@ class TaskPolicy
     /**
      * Determine whether the user can permanently delete the model.
      *
-     * @param User $user
-     * @param Task $task
+     * @param  \App\Models\User  $user
+     * @param Group $group
      * @return Response|bool
      */
-    public function forceDelete(User $user, Task $task)
+    public function forceDelete(User $user, Group $group)
     {
         //
     }

@@ -31,7 +31,7 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
 
     Route::group(['prefix' => '{course}/groups', 'as' => 'groups.'], function() {
         Route::get('/', [GroupController::class, 'index'])->name('index');
-        Route::post('/', [GroupController::class, 'create'])->name('create');
+        Route::post('/', [GroupController::class, 'create'])->name('create')->middleware('can:createGroup,course');
     });
 });
 

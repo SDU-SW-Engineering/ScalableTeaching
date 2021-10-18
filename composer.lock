@@ -5099,16 +5099,16 @@
         },
         {
             "name": "sdu/laravel-mfa",
-            "version": "0.9.2",
+            "version": "0.9.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jazerix/sdu-laravel-mfa.git",
-                "reference": "2c88304cb6190242266c334f2494f58f07f738f6"
+                "reference": "dea47a3a500f402aae3fc5731ca9ea3d3209aa95"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jazerix/sdu-laravel-mfa/zipball/2c88304cb6190242266c334f2494f58f07f738f6",
-                "reference": "2c88304cb6190242266c334f2494f58f07f738f6",
+                "url": "https://api.github.com/repos/jazerix/sdu-laravel-mfa/zipball/dea47a3a500f402aae3fc5731ca9ea3d3209aa95",
+                "reference": "dea47a3a500f402aae3fc5731ca9ea3d3209aa95",
                 "shasum": ""
             },
             "require": {
@@ -5145,9 +5145,9 @@
             "description": "Authentication package for SDU MFA",
             "support": {
                 "issues": "https://github.com/jazerix/sdu-laravel-mfa/issues",
-                "source": "https://github.com/jazerix/sdu-laravel-mfa/tree/0.9.2"
+                "source": "https://github.com/jazerix/sdu-laravel-mfa/tree/0.9.3"
             },
-            "time": "2021-10-07T11:23:42+00:00"
+            "time": "2021-10-18T12:32:03+00:00"
         },
         {
             "name": "seld/jsonlint",
