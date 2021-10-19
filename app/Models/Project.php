@@ -34,6 +34,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\JobStatus[] $jobStatuses
  * @property-read int|null $job_statuses_count
  * @property-read Model|\Eloquent $ownable
+ * @property int $verified
+ * @property string|null $final_commit_sha
+ * @property \Illuminate\Support\Carbon|null $finished_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Task $task
+ * @method static \Illuminate\Database\Query\Builder|Project onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Project whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Project whereFinalCommitSha($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Project whereFinishedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Project whereVerified($value)
+ * @method static \Illuminate\Database\Query\Builder|Project withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|Project withoutTrashed()
  */
 class Project extends Model
 {

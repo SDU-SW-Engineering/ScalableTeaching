@@ -33,10 +33,18 @@
             class="rounded-xl bg-white dark:bg-gray-600 px-4 sm:px-6 lg:px-4 xl:px-6 pt-4 pb-4 sm:pb-6 lg:pb-4 xl:pb-6 space-y-4 shadow-lg">
             <header class="flex items-center justify-between">
                 <h2 class="text-lg leading-6 font-medium text-black dark:text-gray-100">My Groups</h2>
-                <tippy to="newGroupBtn" placement="bottom"  v-if="true">
-                    I'm a Tippy tooltip!
+                <tippy to="noNewGrp"  placement="bottom"  v-if="!canCreateGroup">
+                    You have reached the maximum number of groups you can create
                 </tippy>
-                <button name="newGroupBtn" @click="createModal.show = true"
+                <button name="noNewGrp" v-if="!canCreateGroup" class="opacity-50 group flex items-center rounded-md bg-lime-green-100 text-lime-green-700 text-sm font-medium px-4 py-2">
+                    <svg class="group-hover:text-lime-green-700 text-lime-green-600 mr-2" width="12" height="20"
+                         fill="currentColor">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M6 5a1 1 0 011 1v3h3a1 1 0 110 2H7v3a1 1 0 11-2 0v-3H2a1 1 0 110-2h3V6a1 1 0 011-1z"/>
+                    </svg>
+                    New
+                </button>
+                <button v-else name="newGroupBtn" @click="createModal.show = true"
                         class="hover:bg-lime-green-200 hover:text-light-blue-800 group flex items-center rounded-md bg-lime-green-100 text-lime-green-700 text-sm font-medium px-4 py-2">
                     <svg class="group-hover:text-lime-green-700 text-lime-green-600 mr-2" width="12" height="20"
                          fill="currentColor">
@@ -95,7 +103,7 @@ import ModalButton from "../Modal/ModalButton";
 import _ from "lodash";
 export default {
     components: {ModalButton, Modal},
-    props: ['createUrl', 'groups', 'csrf', 'createUrl'],
+    props: ['createUrl', 'groups', 'csrf', 'createUrl', 'createGroups'],
     data() {
         return {
             createModal: {
@@ -103,9 +111,13 @@ export default {
                 creating: false,
                 loadingName: false,
                 name: "",
-                errors: []
+                errors: [],
             },
+            canCreateGroup: false,
         }
+    },
+    mounted() {
+        this.canCreateGroup = this.createGroups;
     },
     methods: {
         randomName: async function () {
@@ -122,7 +134,8 @@ export default {
                     _csrf: this.csrf,
                     name: this.createModal.name
                 });
-                this.$emit('groups-loaded', response.data);
+                this.$emit('groups-loaded', response.data.groups);
+                this.canCreateGroup = response.data.canCreateGroups;
                 this.createModal.name = "";
                 this.createModal.show = false;
                 this.createModal.errors = [];

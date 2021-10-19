@@ -3,9 +3,8 @@
 namespace App\Policies;
 
 use App\Models\Course;
-use App\Models\User as UserModel;
+use App\Models\User;
 use Illuminate\Auth\Access\Response;
-use SDU\MFA\Azure\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class CoursePolicy
@@ -49,16 +48,14 @@ class CoursePolicy
 
     public function createGroup(User $user, Course $course)
     {
-        dd("hit");
-        $user = UserModel::firstWhere(['guid' => $user->getId()]);
-        $currentCount = $course->userGroups($user->id)->count();
+        $currentCount = $course->userGroups($user)->count();
         // todo: switch to match statement when using php8 in production
-        if ($course->max_group_size == 0)
-            $upperLimit = self::GROUP_DEFAULT_UPPER_LIMIT;
-        else if ($course->max_group_size == 1)
-            $upperLimit = 0;
-        else
+        if ($course->max_groups == 'same_as_assignments')
             $upperLimit = $course->tasks()->count();
+        else if ($course->max_groups == 'custom')
+            $upperLimit = $course->max_group_size;
+        else
+            $upperLimit = 0;
 
         return !($currentCount >= $upperLimit);
     }

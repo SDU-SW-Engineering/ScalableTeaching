@@ -98,10 +98,9 @@ class CourseController extends Controller
 
     private function retrieveCourses(bool $withDescription = false, bool $finishedOnly = true)
     {
-        $user     = User::firstWhere(['guid' => auth()->id()]);
         $statuses = \DB::table('projects')
             ->select('task_id', 'status')
-            ->where('ownable_id', $user->id)
+            ->where('ownable_id', auth()->id())
             ->whereNull('deleted_at')
             ->groupBy('task_id', 'status');
         if ($finishedOnly)

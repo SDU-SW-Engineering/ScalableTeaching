@@ -22,6 +22,12 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Task[] $tasks
  * @property-read int|null $tasks_count
+ * @property string $max_groups
+ * @property int $max_group_size
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Group[] $groups
+ * @property-read int|null $groups_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroupSize($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroups($value)
  */
 class Course extends Model
 {
@@ -37,12 +43,17 @@ class Course extends Model
         return $this->hasMany(Group::class);
     }
 
-    public function userGroups($userId)
+    public function userGroups(User $user)
     {
         return $this->groups()
             ->with('users')
-            ->whereRelation('users', 'user_id', $userId)
+            ->whereRelation('users', 'user_id', $user->id)
             ->latest()
             ->get();
+    }
+
+    public function groupInvitations()
+    {
+        return $this->hasManyThrough(GroupInvitation::class, Group::class);
     }
 }

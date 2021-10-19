@@ -42,6 +42,11 @@ use Illuminate\Support\Carbon;
  * @method static Builder|Task whereSourceProjectId($value)
  * @property-read Collection|Project[] $projects
  * @property-read int|null $projects_count
+ * @property-read mixed $projects_per_day
+ * @property-read mixed $total_completed_tasks_per_day
+ * @property-read mixed $total_projects_per_day
+ * @property-read Collection|\App\Models\JobStatus[] $jobs
+ * @property-read int|null $jobs_count
  */
 class Task extends Model
 {

@@ -42,6 +42,18 @@ use SDU\MFA\SDUUser;
  * @property-read mixed $username
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Project[] $projects
  * @property-read int|null $projects_count
+ * @property string|null $given_name
+ * @property string|null $sur_name
+ * @property string|null $title
+ * @property bool $is_admin
+ * @property bool $is_sys_admin
+ * @property array|null $ad_groups
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereAdGroups($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereGivenName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereIsAdmin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereIsSysAdmin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereSurName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereTitle($value)
  */
 class User extends Authenticatable
 {
@@ -66,6 +78,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'ad_groups',
+        'is_sys_admin',
+        'is_admin'
     ];
 
     /**

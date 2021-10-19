@@ -29,9 +29,15 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
         Route::get('{task}/analytics', [TaskController::class, 'analytics'])->name('analytics')->middleware('can:view,task');
     });
 
-    Route::group(['prefix' => '{course}/groups', 'as' => 'groups.'], function() {
+    Route::group(['prefix' => '{course}/groups', 'as' => 'groups.'], function ()
+    {
         Route::get('/', [GroupController::class, 'index'])->name('index');
         Route::post('/', [GroupController::class, 'create'])->name('create')->middleware('can:createGroup,course');
+        Route::get('{group}', [GroupController::class, 'destroy'])->name('destroy')->middleware('can:delete,group');
+        Route::post('{group}/inviteUser', [GroupController::class, 'inviteUser'])->name('invite')->middleware(['can:invite,group', 'throttle:30']);
+
+        Route::get('{group}/invitation/{groupInvitation}/{action}', [GroupController::class, 'respondToInvite'])->name('respondInvite')
+            ->middleware('can:respondInvite,group,groupInvitation')->where('action', 'accept|decline');
     });
 });
 
@@ -41,6 +47,7 @@ Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['aut
     Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
 });
 
-Route::get('random-name', function() {
+Route::get('random-name', function ()
+{
     return PhraseGenerator::generate();
 })->middleware('auth');

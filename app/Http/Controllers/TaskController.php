@@ -18,14 +18,13 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task)
     {
-        $user        = User::firstWhere(['guid' => auth()->id()]);
-        $project     = $task->projects()->firstWhere('ownable_id', $user->id);
+        $project     = $task->projects()->firstWhere('ownable_id', auth()->id());
         $startDay    = $task->starts_at->format("j/n");
         $endDay      = $task->ends_at->format("j/n");
         $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
         $progress    = $percent > 100 ? 100 : $percent;
         $timeLeft    = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
-        $myBuilds    = $task->dailyBuilds($user->id, false, false);
+        $myBuilds    = $task->dailyBuilds(auth()->id(), false, false);
         $dailyBuilds = $task->dailyBuilds(null, true, false);
 
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
