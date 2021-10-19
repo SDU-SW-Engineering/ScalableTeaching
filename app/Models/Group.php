@@ -33,7 +33,10 @@ class Group extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class)->withPivot('is_owner')->withTimestamps();
+        return $this->belongsToMany(User::class)
+            ->using(GroupUser::class)
+            ->withPivot('is_owner')
+            ->withTimestamps();
     }
 
     public function invitations()

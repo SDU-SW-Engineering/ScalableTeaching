@@ -67,7 +67,7 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group)
     {
-        if (!$group->users()->where('user_id', $user->id)->wherePivot('is_owner', true)->exists())
+        if (!$this->isGroupOwner($group, $user))
             return Response::deny('Only the group owner can delete the group.');
 
         if ($group->users()->where('user_id', '!=', $user->id)->count())
@@ -101,8 +101,20 @@ class GroupPolicy
 
     public function canAcceptInvite(User $user, Group $group, GroupInvitation $groupInvitation)
     {
+        if ($group->users()->count() >= $group->course->max_group_size)
+            return Response::deny("Group is full.");
         if ($group->course->hasMaxGroups($user))
             return Response::deny("Maximum number of groups reached.");
+
+        return true;
+    }
+
+    public function removeMember(User $user, Group $group, User $userToRemove)
+    {
+        if ($user->id == $userToRemove->id)
+            return false;
+        if (!$this->isGroupOwner($group, $user))
+            return false;
 
         return true;
     }
@@ -129,5 +141,15 @@ class GroupPolicy
     public function forceDelete(User $user, Group $group)
     {
         //
+    }
+
+    /**
+     * @param Group $group
+     * @param User $user
+     * @return bool
+     */
+    private function isGroupOwner(Group $group, User $user) : bool
+    {
+        return $group->users()->where('user_id', $user->id)->wherePivot('is_owner', true)->exists();
     }
 }

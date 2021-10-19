@@ -1,7 +1,9 @@
 <template>
     <div class="row-start-2 lg:col-start-1 xl:col-span-2 2xl:col-span-3">
-        <alert method="post" :csrf="csrf" :url="group.leaveRoute" @cancel="showLeaveDialog = false" v-if="group.canLeave.allowed && showLeaveDialog" type="danger"
-               title="Leave Group" content="You will need a new invite to rejoin the group later on." confirm-button-text="Leave Group"></alert>
+        <alert method="post" :csrf="csrf" :url="group.leaveRoute" @cancel="showLeaveDialog = false"
+               v-if="group.canLeave.allowed && showLeaveDialog" type="danger"
+               title="Leave Group" content="You will need a new invite to rejoin the group later on."
+               confirm-button-text="Leave Group"></alert>
         <alert method="delete" :csrf="csrf" :url="group.deleteRoute" @cancel="showDeleteDialog = false"
                v-if="group.canDelete.allowed && showDeleteDialog" type="danger" title="Delete Group"
                content="Are you sure you wish to delete this group? This action cannot be undone."
@@ -54,41 +56,26 @@
                 </div>
             </header>
             <h1 class="text-xl font-medium text-black dark:text-white">{{ group.name }}</h1>
-            <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+            <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-5">
                 <div>
-                    <h2 class="text-lg dark:text-gray-200">Members</h2>
+                    <h2 class="text-lg dark:text-gray-200">Members <span
+                        class="text-gray-400 dark:text-gray-300">({{ group.users.length }}/{{
+                            group.member_cap
+                        }})</span></h2>
                     <div class="mt-2">
-                        <member :key="user.id" v-for="user in group.users" :name="user.name"></member>
-                        <div
-                            class="bg-gray-100 dark:bg-gray-700 border dark:border-gray-600 px-3 py-1 flex justify-between rounded-lg mb-2"
-                            v-for="i in 3">
-                            <div class="flex items-center">
-                                <span class="text-gray-700 dark:text-gray-300">Niels Faurskov</span>
-                                <div class="ml-2">
-                                    <div
-                                        class="bg-lime-green-100 text-lime-green-800 text-xs px-2 py-0.5 font-medium rounded-lg tracking-wide">
-                                        Invited
-                                    </div>
-                                </div>
-                            </div>
-                            <button
-                                class="hover:text-gray-400 dark:text-gray-100 dark:hover:text-gray-300 rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 " fill="none" viewBox="0 0 24 24"
-                                     stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div>
+                        <member @remove="removeUserFromGroup(user)" :key="user.id" :is-you="user.isYou" :is-owner="user.pivot.is_owner"
+                                :can-remove="group.isOwner" v-for="user in group.users" :name="user.name"></member>
+                        <member @remove="removeInvitation(invitation)" :key="invitation.id" :can-remove="group.isOwner"
+                                v-for="invitation in group.invitations" :name="invitation.recipient.name"
+                                :is-invited="true"></member>
+                        <div v-if="group.users.length < group.member_cap" class="mt-4">
                             <label class="text-sm text-black dark:text-gray-100">Add user to group</label>
                             <div class="flex mt-1">
                                 <input @keydown.enter="addUser" v-model="userEmail" :disabled="addingUser" type="email"
                                        placeholder="someone@somewhere.com"
-                                       class="focus:outline-none text-sm flex-grow bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 pl-4 py-1.5 rounded-l-lg">
+                                       class="focus:outline-none text-sm flex-grow bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 pl-4 py-1.5 rounded-l-lg">
                                 <button @click="addUser"
-                                        class="text-gray-800 dark:text-white px-3 hover:bg-gray-400 dark:hover:bg-gray-900 bg-gray-300 dark:bg-gray-800 rounded-r-lg">
+                                        class="text-gray-800 dark:text-white px-3 hover:bg-gray-300 dark:hover:bg-gray-900 bg-gray-200 dark:bg-gray-800 rounded-r-lg transition-colors">
                                     <svg v-if="!addingUser" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
                                          fill="none"
                                          viewBox="0 0 24 24"
@@ -113,8 +100,8 @@
                 <div class="flex flex-col">
                     <h2 class="text-lg  dark:text-gray-200">Projects</h2>
                     <div class="mt-2 grid grid-cols-2 xl:grid-cols-3 gap-4 h-full">
-                        <a href="#" v-for="i in 7"
-                           class="border py-6 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ">
+                        <a href="#" v-for="i in 4"
+                           class="border hover:shadow-lg py-6 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ">
                             Assignment 1
                         </a>
                     </div>
@@ -128,10 +115,20 @@
 import GroupBox from "../GroupBox";
 import Alert from "../Alert";
 import Member from "./Member";
+import _ from "lodash";
 
 export default {
     components: {Member, Alert, GroupBox},
-    props: ['group', 'csrf'],
+    props: {
+        group: {
+            type: Object,
+            required: true
+        },
+        csrf: {
+            required: true,
+            type: String
+        }
+    },
     data() {
         return {
             showDeleteDialog: false,
@@ -146,10 +143,13 @@ export default {
             this.addingUser = true;
             this.addError = "";
             try {
-                await axios.post(this.group.inviteRoute, {
+                let invitation = await axios.post(this.group.inviteRoute, {
                     csrf: this.csrf,
                     email: this.userEmail
                 })
+                this.$emit('invitedUser', invitation.data)
+                this.userEmail = "";
+
             } catch (error) {
                 if (error.response.status === 404)
                     this.addError = "Couldn't find a user with this email.";
@@ -160,7 +160,22 @@ export default {
             } finally {
                 this.addingUser = false;
             }
-
+        },
+        removeInvitation: async function (invitation) {
+            await axios.delete(invitation.deleteRoute, {
+                data: {
+                    csrf: this.csrf
+                }
+            })
+            this.$emit('removeInvitation', invitation)
+        },
+        removeUserFromGroup: async function (user) {
+            let response = await axios.delete(user.removeUserRoute, {
+                data: {
+                    csrf: this.csrf
+                }
+            })
+            this.$emit('removeUser', response.data, user);
         }
     },
 

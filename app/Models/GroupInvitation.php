@@ -40,4 +40,9 @@ class GroupInvitation extends Model
     {
         return $this->belongsTo(User::class, 'invited_by_user_id');
     }
+
+    public function recipient()
+    {
+        return $this->belongsTo(User::class, 'recipient_user_id');
+    }
 }

@@ -2477,6 +2477,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Groups_NoInvitations__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Groups/NoInvitations */ "./resources/js/components/Groups/NoInvitations.vue");
 /* harmony import */ var _Groups_Overview__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Groups/Overview */ "./resources/js/components/Groups/Overview.vue");
 /* harmony import */ var _Groups_GroupInfo__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./Groups/GroupInfo */ "./resources/js/components/Groups/GroupInfo.vue");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_7__);
 //
 //
 //
@@ -2491,6 +2493,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 
 
 
@@ -2513,15 +2516,55 @@ __webpack_require__.r(__webpack_exports__);
     return {
       groups: [],
       invitations: [],
-      openedGroup: null
+      openedGroupIndex: null,
+      count: 0
     };
+  },
+  computed: {
+    openedGroup: function openedGroup() {
+      var _this = this;
+
+      if (this.openedGroupIndex == null) return null;
+      return lodash__WEBPACK_IMPORTED_MODULE_7___default().find(this.groups, function (x) {
+        return x.id === _this.openedGroupIndex;
+      });
+    }
   },
   methods: {
     open: function open(group) {
-      this.openedGroup = group;
+      this.openedGroupIndex = group.id;
     },
     loadGroups: function loadGroups(groups) {
       this.groups = groups;
+    },
+    removeInvitation: function removeInvitation(invitation) {
+      var currentGroup = lodash__WEBPACK_IMPORTED_MODULE_7___default().find(this.groups, function (x) {
+        return x.id === invitation.group_id;
+      });
+
+      if (currentGroup == null) return;
+      this.$delete(currentGroup.invitations, lodash__WEBPACK_IMPORTED_MODULE_7___default().findIndex(currentGroup.invitations, function (x) {
+        return x.id === invitation.id;
+      }));
+    },
+    addInvitation: function addInvitation(invitation) {
+      var currentGroup = lodash__WEBPACK_IMPORTED_MODULE_7___default().find(this.groups, function (x) {
+        return x.id === invitation.group_id;
+      });
+
+      if (currentGroup == null) return;
+      currentGroup.invitations.push(invitation);
+    },
+    removeUserFromGroup: function removeUserFromGroup(response, user) {
+      var currentGroup = lodash__WEBPACK_IMPORTED_MODULE_7___default().find(this.groups, function (x) {
+        return x.id === response.group_id;
+      });
+
+      if (currentGroup == null) return;
+      currentGroup.canDelete = response.canDelete;
+      this.$delete(currentGroup.users, lodash__WEBPACK_IMPORTED_MODULE_7___default().findIndex(currentGroup.users, function (x) {
+        return x.id === user.id;
+      }));
     }
   },
   mounted: function mounted() {
@@ -2548,6 +2591,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _GroupBox__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../GroupBox */ "./resources/js/components/GroupBox.vue");
 /* harmony import */ var _Alert__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../Alert */ "./resources/js/components/Alert.vue");
 /* harmony import */ var _Member__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Member */ "./resources/js/components/Groups/Member.vue");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_4__);
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -2667,19 +2712,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+
 
 
 
@@ -2689,7 +2722,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     Alert: _Alert__WEBPACK_IMPORTED_MODULE_2__["default"],
     GroupBox: _GroupBox__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
-  props: ['group', 'csrf'],
+  props: {
+    group: {
+      type: Object,
+      required: true
+    },
+    csrf: {
+      required: true,
+      type: String
+    }
+  },
   data: function data() {
     return {
       showDeleteDialog: false,
@@ -2702,6 +2744,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   methods: {
     addUser: function () {
       var _addUser = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var invitation;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -2716,25 +2759,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 5:
-                _context.next = 10;
+                invitation = _context.sent;
+                this.$emit('invitedUser', invitation.data);
+                this.userEmail = "";
+                _context.next = 13;
                 break;
-
-              case 7:
-                _context.prev = 7;
-                _context.t0 = _context["catch"](2);
-                if (_context.t0.response.status === 404) this.addError = "Couldn't find a user with this email.";else if (_context.t0.response.status === 429) this.addError = _context.t0.response.data.message;else this.addError = _context.t0.response.data.errors.email[0];
 
               case 10:
                 _context.prev = 10;
-                this.addingUser = false;
-                return _context.finish(10);
+                _context.t0 = _context["catch"](2);
+                if (_context.t0.response.status === 404) this.addError = "Couldn't find a user with this email.";else if (_context.t0.response.status === 429) this.addError = _context.t0.response.data.message;else this.addError = _context.t0.response.data.errors.email[0];
 
               case 13:
+                _context.prev = 13;
+                this.addingUser = false;
+                return _context.finish(13);
+
+              case 16:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[2, 7, 10, 13]]);
+        }, _callee, this, [[2, 10, 13, 16]]);
       }));
 
       function addUser() {
@@ -2742,6 +2788,68 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
 
       return addUser;
+    }(),
+    removeInvitation: function () {
+      var _removeInvitation = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(invitation) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return axios["delete"](invitation.deleteRoute, {
+                  data: {
+                    csrf: this.csrf
+                  }
+                });
+
+              case 2:
+                this.$emit('removeInvitation', invitation);
+
+              case 3:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function removeInvitation(_x) {
+        return _removeInvitation.apply(this, arguments);
+      }
+
+      return removeInvitation;
+    }(),
+    removeUserFromGroup: function () {
+      var _removeUserFromGroup = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3(user) {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.next = 2;
+                return axios["delete"](user.removeUserRoute, {
+                  data: {
+                    csrf: this.csrf
+                  }
+                });
+
+              case 2:
+                response = _context3.sent;
+                this.$emit('removeUser', response.data, user);
+
+              case 4:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function removeUserFromGroup(_x2) {
+        return _removeUserFromGroup.apply(this, arguments);
+      }
+
+      return removeUserFromGroup;
     }()
   }
 });
@@ -2916,8 +3024,43 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ["name", "isInvited", "isOwner", "canRemove"]
+  props: {
+    name: {
+      type: String
+    },
+    isInvited: {
+      type: Boolean,
+      "default": false
+    },
+    canRemove: {
+      type: Boolean,
+      "default": false
+    },
+    isYou: {
+      type: Boolean,
+      "default": false
+    },
+    isOwner: {
+      type: Boolean,
+      "default": false
+    }
+  },
+  methods: {
+    remove: function remove() {
+      this.removing = true;
+      this.$emit('remove');
+    }
+  },
+  data: function data() {
+    return {
+      removing: false
+    };
+  }
 });
 
 /***/ }),
@@ -62159,8 +62302,11 @@ var render = function() {
               attrs: { csrf: _vm.csrf, group: _vm.openedGroup },
               on: {
                 close: function($event) {
-                  _vm.openedGroup = null
-                }
+                  _vm.openedGroupIndex = null
+                },
+                removeInvitation: _vm.removeInvitation,
+                invitedUser: _vm.addInvitation,
+                removeUser: _vm.removeUserFromGroup
               }
             })
           : _vm._e(),
@@ -62431,12 +62577,25 @@ var render = function() {
             "div",
             {
               staticClass:
-                "grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4"
+                "grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-5"
             },
             [
               _c("div", [
                 _c("h2", { staticClass: "text-lg dark:text-gray-200" }, [
-                  _vm._v("Members")
+                  _vm._v("Members "),
+                  _c(
+                    "span",
+                    { staticClass: "text-gray-400 dark:text-gray-300" },
+                    [
+                      _vm._v(
+                        "(" +
+                          _vm._s(_vm.group.users.length) +
+                          "/" +
+                          _vm._s(_vm.group.member_cap) +
+                          ")"
+                      )
+                    ]
+                  )
                 ]),
                 _vm._v(" "),
                 _c(
@@ -62446,183 +62605,167 @@ var render = function() {
                     _vm._l(_vm.group.users, function(user) {
                       return _c("member", {
                         key: user.id,
-                        attrs: { name: user.name }
+                        attrs: {
+                          "is-you": user.isYou,
+                          "is-owner": user.pivot.is_owner,
+                          "can-remove": _vm.group.isOwner,
+                          name: user.name
+                        },
+                        on: {
+                          remove: function($event) {
+                            return _vm.removeUserFromGroup(user)
+                          }
+                        }
                       })
                     }),
                     _vm._v(" "),
-                    _vm._l(3, function(i) {
-                      return _c(
-                        "div",
-                        {
-                          staticClass:
-                            "bg-gray-100 dark:bg-gray-700 border dark:border-gray-600 px-3 py-1 flex justify-between rounded-lg mb-2"
+                    _vm._l(_vm.group.invitations, function(invitation) {
+                      return _c("member", {
+                        key: invitation.id,
+                        attrs: {
+                          "can-remove": _vm.group.isOwner,
+                          name: invitation.recipient.name,
+                          "is-invited": true
                         },
-                        [
-                          _vm._m(0, true),
-                          _vm._v(" "),
-                          _c(
-                            "button",
-                            {
-                              staticClass:
-                                "hover:text-gray-400 dark:text-gray-100 dark:hover:text-gray-300 rounded-full"
-                            },
-                            [
-                              _c(
-                                "svg",
-                                {
-                                  staticClass: "h-5 w-5 ",
-                                  attrs: {
-                                    xmlns: "http://www.w3.org/2000/svg",
-                                    fill: "none",
-                                    viewBox: "0 0 24 24",
-                                    stroke: "currentColor"
-                                  }
-                                },
-                                [
-                                  _c("path", {
-                                    attrs: {
-                                      "stroke-linecap": "round",
-                                      "stroke-linejoin": "round",
-                                      "stroke-width": "2",
-                                      d: "M6 18L18 6M6 6l12 12"
-                                    }
-                                  })
-                                ]
-                              )
-                            ]
-                          )
-                        ]
-                      )
+                        on: {
+                          remove: function($event) {
+                            return _vm.removeInvitation(invitation)
+                          }
+                        }
+                      })
                     }),
                     _vm._v(" "),
-                    _c("div", [
-                      _c(
-                        "label",
-                        {
-                          staticClass: "text-sm text-black dark:text-gray-100"
-                        },
-                        [_vm._v("Add user to group")]
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "flex mt-1" }, [
-                        _c("input", {
-                          directives: [
+                    _vm.group.users.length < _vm.group.member_cap
+                      ? _c("div", { staticClass: "mt-4" }, [
+                          _c(
+                            "label",
                             {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.userEmail,
-                              expression: "userEmail"
-                            }
-                          ],
-                          staticClass:
-                            "focus:outline-none text-sm flex-grow bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 pl-4 py-1.5 rounded-l-lg",
-                          attrs: {
-                            disabled: _vm.addingUser,
-                            type: "email",
-                            placeholder: "someone@somewhere.com"
-                          },
-                          domProps: { value: _vm.userEmail },
-                          on: {
-                            keydown: function($event) {
-                              if (
-                                !$event.type.indexOf("key") &&
-                                _vm._k(
-                                  $event.keyCode,
-                                  "enter",
-                                  13,
-                                  $event.key,
-                                  "Enter"
-                                )
-                              ) {
-                                return null
-                              }
-                              return _vm.addUser.apply(null, arguments)
+                              staticClass:
+                                "text-sm text-black dark:text-gray-100"
                             },
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
+                            [_vm._v("Add user to group")]
+                          ),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "flex mt-1" }, [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.userEmail,
+                                  expression: "userEmail"
+                                }
+                              ],
+                              staticClass:
+                                "focus:outline-none text-sm flex-grow bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 pl-4 py-1.5 rounded-l-lg",
+                              attrs: {
+                                disabled: _vm.addingUser,
+                                type: "email",
+                                placeholder: "someone@somewhere.com"
+                              },
+                              domProps: { value: _vm.userEmail },
+                              on: {
+                                keydown: function($event) {
+                                  if (
+                                    !$event.type.indexOf("key") &&
+                                    _vm._k(
+                                      $event.keyCode,
+                                      "enter",
+                                      13,
+                                      $event.key,
+                                      "Enter"
+                                    )
+                                  ) {
+                                    return null
+                                  }
+                                  return _vm.addUser.apply(null, arguments)
+                                },
+                                input: function($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.userEmail = $event.target.value
+                                }
                               }
-                              _vm.userEmail = $event.target.value
-                            }
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c(
-                          "button",
-                          {
-                            staticClass:
-                              "text-gray-800 dark:text-white px-3 hover:bg-gray-400 dark:hover:bg-gray-900 bg-gray-300 dark:bg-gray-800 rounded-r-lg",
-                            on: { click: _vm.addUser }
-                          },
-                          [
-                            !_vm.addingUser
-                              ? _c(
-                                  "svg",
-                                  {
-                                    staticClass: "h-5 w-5",
-                                    attrs: {
-                                      xmlns: "http://www.w3.org/2000/svg",
-                                      fill: "none",
-                                      viewBox: "0 0 24 24",
-                                      stroke: "currentColor"
-                                    }
-                                  },
-                                  [
-                                    _c("path", {
-                                      attrs: {
-                                        "stroke-linecap": "round",
-                                        "stroke-linejoin": "round",
-                                        "stroke-width": "2",
-                                        d: "M12 4v16m8-8H4"
-                                      }
-                                    })
-                                  ]
-                                )
-                              : _c(
-                                  "svg",
-                                  {
-                                    staticClass:
-                                      "animate-spin h-4 w-4 text-white",
-                                    attrs: {
-                                      xmlns: "http://www.w3.org/2000/svg",
-                                      fill: "none",
-                                      viewBox: "0 0 24 24"
-                                    }
-                                  },
-                                  [
-                                    _c("circle", {
-                                      staticClass: "opacity-25",
-                                      attrs: {
-                                        cx: "12",
-                                        cy: "12",
-                                        r: "10",
-                                        stroke: "currentColor",
-                                        "stroke-width": "4"
-                                      }
-                                    }),
-                                    _vm._v(" "),
-                                    _c("path", {
-                                      staticClass: "opacity-75",
-                                      attrs: {
-                                        fill: "currentColor",
-                                        d:
-                                          "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                      }
-                                    })
-                                  ]
-                                )
-                          ]
-                        )
-                      ]),
-                      _vm._v(" "),
-                      _vm.addError !== ""
-                        ? _c("span", {
-                            staticClass:
-                              "text-red-700 dark:text-red-400 text-xs font-medium",
-                            domProps: { textContent: _vm._s(_vm.addError) }
-                          })
-                        : _vm._e()
-                    ])
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "button",
+                              {
+                                staticClass:
+                                  "text-gray-800 dark:text-white px-3 hover:bg-gray-300 dark:hover:bg-gray-900 bg-gray-200 dark:bg-gray-800 rounded-r-lg transition-colors",
+                                on: { click: _vm.addUser }
+                              },
+                              [
+                                !_vm.addingUser
+                                  ? _c(
+                                      "svg",
+                                      {
+                                        staticClass: "h-5 w-5",
+                                        attrs: {
+                                          xmlns: "http://www.w3.org/2000/svg",
+                                          fill: "none",
+                                          viewBox: "0 0 24 24",
+                                          stroke: "currentColor"
+                                        }
+                                      },
+                                      [
+                                        _c("path", {
+                                          attrs: {
+                                            "stroke-linecap": "round",
+                                            "stroke-linejoin": "round",
+                                            "stroke-width": "2",
+                                            d: "M12 4v16m8-8H4"
+                                          }
+                                        })
+                                      ]
+                                    )
+                                  : _c(
+                                      "svg",
+                                      {
+                                        staticClass:
+                                          "animate-spin h-4 w-4 text-white",
+                                        attrs: {
+                                          xmlns: "http://www.w3.org/2000/svg",
+                                          fill: "none",
+                                          viewBox: "0 0 24 24"
+                                        }
+                                      },
+                                      [
+                                        _c("circle", {
+                                          staticClass: "opacity-25",
+                                          attrs: {
+                                            cx: "12",
+                                            cy: "12",
+                                            r: "10",
+                                            stroke: "currentColor",
+                                            "stroke-width": "4"
+                                          }
+                                        }),
+                                        _vm._v(" "),
+                                        _c("path", {
+                                          staticClass: "opacity-75",
+                                          attrs: {
+                                            fill: "currentColor",
+                                            d:
+                                              "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                          }
+                                        })
+                                      ]
+                                    )
+                              ]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _vm.addError !== ""
+                            ? _c("span", {
+                                staticClass:
+                                  "text-red-700 dark:text-red-400 text-xs font-medium",
+                                domProps: { textContent: _vm._s(_vm.addError) }
+                              })
+                            : _vm._e()
+                        ])
+                      : _vm._e()
                   ],
                   2
                 )
@@ -62639,12 +62782,12 @@ var render = function() {
                     staticClass:
                       "mt-2 grid grid-cols-2 xl:grid-cols-3 gap-4 h-full"
                   },
-                  _vm._l(7, function(i) {
+                  _vm._l(4, function(i) {
                     return _c(
                       "a",
                       {
                         staticClass:
-                          "border py-6 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ",
+                          "border hover:shadow-lg py-6 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ",
                         attrs: { href: "#" }
                       },
                       [
@@ -62665,33 +62808,7 @@ var render = function() {
     1
   )
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "flex items-center" }, [
-      _c("span", { staticClass: "text-gray-700 dark:text-gray-300" }, [
-        _vm._v("Niels Faurskov")
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "ml-2" }, [
-        _c(
-          "div",
-          {
-            staticClass:
-              "bg-lime-green-100 text-lime-green-800 text-xs px-2 py-0.5 font-medium rounded-lg tracking-wide"
-          },
-          [
-            _vm._v(
-              "\n                                    Invited\n                                "
-            )
-          ]
-        )
-      ])
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -62918,7 +63035,8 @@ var render = function() {
     "div",
     {
       staticClass:
-        "bg-gray-100 dark:bg-gray-700 border dark:border-gray-600 px-3 py-1 flex justify-between rounded-lg mb-2"
+        "bg-gray-100 dark:bg-gray-700 border dark:border-gray-600 px-3 py-1 flex justify-between rounded-lg mb-2 last:mb-0",
+      class: { "animate-pulse": _vm.removing }
     },
     [
       _c("div", { staticClass: "flex items-center" }, [
@@ -62926,49 +63044,63 @@ var render = function() {
           _vm._v(_vm._s(_vm.name))
         ]),
         _vm._v(" "),
+        _vm.isOwner
+          ? _c(
+              "div",
+              {
+                staticClass:
+                  "mx-2 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 font-medium rounded-lg tracking-wide"
+              },
+              [_vm._v("\n            Owner\n        ")]
+            )
+          : _vm._e(),
+        _vm._v(" "),
         _vm.isInvited
           ? _c(
               "div",
               {
                 staticClass:
-                  " ml-2 bg-lime-green-100 text-lime-green-800 text-xs px-2 py-0.5 font-medium rounded-lg tracking-wide"
+                  "mx-2 bg-lime-green-100 text-lime-green-800 text-xs px-2 py-0.5 font-medium rounded-lg tracking-wide"
               },
               [_vm._v("\n            Invited\n        ")]
             )
           : _vm._e()
       ]),
       _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass:
-            "hover:text-gray-400 dark:text-gray-100 dark:hover:text-gray-300 rounded-full"
-        },
-        [
-          _c(
-            "svg",
+      _vm.canRemove && !_vm.removing && !_vm.isYou
+        ? _c(
+            "button",
             {
-              staticClass: "h-5 w-5 ",
-              attrs: {
-                xmlns: "http://www.w3.org/2000/svg",
-                fill: "none",
-                viewBox: "0 0 24 24",
-                stroke: "currentColor"
-              }
+              staticClass:
+                "hover:text-gray-400 dark:text-gray-100 dark:hover:text-gray-300 rounded-full",
+              on: { click: _vm.remove }
             },
             [
-              _c("path", {
-                attrs: {
-                  "stroke-linecap": "round",
-                  "stroke-linejoin": "round",
-                  "stroke-width": "2",
-                  d: "M6 18L18 6M6 6l12 12"
-                }
-              })
+              _c(
+                "svg",
+                {
+                  staticClass: "h-5 w-5 ",
+                  attrs: {
+                    xmlns: "http://www.w3.org/2000/svg",
+                    fill: "none",
+                    viewBox: "0 0 24 24",
+                    stroke: "currentColor"
+                  }
+                },
+                [
+                  _c("path", {
+                    attrs: {
+                      "stroke-linecap": "round",
+                      "stroke-linejoin": "round",
+                      "stroke-width": "2",
+                      d: "M6 18L18 6M6 6l12 12"
+                    }
+                  })
+                ]
+              )
             ]
           )
-        ]
-      )
+        : _vm._e()
     ]
   )
 }
