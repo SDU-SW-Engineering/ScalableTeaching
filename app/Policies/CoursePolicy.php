@@ -48,16 +48,9 @@ class CoursePolicy
 
     public function createGroup(User $user, Course $course)
     {
-        $currentCount = $course->userGroups($user)->count();
-        // todo: switch to match statement when using php8 in production
-        if ($course->max_groups == 'same_as_assignments')
-            $upperLimit = $course->tasks()->count();
-        else if ($course->max_groups == 'custom')
-            $upperLimit = $course->max_group_size;
-        else
-            $upperLimit = 0;
-
-        return !($currentCount >= $upperLimit);
+        if ($course->hasMaxGroups($user))
+            return Response::deny('Maximum number of groups reached.');
+        return true;
     }
 
     /**

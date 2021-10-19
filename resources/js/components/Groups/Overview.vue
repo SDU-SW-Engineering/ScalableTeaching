@@ -33,10 +33,10 @@
             class="rounded-xl bg-white dark:bg-gray-600 px-4 sm:px-6 lg:px-4 xl:px-6 pt-4 pb-4 sm:pb-6 lg:pb-4 xl:pb-6 space-y-4 shadow-lg">
             <header class="flex items-center justify-between">
                 <h2 class="text-lg leading-6 font-medium text-black dark:text-gray-100">My Groups</h2>
-                <tippy to="noNewGrp"  placement="bottom"  v-if="!canCreateGroup">
-                    You have reached the maximum number of groups you can create
+                <tippy to="noNewGrp"  placement="bottom"  v-if="!createGroups.allowed">
+                    {{ createGroups.message }}
                 </tippy>
-                <button name="noNewGrp" v-if="!canCreateGroup" class="opacity-50 group flex items-center rounded-md bg-lime-green-100 text-lime-green-700 text-sm font-medium px-4 py-2">
+                <button name="noNewGrp" v-if="!createGroups.allowed" class="opacity-50 group flex items-center rounded-md bg-lime-green-100 text-lime-green-700 text-sm font-medium px-4 py-2">
                     <svg class="group-hover:text-lime-green-700 text-lime-green-600 mr-2" width="12" height="20"
                          fill="currentColor">
                         <path fill-rule="evenodd" clip-rule="evenodd"
@@ -112,12 +112,8 @@ export default {
                 loadingName: false,
                 name: "",
                 errors: [],
-            },
-            canCreateGroup: false,
+            }
         }
-    },
-    mounted() {
-        this.canCreateGroup = this.createGroups;
     },
     methods: {
         randomName: async function () {

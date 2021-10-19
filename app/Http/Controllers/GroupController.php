@@ -23,11 +23,12 @@ class GroupController extends Controller
             {
                 $invite->acceptRoute  = route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'accept']);
                 $invite->declineRoute = route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'decline']);
+                $invite->canAccept    = \Gate::inspect('canAcceptInvite', [$invite->group, $invite])->toArray();
             });
 
         $groups = $this->addMetaToUserGroups($course->userGroups(auth()->user(), true));
         return view('groups.index', [
-            'canCreateGroup' => auth()->user()->can('createGroup', $course),
+            'canCreateGroup' => \Gate::inspect('createGroup', $course)->toArray(),
             'course'         => $course,
             'breadcrumbs'    => [
                 'Courses'     => route('courses.index'),
@@ -64,6 +65,7 @@ class GroupController extends Controller
         {
             $group->deleteRoute = route('courses.groups.destroy', [$group->course_id, $group->id]);
             $group->inviteRoute = route('courses.groups.invite', [$group->course_id, $group->id]);
+            $group->leaveRoute  = route('courses.groups.leave', [$group->course_id, $group->id]);
             $group->canDelete   = \Gate::inspect('delete', $group)->toArray();
             $group->canLeave    = \Gate::inspect('leave', $group)->toArray();
             return $group;
@@ -103,8 +105,19 @@ class GroupController extends Controller
     {
         $accepting = $mode == 'accept';
         if ($accepting)
+        {
+            if (auth()->user()->cannot('canAcceptInvite', [$group, $groupInvitation]))
+                return "failed";
             $group->users()->attach(auth()->id());
+        }
         $groupInvitation->delete();
+
+        return "ok";
+    }
+
+    public function leave(Course $course, Group $group)
+    {
+        $group->users()->detach(auth()->id());
 
         return "ok";
     }

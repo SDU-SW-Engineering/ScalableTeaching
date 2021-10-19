@@ -33,8 +33,9 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
     {
         Route::get('/', [GroupController::class, 'index'])->name('index');
         Route::post('/', [GroupController::class, 'create'])->name('create')->middleware('can:createGroup,course');
-        Route::get('{group}', [GroupController::class, 'destroy'])->name('destroy')->middleware('can:delete,group');
+        Route::delete('{group}', [GroupController::class, 'destroy'])->name('destroy')->middleware('can:delete,group');
         Route::post('{group}/inviteUser', [GroupController::class, 'inviteUser'])->name('invite')->middleware(['can:invite,group', 'throttle:30']);
+        Route::post('{group}/leave', [GroupController::class, 'leave'])->name('leave')->middleware(['can:leave,group']);
 
         Route::get('{group}/invitation/{groupInvitation}/{action}', [GroupController::class, 'respondToInvite'])->name('respondInvite')
             ->middleware('can:respondInvite,group,groupInvitation')->where('action', 'accept|decline');

@@ -56,4 +56,18 @@ class Course extends Model
     {
         return $this->hasManyThrough(GroupInvitation::class, Group::class);
     }
+
+    public function hasMaxGroups(User $user)
+    {
+        $currentCount = $this->userGroups($user)->count();
+        // todo: switch to match statement when using php8 in production
+        if ($this->max_groups == 'same_as_assignments')
+            $upperLimit = $this->tasks()->count();
+        else if ($this->max_groups == 'custom')
+            $upperLimit = $this->max_group_size;
+        else
+            $upperLimit = 0;
+
+        return $currentCount >= $upperLimit;
+    }
 }

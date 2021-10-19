@@ -2138,8 +2138,26 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ['type', 'confirmButtonText', 'content', 'title', 'url'],
+  props: ['type', 'confirmButtonText', 'content', 'title', 'url', 'csrf', 'method'],
   data: function data() {
     return {
       loading: false
@@ -2153,13 +2171,38 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context.prev = _context.next) {
               case 0:
                 this.loading = true;
-                _context.next = 3;
-                return axios.get(this.url);
-
-              case 3:
-                location.reload();
+                _context.t0 = this.method;
+                _context.next = _context.t0 === "post" ? 4 : _context.t0 === "delete" ? 7 : 10;
+                break;
 
               case 4:
+                _context.next = 6;
+                return axios.post(this.url, {
+                  csrf: this.csrf
+                });
+
+              case 6:
+                return _context.abrupt("break", 12);
+
+              case 7:
+                _context.next = 9;
+                return axios["delete"](this.url, {
+                  data: {
+                    csrf: this.csrf
+                  }
+                });
+
+              case 9:
+                return _context.abrupt("break", 12);
+
+              case 10:
+                _context.next = 12;
+                return axios.get(this.url);
+
+              case 12:
+                location.reload();
+
+              case 13:
               case "end":
                 return _context.stop();
             }
@@ -2768,6 +2811,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['invitation'],
   data: function data() {
@@ -2779,7 +2827,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   methods: {
     acceptInvitation: function () {
       var _acceptInvitation = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -2789,10 +2836,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 return axios.get(this.invitation.acceptRoute);
 
               case 3:
-                response = _context.sent;
-                this.accepting = false;
+                location.reload();
 
-              case 5:
+              case 4:
               case "end":
                 return _context.stop();
             }
@@ -2806,10 +2852,33 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
       return acceptInvitation;
     }(),
-    declineInvitation: function declineInvitation(invitation) {
-      this.declining = true;
-      console.log(invitation);
-    }
+    declineInvitation: function () {
+      var _declineInvitation = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(invitation) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                this.declining = true;
+                _context2.next = 3;
+                return axios.get(this.invitation.declineRoute);
+
+              case 3:
+                location.reload();
+
+              case 4:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function declineInvitation(_x) {
+        return _declineInvitation.apply(this, arguments);
+      }
+
+      return declineInvitation;
+    }()
   }
 });
 
@@ -2992,12 +3061,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         loadingName: false,
         name: "",
         errors: []
-      },
-      canCreateGroup: false
+      }
     };
-  },
-  mounted: function mounted() {
-    this.canCreateGroup = this.createGroups;
   },
   methods: {
     randomName: function () {
@@ -62145,8 +62210,13 @@ var render = function() {
       _vm.group.canLeave.allowed && _vm.showLeaveDialog
         ? _c("alert", {
             attrs: {
+              method: "post",
+              csrf: _vm.csrf,
+              url: _vm.group.leaveRoute,
               type: "danger",
               title: "Leave Group",
+              content:
+                "You will need a new invite to rejoin the group later on.",
               "confirm-button-text": "Leave Group"
             },
             on: {
@@ -62160,6 +62230,8 @@ var render = function() {
       _vm.group.canDelete.allowed && _vm.showDeleteDialog
         ? _c("alert", {
             attrs: {
+              method: "delete",
+              csrf: _vm.csrf,
               url: _vm.group.deleteRoute,
               type: "danger",
               title: "Delete Group",
@@ -62694,6 +62766,12 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
+      !_vm.invitation.canAccept.allowed
+        ? _c("tippy", { attrs: { to: "cantAccept", placement: "top" } }, [
+            _vm._v(_vm._s(_vm.invitation.canAccept.message))
+          ])
+        : _vm._e(),
+      _vm._v(" "),
       _c("div", { staticClass: "grid grid-cols-2 px-6 py-4 gap-6" }, [
         _c(
           "button",
@@ -62748,58 +62826,69 @@ var render = function() {
           ]
         ),
         _vm._v(" "),
-        _c(
-          "button",
-          {
-            staticClass:
-              "bg-lime-green-500 py-3 font-medium text-white rounded-lg flex justify-center items-center transition-colors duration-200",
-            class: {
-              "animate-pulse": _vm.accepting,
-              "hover:bg-lime-green-600": !(_vm.declining || _vm.accepting),
-              "opacity-50": _vm.declining
-            },
-            attrs: { disabled: _vm.accepting || _vm.declining },
-            on: { click: _vm.acceptInvitation }
-          },
-          [
-            !_vm.accepting
-              ? _c("span", [_vm._v("Accept")])
-              : _c(
-                  "svg",
-                  {
-                    staticClass: "animate-spin h-5 w-5 text-white",
-                    attrs: {
-                      xmlns: "http://www.w3.org/2000/svg",
-                      fill: "none",
-                      viewBox: "0 0 24 24"
-                    }
-                  },
-                  [
-                    _c("circle", {
-                      staticClass: "opacity-25",
-                      attrs: {
-                        cx: "12",
-                        cy: "12",
-                        r: "10",
-                        stroke: "currentColor",
-                        "stroke-width": "4"
-                      }
-                    }),
-                    _vm._v(" "),
-                    _c("path", {
-                      staticClass: "opacity-75",
-                      attrs: {
-                        fill: "currentColor",
-                        d:
-                          "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      }
-                    })
-                  ]
-                )
-          ]
-        )
+        !_vm.invitation.canAccept.allowed
+          ? _c(
+              "button",
+              {
+                staticClass:
+                  "opacity-50 bg-lime-green-500 py-3 font-medium text-white rounded-lg flex justify-center items-center transition-colors duration-200",
+                attrs: { name: "cantAccept" }
+              },
+              [_vm._v("\n            Accept\n        ")]
+            )
+          : _c(
+              "button",
+              {
+                staticClass:
+                  "bg-lime-green-500 py-3 font-medium text-white rounded-lg flex justify-center items-center transition-colors duration-200",
+                class: {
+                  "animate-pulse": _vm.accepting,
+                  "hover:bg-lime-green-600": !(_vm.declining || _vm.accepting),
+                  "opacity-50": _vm.declining
+                },
+                attrs: { disabled: _vm.accepting || _vm.declining },
+                on: { click: _vm.acceptInvitation }
+              },
+              [
+                !_vm.accepting
+                  ? _c("span", [_vm._v("Accept")])
+                  : _c(
+                      "svg",
+                      {
+                        staticClass: "animate-spin h-5 w-5 text-white",
+                        attrs: {
+                          xmlns: "http://www.w3.org/2000/svg",
+                          fill: "none",
+                          viewBox: "0 0 24 24"
+                        }
+                      },
+                      [
+                        _c("circle", {
+                          staticClass: "opacity-25",
+                          attrs: {
+                            cx: "12",
+                            cy: "12",
+                            r: "10",
+                            stroke: "currentColor",
+                            "stroke-width": "4"
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("path", {
+                          staticClass: "opacity-75",
+                          attrs: {
+                            fill: "currentColor",
+                            d:
+                              "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          }
+                        })
+                      ]
+                    )
+              ]
+            )
       ])
-    ]
+    ],
+    1
   )
 }
 var staticRenderFns = []
@@ -63147,19 +63236,21 @@ var render = function() {
                 [_vm._v("My Groups")]
               ),
               _vm._v(" "),
-              !_vm.canCreateGroup
+              !_vm.createGroups.allowed
                 ? _c(
                     "tippy",
                     { attrs: { to: "noNewGrp", placement: "bottom" } },
                     [
                       _vm._v(
-                        "\n                You have reached the maximum number of groups you can create\n            "
+                        "\n                " +
+                          _vm._s(_vm.createGroups.message) +
+                          "\n            "
                       )
                     ]
                   )
                 : _vm._e(),
               _vm._v(" "),
-              !_vm.canCreateGroup
+              !_vm.createGroups.allowed
                 ? _c(
                     "button",
                     {

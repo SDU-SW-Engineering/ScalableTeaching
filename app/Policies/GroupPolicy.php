@@ -99,6 +99,14 @@ class GroupPolicy
         return $groupInvitation->recipient_user_id == $user->id;
     }
 
+    public function canAcceptInvite(User $user, Group $group, GroupInvitation $groupInvitation)
+    {
+        if ($group->course->hasMaxGroups($user))
+            return Response::deny("Maximum number of groups reached.");
+
+        return true;
+    }
+
     /**
      * Determine whether the user can restore the model.
      *

@@ -15,6 +15,7 @@
                 </dd>
             </div>
         </div>
+        <tippy to="cantAccept" placement="top" v-if="!invitation.canAccept.allowed">{{ invitation.canAccept.message}}</tippy>
         <div class="grid grid-cols-2 px-6 py-4 gap-6">
             <button @click="declineInvitation" :disabled="accepting || declining"
                     :class="{ 'animate-pulse': declining, 'hover:bg-gray-200 dark:hover:bg-gray-500': !(declining || accepting), 'opacity-50': accepting}"
@@ -27,7 +28,11 @@
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
             </button>
-            <button @click="acceptInvitation" :disabled="accepting || declining"
+            <button name="cantAccept" v-if="!invitation.canAccept.allowed"
+                    class="opacity-50 bg-lime-green-500 py-3 font-medium text-white rounded-lg flex justify-center items-center transition-colors duration-200">
+                Accept
+            </button>
+            <button v-else @click="acceptInvitation" :disabled="accepting || declining"
                     :class="{ 'animate-pulse': accepting, 'hover:bg-lime-green-600': !(declining || accepting), 'opacity-50': declining}"
                     class="bg-lime-green-500 py-3 font-medium text-white rounded-lg flex justify-center items-center transition-colors duration-200">
                 <span v-if="!accepting">Accept</span>
@@ -54,12 +59,13 @@ export default {
     methods: {
         acceptInvitation: async function () {
             this.accepting = true;
-            let response = await axios.get(this.invitation.acceptRoute);
-            this.accepting = false;
+            await axios.get(this.invitation.acceptRoute);
+            location.reload();
         },
-        declineInvitation: function (invitation) {
+        declineInvitation: async function (invitation) {
             this.declining = true;
-            console.log(invitation);
+            await axios.get(this.invitation.declineRoute);
+            location.reload();
         }
     }
 }

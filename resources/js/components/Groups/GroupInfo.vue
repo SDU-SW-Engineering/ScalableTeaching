@@ -1,8 +1,8 @@
 <template>
     <div class="row-start-2 lg:col-start-1 xl:col-span-2 2xl:col-span-3">
-        <alert @cancel="showLeaveDialog = false" v-if="group.canLeave.allowed && showLeaveDialog" type="danger"
-               title="Leave Group" confirm-button-text="Leave Group"></alert>
-        <alert :url="group.deleteRoute" @cancel="showDeleteDialog = false"
+        <alert method="post" :csrf="csrf" :url="group.leaveRoute" @cancel="showLeaveDialog = false" v-if="group.canLeave.allowed && showLeaveDialog" type="danger"
+               title="Leave Group" content="You will need a new invite to rejoin the group later on." confirm-button-text="Leave Group"></alert>
+        <alert method="delete" :csrf="csrf" :url="group.deleteRoute" @cancel="showDeleteDialog = false"
                v-if="group.canDelete.allowed && showDeleteDialog" type="danger" title="Delete Group"
                content="Are you sure you wish to delete this group? This action cannot be undone."
                confirm-button-text="Delete Group"></alert>
