@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Group;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -12,13 +13,18 @@ use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class TaskController extends Controller
 {
     public function show(Course $course, Task $task)
     {
-        $project     = $task->projects()->firstWhere('ownable_id', auth()->id());
+        $project = $task->currentProjectForUser(auth()->user());
+        $myGroups    = $course->groups()
+            ->whereRelation('users', 'user_id', auth()->id())
+            ->latest()
+            ->pluck('name', 'id');
         $startDay    = $task->starts_at->format("j/n");
         $endDay      = $task->ends_at->format("j/n");
         $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
@@ -32,6 +38,7 @@ class TaskController extends Controller
             new BarDataSet("You", $myBuilds, "#7BB026")
         );
         $newProjectRoute  = route('courses.tasks.createProject', [$course->id, $task->id]);
+
 
         return view('tasks.show', [
             'course'          => $course,
@@ -48,6 +55,7 @@ class TaskController extends Controller
             'myBuilds'        => $myBuilds,
             'buildGraph'      => $dailyBuildsGraph,
             'newProjectRoute' => $newProjectRoute,
+            'availableGroups' => $myGroups,
             'breadcrumbs'     => [
                 'Courses'     => route('courses.index'),
                 $course->name => route('courses.show', $course->id),

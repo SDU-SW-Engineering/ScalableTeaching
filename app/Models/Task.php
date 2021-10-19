@@ -71,6 +71,11 @@ class Task extends Model
         ]);
     }
 
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
     public function jobs()
     {
         return $this->hasManyThrough(JobStatus::class, Project::class);
@@ -85,7 +90,7 @@ class Task extends Model
         if ($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(! $withToday))->get();
     }
 
     public function projects()
@@ -115,5 +120,25 @@ class Task extends Model
     private function earliestEndDate($excludeToday = false)
     {
         return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
+    }
+
+    public function currentProjectForUser(User $user)
+    {
+        $myGroups    = $this->course->groups()
+            ->whereRelation('users', 'user_id', $user->id)
+            ->latest()
+            ->pluck('name', 'id');
+        $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function (Builder $query) use ($myGroups)
+        {
+            $query->whereIn('id', $myGroups->keys());
+        })->first();
+
+        if ($groupProject != null)
+            return $groupProject;
+
+        return $user->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
+        {
+            $query->where('id', $user->id);
+        })->first();
     }
 }

@@ -3,8 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Project;
-use SDU\MFA\Azure\User;
-use App\Models\User as UserModel;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProjectPolicy
@@ -31,11 +30,8 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project)
     {
-        $user = UserModel::firstWhere(['guid' => $user->id]);
-        if ($user == null)
-            return false;
-
-        return $user->projects()->where('id', $project->id)->exists();
+        $currentProject = $project->task->currentProjectForUser($user);
+        return $currentProject->id == $project->id;
     }
 
     /**

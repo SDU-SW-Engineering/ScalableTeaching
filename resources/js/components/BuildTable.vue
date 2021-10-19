@@ -5,7 +5,7 @@
                 <div class="py-2 align-middle inline-block min-w-full">
                     <div class="shadow-md overflow-x-auto max-vh70 border-b border-gray-200 dark:border-gray-600 sm:rounded-lg">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-500">
-                            <thead class="bg-gray-100 dark:bg-gray-800">
+                            <thead class="bg-gray-100 dark:bg-gray-900">
                             <tr>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -29,7 +29,7 @@
                                 </th>
                             </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-500">
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-500">
                             <tr v-for="build in builds">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">

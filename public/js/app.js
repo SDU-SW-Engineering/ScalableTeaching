@@ -3776,6 +3776,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -3797,44 +3806,46 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     Completed: _Widgets_Completed__WEBPACK_IMPORTED_MODULE_6__["default"],
     Alert: _Alert__WEBPACK_IMPORTED_MODULE_8__["default"]
   },
-  props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph'],
+  props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName'],
   methods: {
     startAssignment: function () {
-      var _startAssignment = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var response;
+      var _startAssignment = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee(startAs) {
+        var createAs, response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                createAs = startAs == null ? this.startAs : startAs;
                 this.startingAssignment = true;
                 this.errorMessage = "";
-                _context.prev = 2;
-                _context.next = 5;
+                _context.prev = 3;
+                _context.next = 6;
                 return axios.post(this.newProjectUrl, {
-                  _token: this.csrf
+                  _token: this.csrf,
+                  as: createAs
                 });
 
-              case 5:
+              case 6:
                 response = _context.sent;
                 location.reload();
-                _context.next = 13;
+                _context.next = 14;
                 break;
 
-              case 9:
-                _context.prev = 9;
-                _context.t0 = _context["catch"](2);
+              case 10:
+                _context.prev = 10;
+                _context.t0 = _context["catch"](3);
                 this.errorMessage = _context.t0.response.data.message;
                 this.startingAssignment = false;
 
-              case 13:
+              case 14:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[2, 9]]);
+        }, _callee, this, [[3, 10]]);
       }));
 
-      function startAssignment() {
+      function startAssignment(_x) {
         return _startAssignment.apply(this, arguments);
       }
 
@@ -3848,7 +3859,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       hideMissingAssignmentWarning: false,
       startingAssignment: false,
       labels: this.buildGraph.labels,
-      datasets: this.buildGraph.datasets
+      datasets: this.buildGraph.datasets,
+      startAs: "solo"
     };
   }
 });
@@ -3900,8 +3912,22 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ['startingAssignment', 'errorMessage']
+  props: ['startingAssignment', 'errorMessage', 'groups', 'userName'],
+  data: function data() {
+    return {
+      startAs: "solo"
+    };
+  }
 });
 
 /***/ }),
@@ -61801,7 +61827,7 @@ var render = function() {
                       "tbody",
                       {
                         staticClass:
-                          "bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-500"
+                          "bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-500"
                       },
                       _vm._l(_vm.builds, function(build) {
                         return _c("tr", [
@@ -62128,7 +62154,7 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("thead", { staticClass: "bg-gray-100 dark:bg-gray-800" }, [
+    return _c("thead", { staticClass: "bg-gray-100 dark:bg-gray-900" }, [
       _c("tr", [
         _c(
           "th",
@@ -64333,6 +64359,84 @@ var render = function() {
                                 }
                               }),
                               _vm._v(" "),
+                              Object.keys(_vm.groups).length > 0
+                                ? _c(
+                                    "div",
+                                    { staticClass: "mb-4 flex flex-col" },
+                                    [
+                                      _c(
+                                        "span",
+                                        {
+                                          staticClass:
+                                            "mb-1 text-gray-600 dark:text-gray-400"
+                                        },
+                                        [_vm._v("Start Assignment as:")]
+                                      ),
+                                      _vm._v(" "),
+                                      _c(
+                                        "select",
+                                        {
+                                          directives: [
+                                            {
+                                              name: "model",
+                                              rawName: "v-model",
+                                              value: _vm.startAs,
+                                              expression: "startAs"
+                                            }
+                                          ],
+                                          staticClass:
+                                            "bg-gray-100 dark:bg-gray-600 border-gray-300 text-gray-900 dark:text-gray-200 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5",
+                                          attrs: { id: "countries" },
+                                          on: {
+                                            change: function($event) {
+                                              var $$selectedVal = Array.prototype.filter
+                                                .call(
+                                                  $event.target.options,
+                                                  function(o) {
+                                                    return o.selected
+                                                  }
+                                                )
+                                                .map(function(o) {
+                                                  var val =
+                                                    "_value" in o
+                                                      ? o._value
+                                                      : o.value
+                                                  return val
+                                                })
+                                              _vm.startAs = $event.target
+                                                .multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
+                                            }
+                                          }
+                                        },
+                                        [
+                                          _c("option", {
+                                            attrs: { value: "solo" },
+                                            domProps: {
+                                              textContent: _vm._s(_vm.userName)
+                                            }
+                                          }),
+                                          _vm._v(" "),
+                                          _vm._l(_vm.groups, function(
+                                            group,
+                                            id
+                                          ) {
+                                            return _c("option", {
+                                              key: id,
+                                              domProps: {
+                                                value: id,
+                                                textContent: _vm._s(group)
+                                              }
+                                            })
+                                          })
+                                        ],
+                                        2
+                                      )
+                                    ]
+                                  )
+                                : _vm._e(),
+                              _vm._v(" "),
                               _c(
                                 "div",
                                 { staticClass: "flex justify-center gap-4" },
@@ -64349,7 +64453,11 @@ var render = function() {
                                       attrs: {
                                         disabled: _vm.startingAssignment
                                       },
-                                      on: { click: _vm.startAssignment }
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.startAssignment(null)
+                                        }
+                                      }
                                     },
                                     [
                                       _vm.startingAssignment
@@ -64484,7 +64592,9 @@ var render = function() {
             ? _c("not-started", {
                 attrs: {
                   errorMessage: _vm.errorMessage,
-                  "starting-assignment": _vm.startingAssignment
+                  "starting-assignment": _vm.startingAssignment,
+                  groups: _vm.groups,
+                  "user-name": _vm.userName
                 },
                 on: {
                   "update:errorMessage": function($event) {
@@ -64733,6 +64843,62 @@ var render = function() {
               domProps: { textContent: _vm._s(_vm.errorMessage) }
             }),
             _vm._v(" "),
+            Object.keys(_vm.groups).length > 0
+              ? _c("div", { staticClass: "mb-4 flex flex-col" }, [
+                  _c(
+                    "span",
+                    { staticClass: "mb-1 text-gray-600 dark:text-gray-400" },
+                    [_vm._v("Start Assignment as:")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "select",
+                    {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.startAs,
+                          expression: "startAs"
+                        }
+                      ],
+                      staticClass:
+                        "bg-gray-100 dark:bg-gray-600 border-gray-300 text-gray-900 dark:text-gray-200 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5",
+                      attrs: { id: "countries" },
+                      on: {
+                        change: function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value
+                              return val
+                            })
+                          _vm.startAs = $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        }
+                      }
+                    },
+                    [
+                      _c("option", {
+                        attrs: { value: "solo" },
+                        domProps: { textContent: _vm._s(_vm.userName) }
+                      }),
+                      _vm._v(" "),
+                      _vm._l(_vm.groups, function(group, id) {
+                        return _c("option", {
+                          key: id,
+                          domProps: { value: id, textContent: _vm._s(group) }
+                        })
+                      })
+                    ],
+                    2
+                  )
+                ])
+              : _vm._e(),
+            _vm._v(" "),
             _c("div", { staticClass: "flex justify-start gap-4" }, [
               _c(
                 "button",
@@ -64743,7 +64909,7 @@ var render = function() {
                   attrs: { disabled: _vm.startingAssignment },
                   on: {
                     click: function($event) {
-                      return _vm.$emit("startAssignment")
+                      return _vm.$emit("startAssignment", _vm.startAs)
                     }
                   }
                 },
