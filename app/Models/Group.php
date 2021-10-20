@@ -58,4 +58,9 @@ class Group extends Model
     {
         return \Str::kebab($this->name);
     }
+
+    public function hasMember(User $user) : bool
+    {
+        return $this->users()->where('user_id', $user->id)->exists();
+    }
 }

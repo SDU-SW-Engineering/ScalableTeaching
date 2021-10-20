@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use GrahamCampbell\GitLab\GitLabManager;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -72,6 +73,49 @@ class Project extends Model
     public function task()
     {
         return $this->belongsTo(Task::class);
+    }
+
+    public function refreshGitlabAccess()
+    {
+        $gitLabManager   = app(GitLabManager::class);
+        $supposedMembers = $this->owners()->map(function ($user) use ($gitLabManager)
+        {
+            $users = $gitLabManager->users()->all([
+                'username' => $user->username
+            ]);
+            if (count($users) == 1)
+                return $users[0]['id'];
+            return null;
+        })->reject(function ($gitlabId)
+        {
+            return $gitlabId == null;
+        });
+        $currentMembers  = collect($gitLabManager->projects()->members($this->project_id))->pluck('id');
+        $add             = $supposedMembers->diff($currentMembers);
+        $remove          = $currentMembers->diff($supposedMembers);
+        $this->addUsersToGitlab($add);
+        $remove->each(function ($gitlabUserId) use ($gitLabManager)
+        {
+            try
+            {
+                $gitLabManager->projects()->removeMember($this->project_id, $gitlabUserId);
+            }
+            catch (\Exception $ignored)
+            {
+
+            }
+        });
+    }
+
+    /**
+     * returns a collection of users that own the project
+     * @return Collection
+     */
+    public function owners()
+    {
+        if ($this->ownable_type == User::class)
+            return Collection::wrap($this->ownable);
+        return $this->ownable->users()->get();
     }
 
     public function addUsersToGitlab($gitlabIds, &$errors = [])

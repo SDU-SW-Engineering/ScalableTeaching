@@ -50,6 +50,8 @@ Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['aut
 {
     Route::get('{project}/builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
     Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
+    Route::post('{project}/migrate/{group}', [ProjectController::class, 'migrate'])->middleware(['can:migrate,project,group', 'throttle:5']);
+    Route::post('{project}/refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
 });
 
 Route::get('random-name', function ()

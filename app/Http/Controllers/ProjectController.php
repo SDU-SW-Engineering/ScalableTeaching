@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
+use App\Models\Group;
 use App\Models\JobStatus;
 use App\Models\Project;
 use Carbon\Carbon;
@@ -50,6 +52,17 @@ class ProjectController extends Controller
         });
 
         return "OK";
+    }
 
+    public function migrate(Project $project, Group $group)
+    {
+        $project->ownable()->associate($group)->save();
+        return "ok";
+    }
+
+    public function refreshAccess(Project $project)
+    {
+        $project->refreshGitlabAccess();
+        return "ok";
     }
 }

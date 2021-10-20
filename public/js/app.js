@@ -3536,7 +3536,64 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _Alert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Alert */ "./resources/js/components/Alert.vue");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _Alert__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Alert */ "./resources/js/components/Alert.vue");
+/* harmony import */ var _GroupBox__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./GroupBox */ "./resources/js/components/GroupBox.vue");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3562,20 +3619,59 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
-    Alert: _Alert__WEBPACK_IMPORTED_MODULE_0__["default"]
+    GroupBox: _GroupBox__WEBPACK_IMPORTED_MODULE_2__["default"],
+    Alert: _Alert__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
-  props: ['project'],
+  props: ['project', 'groups'],
   data: function data() {
     return {
-      showResetWarning: false
+      showResetWarning: false,
+      migrate: {
+        group: null,
+        showConfirm: false
+      },
+      refresh: {
+        loading: false
+      }
     };
   },
   methods: {
-    resetProject: function resetProject() {
-      confirm('Are you sure? This can\'t be undone!');
-    }
+    migrateProject: function migrateProject() {
+      if (this.migrate.group == null) return;
+      this.migrate.showConfirm = true;
+    },
+    refreshProject: function () {
+      var _refreshProject = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                this.refresh.loading = true;
+                _context.next = 3;
+                return axios.post('/projects/' + this.project.id + '/refresh-access', {
+                  csrf: this.csrf
+                });
+
+              case 3:
+                location.reload();
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function refreshProject() {
+        return _refreshProject.apply(this, arguments);
+      }
+
+      return refreshProject;
+    }()
   }
 });
 
@@ -3654,6 +3750,11 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+//
+//
+//
+//
+//
 //
 //
 //
@@ -64112,67 +64213,228 @@ var render = function() {
             _vm._v("Settings")
           ]),
           _vm._v(" "),
-          _c("div", { staticClass: "flex lg:w-1/2" }, [
-            _c(
-              "div",
-              {
-                staticClass:
-                  "border-2 rounded-xl p-4 mt-6 border-lime-green-400 relative"
-              },
-              [
-                _c(
-                  "h3",
-                  {
-                    staticClass:
-                      "absolute text-lime-green-400 -my-8 -ml-2 bg-white dark:bg-gray-800 px-2"
-                  },
-                  [_vm._v("Start over")]
-                ),
-                _vm._v(" "),
-                _c("p", { staticClass: "text-gray-600 dark:text-gray-100" }, [
-                  _vm._v(
-                    "If you wish, you can reset your project here. Please\n                    note that this will erase the repository, and you will lose all commits made to it."
-                  )
-                ]),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass:
-                      "py-1 px-2 font-semibold rounded transition-colors text-sm mt-2",
-                    class: [
-                      _vm.project.status === "finished" ||
-                      _vm.project.status === "overdue"
-                        ? "cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-600"
-                        : "bg-red-600 text-white hover:bg-red-500"
-                    ],
-                    attrs: { disabled: _vm.project.status === "finished" },
-                    on: {
-                      click: function($event) {
-                        _vm.showResetWarning = true
-                      }
-                    }
-                  },
-                  [_vm._v("Reset Project\n                ")]
-                ),
-                _vm._v(" "),
-                _vm.project.status === "finished" ||
-                _vm.project.status === "overdue"
-                  ? _c(
-                      "p",
-                      {
+          _c("div", { staticClass: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, [
+            _vm.project.ownable_type === "App\\Models\\Group"
+              ? _c("div", [
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "border-2 rounded-xl p-4 mt-6 border-lime-green-400 relative"
+                    },
+                    [
+                      _c(
+                        "h3",
+                        {
+                          staticClass:
+                            "absolute text-lime-green-400 -my-8 -ml-2 bg-white dark:bg-gray-800 px-2"
+                        },
+                        [_vm._v("Repository\n                        Access")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "p",
+                        { staticClass: "text-gray-600 dark:text-gray-100" },
+                        [
+                          _vm._v(
+                            "Re-invites missing people to the project and removes\n                        people that shouldn't have access."
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("button", {
                         staticClass:
-                          "text-red-600 font-semibold dark:text-red-500 text-xs mt-1"
-                      },
-                      [
-                        _vm._v(
-                          "A finished project cannot be\n                    reset."
-                        )
-                      ]
+                          "py-1 px-2 font-semibold rounded transition-colors text-sm mt-2 bg-lime-green-600 text-white hover:bg-lime-green-500",
+                        attrs: { disabled: _vm.refresh.loading },
+                        domProps: {
+                          textContent: _vm._s(
+                            _vm.refresh.loading
+                              ? "Refreshing..."
+                              : "Refresh Access"
+                          )
+                        },
+                        on: { click: _vm.refreshProject }
+                      })
+                    ]
+                  )
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _c("div", [
+              _c(
+                "div",
+                {
+                  staticClass:
+                    "border-2 rounded-xl p-4 mt-6 border-lime-green-400 relative"
+                },
+                [
+                  _c(
+                    "h3",
+                    {
+                      staticClass:
+                        "absolute text-lime-green-400 -my-8 -ml-2 bg-white dark:bg-gray-800 px-2"
+                    },
+                    [_vm._v("Start\n                        over")]
+                  ),
+                  _vm._v(" "),
+                  _c("p", { staticClass: "text-gray-600 dark:text-gray-100" }, [
+                    _vm._v(
+                      "If you wish, you can delete your project here.\n                        Please\n                        note that this will erase the repository, and you will lose all commits made to it."
                     )
-                  : _vm._e()
-              ]
-            )
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass:
+                        "py-1 px-2 font-semibold rounded transition-colors text-sm mt-2",
+                      class: [
+                        _vm.project.status === "finished" ||
+                        _vm.project.status === "overdue"
+                          ? "cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-600"
+                          : "bg-red-600 text-white hover:bg-red-500"
+                      ],
+                      attrs: { disabled: _vm.project.status === "finished" },
+                      on: {
+                        click: function($event) {
+                          _vm.showResetWarning = true
+                        }
+                      }
+                    },
+                    [_vm._v("Delete Project\n                    ")]
+                  ),
+                  _vm._v(" "),
+                  _vm.project.status === "finished" ||
+                  _vm.project.status === "overdue"
+                    ? _c(
+                        "p",
+                        {
+                          staticClass:
+                            "text-red-600 font-semibold dark:text-red-500 text-xs mt-1"
+                        },
+                        [
+                          _vm._v(
+                            "A finished project cannot\n                        be\n                        reset."
+                          )
+                        ]
+                      )
+                    : _vm._e()
+                ]
+              )
+            ]),
+            _vm._v(" "),
+            _vm.project.ownable_type === "App\\Models\\User"
+              ? _c("div", [
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "border-2 rounded-xl p-4 mt-6 border-lime-green-400 relative"
+                    },
+                    [
+                      _c(
+                        "h3",
+                        {
+                          staticClass:
+                            "absolute text-lime-green-400 -my-8 -ml-2 bg-white dark:bg-gray-800 px-2"
+                        },
+                        [_vm._v("Migrate to\n                        group")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "p",
+                        { staticClass: "text-gray-600 dark:text-gray-100" },
+                        [
+                          _vm._v(
+                            "Move your project to one of your groups here. This\n                        action will fail if the group or any of the members have already started the same\n                        project."
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "flex items-center mt-4 mb-2" },
+                        [
+                          _c(
+                            "span",
+                            { staticClass: "text-sm mr-1 dark:text-gray-200" },
+                            [_vm._v("Group:")]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "select",
+                            {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.migrate.group,
+                                  expression: "migrate.group"
+                                }
+                              ],
+                              staticClass:
+                                "bg-gray-100 dark:bg-gray-600 border-gray-300 text-gray-900 dark:text-gray-200 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5",
+                              on: {
+                                change: function($event) {
+                                  var $$selectedVal = Array.prototype.filter
+                                    .call($event.target.options, function(o) {
+                                      return o.selected
+                                    })
+                                    .map(function(o) {
+                                      var val =
+                                        "_value" in o ? o._value : o.value
+                                      return val
+                                    })
+                                  _vm.$set(
+                                    _vm.migrate,
+                                    "group",
+                                    $event.target.multiple
+                                      ? $$selectedVal
+                                      : $$selectedVal[0]
+                                  )
+                                }
+                              }
+                            },
+                            _vm._l(_vm.groups, function(group, id) {
+                              return _c("option", {
+                                key: id,
+                                domProps: {
+                                  value: id,
+                                  textContent: _vm._s(group)
+                                }
+                              })
+                            }),
+                            0
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _vm.migrate.group == null
+                        ? _c("tippy", { attrs: { to: "btnMigrate" } }, [
+                            _vm._v("Please select a group first.")
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _c(
+                        "button",
+                        {
+                          staticClass:
+                            "py-1 px-2 font-semibold rounded transition-colors text-sm mt-2",
+                          class: [
+                            _vm.migrate.group == null
+                              ? "cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-600"
+                              : "bg-red-600 text-white hover:bg-red-500"
+                          ],
+                          attrs: { name: "btnMigrate" },
+                          on: { click: _vm.migrateProject }
+                        },
+                        [_vm._v("Migrate Project\n                    ")]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              : _vm._e()
           ])
         ]
       ),
@@ -64190,6 +64452,26 @@ var render = function() {
             on: {
               cancel: function($event) {
                 _vm.showResetWarning = false
+              }
+            }
+          })
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.migrate.showConfirm
+        ? _c("alert", {
+            attrs: {
+              type: "danger",
+              title: "Migrate to group",
+              method: "post",
+              url:
+                "/projects/" + _vm.project.id + "/migrate/" + _vm.migrate.group,
+              "confirm-button-text": "Migrate Project",
+              content:
+                "Migrating your project cannot be undone. Be certain that this what you want to do before confirming."
+            },
+            on: {
+              cancel: function($event) {
+                _vm.migrate.showConfirm = false
               }
             }
           })
@@ -64524,7 +64806,6 @@ var render = function() {
                                           ],
                                           staticClass:
                                             "bg-gray-100 dark:bg-gray-600 border-gray-300 text-gray-900 dark:text-gray-200 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5",
-                                          attrs: { id: "countries" },
                                           on: {
                                             change: function($event) {
                                               var $$selectedVal = Array.prototype.filter
@@ -64714,7 +64995,9 @@ var render = function() {
           },
           [
             _vm.project != null
-              ? _c("settings", { attrs: { project: _vm.project } })
+              ? _c("settings", {
+                  attrs: { groups: _vm.groups, project: _vm.project }
+                })
               : _vm._e()
           ],
           1
@@ -64725,6 +65008,17 @@ var render = function() {
         "div",
         { staticClass: "w-full lg:w-1/3 mt-4 mb-4" },
         [
+          _vm.project.ownable_type === "App\\Models\\Group"
+            ? _c(
+                "div",
+                {
+                  staticClass:
+                    "bg-white shadow-lg px-4 py-4 rounded-md mt-8 dark:bg-gray-800"
+                },
+                [_vm._m(0)]
+              )
+            : _vm._e(),
+          _vm._v(" "),
           _vm.warning.length > 0
             ? _c("warning", { attrs: { message: _vm.warning } })
             : _vm._e(),
@@ -64823,7 +65117,20 @@ var render = function() {
     ])
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "flex items-center justify-center" }, [
+      _c(
+        "h3",
+        { staticClass: "font-bold text-xl dark:text-white text-center" },
+        [_vm._v("Group Project")]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 

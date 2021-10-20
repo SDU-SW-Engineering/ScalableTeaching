@@ -70,7 +70,7 @@
                                        v-html="errorMessage" v-show="errorMessage.length > 0"></p>
                                     <div class="mb-4 flex flex-col" v-if="Object.keys(groups).length > 0">
                                         <span class="mb-1 text-gray-600 dark:text-gray-400">Start Assignment as:</span>
-                                        <select v-model="startAs" id="countries"
+                                        <select v-model="startAs"
                                                 class="bg-gray-100 dark:bg-gray-600 border-gray-300 text-gray-900 dark:text-gray-200 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                                             <option value="solo" v-text="userName"></option>
                                             <option :key="id" :value="id" v-for="(group, id) in groups"
@@ -106,10 +106,15 @@
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
                 </div>
                 <div v-show="tab === 'settings'">
-                    <settings :project="project" v-if="project != null"></settings>
+                    <settings :groups="groups" :project="project" v-if="project != null"></settings>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
+                <div v-if="project.ownable_type === 'App\\Models\\Group'" class="bg-white shadow-lg px-4 py-4 rounded-md mt-8 dark:bg-gray-800">
+                    <div class="flex items-center justify-center">
+                        <h3 class="font-bold text-xl dark:text-white text-center">Group Project</h3>
+                    </div>
+                </div>
                 <warning :message="warning" v-if="warning.length > 0"></warning>
                 <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
                              :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
@@ -161,8 +166,7 @@ export default {
                 });
                 location.reload();
             } catch (e) {
-                if (e.response.status === 404)
-                {
+                if (e.response.status === 404) {
                     location.reload();
                     return;
                 }

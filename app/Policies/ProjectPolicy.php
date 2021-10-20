@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
+use App\Models\Group;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use SDU\MFA\Azure\Group;
 
 class ProjectPolicy
 {
@@ -92,5 +92,22 @@ class ProjectPolicy
     public function forceDelete(User $user, Project $project)
     {
         //
+    }
+
+    public function migrate(User $user, Project $project, Group $group)
+    {
+        if ($project->ownable_type == Group::class)
+            return false;
+        if ($project->ownable->id != $user->id)
+            return false;
+        if ( ! $group->hasMember($user))
+            return false;
+
+        return true;
+    }
+
+    public function refreshAccess(User $user, Project $project)
+    {
+        return $project->owners()->contains('id', $user->id);
     }
 }
