@@ -94,10 +94,13 @@ class User extends Authenticatable
         'is_sys_admin'      => 'bool'
     ];
 
-    protected $appends = ['username'];
-
     public function projects()
     {
         return $this->morphMany(Project::class, 'ownable');
+    }
+
+    public function getProjectNameAttribute()
+    {
+        return \Str::kebab($this->username);
     }
 }

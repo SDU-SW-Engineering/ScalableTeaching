@@ -99,9 +99,12 @@
                 </div>
                 <div class="flex flex-col">
                     <h2 class="text-lg  dark:text-gray-200">Projects</h2>
-                    <div class="mt-2 grid grid-cols-2 xl:grid-cols-3 gap-4 h-full">
-                        <a href="#" v-for="i in 4"
-                           class="border hover:shadow-lg py-6 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ">
+                    <div class="flex justify-center items-center" v-if="group.projects.length === 0">
+                        <span class="text-sm text-gray-400">No projects</span>
+                    </div>
+                    <div v-else class="mt-2 grid grid-cols-2 xl:grid-cols-3 gap-4 h-full">
+                        <a :href="'/courses/' + group.course_id + '/tasks/' + project.task_id" :key="project.id" v-for="project in group.projects"
+                           class="border hover:shadow-lg py-6 max-h-14 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ">
                             Assignment 1
                         </a>
                     </div>

@@ -67,7 +67,7 @@
                                     <h3 class="font-bold text-lg mb-4 dark:text-white">You haven't started your
                                         assignment!</h3>
                                     <p class="bg-gray-100 text-red-700 dark:text-red-400 dark:bg-gray-900 rounded-md font-semibold px-2 py-2 text-sm max-w-xs mb-4 mt-2 text-center"
-                                       v-text="errorMessage" v-show="errorMessage.length > 0"></p>
+                                       v-html="errorMessage" v-show="errorMessage.length > 0"></p>
                                     <div class="mb-4 flex flex-col" v-if="Object.keys(groups).length > 0">
                                         <span class="mb-1 text-gray-600 dark:text-gray-400">Start Assignment as:</span>
                                         <select v-model="startAs" id="countries"
@@ -110,6 +110,7 @@
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
+                <warning :message="warning" v-if="warning.length > 0"></warning>
                 <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
                              :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
                              v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
@@ -143,10 +144,11 @@ import Completed from "./Widgets/Completed";
 import Overdue from "./Widgets/Overdue";
 import Alert from "./Alert";
 import BarChart from "./BarChart";
+import Warning from "./Widgets/Warning";
 
 export default {
-    components: {BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
-    props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName'],
+    components: {Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
+    props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning'],
     methods: {
         startAssignment: async function (startAs) {
             let createAs = startAs == null ? this.startAs : startAs;
@@ -159,6 +161,11 @@ export default {
                 });
                 location.reload();
             } catch (e) {
+                if (e.response.status === 404)
+                {
+                    location.reload();
+                    return;
+                }
                 this.errorMessage = e.response.data.message;
                 this.startingAssignment = false;
             }

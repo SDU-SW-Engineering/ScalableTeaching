@@ -13,7 +13,7 @@
                 <h3 class="font-bold text-lg mb-4 dark:text-white text-center">You
                     haven't started your
                     assignment yet</h3>
-                <p class="bg-gray-100 text-red-700 dark:text-red-400 dark:bg-gray-900 rounded-md font-semibold px-2 py-2 text-sm max-w-xs mb-4 mt-2 text-center" v-text="errorMessage" v-show="errorMessage.length > 0"></p>
+                <p class="bg-gray-100 text-red-700 dark:text-red-400 dark:bg-gray-900 rounded-md font-semibold px-2 py-2 text-sm max-w-xs mb-4 mt-2 text-center" v-html="errorMessage" v-show="errorMessage.length > 0"></p>
                 <div class="mb-4 flex flex-col" v-if="Object.keys(groups).length > 0">
                     <span class="mb-1 text-gray-600 dark:text-gray-400">Start Assignment as:</span>
                     <select v-model="startAs" id="countries"

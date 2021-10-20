@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\CarbonPeriod;
-use DB;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -140,5 +138,16 @@ class Task extends Model
         {
             $query->where('id', $user->id);
         })->first();
+    }
+
+    /**
+     * @param Collection $users
+     * @return Collection
+     */
+    public function progressStatus(Collection $users) : Collection
+    {
+        return $users->filter(function(User $user) {
+            return $this->currentProjectForUser($user) != null;
+        });
     }
 }

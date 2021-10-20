@@ -48,4 +48,14 @@ class Group extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function projects()
+    {
+        return $this->morphMany(Project::class, 'ownable');
+    }
+
+    public function getProjectNameAttribute()
+    {
+        return \Str::kebab($this->name);
+    }
 }

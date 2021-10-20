@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -54,7 +55,9 @@ class Project extends Model
 
     protected $dates = ['finished_at'];
 
-    protected $fillable = ['project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id', 'final_commit_sha','created_at', 'finished_at'];
+    protected $hidden = ['final_commit_sha'];
+
+    protected $fillable = ['project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id', 'final_commit_sha', 'created_at', 'finished_at'];
 
     public function ownable()
     {
@@ -69,5 +72,27 @@ class Project extends Model
     public function task()
     {
         return $this->belongsTo(Task::class);
+    }
+
+    public function addUsersToGitlab($gitlabIds, &$errors = [])
+    {
+        foreach ($gitlabIds as $user => $gitlabId)
+        {
+            $gitLabManager = app(GitLabManager::class);
+            try
+            {
+                $gitLabManager->projects()->addMember($this->project_id, $gitlabId, 30);
+            }
+            catch (\Exception $e)
+            {
+                $message = strtolower($e->getMessage());
+                if (\Str::contains($message, 'should be greater than or equal to'))
+                    continue;
+                if ($message == 'member already exists')
+                    continue;
+
+                $errors[] = "$user: " . $e->getMessage();
+            }
+        }
     }
 }

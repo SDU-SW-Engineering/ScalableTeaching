@@ -89,6 +89,11 @@ class GroupPolicy
         return true;
     }
 
+    public function canStartProject(User $user, Group $group)
+    {
+        return $this->view($user, $group);
+    }
+
     public function invite(User $user, Group $group)
     {
         return $this->view($user, $group);
