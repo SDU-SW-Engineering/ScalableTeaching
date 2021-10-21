@@ -2156,11 +2156,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['type', 'confirmButtonText', 'content', 'title', 'url', 'csrf', 'method'],
   data: function data() {
     return {
-      loading: false
+      loading: false,
+      errorText: ""
     };
   },
   methods: {
@@ -2171,43 +2175,53 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             switch (_context.prev = _context.next) {
               case 0:
                 this.loading = true;
+                this.errorText = "";
+                _context.prev = 2;
                 _context.t0 = this.method;
-                _context.next = _context.t0 === "post" ? 4 : _context.t0 === "delete" ? 7 : 10;
+                _context.next = _context.t0 === "post" ? 6 : _context.t0 === "delete" ? 9 : 12;
                 break;
 
-              case 4:
-                _context.next = 6;
+              case 6:
+                _context.next = 8;
                 return axios.post(this.url, {
                   csrf: this.csrf
                 });
 
-              case 6:
-                return _context.abrupt("break", 12);
+              case 8:
+                return _context.abrupt("break", 14);
 
-              case 7:
-                _context.next = 9;
+              case 9:
+                _context.next = 11;
                 return axios["delete"](this.url, {
                   data: {
                     csrf: this.csrf
                   }
                 });
 
-              case 9:
-                return _context.abrupt("break", 12);
-
-              case 10:
-                _context.next = 12;
-                return axios.get(this.url);
+              case 11:
+                return _context.abrupt("break", 14);
 
               case 12:
-                location.reload();
+                _context.next = 14;
+                return axios.get(this.url);
 
-              case 13:
+              case 14:
+                location.reload();
+                _context.next = 21;
+                break;
+
+              case 17:
+                _context.prev = 17;
+                _context.t1 = _context["catch"](2);
+                this.loading = false;
+                this.errorText = _context.t1.response.data.message;
+
+              case 21:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this);
+        }, _callee, this, [[2, 17]]);
       }));
 
       function confirm() {
@@ -61865,7 +61879,17 @@ var render = function() {
                               "text-sm text-gray-500 dark:text-gray-400",
                             domProps: { textContent: _vm._s(_vm.content) }
                           })
-                        ])
+                        ]),
+                        _vm._v(" "),
+                        _vm.errorText.length > 0
+                          ? _c("div", { staticClass: "mt-2" }, [
+                              _c("p", {
+                                staticClass:
+                                  "text-sm text-red-600 text-sm font-medium dark:text-red-400 p-2 rounded-lg bg-gray-100 dark:bg-gray-900",
+                                domProps: { innerHTML: _vm._s(_vm.errorText) }
+                              })
+                            ])
+                          : _vm._e()
                       ]
                     )
                   ])
@@ -64443,9 +64467,9 @@ var render = function() {
         ? _c("alert", {
             attrs: {
               type: "danger",
-              title: "Reset project",
+              title: "Delete project",
               url: "/projects/" + _vm.project.id + "/reset",
-              "confirm-button-text": "Reset Project",
+              "confirm-button-text": "Delete Project",
               content:
                 "Resetting your project cannot be undone. Be certain that this what you want to do before confirming."
             },
@@ -65008,6 +65032,7 @@ var render = function() {
         "div",
         { staticClass: "w-full lg:w-1/3 mt-4 mb-4" },
         [
+          _vm.project != null &&
           _vm.project.ownable_type === "App\\Models\\Group"
             ? _c(
                 "div",

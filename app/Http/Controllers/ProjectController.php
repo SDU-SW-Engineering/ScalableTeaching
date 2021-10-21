@@ -56,7 +56,19 @@ class ProjectController extends Controller
 
     public function migrate(Project $project, Group $group)
     {
+        $activeUsers = $project->task->projectsForUsers($group->users)->reject(function (Project $currentProject) use ($project)
+        {
+            return $currentProject->id == $project->id;
+        })->map(function (Project $project)
+        {
+            return $project->owners()->pluck('name');
+        })->flatten();
+
+        abort_if($activeUsers->count() > 0, 409, "The following members have already started a project: "
+            . $activeUsers->join(", ") . '<br><br>They will need to delete their project for the group to start the project.');
+
         $project->ownable()->associate($group)->save();
+        $project->refreshGitlabAccess();
         return "ok";
     }
 

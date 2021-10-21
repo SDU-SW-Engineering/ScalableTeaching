@@ -4,6 +4,8 @@ namespace App\Policies;
 
 use App\Models\Group;
 use App\Models\GroupInvitation;
+use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -67,7 +69,7 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group)
     {
-        if (!$this->isGroupOwner($group, $user))
+        if ( ! $this->isGroupOwner($group, $user))
             return Response::deny('Only the group owner can delete the group.');
 
         if ($group->users()->where('user_id', '!=', $user->id)->count())
@@ -79,7 +81,7 @@ class GroupPolicy
     public function leave(User $user, Group $group)
     {
         $members = $group->users;
-        $member = $members->firstWhere('id', $user->id);
+        $member  = $members->firstWhere('id', $user->id);
         if ($member == null)
             return Response::deny('Not a member of the group.');
 
@@ -111,6 +113,13 @@ class GroupPolicy
         if ($group->course->hasMaxGroups($user))
             return Response::deny("Maximum number of groups reached.");
 
+        $userIsEligible = $group->projects->every(function (Project $project) use ($user)
+        {
+            return $project->task->currentProjectForUser($user) == null;
+        });
+        if (!$userIsEligible)
+            return Response::deny("This group is already working on a project that you have also started.");
+
         return true;
     }
 
@@ -118,7 +127,7 @@ class GroupPolicy
     {
         if ($user->id == $userToRemove->id)
             return false;
-        if (!$this->isGroupOwner($group, $user))
+        if ( ! $this->isGroupOwner($group, $user))
             return false;
 
         return true;
@@ -127,7 +136,7 @@ class GroupPolicy
     /**
      * Determine whether the user can restore the model.
      *
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
      * @param Group $group
      * @return Response|bool
      */
@@ -139,7 +148,7 @@ class GroupPolicy
     /**
      * Determine whether the user can permanently delete the model.
      *
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
      * @param Group $group
      * @return Response|bool
      */

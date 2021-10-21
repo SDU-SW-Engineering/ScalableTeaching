@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,10 +15,14 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = $this->retrieveCourses()->get()->map(function ($course)
+        $courses = Course::all()->map(function ($course)
         {
+            $tasks = $course->tasks->each(function(Task $task) {
+                $project =  $task->currentProjectForUser(auth()->user());
+                $task->status = $project == null ? null : $project->status;
+            });
 
-            $deadline = $course->tasks->sort(function ($a, $b)
+            $deadline = $tasks->sort(function ($a, $b)
             {
                 $startsAtA = Carbon::parse($a->starts_at);
                 $endsAtA   = Carbon::parse($a->ends_at);
@@ -38,8 +43,8 @@ class CourseController extends Controller
             return [
                 'id'            => $course->id,
                 'name'          => $course->name,
-                'taskCount'     => $course->tasks->count(),
-                'completed'     => $course->tasks->where('status', 'finished')->count(),
+                'taskCount'     => $tasks->count(),
+                'completed'     => $tasks->where('status', 'finished')->count(),
                 'next_deadline' => $deadline == null ? null : $deadline->ends_at
             ];
         });
@@ -55,28 +60,35 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $course     = $this->retrieveCourses(true, false)->findOrFail($course->id);
-        $inProgress = $course->tasks->filter(function ($task)
+        $tasks = $course->tasks->each(function(Task $task) {
+            $task->project = $task->currentProjectForUser(auth()->user());
+        });
+
+        $inProgress = $tasks->filter(function ($task)
         {
             return now()->isBetween($task->starts_at, $task->ends_at);
         });
-        $past       = $course->tasks->filter(function ($task)
+        $past       = $tasks->filter(function ($task)
         {
             return now()->isAfter($task->ends_at);
         });
-        $upcoming   = $course->tasks->filter(function ($task)
+        $upcoming   = $tasks->filter(function ($task)
         {
             return now()->isBefore($task->starts_at);
         });
 
-        $taskCount = $course->tasks->count();
-        $failed    = $course->tasks->filter(function ($task)
+        $taskCount = $tasks->count();
+        $failed    = $tasks->filter(function ($task)
         {
-            return $task->status == 'overdue';
+            if ($task->project == null) // todo: php8 ?->
+                return false;
+            return $task->project->status == 'overdue';
         })->count();
-        $approved  = $course->tasks->filter(function ($task)
+        $approved  = $tasks->filter(function ($task)
         {
-            return $task->status == 'finished';
+            if ($task->project == null) // todo: php8 ?->
+                return false;
+            return $task->project->status == 'finished';
         })->count();
 
         return view('courses.show', [

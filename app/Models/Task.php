@@ -120,9 +120,9 @@ class Task extends Model
         return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
     }
 
-    public function currentProjectForUser(User $user)
+    public function currentProjectForUser(User $user) : ?Project
     {
-        $myGroups    = $this->course->groups()
+        $myGroups     = $this->course->groups()
             ->whereRelation('users', 'user_id', $user->id)
             ->latest()
             ->pluck('name', 'id');
@@ -134,10 +134,13 @@ class Task extends Model
         if ($groupProject != null)
             return $groupProject;
 
-        return $user->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
+        /** @var Project $project */
+        $project = $user->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
         {
             $query->where('id', $user->id);
         })->first();
+
+        return $project;
     }
 
     /**
@@ -146,8 +149,23 @@ class Task extends Model
      */
     public function progressStatus(Collection $users) : Collection
     {
-        return $users->filter(function(User $user) {
+        return $users->filter(function (User $user)
+        {
             return $this->currentProjectForUser($user) != null;
         });
+    }
+
+    public function projectsForUsers(Collection $users) : Collection
+    {
+        $projects = Collection::empty();
+        $users->each(function (User $user) use ($projects)
+        {
+            $project = $this->currentProjectForUser($user);
+            if ($project == null)
+                return;
+            $projects[] = $project;
+        });
+
+        return $projects;
     }
 }

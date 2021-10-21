@@ -110,7 +110,7 @@
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
-                <div v-if="project.ownable_type === 'App\\Models\\Group'" class="bg-white shadow-lg px-4 py-4 rounded-md mt-8 dark:bg-gray-800">
+                <div v-if="project != null && project.ownable_type === 'App\\Models\\Group'" class="bg-white shadow-lg px-4 py-4 rounded-md mt-8 dark:bg-gray-800">
                     <div class="flex items-center justify-center">
                         <h3 class="font-bold text-xl dark:text-white text-center">Group Project</h3>
                     </div>

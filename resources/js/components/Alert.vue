@@ -37,6 +37,9 @@
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500 dark:text-gray-400" v-text="content"></p>
                             </div>
+                            <div class="mt-2" v-if="errorText.length > 0">
+                                <p class="text-sm text-red-600 text-sm font-medium dark:text-red-400 p-2 rounded-lg bg-gray-100 dark:bg-gray-900" v-html="errorText"></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -75,29 +78,39 @@ export default {
     props: ['type', 'confirmButtonText', 'content', 'title', 'url', 'csrf', 'method'],
     data: function () {
         return {
-            loading: false
+            loading: false,
+            errorText: "",
         }
     },
     methods: {
         confirm: async function () {
             this.loading = true;
-            switch (this.method) {
-                case "post":
-                    await axios.post(this.url, {
-                        csrf: this.csrf
-                    })
-                    break;
-                case "delete":
-                    await axios.delete(this.url, {
-                        data: {
+            this.errorText = "";
+            try
+            {
+                switch (this.method) {
+                    case "post":
+                        await axios.post(this.url, {
                             csrf: this.csrf
-                        }
-                    });
-                    break;
-                default:
-                    await axios.get(this.url);
+                        })
+                        break;
+                    case "delete":
+                        await axios.delete(this.url, {
+                            data: {
+                                csrf: this.csrf
+                            }
+                        });
+                        break;
+                    default:
+                        await axios.get(this.url);
+                }
+                location.reload();
             }
-            location.reload();
+            catch (error)
+            {
+                this.loading = false;
+                this.errorText = error.response.data.message;
+            }
         }
     }
 }

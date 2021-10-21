@@ -58,8 +58,8 @@
 
             </div>
         </div>
-        <alert type="danger" title="Reset project" :url="'/projects/' + project.id + '/reset'"
-               confirm-button-text="Reset Project"
+        <alert type="danger" title="Delete project" :url="'/projects/' + project.id + '/reset'"
+               confirm-button-text="Delete Project"
                content="Resetting your project cannot be undone. Be certain that this what you want to do before confirming."
                v-if="showResetWarning" @cancel="showResetWarning=false"></alert>
         <alert type="danger" title="Migrate to group" method="post"
