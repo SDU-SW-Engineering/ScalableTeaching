@@ -167,10 +167,9 @@ export default {
             }
         },
         removeInvitation: async function (invitation) {
-            await axios.delete(invitation.deleteRoute, {
-                data: {
-                    csrf: this.csrf
-                }
+            await axios.post(invitation.deleteRoute, {
+                csrf: this.csrf,
+                _method: 'DELETE'
             })
             this.$emit('removeInvitation', invitation)
         },
