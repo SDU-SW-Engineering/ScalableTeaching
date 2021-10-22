@@ -98,12 +98,12 @@ class Task extends Model
 
     public function getProjectsPerDayAttribute()
     {
-        return $this->projects()->withTrashed()->daily($this->starts_at, $this->earliestEndDate())->get();
+        return $this->projects()->daily($this->starts_at, $this->earliestEndDate())->get();
     }
 
     public function getTotalProjectsPerDayAttribute()
     {
-        return $this->projects()->withTrashed()->daily($this->starts_at, $this->earliestEndDate())->total();
+        return $this->projects()->daily($this->starts_at, $this->earliestEndDate())->total();
     }
 
     public function getTotalCompletedTasksPerDayAttribute()
