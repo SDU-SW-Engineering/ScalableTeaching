@@ -38,7 +38,8 @@
                                 <p class="text-sm text-gray-500 dark:text-gray-400" v-text="content"></p>
                             </div>
                             <div class="mt-2" v-if="errorText.length > 0">
-                                <p class="text-sm text-red-600 text-sm font-medium dark:text-red-400 p-2 rounded-lg bg-gray-100 dark:bg-gray-900" v-html="errorText"></p>
+                                <p class="text-sm text-red-600 text-sm font-medium dark:text-red-400 p-2 rounded-lg bg-gray-100 dark:bg-gray-900"
+                                   v-html="errorText"></p>
                             </div>
                         </div>
                     </div>
@@ -86,8 +87,7 @@ export default {
         confirm: async function () {
             this.loading = true;
             this.errorText = "";
-            try
-            {
+            try {
                 switch (this.method) {
                     case "post":
                         await axios.post(this.url, {
@@ -95,19 +95,16 @@ export default {
                         })
                         break;
                     case "delete":
-                        await axios.delete(this.url, {
-                            data: {
-                                csrf: this.csrf
-                            }
+                        await axios.post(this.url, {
+                            csrf: this.csrf,
+                            _method: 'DELETE'
                         });
                         break;
                     default:
                         await axios.get(this.url);
                 }
                 location.reload();
-            }
-            catch (error)
-            {
+            } catch (error) {
                 this.loading = false;
                 this.errorText = error.response.data.message;
             }

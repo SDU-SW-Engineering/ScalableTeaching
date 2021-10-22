@@ -63,7 +63,8 @@
                             group.member_cap
                         }})</span></h2>
                     <div class="mt-2">
-                        <member @remove="removeUserFromGroup(user)" :key="user.id" :is-you="user.isYou" :is-owner="user.pivot.is_owner"
+                        <member @remove="removeUserFromGroup(user)" :key="user.id" :is-you="user.isYou"
+                                :is-owner="user.pivot.is_owner"
                                 :can-remove="group.isOwner" v-for="user in group.users" :name="user.name"></member>
                         <member @remove="removeInvitation(invitation)" :key="invitation.id" :can-remove="group.isOwner"
                                 v-for="invitation in group.invitations" :name="invitation.recipient.name"
@@ -103,7 +104,8 @@
                         <span class="text-sm text-gray-400">No projects</span>
                     </div>
                     <div v-else class="mt-2 grid grid-cols-2 xl:grid-cols-3 gap-4 h-full">
-                        <a :href="'/courses/' + group.course_id + '/tasks/' + project.task_id" :key="project.id" v-for="project in group.projects"
+                        <a :href="'/courses/' + group.course_id + '/tasks/' + project.task_id" :key="project.id"
+                           v-for="project in group.projects"
                            class="border hover:shadow-lg py-6 max-h-14 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ">
                             Assignment 1
                         </a>
@@ -173,11 +175,11 @@ export default {
             this.$emit('removeInvitation', invitation)
         },
         removeUserFromGroup: async function (user) {
-            let response = await axios.delete(user.removeUserRoute, {
-                data: {
-                    csrf: this.csrf
+            let response = await axios.post(user.removeUserRoute, {
+                    csrf: this.csrf,
+                    _method: 'DELETE'
                 }
-            })
+            );
             this.$emit('removeUser', response.data, user);
         }
     },
