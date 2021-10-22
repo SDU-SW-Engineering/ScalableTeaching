@@ -90,7 +90,11 @@ module.exports = {
         extend: {
             borderStyle: ['dark', 'hover'],
             borderWidth: ['hover'],
-            typography: ['dark']
+            typography: ['dark'],
+            margin: ['last'],
+            dropShadow: ['dark'],
+            opacity: ['disabled'],
+            backgroundColor: ['disabled']
         },
     },
     plugins: [

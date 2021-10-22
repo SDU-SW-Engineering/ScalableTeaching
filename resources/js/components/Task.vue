@@ -67,9 +67,18 @@
                                     <h3 class="font-bold text-lg mb-4 dark:text-white">You haven't started your
                                         assignment!</h3>
                                     <p class="bg-gray-100 text-red-700 dark:text-red-400 dark:bg-gray-900 rounded-md font-semibold px-2 py-2 text-sm max-w-xs mb-4 mt-2 text-center"
-                                       v-text="errorMessage" v-show="errorMessage.length > 0"></p>
+                                       v-html="errorMessage" v-show="errorMessage.length > 0"></p>
+                                    <div class="mb-4 flex flex-col" v-if="Object.keys(groups).length > 0">
+                                        <span class="mb-1 text-gray-600 dark:text-gray-400">Start Assignment as:</span>
+                                        <select v-model="startAs"
+                                                class="bg-gray-100 dark:bg-gray-600 border-gray-300 text-gray-900 dark:text-gray-200 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                            <option value="solo" v-text="userName"></option>
+                                            <option :key="id" :value="id" v-for="(group, id) in groups"
+                                                    v-text="group"></option>
+                                        </select>
+                                    </div>
                                     <div class="flex justify-center gap-4">
-                                        <button @click="startAssignment" :disabled="startingAssignment"
+                                        <button @click="startAssignment(null)" :disabled="startingAssignment"
                                                 :class="{'cursor-not-allowed': startingAssignment}"
                                                 class="flex items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-lime-green-600 rounded-md hover:bg-lime-green-500 focus:outline-none focus:ring focus:ring-lime-green-300 focus:ring-opacity-80">
                                             <svg v-if="startingAssignment" class="animate-spin h-5 w-5 mr-1 text-white"
@@ -97,12 +106,18 @@
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
                 </div>
                 <div v-show="tab === 'settings'">
-                    <settings :project="project" v-if="project != null"></settings>
+                    <settings :groups="groups" :project="project" v-if="project != null"></settings>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
+                <div v-if="project != null && project.ownable_type === 'App\\Models\\Group'" class="bg-white shadow-lg px-4 py-4 rounded-md mt-8 dark:bg-gray-800">
+                    <div class="flex items-center justify-center">
+                        <h3 class="font-bold text-xl dark:text-white text-center">Group Project</h3>
+                    </div>
+                </div>
+                <warning :message="warning" v-if="warning.length > 0"></warning>
                 <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
-                             :starting-assignment="startingAssignment"
+                             :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
                              v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
                 <started :project="project" :progress="progress"
                          v-if="project != null && project.status === 'active'"></started>
@@ -134,20 +149,27 @@ import Completed from "./Widgets/Completed";
 import Overdue from "./Widgets/Overdue";
 import Alert from "./Alert";
 import BarChart from "./BarChart";
+import Warning from "./Widgets/Warning";
 
 export default {
-    components: {BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
-    props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph'],
+    components: {Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
+    props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning'],
     methods: {
-        startAssignment: async function () {
+        startAssignment: async function (startAs) {
+            let createAs = startAs == null ? this.startAs : startAs;
             this.startingAssignment = true;
             this.errorMessage = "";
             try {
                 let response = await axios.post(this.newProjectUrl, {
-                    _token: this.csrf
+                    _token: this.csrf,
+                    as: createAs
                 });
                 location.reload();
             } catch (e) {
+                if (e.response.status === 404) {
+                    location.reload();
+                    return;
+                }
                 this.errorMessage = e.response.data.message;
                 this.startingAssignment = false;
             }
@@ -160,7 +182,8 @@ export default {
             hideMissingAssignmentWarning: false,
             startingAssignment: false,
             labels: this.buildGraph.labels,
-            datasets: this.buildGraph.datasets
+            datasets: this.buildGraph.datasets,
+            startAs: "solo"
         }
     }
 }

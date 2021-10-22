@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Group;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -12,20 +13,26 @@ use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
+use Http\Client\Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
 class TaskController extends Controller
 {
     public function show(Course $course, Task $task)
     {
-        $user        = User::firstWhere(['guid' => auth()->id()]);
-        $project     = $task->projects()->firstWhere('ownable_id', $user->id);
+        $project     = $task->currentProjectForUser(auth()->user());
+        $myGroups    = $course->groups()
+            ->whereRelation('users', 'user_id', auth()->id())
+            ->latest()
+            ->pluck('name', 'id');
         $startDay    = $task->starts_at->format("j/n");
         $endDay      = $task->ends_at->format("j/n");
         $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
         $progress    = $percent > 100 ? 100 : $percent;
         $timeLeft    = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
-        $myBuilds    = $task->dailyBuilds($user->id, false, false);
+        $myBuilds    = $task->dailyBuilds(auth()->id(), false, false);
         $dailyBuilds = $task->dailyBuilds(null, true, false);
 
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
@@ -48,59 +55,86 @@ class TaskController extends Controller
             'builds'          => $dailyBuilds,
             'myBuilds'        => $myBuilds,
             'buildGraph'      => $dailyBuildsGraph,
-            'newProjectRoute' => $newProjectRoute
+            'newProjectRoute' => $newProjectRoute,
+            'availableGroups' => $myGroups,
+            'breadcrumbs'     => [
+                'Courses'     => route('courses.index'),
+                $course->name => route('courses.show', $course->id),
+                $task->name   => null
+            ]
         ]);
     }
 
     public function doCreateProject(Course $course, Task $task, GitLabManager $gitLabManager)
     {
+        $isSolo            = request('as', 'solo') == 'solo';
+        $group             = $isSolo ? null : Group::findOrFail(request('as'));
+        $users             = $isSolo ? Collection::wrap(auth()->user()) : $group->users;
+        $membersInProgress = $task->progressStatus($users);
 
-        $user    = User::firstWhere(['guid' => auth()->id()]);
-        $project = $task->projects()->firstWhere('ownable_id', $user->id);
-        abort_if($project != null, 409, 'A project has already been created for you.');
-        $gitlabUser = collect($gitLabManager->users()->all([
-            'username' => $user->username
-        ]));
+        abort_if($membersInProgress->count() > 0, 409, "The following members have already started a project: "
+            . $membersInProgress->pluck('name')->map(function ($name)
+            {
+                return "<b>$name</b>";
+            })->join(', ') . ".<br><br>"
+            . "They will need to delete their project for the group to start the project.");
 
-        abort_if($gitlabUser->isEmpty(), 409, 'Could not find your gitlab user. Log in to gitlab.sdu.dk and try again.');
+        if ($group != null)
+            abort_unless(auth()->user()->can('canStartProject', $group), "You don't have access to this project.");
 
-        $projectId = $this->createProject($gitLabManager, $user->username, $user);
-
-        $gitlabUserId = $gitlabUser->first()['id'];
-        $added        = true;
-        try
+        $registeredGitLabUsers = $users->filter(function ($user) use ($gitLabManager)
         {
-            $gitLabManager->projects()->addMember($projectId, $gitlabUserId, 40);
-        }
-        catch (\Exception $e)
-        {
-            $added = Str::contains($e->getMessage(), 'Member already exists');
-        }
+            $users = $gitLabManager->users()->all([
+                'username' => $user->username
+            ]);
+            if (count($users) != 1)
+                return false;
+            $user->gitlab_id = $users[0]['id'];
+            return true;
+        });
+        $missingGitLabUsers    = $users->pluck('name', 'username')->diffKeys($registeredGitLabUsers->pluck('name', 'username'));
+
+
+        abort_if($missingGitLabUsers->count() > 0, 409, "The following members have not been registered at GitLab: "
+            . $missingGitLabUsers->map(function ($name)
+            {
+                return "<b>$name</b>";
+            })->join(', ') . ".<br><br>"
+            . "They should log in to GitLab first.");
+
+        $owner = $isSolo ? auth()->user() : $group;
+
+        $project = $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
+        $project->addUsersToGitlab($registeredGitLabUsers->pluck('gitlab_id', 'name'), $warnings);
+        if (is_array($warnings) && count($warnings) > 0)
+            session()->flash('warning', implode("<br>", $warnings));
 
         return "OK";
     }
 
 
     /**
-     * @return int Project id
+     * @param GitLabManager $manager
+     * @param Task $task
+     * @param string $name
+     * @param Group|User $owner
+     * @return Project
+     * @throws Exception
      */
-    private function createProject(GitLabManager $manager, $username, User $user) : int
+    private function createProject(GitLabManager $manager, Task $task, string $name, $owner) : Project
     {
         $resultPager = new ResultPager($manager->connection());
         $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [1167]));
-        $project     = $projects->firstWhere('name', $username);
+        $project     = $projects->firstWhere('name', $name);
         if ($project == null)
         {
-            $project = $this->forkProject($manager, $username);
+            $project = $this->forkProject($manager, $name);
         }
 
-        Project::updateOrCreate([
-            'project_id' => $project['id']
-        ], [
-            'task_id'      => Task::first()->id,
-            'repo_name'    => $project['name'],
-            'ownable_id'   => $user->id,
-            'ownable_type' => User::class
+        $dbProject = $owner->projects()->updateOrCreate([
+            'project_id' => $project['id'],
+            'task_id'    => Task::first()->id,
+            'repo_name'  => $project['name'],
         ]);
 
         $currentHooks = collect($manager->projects()->hooks($project['id']));
@@ -113,7 +147,7 @@ class TaskController extends Controller
             ]);
         }
 
-        return $project['id'];
+        return $dbProject;
     }
 
     private function forkProject(GitLabManager $manager, $username)
@@ -145,8 +179,14 @@ class TaskController extends Controller
 
         $dailyBuilds      = $task->dailyBuilds(null, true, true);
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B"));
+        $breadcrumbs      = [
+            'Courses'     => route('courses.index'),
+            $course->name => route('courses.show', $course->id),
+            $task->name   => route('courses.tasks.show', [$course->id, $task->id]),
+            'Analytics'   => null
+        ];
 
-        return view('tasks.analytics', compact('course', 'task', 'projectCount',
+        return view('tasks.analytics', compact('course', 'task', 'projectCount', 'breadcrumbs',
             'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday', 'totalProjectsPerDayGraph', 'dailyBuildsGraph'));
     }
 }

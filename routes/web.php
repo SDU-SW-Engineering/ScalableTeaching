@@ -2,21 +2,12 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
 
 Route::get('/', [HomeController::class, 'index'])->middleware('auth')->name('home');
 
@@ -37,10 +28,33 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
         Route::get('{task}/analytics', [TaskController::class, 'analytics'])->name('analytics')->middleware('can:view,task');
     });
+
+    Route::group(['prefix' => '{course}/groups', 'as' => 'groups.'], function ()
+    {
+        Route::get('/', [GroupController::class, 'index'])->name('index');
+        Route::post('/', [GroupController::class, 'create'])->name('create')->middleware('can:createGroup,course');
+        Route::delete('{group}', [GroupController::class, 'destroy'])->name('destroy')->middleware('can:delete,group');
+        Route::post('{group}/inviteUser', [GroupController::class, 'inviteUser'])->name('invite')->middleware(['can:invite,group', 'throttle:30']);
+        Route::post('{group}/leave', [GroupController::class, 'leave'])->name('leave')->middleware(['can:leave,group']);
+
+        Route::get('{group}/invitation/{groupInvitation}/{action}', [GroupController::class, 'respondToInvite'])->name('respondInvite')
+            ->middleware('can:respondInvite,group,groupInvitation')->where('action', 'accept|decline');
+        Route::delete('{group}/invitation/{groupInvitation}', [GroupController::class, 'deleteInvite'])->name('invitations.delete')
+            ->middleware('can:delete,groupInvitation');
+        Route::delete('{group}/members/{user}', [GroupController::class, 'removeMember'])->name('removeMember')
+            ->middleware('can:removeMember,group,user');
+    });
 });
 
 Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['auth']], function ()
 {
     Route::get('{project}/builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
     Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
+    Route::post('{project}/migrate/{group}', [ProjectController::class, 'migrate'])->middleware(['can:migrate,project,group', 'throttle:5']);
+    Route::post('{project}/refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
 });
+
+Route::get('random-name', function ()
+{
+    return PhraseGenerator::generate();
+})->middleware('auth');

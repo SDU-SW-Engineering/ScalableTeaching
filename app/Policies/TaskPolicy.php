@@ -3,19 +3,13 @@
 namespace App\Policies;
 
 use App\Models\Task;
-use App\Models\User as UserModel;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
-use SDU\MFA\Azure\User;
 
 class TaskPolicy
 {
     use HandlesAuthorization;
-
-    private function dbUser(User $user) : \App\Models\User
-    {
-        return UserModel::firstWhere(['guid' => $user->id]);
-    }
 
     /**
      * Determine whether the user can view any models.

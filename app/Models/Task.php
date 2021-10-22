@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\CarbonPeriod;
-use DB;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,6 +40,11 @@ use Illuminate\Support\Carbon;
  * @method static Builder|Task whereSourceProjectId($value)
  * @property-read Collection|Project[] $projects
  * @property-read int|null $projects_count
+ * @property-read mixed $projects_per_day
+ * @property-read mixed $total_completed_tasks_per_day
+ * @property-read mixed $total_projects_per_day
+ * @property-read Collection|\App\Models\JobStatus[] $jobs
+ * @property-read int|null $jobs_count
  */
 class Task extends Model
 {
@@ -66,6 +69,11 @@ class Task extends Model
         ]);
     }
 
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
     public function jobs()
     {
         return $this->hasManyThrough(JobStatus::class, Project::class);
@@ -80,7 +88,7 @@ class Task extends Model
         if ($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(! $withToday))->get();
     }
 
     public function projects()
@@ -110,5 +118,54 @@ class Task extends Model
     private function earliestEndDate($excludeToday = false)
     {
         return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
+    }
+
+    public function currentProjectForUser(User $user) : ?Project
+    {
+        $myGroups     = $this->course->groups()
+            ->whereRelation('users', 'user_id', $user->id)
+            ->latest()
+            ->pluck('name', 'id');
+        $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function (Builder $query) use ($myGroups)
+        {
+            $query->whereIn('id', $myGroups->keys());
+        })->first();
+
+        if ($groupProject != null)
+            return $groupProject;
+
+        /** @var Project $project */
+        $project = $user->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
+        {
+            $query->where('id', $user->id);
+        })->first();
+
+        return $project;
+    }
+
+    /**
+     * @param Collection $users
+     * @return Collection
+     */
+    public function progressStatus(Collection $users) : Collection
+    {
+        return $users->filter(function (User $user)
+        {
+            return $this->currentProjectForUser($user) != null;
+        });
+    }
+
+    public function projectsForUsers(Collection $users) : Collection
+    {
+        $projects = Collection::empty();
+        $users->each(function (User $user) use ($projects)
+        {
+            $project = $this->currentProjectForUser($user);
+            if ($project == null)
+                return;
+            $projects[] = $project;
+        });
+
+        return $projects;
     }
 }

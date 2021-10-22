@@ -29,8 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::before(function($user, $ability) {
-            $dbUser = UserModel::firstWhere(['guid' => $user->id]);
-            if ($dbUser != null && $dbUser->is_admin)
+            if ($user->is_admin)
                 return true;
         });
     }

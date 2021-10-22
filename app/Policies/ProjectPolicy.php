@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
+use App\Models\Group;
 use App\Models\Project;
-use SDU\MFA\Azure\User;
-use App\Models\User as UserModel;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProjectPolicy
@@ -31,11 +31,8 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project)
     {
-        $user = UserModel::firstWhere(['guid' => $user->id]);
-        if ($user == null)
-            return false;
-
-        return $user->projects()->where('id', $project->id)->exists();
+        $currentProject = $project->task->currentProjectForUser($user);
+        return $currentProject->id == $project->id;
     }
 
     /**
@@ -95,5 +92,22 @@ class ProjectPolicy
     public function forceDelete(User $user, Project $project)
     {
         //
+    }
+
+    public function migrate(User $user, Project $project, Group $group)
+    {
+        if ($project->ownable_type == Group::class)
+            return false;
+        if ($project->ownable->id != $user->id)
+            return false;
+        if ( ! $group->hasMember($user))
+            return false;
+
+        return true;
+    }
+
+    public function refreshAccess(User $user, Project $project)
+    {
+        return $project->owners()->contains('id', $user->id);
     }
 }

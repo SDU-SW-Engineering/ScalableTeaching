@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Listeners\SaveUserToDatabase;
+use App\Listeners\AddProjectsToExistingUsers;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
@@ -22,7 +22,7 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
         Login::class => [
-            SaveUserToDatabase::class
+            AddProjectsToExistingUsers::class
         ]
     ];
 

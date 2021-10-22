@@ -1,7 +1,7 @@
 @extends('master')
 
 @section('content')
-    <section>
+    <section class="bg-gray-800">
         <nav class="container p-6 mx-auto lg:flex lg:justify-between lg:items-center">
             <div class="flex items-center justify-between">
                 <div>
@@ -9,7 +9,6 @@
                        href="#">WebTech</a>
                 </div>
 
-                <!-- Mobile menu button -->
                 <div class="flex lg:hidden">
                     <button @click="show = !show" type="button"
                             class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600"
@@ -38,18 +37,20 @@
             @endauth
         </nav>
 
-        <div class="container px-6 py-16 mx-auto text-center bg-gray-100 rounded-xl shadow-lg bg-blob"
-             style="background-position: 50% 60%; background-size: cover;">
-            <div class="max-w-lg mx-auto">
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-white md:text-4xl">Assignment Tracking</h1>
-                <p class="mt-6 text-gray-500 dark:text-gray-300 mb-4">This page keeps track of your assignments and
-                    tells you instantly when an assignment has been passed.</p>
-                <a href="{{ route('courses.index') }}"
-                   class="px-6 py-2 mt-6 text-sm font-medium leading-5 text-center text-white capitalize bg-lime-green-400 rounded-lg hover:bg-lime-green-300 md:mx-0 md:w-auto focus:outline-none shadow-lg">
-                    Get Started Now
-                </a>
-            </div>
+        <div class="py-10 md:py-40">
+            <div class="container px-6 py-16 mx-auto text-center bg-gray-100 rounded-xl shadow-lg bg-blob "
+                 style="background-position: 50% 60%; background-size: cover;">
+                <div class="max-w-lg mx-auto">
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-white md:text-4xl">Assignment Tracking</h1>
+                    <p class="mt-6 text-gray-500 dark:text-gray-300 mb-4">This page keeps track of your assignments and
+                        tells you instantly when an assignment has been passed.</p>
+                    <a href="{{ route('courses.index') }}"
+                       class="px-6 py-2 mt-6 text-sm font-medium leading-5 text-center text-white capitalize bg-lime-green-400 rounded-lg hover:bg-lime-green-300 md:mx-0 md:w-auto focus:outline-none shadow-lg">
+                        Get Started Now
+                    </a>
+                </div>
 
+            </div>
         </div>
     </section>
     <section class="bg-white dark:bg-gray-800">

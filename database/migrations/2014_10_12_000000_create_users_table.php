@@ -17,8 +17,13 @@ class CreateUsersTable extends Migration
         {
             $table->increments('id');
             $table->string('guid');
-            $table->string('name');
+            $table->string('name')->nullable();
+            $table->string('given_name')->nullable();
+            $table->string('sur_name')->nullable();
+            $table->string('title')->nullable();
             $table->string('email')->unique();
+            $table->json('ad_groups')->nullable();
+            $table->rememberToken();
             $table->timestamps();
         });
     }

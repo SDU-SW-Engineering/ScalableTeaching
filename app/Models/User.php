@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use SDU\MFA\SDUUser;
 
 /**
  * App\Models\User
@@ -41,10 +42,22 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read mixed $username
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Project[] $projects
  * @property-read int|null $projects_count
+ * @property string|null $given_name
+ * @property string|null $sur_name
+ * @property string|null $title
+ * @property bool $is_admin
+ * @property bool $is_sys_admin
+ * @property array|null $ad_groups
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereAdGroups($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereGivenName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereIsAdmin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereIsSysAdmin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereSurName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereTitle($value)
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SDUUser;
 
     /**
      * The attributes that are mass assignable.
@@ -65,6 +78,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'ad_groups',
+        'is_sys_admin',
+        'is_admin'
     ];
 
     /**
@@ -78,15 +94,13 @@ class User extends Authenticatable
         'is_sys_admin'      => 'bool'
     ];
 
-    protected $appends = ['username'];
-
-    public function getUsernameAttribute()
-    {
-        return explode('@', $this->email)[0];
-    }
-
     public function projects()
     {
         return $this->morphMany(Project::class, 'ownable');
+    }
+
+    public function getProjectNameAttribute()
+    {
+        return \Str::kebab($this->username);
     }
 }

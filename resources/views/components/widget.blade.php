@@ -1,6 +1,6 @@
 <div>
     <div class="w-full">
-        <div class="flex shadow-lg bg-gray-200 dark:bg-gray-700 rounded-md px-5 py-5">
+        <div class="flex shadow-lg bg-gray-200 dark:bg-gray-800 rounded-md px-5 py-5">
             <div
                 class="flex w-10 h-10 bg-lime-green-200 justify-center items-center rounded-lg text-lime-green-800 mr-5">
                 {{ $icon }}

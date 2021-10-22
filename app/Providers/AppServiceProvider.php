@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        \Validator::extend('alpha_hyphen', function($attribute, $value) {
+            return preg_match("/^[A-Za-z-0-9]+$/", $value) === 1;
+        });
     }
 }
