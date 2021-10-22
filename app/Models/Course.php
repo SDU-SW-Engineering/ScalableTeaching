@@ -64,7 +64,7 @@ class Course extends Model
         if ($this->max_groups == 'same_as_assignments')
             $upperLimit = $this->tasks()->count();
         else if ($this->max_groups == 'custom')
-            $upperLimit = $this->max_group_size;
+            $upperLimit = $this->max_groups_amount;
         else
             $upperLimit = 0;
 

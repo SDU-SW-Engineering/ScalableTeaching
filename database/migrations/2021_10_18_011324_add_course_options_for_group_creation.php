@@ -15,7 +15,8 @@ class AddCourseOptionsForGroupCreation extends Migration
     {
         Schema::table('courses', function (Blueprint $table) {
             $table->enum('max_groups', ['custom', 'same_as_assignments', 'none'])->default('same_as_assignments')->after('name');
-            $table->integer('max_group_size')->default(1)->after('max_groups');
+            $table->integer('max_groups_amount')->default(1)->nullable()->after('max_groups');
+            $table->integer('max_group_size')->default(1)->after('max_groups_amount');
         });
     }
 
