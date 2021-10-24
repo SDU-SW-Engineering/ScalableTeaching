@@ -75,6 +75,9 @@ class GroupPolicy
         if ($group->users()->where('user_id', '!=', $user->id)->count())
             return Response::deny('Group needs to be empty before it can be deleted (excluding owner).');
 
+        if ($group->projects()->count() > 0)
+            return Response::deny('A group can\'t be deleted once it has a project attached to it.');
+
         return true;
     }
 

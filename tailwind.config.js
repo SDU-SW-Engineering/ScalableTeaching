@@ -94,10 +94,12 @@ module.exports = {
             margin: ['last'],
             dropShadow: ['dark'],
             opacity: ['disabled'],
+            cursor: ['disabled'],
             backgroundColor: ['disabled']
         },
     },
     plugins: [
-        require('@tailwindcss/typography')
+        require('@tailwindcss/typography'),
+        require('@tailwindcss/forms')
     ],
 }

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * App\Models\Course
@@ -33,12 +36,12 @@ class Course extends Model
 {
     use HasFactory;
 
-    public function tasks()
+    public function tasks() : HasMany
     {
         return $this->hasMany(Task::class);
     }
 
-    public function groups()
+    public function groups() : HasMany
     {
         return $this->hasMany(Group::class);
     }
@@ -52,12 +55,12 @@ class Course extends Model
             ->get();
     }
 
-    public function groupInvitations()
+    public function groupInvitations() : HasManyThrough
     {
         return $this->hasManyThrough(GroupInvitation::class, Group::class);
     }
 
-    public function hasMaxGroups(User $user)
+    public function hasMaxGroups(User $user) : bool
     {
         $currentCount = $this->userGroups($user)->count();
         // todo: switch to match statement when using php8 in production
@@ -69,5 +72,15 @@ class Course extends Model
             $upperLimit = 0;
 
         return $currentCount >= $upperLimit;
+    }
+
+    public function teachers() : BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'teachers')->withTimestamps();
+    }
+
+    public function hasTeacher(User $user) : bool
+    {
+        return $this->teachers()->where('user_id', $user->id)->exists();
     }
 }

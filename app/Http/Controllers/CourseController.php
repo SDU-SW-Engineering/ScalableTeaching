@@ -17,8 +17,9 @@ class CourseController extends Controller
     {
         $courses = Course::all()->map(function ($course)
         {
-            $tasks = $course->tasks->each(function(Task $task) {
-                $project =  $task->currentProjectForUser(auth()->user());
+            $tasks = $course->tasks->each(function (Task $task)
+            {
+                $project      = $task->currentProjectForUser(auth()->user());
                 $task->status = $project == null ? null : $project->status;
             });
 
@@ -60,7 +61,8 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $tasks = $course->tasks->each(function(Task $task) {
+        $tasks = $course->tasks->each(function (Task $task)
+        {
             $task->project = $task->currentProjectForUser(auth()->user());
         });
 
@@ -131,5 +133,38 @@ class CourseController extends Controller
                     ->leftJoinSub($statuses, 'projects', 'tasks.id', '=', 'projects.task_id');
             }
         ]);
+    }
+
+    public function showManage(Course $course)
+    {
+        return view('courses.manage.index', [
+            'course'      => $course,
+            'breadcrumbs' => [
+                'Courses'     => route('courses.index'),
+                $course->name => null
+            ]
+        ]);
+    }
+
+    public function addTeacher(Course $course)
+    {
+        $validated = \Validator::make(\request()->all(), [
+            'teacher' => ['required', 'exists:users,id']
+        ])->validateWithBag('teachers');
+
+        $user = User::find($validated['teacher']);
+        $course->teachers()->syncWithoutDetaching($user);
+
+        return redirect()->back();
+    }
+
+    public function removeTeacher(Course $course, User $teacher)
+    {
+        if ($teacher->id == auth()->id())
+            return redirect()->back()->withErrors('You can\'t remove yourself.', 'teachers');
+
+        $course->teachers()->detach($teacher);
+
+        return redirect()->back();
     }
 }

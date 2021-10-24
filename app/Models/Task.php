@@ -76,7 +76,7 @@ class Task extends Model
 
     public function jobs()
     {
-        return $this->hasManyThrough(JobStatus::class, Project::class);
+        return $this->hasManyThrough(JobStatus::class, Project::class)->withTrashedParents();
     }
 
     public function dailyBuilds(?int $owner = null, bool $withTrash = false, $withToday = false) : \Illuminate\Support\Collection

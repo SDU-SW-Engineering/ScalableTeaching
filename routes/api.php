@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,3 +17,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('reporter', [HomeController::class, 'reporter'])->name('reporter');
+
+Route::get('users/search', [UserController::class, 'search'])->middleware('auth');

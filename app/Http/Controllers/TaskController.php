@@ -106,6 +106,7 @@ class TaskController extends Controller
 
         $project = $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
         $project->addUsersToGitlab($registeredGitLabUsers->pluck('gitlab_id', 'name'), $warnings);
+        $project->unprotectBranches();
         if (is_array($warnings) && count($warnings) > 0)
             session()->flash('warning', implode("<br>", $warnings));
 
@@ -127,9 +128,7 @@ class TaskController extends Controller
         $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [1167]));
         $project     = $projects->firstWhere('name', $name);
         if ($project == null)
-        {
             $project = $this->forkProject($manager, $name);
-        }
 
         $dbProject = $owner->projects()->updateOrCreate([
             'project_id' => $project['id'],

@@ -31,7 +31,9 @@ class TaskPolicy
      */
     public function view(User $user, Task $task)
     {
-        //
+        if ($task->course->hasTeacher($user))
+            return true;
+        return false;
     }
 
     /**
@@ -58,6 +60,9 @@ class TaskPolicy
 
     public function viewAnalytics(User $user, Task $task)
     {
+        if ($task->course->hasTeacher($user))
+            return true;
+        return false;
     }
 
     /**

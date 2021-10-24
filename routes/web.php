@@ -22,27 +22,37 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
     Route::get('/', [CourseController::class, 'index'])->name('index');
     Route::get('{course}', [CourseController::class, 'show'])->name('show');
 
-    Route::group(['prefix' => '{course}/tasks', 'as' => 'tasks.'], function ()
+    Route::group(['prefix' => '{course}'], function ()
     {
-        Route::get('{task}', [TaskController::class, 'show'])->name('show');
-        Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
-        Route::get('{task}/analytics', [TaskController::class, 'analytics'])->name('analytics')->middleware('can:view,task');
-    });
+        Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function ()
+        {
+            Route::get('{task}', [TaskController::class, 'show'])->name('show');
+            Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
+            Route::get('{task}/analytics', [TaskController::class, 'analytics'])->name('analytics')->middleware('can:view,task');
+        });
 
-    Route::group(['prefix' => '{course}/groups', 'as' => 'groups.'], function ()
-    {
-        Route::get('/', [GroupController::class, 'index'])->name('index');
-        Route::post('/', [GroupController::class, 'create'])->name('create')->middleware('can:createGroup,course');
-        Route::delete('{group}', [GroupController::class, 'destroy'])->name('destroy')->middleware('can:delete,group');
-        Route::post('{group}/inviteUser', [GroupController::class, 'inviteUser'])->name('invite')->middleware(['can:invite,group', 'throttle:30']);
-        Route::post('{group}/leave', [GroupController::class, 'leave'])->name('leave')->middleware(['can:leave,group']);
+        Route::group(['prefix' => 'groups', 'as' => 'groups.'], function ()
+        {
+            Route::get('/', [GroupController::class, 'index'])->name('index');
+            Route::post('/', [GroupController::class, 'create'])->name('create')->middleware('can:createGroup,course');
+            Route::delete('{group}', [GroupController::class, 'destroy'])->name('destroy')->middleware('can:delete,group');
+            Route::post('{group}/inviteUser', [GroupController::class, 'inviteUser'])->name('invite')->middleware(['can:invite,group', 'throttle:30']);
+            Route::post('{group}/leave', [GroupController::class, 'leave'])->name('leave')->middleware(['can:leave,group']);
 
-        Route::get('{group}/invitation/{groupInvitation}/{action}', [GroupController::class, 'respondToInvite'])->name('respondInvite')
-            ->middleware('can:respondInvite,group,groupInvitation')->where('action', 'accept|decline');
-        Route::delete('{group}/invitation/{groupInvitation}', [GroupController::class, 'deleteInvite'])->name('invitations.delete')
-            ->middleware('can:delete,groupInvitation');
-        Route::delete('{group}/members/{user}', [GroupController::class, 'removeMember'])->name('removeMember')
-            ->middleware('can:removeMember,group,user');
+            Route::get('{group}/invitation/{groupInvitation}/{action}', [GroupController::class, 'respondToInvite'])->name('respondInvite')
+                ->middleware('can:respondInvite,group,groupInvitation')->where('action', 'accept|decline');
+            Route::delete('{group}/invitation/{groupInvitation}', [GroupController::class, 'deleteInvite'])->name('invitations.delete')
+                ->middleware('can:delete,groupInvitation');
+            Route::delete('{group}/members/{user}', [GroupController::class, 'removeMember'])->name('removeMember')
+                ->middleware('can:removeMember,group,user');
+        });
+
+        Route::group(['prefix' => 'manage', 'as' => 'manage.'], function ()
+        {
+            Route::get('/', [CourseController::class, 'showManage'])->name('index')->middleware('can:manage,course');
+            Route::post('add-teacher', [CourseController::class, 'addTeacher'])->name('addTeacher')->middleware('can:manage,course');
+            Route::get('teachers/{teacher}/remove', [CourseController::class, 'removeTeacher'])->name('removeTeacher')->middleware('can:manage,course');
+        });
     });
 });
 

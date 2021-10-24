@@ -139,4 +139,15 @@ class Project extends Model
             }
         }
     }
+
+    public function unprotectBranches()
+    {
+        $gitLabManager = app(GitLabManager::class);
+        sleep(1); // todo: this should be switched out with a queue worker that is delayed
+        $protectedBranches = collect($gitLabManager->projects()->protectedBranches($this->project_id));
+        $protectedBranches->each(function($protectedBranch) use ($gitLabManager)
+        {
+            $gitLabManager->repositories()->unprotectBranch($this->project_id, $protectedBranch['name']);
+        });
+    }
 }

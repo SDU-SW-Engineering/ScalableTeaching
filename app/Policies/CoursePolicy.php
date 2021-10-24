@@ -11,8 +11,6 @@ class CoursePolicy
 {
     use HandlesAuthorization;
 
-    const GROUP_DEFAULT_UPPER_LIMIT = 8;
-
     /**
      * Determine whether the user can view any models.
      *
@@ -99,5 +97,10 @@ class CoursePolicy
     public function forceDelete(User $user, Course $course)
     {
         //
+    }
+
+    public function manage(User $user, Course $course)
+    {
+        return $course->hasTeacher($user);
     }
 }
