@@ -3,6 +3,11 @@
 namespace App\Models;
 
 use GrahamCampbell\GitLab\GitLabManager;
+use GraphQL\Client;
+use GraphQL\SchemaObject\ProjectRepositoryArgumentsObject;
+use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
+use GraphQL\SchemaObject\RootProjectsArgumentsObject;
+use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -92,6 +97,11 @@ class Task extends Model
         return $this->hasMany(Project::class);
     }
 
+    public function protectedFiles()
+    {
+        return $this->hasMany(TaskProtectedFile::class);
+    }
+
     public function getProjectsPerDayAttribute()
     {
         return $this->projects()->daily($this->starts_at, $this->earliestEndDate())->get();
@@ -163,5 +173,38 @@ class Task extends Model
         });
 
         return $projects;
+    }
+
+    public function loadShaValuesFromDirectory(string $dir = "", ?string $selectFile = null)
+    {
+        $rootObject = new RootQueryObject();
+        $rootObject->selectProjects((new RootProjectsArgumentsObject())
+            ->setIds(["gid://gitlab/Project/$this->source_project_id"])
+            ->setFirst(1))
+            ->selectNodes()
+            ->selectRepository()
+            ->selectTree((new RepositoryTreeArgumentsObject())->setPath($dir))
+            ->selectBlobs()
+            ->selectNodes()
+            ->selectName()
+            ->selectSha();
+        $client   = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+        $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes;
+        if (count($projects) == 0)
+            return;
+
+        collect($projects[0]->repository->tree->blobs->nodes)->each(function ($repoFile) use ($selectFile, $dir)
+        {
+            if ($selectFile != null && $repoFile->name != $selectFile)
+                return;
+            $fileName         = "/" . trim("$dir/$repoFile->name", " /");
+            $file             = $this->protectedFiles()->firstOrNew([
+                'path' => $fileName
+            ]);
+            $shaValues        = is_array($file->sha_values) ? $file->sha_values : [];
+            $shaValues[]      = $repoFile->sha;
+            $file->sha_values = array_unique($shaValues);
+            $file->save();
+        });
     }
 }

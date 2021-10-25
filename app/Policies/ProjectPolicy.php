@@ -123,4 +123,9 @@ class ProjectPolicy
     {
         return false;
     }
+
+    public function validate(User $user, Project $project)
+    {
+        return false;
+    }
 }

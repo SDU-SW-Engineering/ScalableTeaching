@@ -146,7 +146,7 @@
                                 </th>
                                 @if(request('status') == 'finished')
                                     <th class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-                                        Finished at
+                                        Finished
                                     </th>
                                     <th scope="col"
                                         class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
@@ -215,13 +215,28 @@
                                                           stroke-width="2"
                                                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                 </svg>
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                     class="h-6 w-6 waiting-for-verification" fill="none"
-                                                     viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
+                                                @if($project->validationStatus == 'pending')
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                         class="h-6 w-6 waiting-for-verification" fill="none"
+                                                         viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2"
+                                                              d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                @elseif($project->validationStatus == 'success')
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                         class="h-6 w-6 text-lime-green-400 validated-success"
+                                                         fill="none" viewBox="0 0 24 24"
+                                                         stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2"
+                                                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                @else
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 validated-failed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                @endif
                                             </div>
                                         @endif
                                     </td>
@@ -244,10 +259,18 @@
                                             @if($project->status == 'finished')
                                                 <a type="button"
                                                    href="{{ route('courses.tasks.downloadProject', [$course->id, $task->id, $project->id]) }}"
-                                                   class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium rounded-r-lg text-xs px-3 py-2 text-center">Download</a>
+                                                   class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium text-xs px-3 py-2 text-center">Download</a>
                                             @else
                                                 <a type="button"
-                                                   class="text-white not-done bg-gray-500 cursor-not-allowed font-medium rounded-r-lg text-xs px-3 py-2 text-center">Download</a>
+                                                   class="text-white not-done bg-gray-500 cursor-not-allowed font-medium text-xs px-3 py-2 text-center">Download</a>
+                                            @endif
+                                            @if($project->status == 'finished')
+                                                <a type="button"
+                                                   href="{{ route('courses.tasks.validateProject', [$course->id, $task->id, $project->id]) }}"
+                                                   class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium rounded-r-lg text-xs px-3 py-2 text-center">Validate</a>
+                                            @else
+                                                <a type="button"
+                                                   class="text-white cant-validate bg-gray-500 cursor-not-allowed font-medium rounded-r-lg text-xs px-3 py-2 text-center">Validate</a>
                                             @endif
                                         </div>
                                     </td>
@@ -275,10 +298,19 @@
                 content: 'This project has been handed in',
             });
             tippy('.waiting-for-verification', {
-                content: 'Waiting for verification'
+                content: 'Waiting for validation'
             });
             tippy('.not-done', {
                 content: 'Can\'t download before assignment has been handed in.'
+            });
+            tippy('.cant-validate', {
+                content: 'Can\'t validate before assignment has been handed in.'
+            });
+            tippy('.validated-success', {
+                content: 'This project has been successfully validated, an no issues were found.'
+            });
+            tippy('.validated-failed', {
+                content: 'This project has failed validation, see the log for more information.'
             });
         });
     </script>

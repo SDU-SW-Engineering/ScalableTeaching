@@ -58,9 +58,16 @@ class Project extends Model
 
     protected $dates = ['finished_at'];
 
-    protected $hidden = ['final_commit_sha'];
+    protected $casts = [
+        'validation_errors' => 'array'
+    ];
 
-    protected $fillable = ['project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id', 'final_commit_sha', 'created_at', 'finished_at'];
+    protected $hidden = ['final_commit_sha', 'validation_errors', 'validated_at'];
+
+    protected $fillable = [
+        'project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
+        'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at'
+    ];
 
     public function ownable()
     {
@@ -177,5 +184,14 @@ class Project extends Model
     public function dailyBuilds($withToday = false) : \Illuminate\Support\Collection
     {
         return $this->jobStatuses()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(! $withToday))->get();
+    }
+
+    public function getValidationStatusAttribute()
+    {
+        if ($this->validated_at == null)
+            return "pending";
+        if (count($this->validation_errors) > 0)
+            return "failed";
+        return "success";
     }
 }

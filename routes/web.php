@@ -30,6 +30,7 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
             Route::get('{task}', [TaskController::class, 'show'])->name('show');
             Route::get('{task}/projects/{project}', [TaskController::class, 'showProject'])->name('showProject')->middleware('can:view,project');
             Route::get('{task}/projects/{project}/download', [ProjectController::class, 'download'])->name('downloadProject')->middleware('can:download,project');
+            Route::get('{task}/projects/{project}/validate', [ProjectController::class, 'validateProject'])->name('validateProject')->middleware('can:validate,project');
             Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
 
             Route::group(['prefix' => '{task}/analytics', 'as' => 'analytics.'], function ()

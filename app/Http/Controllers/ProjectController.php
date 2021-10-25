@@ -12,7 +12,13 @@ use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
 use Gitlab\Exception\RuntimeException;
 use GrahamCampbell\GitLab\GitLabManager;
+use GraphQL\Client;
+use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
+use GraphQL\SchemaObject\RootProjectsArgumentsObject;
+use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Str;
 
 class ProjectController extends Controller
 {
@@ -83,11 +89,67 @@ class ProjectController extends Controller
     {
         $sha = $project->final_commit_sha;
         abort_if($sha == null, 404);
-        return response()->streamDownload(function() use ($sha, $project, $gitLabManager)
+        return response()->streamDownload(function () use ($sha, $project, $gitLabManager)
         {
             echo $gitLabManager->repositories()->archive($project->project_id, [
                 'sha' => $sha
             ], 'zip');
         }, "$project->repo_name.zip");
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function validateProject(Course $course, Task $task, Project $project)
+    {
+        if ($project->final_commit_sha == null)
+            return redirect()->back()->withErrors('Can\'t validate this project as it isn\' finished yet');
+        /** @var Collection $files */
+        $files       = $project->task->protectedFiles;
+        $directories = $files->groupBy('directory');
+        $errors      = [];
+        foreach ($directories as $directory => $files)
+        {
+            $rootObject = new RootQueryObject();
+            $rootObject->selectProjects((new RootProjectsArgumentsObject())
+                ->setIds(["gid://gitlab/Project/$project->project_id"])
+                ->setFirst(1))
+                ->selectNodes()
+                ->selectRepository()
+                ->selectTree((new RepositoryTreeArgumentsObject())->setPath(trim($directory, '/'))->setRef($project->final_commit_sha))
+                ->selectBlobs()
+                ->selectNodes()
+                ->selectName()
+                ->selectSha();
+            $client   = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+            $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes;
+
+            if (count($projects) == 0)
+                throw new \Exception("Project with id $project->id wasn't found.");
+
+            $repoFiles = collect($projects[0]->repository->tree->blobs->nodes);
+            foreach ($files as $file)
+            {
+                $lookFor = $file->baseName;
+                $found   = $repoFiles->firstWhere('name', $lookFor);
+                if ($found == null)
+                {
+                    $errors[] = "The file \"{$file->path}\" is missing.";
+                    continue;
+                }
+
+                $shaValues = collect($file->sha_values);
+                $shaIntact = $shaValues->contains($found->sha);
+                if ( ! $shaIntact)
+                    $errors[] = "The file \"{$file->path}\" has been altered! Expected one of [{$shaValues->join(', ')}] but got $found->sha.";
+            }
+        }
+
+        $project->update([
+            'validated_at'      => now(),
+            'validation_errors' => $errors
+        ]);
+
+        return redirect()->back();
     }
 }

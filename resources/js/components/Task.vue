@@ -121,7 +121,7 @@
                              v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
                 <started :project="project" :progress="progress"
                          v-if="project != null && project.status === 'active'"></started>
-                <completed v-if="project != null && project.status === 'finished'"></completed>
+                <completed v-if="project != null && project.status === 'finished'" :validation="project.validationStatus"></completed>
                 <overdue v-if="project != null && project.status === 'overdue'"></overdue>
                 <div class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>

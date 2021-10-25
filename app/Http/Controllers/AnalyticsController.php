@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Project;
 use App\Models\Task;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\DataSets\LineDataSet;
@@ -59,12 +60,6 @@ class AnalyticsController extends Controller
 
     public function builds(Course $course, Task $task)
     {
-        $rootObject = new RootQueryObject();
-        $rootObject->selectProjects((new RootProjectsArgumentsObject())->setIds(['gid://gitlab/Project/2634'])->setFirst(1))->selectNodes()->selectName();
-        $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer PATk_Nb9mZAfPuMgT562RpQ']);
-        dd($client->runQuery($rootObject->getQuery()));
-
-
         $dailyBuilds      = $task->dailyBuilds(true, true);
         $activeIndex      = $dailyBuilds->keys()->search(\request('q'));
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B", $activeIndex === false ? null : $activeIndex));
