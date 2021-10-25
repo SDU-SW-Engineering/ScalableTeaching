@@ -22,7 +22,12 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task)
     {
-        $project     = $task->currentProjectForUser(auth()->user());
+        $project = $task->currentProjectForUser(auth()->user());
+        return $this->showProject($course, $task, $project);
+    }
+
+    public function showProject(Course $course, Task $task, ?Project $project)
+    {
         $myGroups    = $course->groups()
             ->whereRelation('users', 'user_id', auth()->id())
             ->latest()
@@ -32,8 +37,8 @@ class TaskController extends Controller
         $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
         $progress    = $percent > 100 ? 100 : $percent;
         $timeLeft    = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
-        $myBuilds    = $task->dailyBuilds(auth()->id(), false, false);
-        $dailyBuilds = $task->dailyBuilds(null, true, false);
+        $myBuilds    = $project == null ? collect() : $project->dailyBuilds(false);
+        $dailyBuilds = $task->dailyBuilds(true, false);
 
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
             new BarDataSet("Total", $dailyBuilds->subtractByKey($myBuilds), "#6B7280"),
@@ -169,6 +174,16 @@ class TaskController extends Controller
         $buildCount      = $task->jobs()->count();
         $buildsToday     = $task->jobs()->whereRaw("date(job_statuses.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
 
+        $projectQuery = $task->projects()
+            ->select('*', \DB::raw('TIMESTAMPDIFF(second,created_at, finished_at) as duration'))
+            ->withCount('jobStatuses')
+            ->orderBy(request('sort', 'created_at'), request('direction', 'desc'));
+
+        if (request('status', 'all') != 'all')
+            $projectQuery->where('status', request('status', 'active'));
+
+        $projects = $projectQuery->paginate(10)->withQueryString();
+
         $totalProjectsPerDay      = $task->totalProjectsPerDay;
         $projectsCompletedPerDay  = $task->totalCompletedTasksPerDay;
         $totalProjectsPerDayGraph = new Graph($totalProjectsPerDay->keys(),
@@ -176,7 +191,7 @@ class TaskController extends Controller
             new LineDataSet("Completed", $projectsCompletedPerDay, "#7BB026", true)
         );
 
-        $dailyBuilds      = $task->dailyBuilds(null, true, true);
+        $dailyBuilds      = $task->dailyBuilds(true, true);
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B"));
         $breadcrumbs      = [
             'Courses'     => route('courses.index'),
@@ -186,6 +201,7 @@ class TaskController extends Controller
         ];
 
         return view('tasks.analytics', compact('course', 'task', 'projectCount', 'breadcrumbs',
-            'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday', 'totalProjectsPerDayGraph', 'dailyBuildsGraph'));
+            'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday',
+            'totalProjectsPerDayGraph', 'dailyBuildsGraph', 'projects'));
     }
 }

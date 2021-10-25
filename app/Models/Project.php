@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -143,11 +145,37 @@ class Project extends Model
     public function unprotectBranches()
     {
         $gitLabManager = app(GitLabManager::class);
-        sleep(1); // todo: this should be switched out with a queue worker that is delayed
-        $protectedBranches = collect($gitLabManager->projects()->protectedBranches($this->project_id));
-        $protectedBranches->each(function($protectedBranch) use ($gitLabManager)
+        $tries         = 3;
+        do
         {
-            $gitLabManager->repositories()->unprotectBranch($this->project_id, $protectedBranch['name']);
-        });
+            sleep(1);  // todo: this should be switched out with a queue worker that is delayed
+            $project = $gitLabManager->projects()->show($this->project_id);
+            if ($project['import_error'] != null)
+                break;
+            if ($project['import_status'] == 'finished')
+            {
+                $protectedBranches = collect($gitLabManager->projects()->protectedBranches($this->project_id));
+                $protectedBranches->each(function ($protectedBranch) use ($gitLabManager)
+                {
+                    $gitLabManager->repositories()->unprotectBranch($this->project_id, $protectedBranch['name']);
+                });
+                break;
+            }
+            $tries--;
+        }
+        while ($tries != 0);
+    }
+
+    public function getDurationAttribute()
+    {
+        if ($this->finished_at == null)
+            return null;
+
+        return number_format($this->created_at->diffInHours($this->finished_at) / 24, 2);
+    }
+
+    public function dailyBuilds($withToday = false) : \Illuminate\Support\Collection
+    {
+        return $this->jobStatuses()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(! $withToday))->get();
     }
 }

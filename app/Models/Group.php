@@ -63,4 +63,9 @@ class Group extends Model
     {
         return $this->users()->where('user_id', $user->id)->exists();
     }
+
+    public function getMemberStringAttribute()
+    {
+        return $this->users->pluck('name')->sort()->join(', ');
+    }
 }

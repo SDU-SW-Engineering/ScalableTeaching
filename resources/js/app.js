@@ -3,7 +3,7 @@ require('chart.js')
 
 import Vue from 'vue'
 
-import TippyComponent from "vue-tippy";
+import VueTippy, { TippyComponent } from "vue-tippy";
 import VueTailwind from 'vue-tailwind'
 import {
     TRichSelect,

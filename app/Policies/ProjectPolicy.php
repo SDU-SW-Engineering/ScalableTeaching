@@ -11,6 +11,12 @@ class ProjectPolicy
 {
     use HandlesAuthorization;
 
+    public function before(User $user, $ability, ?Project $project)
+    {
+        if ($project != null && $project->task->course->hasTeacher($user))
+            return true;
+    }
+
     /**
      * Determine whether the user can view any models.
      *
@@ -19,7 +25,7 @@ class ProjectPolicy
      */
     public function viewAny(User $user)
     {
-        //
+
     }
 
     /**
@@ -32,6 +38,8 @@ class ProjectPolicy
     public function view(User $user, Project $project)
     {
         $currentProject = $project->task->currentProjectForUser($user);
+        if ($currentProject == null)
+            return false;
         return $currentProject->id == $project->id;
     }
 
@@ -109,5 +117,10 @@ class ProjectPolicy
     public function refreshAccess(User $user, Project $project)
     {
         return $project->owners()->contains('id', $user->id);
+    }
+
+    public function download(User $user, Project $project)
+    {
+        return false;
     }
 }

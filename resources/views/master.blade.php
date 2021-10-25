@@ -6,7 +6,6 @@
     <title>Web Technologies</title>
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
     <script type="text/javascript" src="{{ mix('js/app.js') }}" defer></script>
-
 </head>
 <body class="bg-gray-50 dark:bg-gray-700 h-screen" style="min-width: 480px">
 <div id="app">
@@ -14,8 +13,6 @@
     @yield('content')
 </div>
 
-<script type="text/javascript" defer>
-
-</script>
+@yield('script')
 </body>
 </html>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -51,4 +52,9 @@ class JobStatus extends Model
         'history' => 'array',
         'log'     => 'array'
     ];
+
+    public function scopeFinished(Builder $query)
+    {
+        $query->where('status', 'finished');
+    }
 }

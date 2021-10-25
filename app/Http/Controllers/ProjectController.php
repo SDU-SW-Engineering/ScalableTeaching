@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\JobStatus;
 use App\Models\Project;
+use App\Models\Task;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
@@ -76,5 +77,17 @@ class ProjectController extends Controller
     {
         $project->refreshGitlabAccess();
         return "ok";
+    }
+
+    public function download(Course $course, Task $task, Project $project, GitLabManager $gitLabManager)
+    {
+        $sha = $project->final_commit_sha;
+        abort_if($sha == null, 404);
+        return response()->streamDownload(function() use ($sha, $project, $gitLabManager)
+        {
+            echo $gitLabManager->repositories()->archive($project->project_id, [
+                'sha' => $sha
+            ], 'zip');
+        }, "$project->repo_name.zip");
     }
 }

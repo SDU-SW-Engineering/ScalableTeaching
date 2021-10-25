@@ -5,7 +5,7 @@ return [
     'dsn'         => env('SENTRY_LARAVEL_DSN', env('SENTRY_DSN')),
 
     // capture release as git sha
-    'release'     => "scalable-teaching@0.1.0",
+    'release'     => "scalable-teaching@0.1.1",
 
     // When left empty or `null` the Laravel environment will be used
     'environment' => env('SENTRY_ENVIRONMENT'),

@@ -79,15 +79,11 @@ class Task extends Model
         return $this->hasManyThrough(JobStatus::class, Project::class)->withTrashedParents();
     }
 
-    public function dailyBuilds(?int $owner = null, bool $withTrash = false, $withToday = false) : \Illuminate\Support\Collection
+    public function dailyBuilds(bool $withTrash = false, $withToday = false) : \Illuminate\Support\Collection
     {
         $query = $this->jobs();
-
-        if ($owner != null)
-            $query->where('projects.ownable_id', $owner);
         if ($withTrash)
             $query->withTrashedParents();
-
         return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(! $withToday))->get();
     }
 
@@ -115,7 +111,7 @@ class Task extends Model
             ->total();
     }
 
-    private function earliestEndDate($excludeToday = false)
+    public function earliestEndDate($excludeToday = false)
     {
         return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
     }

@@ -12,7 +12,9 @@
  */
 
 window.axios = require('axios');
+import 'tippy.js/dist/tippy.css'
 
+window.tippy = require('tippy.js').default
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /**

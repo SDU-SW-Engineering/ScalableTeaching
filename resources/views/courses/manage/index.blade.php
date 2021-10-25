@@ -5,8 +5,8 @@
         @include('courses.partials.tabs')
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
             <div class="shadow-lg">
-                <header class="bg-gray-900 text-white rounded-t-lg text-lg px-6 py-4">Teachers</header>
-                <div class="bg-gray-600 rounded-b-lg p-6 ">
+                <header class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white rounded-t-lg text-lg px-6 py-4">Teachers</header>
+                <div class="bg-white dark:bg-gray-600 rounded-b-lg p-6 ">
                     @if($errors->hasBag('teachers'))
                         <div class="bg-red-200 px-3 py-4 flex rounded mb-4 items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 mr-3"
@@ -53,7 +53,7 @@
                         @csrf
                         <user-select name="teacher"></user-select>
                         <button type="submit"
-                                class="dark:bg-lime-green-500 px-2 py-1 rounded-md mt-3 w-full dark:text-gray-100">Add
+                                class="bg-lime-green-500 px-2 py-1 rounded-md mt-3 w-full text-gray-100 hover:bg-lime-green-600 transition-colors">Add
                         </button>
                     </form>
                 </div>
