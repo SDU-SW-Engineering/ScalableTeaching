@@ -7,13 +7,13 @@ use Illuminate\Support\Collection;
 
 class DataSet implements Arrayable
 {
-    private $borderColor;
+    protected $borderColor;
 
-    private $backgroundColor;
+    protected $backgroundColor;
 
-    private $label;
+    protected $label;
 
-    private $data;
+    protected $data;
 
     public function __construct($label, Collection $data, $color, $transparent = false)
     {

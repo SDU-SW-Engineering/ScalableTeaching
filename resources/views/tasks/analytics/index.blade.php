@@ -61,10 +61,15 @@
                 </div>
             </div>
             <div class="bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
-                <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds Per Day</h3>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold">Builds Per Day</h3>
+                    <a class="bg-lime-green-500 text-white text-sm px-2 py-0.5 hover:bg-lime-green-600 transition-colors rounded-md mr-2"
+                       href="{{ route('courses.tasks.analytics.builds', [$course->id, $task->id]) }}">Details</a>
+                </div>
                 <div>
                     <bar-chart :height="300" :labels="{{ $dailyBuildsGraph->labels() }}"
-                               :data="{{ $dailyBuildsGraph->datasets()  }}"></bar-chart>
+                               :data="{{ $dailyBuildsGraph->datasets()  }}"
+                               route="{{ route('courses.tasks.analytics.builds', [$course->id, $task->id]) }}"></bar-chart>
                 </div>
             </div>
         </div>
@@ -183,7 +188,8 @@
                                         @if($project->ownable_type == \App\Models\User::class)
                                             {{ $project->ownable->name }}
                                         @elseif($project->ownable_type == \App\Models\Group::class)
-                                            {{ $project->ownable->name }} <span class="text-gray-400">({{ $project->ownable->memberString }})</span>
+                                            {{ $project->ownable->name }} <span
+                                                class="text-gray-400">({{ $project->ownable->memberString }})</span>
                                         @else
                                             {{ $project->repo_name }}
                                         @endif
@@ -275,7 +281,5 @@
                 content: 'Can\'t download before assignment has been handed in.'
             });
         });
-
-
     </script>
 @endsection

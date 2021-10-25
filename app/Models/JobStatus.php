@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -56,5 +57,18 @@ class JobStatus extends Model
     public function scopeFinished(Builder $query)
     {
         $query->where('status', 'finished');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function getRunTimeAttribute() {
+        return CarbonInterval::seconds($this->duration)->forHumans();
+    }
+
+    public function getQueuedForAttribute() {
+        return CarbonInterval::seconds($this->queue_duration)->forHumans();
     }
 }
