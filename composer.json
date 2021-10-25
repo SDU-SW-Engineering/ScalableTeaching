@@ -14,6 +14,7 @@
         "barryvdh/laravel-ide-helper": "^2.10",
         "erusev/parsedown": "^1.7",
         "fruitcake/laravel-cors": "^2.0",
+        "gmostafa/php-graphql-oqm": "^1.4",
         "graham-campbell/gitlab": "5.4",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.54",
@@ -36,7 +37,8 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
-            "Domain\\": "domain/"
+            "Domain\\": "domain/",
+            "GraphQL\\SchemaObject\\": "GitLabGraphQL/"
         }
     },
     "autoload-dev": {
