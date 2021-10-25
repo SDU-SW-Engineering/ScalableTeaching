@@ -28,11 +28,12 @@ class TaskController extends Controller
 
     public function showProject(Course $course, Task $task, ?Project $project)
     {
-        $myGroups    = $course->groups()
+        $myGroups = $course->groups()
             ->whereRelation('users', 'user_id', auth()->id())
             ->latest()
             ->pluck('name', 'id');
-        $project->append('validationStatus');
+        if ($project != null)
+            $project->append('validationStatus');
         $startDay    = $task->starts_at->format("j/n");
         $endDay      = $task->ends_at->format("j/n");
         $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
