@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
@@ -30,7 +31,12 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
             Route::get('{task}/projects/{project}', [TaskController::class, 'showProject'])->name('showProject')->middleware('can:view,project');
             Route::get('{task}/projects/{project}/download', [ProjectController::class, 'download'])->name('downloadProject')->middleware('can:download,project');
             Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
-            Route::get('{task}/analytics', [TaskController::class, 'analytics'])->name('analytics')->middleware('can:view,task');
+
+            Route::group(['prefix' => '{task}/analytics', 'as' => 'analytics.'], function ()
+            {
+                Route::get('/', [AnalyticsController::class, 'index'])->name('index')->middleware('can:view,task');
+                Route::get('builds', [AnalyticsController::class, 'builds'])->name('builds')->middleware('can:view,task');
+            });
         });
 
         Route::group(['prefix' => 'groups', 'as' => 'groups.'], function ()
