@@ -8,15 +8,20 @@ class Confirm extends Component
 {
     public ?string $acceptRoute = null;
     public ?string $declineRoute = null;
+    public string $header;
+    public string $subHeader;
 
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct(string $acceptRoute)
+    public function __construct(?string $acceptRoute, ?string $declineRoute, string $header, string $subHeader)
     {
-        $this->acceptRoute = $acceptRoute;
+        $this->acceptRoute  = $acceptRoute;
+        $this->declineRoute = $declineRoute;
+        $this->header       = $header;
+        $this->subHeader    = $subHeader;
     }
 
     /**
@@ -26,7 +31,6 @@ class Confirm extends Component
      */
     public function render()
     {
-        dd($this->acceptRoute);
         return view('components.confirm');
     }
 }

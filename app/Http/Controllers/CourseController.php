@@ -170,6 +170,17 @@ class CourseController extends Controller
 
     public function showEnroll(Course $course)
     {
-        return view('courses.enroll-dialog');
+        if ($course->enroll_token != request('token'))
+            return redirect()->route('home')->withError('Invalid course token');
+
+        if ($course->users()->where(['user_id' => auth()->id()])->exists())
+            return redirect()->route('courses.show', [$course->id]);
+
+        if ( ! request()->has('confirm'))
+            return view('courses.enroll-dialog', compact('course'));
+
+        $course->users()->attach(auth()->id(), ['role' => 'student']);
+
+        return redirect()->route('courses.show', [$course->id]);
     }
 }
