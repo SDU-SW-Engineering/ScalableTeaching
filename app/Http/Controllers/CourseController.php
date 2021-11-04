@@ -153,7 +153,7 @@ class CourseController extends Controller
         ])->validateWithBag('teachers');
 
         $user = User::find($validated['teacher']);
-        $course->teachers()->syncWithoutDetaching($user);
+        $course->teachers()->syncWithoutDetaching([$user->id => ['role' => 'teacher']]);
 
         return redirect()->back();
     }
@@ -166,5 +166,10 @@ class CourseController extends Controller
         $course->teachers()->detach($teacher);
 
         return redirect()->back();
+    }
+
+    public function showEnroll(Course $course)
+    {
+        return view('courses.enroll-dialog');
     }
 }

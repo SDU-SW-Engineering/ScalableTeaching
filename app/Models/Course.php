@@ -49,7 +49,7 @@ class Course extends Model
     public function userGroups(User $user)
     {
         return $this->groups()
-            ->with(['users','invitations.recipient','projects'])
+            ->with(['users', 'invitations.recipient', 'projects'])
             ->whereRelation('users', 'user_id', $user->id)
             ->latest()
             ->get();
@@ -76,7 +76,25 @@ class Course extends Model
 
     public function teachers() : BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'teachers')->withTimestamps();
+        return $this->belongsToMany(User::class)
+            ->as(CourseUser::class)
+            ->wherePivot('role', 'teacher')
+            ->withTimestamps();
+    }
+
+    public function students() : BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->as(CourseUser::class)
+            ->wherePivot('role', 'student')
+            ->withTimestamps();
+    }
+
+    public function users() : BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->as(CourseUser::class)
+            ->withTimestamps();
     }
 
     public function hasTeacher(User $user) : bool

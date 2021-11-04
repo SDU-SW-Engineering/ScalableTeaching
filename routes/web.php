@@ -25,6 +25,8 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
 
     Route::group(['prefix' => '{course}'], function ()
     {
+        Route::get('enroll', [CourseController::class, 'showEnroll'])->name('enroll');
+
         Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function ()
         {
             Route::get('{task}', [TaskController::class, 'show'])->name('show');
