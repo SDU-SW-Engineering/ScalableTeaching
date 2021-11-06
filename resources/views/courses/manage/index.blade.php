@@ -63,7 +63,7 @@
             </div>
             <x-card name="enroll" header="Enrollment">
                 <x-slot name="content">
-                    <p class="text-black dark:text-white mb-2 text-sm">You can share the link below to let student join the course.</p>
+                    <p class="text-black dark:text-white mb-2 text-sm">You can share the link below to let students join the course.</p>
                     <input type="text" id="groupname" readonly
                            value="{{ route('courses.enroll', [$course->id, 'token' => $course->enroll_token]) }}"
                            class="disabled:bg-gray-200 dark:disabled:bg-gray-700 bg-gray-50
