@@ -22,16 +22,17 @@ class CoursePolicy
         //
     }
 
+
     /**
      * Determine whether the user can view the model.
      *
      * @param User $user
      * @param Course $course
-     * @return Response|bool
+     * @return bool
      */
     public function view(User $user, Course $course)
     {
-        //
+        return $course->users()->where('user_id', $user->id)->exists();
     }
 
     /**

@@ -15,7 +15,7 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::all()->map(function ($course)
+        $courses = auth()->user()->courses->map(function ($course)
         {
             $tasks = $course->tasks->each(function (Task $task)
             {

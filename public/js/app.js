@@ -7066,32 +7066,31 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 6:
                 response = _context.sent;
-                location.reload();
-                _context.next = 17;
+                _context.next = 16;
                 break;
 
-              case 10:
-                _context.prev = 10;
+              case 9:
+                _context.prev = 9;
                 _context.t0 = _context["catch"](3);
 
                 if (!(_context.t0.response.status === 404)) {
-                  _context.next = 15;
+                  _context.next = 14;
                   break;
                 }
 
                 location.reload();
                 return _context.abrupt("return");
 
-              case 15:
+              case 14:
                 this.errorMessage = _context.t0.response.data.message;
                 this.startingAssignment = false;
 
-              case 17:
+              case 16:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[3, 10]]);
+        }, _callee, this, [[3, 9]]);
       }));
 
       function startAssignment(_x) {
@@ -82698,7 +82697,9 @@ var render = function() {
                 _c("div", {
                   staticClass: "prose-sm dark:prose-light",
                   class: [
-                    _vm.hideMissingAssignmentWarning || _vm.project != null
+                    _vm.hideMissingAssignmentWarning ||
+                    _vm.project != null ||
+                    _vm.progress.ended
                       ? ""
                       : "filter blur-sm"
                   ],
@@ -82707,7 +82708,9 @@ var render = function() {
               ]
             ),
             _vm._v(" "),
-            !_vm.hideMissingAssignmentWarning && _vm.project == null
+            !_vm.hideMissingAssignmentWarning &&
+            _vm.project == null &&
+            !_vm.progress.ended
               ? _c(
                   "div",
                   { staticClass: "absolute flex w-full justify-center" },
@@ -83024,7 +83027,8 @@ var render = function() {
             : _vm._e(),
           _vm._v(" "),
           (_vm.hideMissingAssignmentWarning || _vm.tab !== "description") &&
-          _vm.project == null
+          _vm.project == null &&
+          !_vm.progress.ended
             ? _c("not-started", {
                 attrs: {
                   errorMessage: _vm.errorMessage,
@@ -83056,7 +83060,8 @@ var render = function() {
               })
             : _vm._e(),
           _vm._v(" "),
-          _vm.project != null && _vm.project.status === "overdue"
+          (_vm.project != null && _vm.project.status === "overdue") ||
+          (_vm.progress.ended && _vm.project == null)
             ? _c("overdue")
             : _vm._e(),
           _vm._v(" "),

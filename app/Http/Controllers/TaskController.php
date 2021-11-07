@@ -57,7 +57,8 @@ class TaskController extends Controller
                 'startDay' => $startDay,
                 'endDay'   => $endDay,
                 'percent'  => $progress,
-                'timeLeft' => $timeLeft
+                'timeLeft' => $timeLeft,
+                'ended'    => $task->ends_at->isPast()
             ],
             'builds'          => $dailyBuilds,
             'myBuilds'        => $myBuilds,
@@ -74,6 +75,8 @@ class TaskController extends Controller
 
     public function doCreateProject(Course $course, Task $task, GitLabManager $gitLabManager)
     {
+        abort_if($task->ends_at->isPast(), 410, "The task has ended.");
+
         $isSolo            = request('as', 'solo') == 'solo';
         $group             = $isSolo ? null : Group::findOrFail(request('as'));
         $users             = $isSolo ? Collection::wrap(auth()->user()) : $group->users;

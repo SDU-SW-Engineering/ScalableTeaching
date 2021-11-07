@@ -21,11 +21,11 @@ Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'
 Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth'], function ()
 {
     Route::get('/', [CourseController::class, 'index'])->name('index');
-    Route::get('{course}', [CourseController::class, 'show'])->name('show');
+    Route::get('{course}/enroll', [CourseController::class, 'showEnroll'])->name('enroll');
 
-    Route::group(['prefix' => '{course}'], function ()
+    Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function ()
     {
-        Route::get('enroll', [CourseController::class, 'showEnroll'])->name('enroll');
+        Route::get('/', [CourseController::class, 'show'])->name('show');
 
         Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function ()
         {
