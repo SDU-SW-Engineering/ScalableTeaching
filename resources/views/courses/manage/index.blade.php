@@ -4,6 +4,7 @@
     <div class="px-6 pt-4 container mx-auto">
         @include('courses.partials.tabs')
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            @include('courses.partials.taskOverview')
             <div class="shadow-lg">
                 <header class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white rounded-t-lg text-lg px-6 py-4">
                     Teachers
@@ -62,14 +63,13 @@
                 </div>
             </div>
             <x-card name="enroll" header="Enrollment">
-                <x-slot name="content">
-                    <p class="text-black dark:text-white mb-2 text-sm">You can share the link below to let students join the course.</p>
-                    <input type="text" id="groupname" readonly
-                           value="{{ route('courses.enroll', [$course->id, 'token' => $course->enroll_token]) }}"
-                           class="disabled:bg-gray-200 dark:disabled:bg-gray-700 bg-gray-50
+                <p class="text-black dark:text-white mb-2 text-sm">You can share the link below to let students join the
+                    course.</p>
+                <input type="text" id="groupname" readonly
+                       value="{{ route('courses.enroll', [$course->id, 'token' => $course->enroll_token]) }}"
+                       class="disabled:bg-gray-200 dark:disabled:bg-gray-700 bg-gray-50
                            flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none  block w-full p-2.5 dark:bg-gray-700 dark:border-gray-700 dark:text-gray-200"
-                    >
-                </x-slot>
+                >
             </x-card>
         </div>
     </div>

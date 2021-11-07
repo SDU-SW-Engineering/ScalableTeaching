@@ -29,6 +29,7 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
 
         Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function ()
         {
+            Route::get('new', [TaskController::class, 'showCreate'])->name('create');
             Route::get('{task}', [TaskController::class, 'show'])->name('show');
             Route::get('{task}/projects/{project}', [TaskController::class, 'showProject'])->name('showProject')->middleware('can:view,project');
             Route::get('{task}/projects/{project}/download', [ProjectController::class, 'download'])->name('downloadProject')->middleware('can:download,project');

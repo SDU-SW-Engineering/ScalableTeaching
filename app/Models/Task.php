@@ -207,4 +207,18 @@ class Task extends Model
             $file->save();
         });
     }
+
+    public function participants() : \Illuminate\Support\Collection
+    {
+        return $this->projects->reject(function (Project $project)
+        {
+            return $project->ownable_type == null;
+        })->map(function (Project $project)
+        {
+            return $project->owners()->each(function(User $user) use ($project)
+            {
+                $user->project_status = $project->status;
+            });
+        })->flatten();
+    }
 }

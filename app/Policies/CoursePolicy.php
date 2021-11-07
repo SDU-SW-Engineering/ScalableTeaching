@@ -45,6 +45,11 @@ class CoursePolicy
     {
     }
 
+    public function createTask(User $user, Course $course)
+    {
+        return $course->hasTeacher($user);
+    }
+
     public function createGroup(User $user, Course $course)
     {
         if ($course->hasMaxGroups($user))

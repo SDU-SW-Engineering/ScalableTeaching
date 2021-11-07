@@ -167,4 +167,13 @@ class TaskController extends Controller
             'path'      => $username
         ]);
     }
+
+    public function showCreate(Course $course)
+    {
+        $breadcrumbs = [
+            'Courses'     => route('courses.index'),
+            $course->name => null
+        ];
+        return view('courses.create', compact('course', 'breadcrumbs'));
+    }
 }

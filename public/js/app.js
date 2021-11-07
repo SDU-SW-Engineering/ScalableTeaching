@@ -5590,6 +5590,36 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Elements/DateRangePicker.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Elements/DateRangePicker.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  data: function data() {
+    return {
+      date: []
+    };
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Groups.vue?vue&type=script&lang=js&":
 /*!*************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Groups.vue?vue&type=script&lang=js& ***!
@@ -7187,6 +7217,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ["name"],
   data: function data() {
@@ -7471,6 +7502,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__["default"].component('bar-chart', __webpack_req
 vue__WEBPACK_IMPORTED_MODULE_3__["default"].component('groups', __webpack_require__(/*! ./components/Groups */ "./resources/js/components/Groups.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_3__["default"].component("tippy", vue_tippy__WEBPACK_IMPORTED_MODULE_0__.TippyComponent);
 vue__WEBPACK_IMPORTED_MODULE_3__["default"].component("user-select", __webpack_require__(/*! ./components/UserSelect */ "./resources/js/components/UserSelect.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_3__["default"].component("date-range", __webpack_require__(/*! ./components/Elements/DateRangePicker */ "./resources/js/components/Elements/DateRangePicker.vue")["default"]);
 var settings = {
   't-rich-select': {
     component: vue_tailwind_dist_components__WEBPACK_IMPORTED_MODULE_2__.TRichSelect,
@@ -7494,7 +7526,7 @@ var settings = {
         loadingMoreResults: 'pb-2 px-3 text-gray-400 text-sm',
         optionsList: '',
         searchWrapper: 'p-2 placeholder-gray-400',
-        searchBox: 'px-3 py-2 bg-gray-50 dark:bg-gray-600 dark:text-white text-sm rounded border focus:outline-none focus:shadow-outline border-gray-300 dark:border-gray-800',
+        searchBox: 'px-3 py-2 bg-gray-50 dark:bg-gray-600 dark:text-white dark:border-gray-800 text-sm rounded border focus:outline-none focus:shadow-outline border-gray-300 ',
         optgroup: 'text-gray-400 uppercase text-xs py-1 px-2 font-semibold',
         option: '',
         disabledOption: '',
@@ -7510,6 +7542,92 @@ var settings = {
         leaveClass: 'opacity-100',
         leaveActiveClass: 'transition ease-in duration-75',
         leaveToClass: 'opacity-0'
+      }
+    }
+  },
+  't-datepicker': {
+    component: vue_tailwind_dist_components__WEBPACK_IMPORTED_MODULE_2__.TDatepicker,
+    props: {
+      fixedClasses: {
+        navigator: 'flex',
+        navigatorViewButton: 'flex items-center',
+        navigatorViewButtonIcon: 'flex-shrink-0 h-5 w-5',
+        navigatorViewButtonBackIcon: 'flex-shrink-0 h-5 w-5',
+        navigatorLabel: 'flex items-center py-1',
+        navigatorPrevButtonIcon: 'h-6 w-6 inline-flex',
+        navigatorNextButtonIcon: 'h-6 w-6 inline-flex',
+        inputWrapper: 'relative',
+        viewGroup: 'inline-flex flex-wrap',
+        view: 'w-64',
+        calendarDaysWrapper: 'grid grid-cols-7',
+        calendarHeaderWrapper: 'grid grid-cols-7',
+        monthWrapper: 'grid grid-cols-4',
+        yearWrapper: 'grid grid-cols-4',
+        input: 'block w-full px-3 py-2 dark:bg-gray-700 dark:text-white transition duration-100 ease-in-out border rounded dark:border-gray-700 shadow-sm focus:border-lime-green-500 focus:ring-2 focus:ring-lime-green-500 focus:outline-none focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed',
+        clearButton: 'flex flex-shrink-0 items-center justify-center absolute right-0 top-0 m-2 h-6 w-6',
+        clearButtonIcon: 'fill-current h-3 w-3'
+      },
+      classes: {
+        wrapper: 'flex flex-col',
+        dropdownWrapper: 'relative z-10',
+        dropdown: 'origin-top-left absolute rounded shadow dark:bg-gray-700 bg-white overflow-hidden mt-1',
+        enterClass: 'opacity-0 scale-95',
+        enterActiveClass: 'transition transform ease-out duration-100',
+        enterToClass: 'opacity-100 scale-100',
+        leaveClass: 'opacity-100 scale-100',
+        leaveActiveClass: 'transition transform ease-in duration-75',
+        leaveToClass: 'opacity-0 scale-95',
+        inlineWrapper: '',
+        inlineViews: 'rounded bg-white border mt-1 inline-flex',
+        inputWrapper: '',
+        input: 'text-black placeholder-gray-400 border-gray-300',
+        clearButton: 'hover:bg-gray-100 rounded transition duration-100 ease-in-out text-gray-600',
+        clearButtonIcon: '',
+        viewGroup: '',
+        view: '',
+        navigator: 'pt-2 px-3',
+        navigatorViewButton: 'transition ease-in-out duration-100 inline-flex cursor-pointer rounded-full px-2 py-1 -ml-1 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-500',
+        navigatorViewButtonIcon: 'fill-current text-gray-400',
+        navigatorViewButtonBackIcon: 'fill-current text-gray-400',
+        navigatorViewButtonMonth: 'text-gray-700 font-semibold',
+        navigatorViewButtonYear: 'text-gray-500 ml-1 dark:text-lime-green-300',
+        navigatorViewButtonYearRange: 'text-gray-500 ml-1 dark:text-lime-green-300',
+        navigatorLabel: 'py-1',
+        navigatorLabelMonth: 'text-gray-700 font-semibold dark:text-gray-200',
+        navigatorLabelYear: 'text-gray-500 ml-1 dark:text-lime-green-300',
+        navigatorPrevButton: 'transition ease-in-out duration-100 inline-flex cursor-pointer hover:bg-gray-100 rounded-full p-1 ml-2 ml-auto disabled:opacity-50 disabled:cursor-not-allowed',
+        navigatorNextButton: 'transition ease-in-out duration-100 inline-flex cursor-pointer hover:bg-gray-100 rounded-full p-1 -mr-1 disabled:opacity-50 disabled:cursor-not-allowed',
+        navigatorPrevButtonIcon: 'text-gray-400',
+        navigatorNextButtonIcon: 'text-gray-400',
+        calendarWrapper: 'px-3 pt-2',
+        calendarHeaderWrapper: '',
+        calendarHeaderWeekDay: 'uppercase text-xs text-gray-500 w-8 h-8 flex items-center justify-center',
+        calendarDaysWrapper: '',
+        calendarDaysDayWrapper: 'w-full h-8 flex flex-shrink-0 items-center dark:text-gray-200',
+        otherMonthDay: 'text-sm rounded-full w-8 h-8 mx-auto hover:bg-lime-green-100 text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed',
+        emptyDay: '',
+        inRangeFirstDay: 'text-sm bg-lime-green-500 text-white w-full h-8 rounded-l-full',
+        inRangeLastDay: 'text-sm bg-lime-green-500 text-white w-full h-8 rounded-r-full',
+        inRangeDay: 'text-sm bg-lime-green-200 dark:bg-lime-green-400 w-full h-8 disabled:opacity-50 disabled:cursor-not-allowed',
+        selectedDay: 'text-sm rounded-full w-8 h-8 mx-auto bg-lime-green-500 text-white disabled:opacity-50 disabled:cursor-not-allowed',
+        activeDay: 'text-sm rounded-full bg-lime-green-100 w-8 h-8 mx-auto disabled:opacity-50 disabled:cursor-not-allowed',
+        highlightedDay: 'text-sm rounded-full bg-lime-green-200 w-8 h-8 mx-auto disabled:opacity-50 disabled:cursor-not-allowed',
+        day: 'text-sm rounded-full w-8 h-8 mx-auto hover:bg-lime-green-100 dark:hover:bg-lime-green-200 dark:hover:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed',
+        today: 'text-sm rounded-full w-8 h-8 mx-auto hover:bg-lime-green-100 disabled:opacity-50 disabled:cursor-not-allowed border border-lime-green-500',
+        monthWrapper: 'px-3 pt-2',
+        selectedMonth: 'text-sm rounded w-full h-12 mx-auto bg-lime-green-500 text-white',
+        activeMonth: 'text-sm rounded w-full h-12 mx-auto bg-lime-green-100',
+        month: 'text-sm rounded w-full h-12 mx-auto hover:bg-lime-green-100 dark:text-gray-200',
+        yearWrapper: 'px-3 pt-2',
+        year: 'text-sm rounded w-full h-12 mx-auto hover:bg-lime-green-100 dark:text-gray-200',
+        selectedYear: 'text-sm rounded w-full h-12 mx-auto bg-lime-green-500 text-white',
+        activeYear: 'text-sm rounded w-full h-12 mx-auto bg-lime-green-100'
+      },
+      variants: {
+        danger: {
+          input: 'border-red-300 bg-red-50 placeholder-red-200 text-red-900',
+          clearButton: 'hover:bg-red-200 text-red-500'
+        }
       }
     }
   }
@@ -78307,6 +78425,45 @@ component.options.__file = "resources/js/components/BuildTable.vue"
 
 /***/ }),
 
+/***/ "./resources/js/components/Elements/DateRangePicker.vue":
+/*!**************************************************************!*\
+  !*** ./resources/js/components/Elements/DateRangePicker.vue ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _DateRangePicker_vue_vue_type_template_id_3d950750___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DateRangePicker.vue?vue&type=template&id=3d950750& */ "./resources/js/components/Elements/DateRangePicker.vue?vue&type=template&id=3d950750&");
+/* harmony import */ var _DateRangePicker_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DateRangePicker.vue?vue&type=script&lang=js& */ "./resources/js/components/Elements/DateRangePicker.vue?vue&type=script&lang=js&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _DateRangePicker_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _DateRangePicker_vue_vue_type_template_id_3d950750___WEBPACK_IMPORTED_MODULE_0__.render,
+  _DateRangePicker_vue_vue_type_template_id_3d950750___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/Elements/DateRangePicker.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
 /***/ "./resources/js/components/GroupBox.vue":
 /*!**********************************************!*\
   !*** ./resources/js/components/GroupBox.vue ***!
@@ -79088,6 +79245,22 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/Elements/DateRangePicker.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************!*\
+  !*** ./resources/js/components/Elements/DateRangePicker.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_DateRangePicker_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./DateRangePicker.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Elements/DateRangePicker.vue?vue&type=script&lang=js&");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_DateRangePicker_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
 /***/ "./resources/js/components/Groups.vue?vue&type=script&lang=js&":
 /*!*********************************************************************!*\
   !*** ./resources/js/components/Groups.vue?vue&type=script&lang=js& ***!
@@ -79374,6 +79547,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BuildTable_vue_vue_type_template_id_6a5f06ab___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
 /* harmony export */ });
 /* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BuildTable_vue_vue_type_template_id_6a5f06ab___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./BuildTable.vue?vue&type=template&id=6a5f06ab& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/BuildTable.vue?vue&type=template&id=6a5f06ab&");
+
+
+/***/ }),
+
+/***/ "./resources/js/components/Elements/DateRangePicker.vue?vue&type=template&id=3d950750&":
+/*!*********************************************************************************************!*\
+  !*** ./resources/js/components/Elements/DateRangePicker.vue?vue&type=template&id=3d950750& ***!
+  \*********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DateRangePicker_vue_vue_type_template_id_3d950750___WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DateRangePicker_vue_vue_type_template_id_3d950750___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DateRangePicker_vue_vue_type_template_id_3d950750___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./DateRangePicker.vue?vue&type=template&id=3d950750& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Elements/DateRangePicker.vue?vue&type=template&id=3d950750&");
 
 
 /***/ }),
@@ -80449,6 +80639,61 @@ var staticRenderFns = [
     ])
   }
 ]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Elements/DateRangePicker.vue?vue&type=template&id=3d950750&":
+/*!************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/Elements/DateRangePicker.vue?vue&type=template&id=3d950750& ***!
+  \************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render),
+/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    [
+      _c("t-datepicker", {
+        attrs: {
+          range: true,
+          "week-start": 1,
+          "months-per-view": 2,
+          "close-on-select": false
+        },
+        model: {
+          value: _vm.date,
+          callback: function($$v) {
+            _vm.date = $$v
+          },
+          expression: "date"
+        }
+      }),
+      _vm._v(" "),
+      _c("input", {
+        attrs: { type: "hidden", name: "from" },
+        domProps: { value: _vm.date[0] }
+      }),
+      _vm._v(" "),
+      _c("input", {
+        attrs: { type: "hidden", name: "to" },
+        domProps: { value: _vm.date[1] }
+      })
+    ],
+    1
+  )
+}
+var staticRenderFns = []
 render._withStripped = true
 
 

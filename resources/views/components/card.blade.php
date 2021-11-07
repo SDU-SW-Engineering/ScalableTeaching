@@ -1,6 +1,10 @@
-<div>
+<div {{ $attributes }}>
     <div class="shadow-lg">
-        <header class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white rounded-t-lg text-lg px-6 py-4">{{ $header }}
+        <header class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white rounded-t-lg text-lg px-6 py-4 flex justify-between items-center">
+            {{ $header }}
+            @isset($headerCorner)
+                {{ $headerCorner }}
+            @endisset
         </header>
         <div class="bg-white dark:bg-gray-600 rounded-b-lg p-6 ">
             @if($errors->hasBag($name))
@@ -24,7 +28,7 @@
                     </div>
                 </div>
             @endif
-            {{ $content }}
+            {{ $slot }}
         </div>
     </div>
 </div>

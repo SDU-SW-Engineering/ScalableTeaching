@@ -27,6 +27,6 @@ class Card extends Component
      */
     public function render()
     {
-        return view('components.card', ['name' => $this->name, 'header' => $this->header]);
+        return view('components.card');
     }
 }
