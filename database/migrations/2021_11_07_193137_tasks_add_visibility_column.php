@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddEnrollTokenToCourses extends Migration
+class TasksAddVisibilityColumn extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddEnrollTokenToCourses extends Migration
      */
     public function up()
     {
-        Schema::table('courses', function (Blueprint $table) {
-            $table->string('enroll_token')->after('name');
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->boolean('is_visible')->default(false)->after('name');
             $table->unsignedBigInteger('gitlab_group_id')->after('name');
         });
     }
@@ -26,8 +26,8 @@ class AddEnrollTokenToCourses extends Migration
      */
     public function down()
     {
-        Schema::table('courses', function (Blueprint $table) {
-            $table->dropColumn(['enroll_token', 'gitlab_group_id']);
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn(['is_visible', 'gitlab_group_id']);
         });
     }
 }

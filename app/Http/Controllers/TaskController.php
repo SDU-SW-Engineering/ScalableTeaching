@@ -7,10 +7,12 @@ use App\Models\Group;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
+use Gitlab\Exception\RuntimeException;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use Http\Client\Exception;
@@ -175,5 +177,73 @@ class TaskController extends Controller
             $course->name => null
         ];
         return view('courses.create', compact('course', 'breadcrumbs'));
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function store(Course $course, GitLabManager $manager)
+    {
+        $validated = request()->validateWithBag('new', [
+            'name'        => 'required',
+            'description' => 'required',
+            'project-id'  => ['required', 'numeric'],
+            'from'        => ['required', 'date'],
+            'to'          => ['required', 'date'],
+            'start-time'  => ['required', 'date_format:H:i'],
+            'end-time'    => ['required', 'date_format:H:i'],
+        ]);
+
+        try
+        {
+            $manager->projects()->show($validated['project-id']);
+        }
+        catch (RuntimeException $runtimeException)
+        {
+            if ($runtimeException->getCode() == 404)
+                return back()
+                    ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
+                    ->withInput();
+        }
+
+        $snakeName       = Str::snake($validated['name']);
+        $params          = [
+            'name'                      => $validated['name'],
+            'path'                      => $snakeName,
+            'description'               => $validated['description'],
+            'visibility'                => 'private',
+            'parent_id'                 => $course->gitlab_group_id,
+            'default_branch_protection' => 0,
+            'lfs_enabled'               => false,
+            'auto_devops_enabled'       => false,
+            'request_access_enabled'    => false
+        ];
+        $response        = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
+        $groupResponse = json_decode($response->getBody()->getContents(), true);
+        if ($response->getStatusCode() != 201)
+            return back()
+                ->withErrors(['project-id' => 'Couldn\'t create the project. Refrain from using symbols or foreign characters in the name.'], 'new')
+                ->withInput();
+
+
+        /** @var Task $task */
+        $task = $course->tasks()->create([
+            'source_project_id' => $validated['project-id'],
+            'name'              => $validated['name'],
+            'short_description' => $validated['description'],
+            'starts_at'         => Carbon::parse($validated['from'] . " " . $validated['start-time']),
+            'ends_at'           => Carbon::parse($validated['to'] . " " . $validated['end-time']),
+            'gitlab_group_id'   => $groupResponse['id']
+        ]);
+
+        try
+        {
+            $task->reloadDescriptionFromRepo();
+        }
+        catch (\Exception $ignored)
+        {
+        }
+
+        return redirect()->route('courses.manage.index', $course->id);
     }
 }

@@ -13,7 +13,7 @@
         @foreach($courses as $course)
             <div
                 class="shadow-lg hover:shadow-xl border dark:border-gray-800 rounded-xl p-4 bg-white relative overflow-hidden dark:bg-gray-800">
-                <a href="{{ route('courses.show', [$course['id']]) }}" class="w-full h-full block">
+                <a href="{{ route('courses.show', [$course['id']]) }}" class="w-full h-full block flex flex-col justify-between">
                     <div class="w-full">
                         <p class="text-gray-800 dark:text-white text-xl font-medium mb-2">
                             {{ $course['name'] }}
@@ -31,20 +31,22 @@
                             @endif
                         @endunless
                     </div>
-                    <div class="flex items-center justify-between my-2">
-                        <p class="text-gray-300 text-sm">
-                            @if ($course['taskCount'] == 0)
-                                0
-                            @else
-                                {{ $course['completed'] }}/{{ $course['taskCount'] }}
-                            @endif
-                            task completed
-                        </p>
-                    </div>
-                    <div class="w-full h-2 bg-lime-green-200 rounded-full">
-                        <div
-                            style="width: {{ $course['taskCount'] == 0 ? 0 : number_format($course['completed'] / $course['taskCount'] * 100, 2) }}%"
-                            class="h-full text-center text-xs text-white bg-lime-green-600 rounded-full">
+                    <div>
+                        <div class="flex items-center justify-between my-2">
+                            <p class="text-gray-300 text-sm">
+                                @if ($course['taskCount'] == 0)
+                                    0
+                                @else
+                                    {{ $course['completed'] }}/{{ $course['taskCount'] }}
+                                @endif
+                                task completed
+                            </p>
+                        </div>
+                        <div class="w-full h-2 bg-lime-green-200 rounded-full">
+                            <div
+                                style="width: {{ $course['taskCount'] == 0 ? 0 : number_format($course['completed'] / $course['taskCount'] * 100, 2) }}%"
+                                class="h-full text-center text-xs text-white bg-lime-green-600 rounded-full">
+                            </div>
                         </div>
                     </div>
                 </a>

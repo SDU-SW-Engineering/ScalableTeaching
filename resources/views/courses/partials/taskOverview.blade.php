@@ -49,7 +49,7 @@
                     <dt class="sr-only">Category</dt>
                     <dd class="group-hover:text-lime-green-200 text-sm font-medium text-gray-500 dark:text-gray-400">
                         <div class="w-full bg-gray-400 rounded-full h-2.5">
-                            <div class="bg-lime-green-400 h-2.5 rounded-full" style="width: {{ $task->participants()->where('project_status', "finished")->count() / $task->participants()->count() * 100 }}%"></div>
+                            <div class="bg-lime-green-400 h-2.5 rounded-full" style="width: {{ $task->participants()->count() == 0 ? 0 : $task->participants()->where('project_status', "finished")->count() / $task->participants()->count() * 100 }}%"></div>
                         </div>
                     </dd>
                 </div>

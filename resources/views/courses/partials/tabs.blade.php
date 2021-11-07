@@ -34,24 +34,6 @@
         </a>
     </div>
     <div class="flex">
-        @can('createTask', $course)
-            <a href="{{ route('courses.tasks.create', $course->id) }}"
-                @class([
-                request()->is('courses/*/tasks/new')
-                     ?  'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700'
-                     : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300',
-                 'py-2 px-3 rounded-md font-semibold flex items-center'
-                 ])>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                <span>
-                    Create Task
-                </span>
-            </a>
-        @endcan
         @can('manage', $course)
             <a href="{{ route('courses.manage.index', $course->id) }}"
                 @class([

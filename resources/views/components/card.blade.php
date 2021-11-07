@@ -17,11 +17,11 @@
                               clip-rule="evenodd"/>
                     </svg>
                     <div class="text-red-900">
-                        <div class="font-medium">There were {{ $errors->name->count() }} errors with your
+                        <div class="font-medium">There were {{ $errors->getBag($name)->count() }} errors with your
                             form
                         </div>
                         <ul class="list-disc list-inside text-sm">
-                            @foreach($errors->name->all() as $error)
+                            @foreach($errors->getBag($name)->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>

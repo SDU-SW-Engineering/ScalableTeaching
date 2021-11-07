@@ -21,9 +21,9 @@ class AnalyticsController extends Controller
         $projectCount    = $task->projects()->count();
         $projectsToday   = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
         $finishedCount   = $task->projects()->where('status', 'finished')->count();
-        $finishedPercent = $finishedCount / $projectCount * 100;
+        $finishedPercent = $projectCount == 0 ? 0 : $finishedCount / $projectCount * 100;
         $failedCount     = $task->projects()->where('status', 'failed')->count();
-        $failedPercent   = $failedCount / $projectCount * 100;
+        $failedPercent   = $projectCount == 0 ? 0 : $failedCount / $projectCount * 100;
         $buildCount      = $task->jobs()->count();
         $buildsToday     = $task->jobs()->whereRaw("date(job_statuses.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
 
