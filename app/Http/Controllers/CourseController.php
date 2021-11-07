@@ -61,7 +61,7 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $tasks = $course->tasks->each(function (Task $task)
+        $tasks = $course->tasks()->where('is_visible', true)->get()->each(function (Task $task)
         {
             $task->project = $task->currentProjectForUser(auth()->user());
         });
@@ -108,7 +108,8 @@ class CourseController extends Controller
             'breadcrumbs'        => [
                 'Courses'     => route('courses.index'),
                 $course->name => null
-            ]
+            ],
+            'tasks'              => $tasks
         ]);
     }
 
