@@ -25,6 +25,8 @@
                         @break
                     @endswitch
                 </span>
+            @elseif($task->project == null && $task->ends_at->isPast())
+                <span class="px-3 py-1 text-sm font-bold text-gray-100 transform rounded bg-red-500">Failed</span>
             @endif
         </div>
 

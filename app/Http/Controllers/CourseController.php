@@ -82,6 +82,8 @@ class CourseController extends Controller
         $taskCount = $tasks->count();
         $failed    = $tasks->filter(function ($task)
         {
+            if ($task->project == null && $task->ends_at->isPast())
+                return true;
             if ($task->project == null) // todo: php8 ?->
                 return false;
             return $task->project->status == 'overdue';

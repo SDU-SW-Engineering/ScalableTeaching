@@ -19,10 +19,16 @@
                             {{ $course['name'] }}
                         </p>
                         @unless($course['next_deadline'] == null)
-                            <p class="text-lime-green-600 text-xs font-medium mb-2">
-                                Next Due Date: <b>{{ $course['next_deadline']->toFormattedDateString() }}
-                                    , {{ $course['next_deadline']->diffForHumans() }}</b>
-                            </p>
+                            @if ($course['next_deadline']->isFuture())
+                                <p class="text-lime-green-600 text-xs font-medium mb-2">
+                                    Next Due Date: <b>{{ $course['next_deadline']->toFormattedDateString() }}
+                                        , {{ $course['next_deadline']->diffForHumans() }}</b>
+                                </p>
+                            @else
+                                <p class="text-lime-green-600 text-xs font-medium mb-2">
+                                    No upcoming tasks.
+                                </p>
+                            @endif
                         @endunless
                     </div>
                     <div class="flex items-center justify-between my-2">
