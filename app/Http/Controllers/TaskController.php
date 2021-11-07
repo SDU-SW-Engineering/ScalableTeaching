@@ -147,7 +147,7 @@ class TaskController extends Controller
 
         $dbProject = $owner->projects()->updateOrCreate([
             'project_id' => $project['id'],
-            'task_id'    => Task::first()->id,
+            'task_id'    => $task->id,
             'repo_name'  => $project['name'],
         ]);
 
@@ -172,8 +172,8 @@ class TaskController extends Controller
             'namespace_id' => $groupId,
         ];
 
-        $id = rawurlencode((string)$sourceProjectId);
-        $response      = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
+        $id       = rawurlencode((string)$sourceProjectId);
+        $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
         return json_decode($response->getBody()->getContents(), true);
     }
 
