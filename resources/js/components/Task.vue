@@ -164,7 +164,7 @@ export default {
                     _token: this.csrf,
                     as: createAs
                 });
-                //location.reload();
+                location.reload();
             } catch (e) {
                 if (e.response.status === 404) {
                     location.reload();

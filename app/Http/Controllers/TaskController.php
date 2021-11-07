@@ -120,7 +120,8 @@ class TaskController extends Controller
 
         $project = $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
         $project->addUsersToGitlab($registeredGitLabUsers->pluck('gitlab_id', 'name'), $warnings);
-        $project->unprotectBranches();
+        #$project->unprotectBranches();
+        $project->disableForking();
         if (is_array($warnings) && count($warnings) > 0)
             session()->flash('warning', implode("<br>", $warnings));
 
@@ -139,10 +140,10 @@ class TaskController extends Controller
     private function createProject(GitLabManager $manager, Task $task, string $name, $owner) : Project
     {
         $resultPager = new ResultPager($manager->connection());
-        $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [1167]));
+        $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [$task->gitlab_group_id]));
         $project     = $projects->firstWhere('name', $name);
         if ($project == null)
-            $project = $this->forkProject($manager, $name);
+            $project = $this->forkProject($manager, $name, $task->source_project_id, $task->gitlab_group_id);
 
         $dbProject = $owner->projects()->updateOrCreate([
             'project_id' => $project['id'],
@@ -163,13 +164,17 @@ class TaskController extends Controller
         return $dbProject;
     }
 
-    private function forkProject(GitLabManager $manager, $username)
+    private function forkProject(GitLabManager $manager, $username, int $sourceProjectId, $groupId)
     {
-        return $manager->projects()->fork(2557, [
-            'namespace' => 'webtech/assignment-1',
-            'name'      => $username,
-            'path'      => $username
-        ]);
+        $params = [
+            'name'         => $username,
+            'path'         => $username,
+            'namespace_id' => $groupId,
+        ];
+
+        $id = rawurlencode((string)$sourceProjectId);
+        $response      = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     public function showCreate(Course $course)

@@ -7108,31 +7108,32 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 6:
                 response = _context.sent;
-                _context.next = 16;
+                location.reload();
+                _context.next = 17;
                 break;
 
-              case 9:
-                _context.prev = 9;
+              case 10:
+                _context.prev = 10;
                 _context.t0 = _context["catch"](3);
 
                 if (!(_context.t0.response.status === 404)) {
-                  _context.next = 14;
+                  _context.next = 15;
                   break;
                 }
 
                 location.reload();
                 return _context.abrupt("return");
 
-              case 14:
+              case 15:
                 this.errorMessage = _context.t0.response.data.message;
                 this.startingAssignment = false;
 
-              case 16:
+              case 17:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[3, 9]]);
+        }, _callee, this, [[3, 10]]);
       }));
 
       function startAssignment(_x) {

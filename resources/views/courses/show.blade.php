@@ -5,7 +5,7 @@
         @include('courses.partials.tabs')
         <div class="flex gap-6 flex-wrap-reverse">
             <div class="flex-1 w-full lg:w-2/3 xl:w-3/4">
-                @if($tasks->empty())
+                @if($tasks->count() == 0)
                     <h1 class="dark:text-gray-400 w-full text-center mt-12 text-xl">No tasks available. Check back later.</h1>
                 @else
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">

@@ -173,6 +173,28 @@ class Project extends Model
         while ($tries != 0);
     }
 
+    public function disableForking()
+    {
+        $gitLabManager = app(GitLabManager::class);
+        $tries         = 3;
+        do
+        {
+            sleep(1);  // todo: this should be switched out with a queue worker that is delayed
+            $project = $gitLabManager->projects()->show($this->project_id);
+            if ($project['import_error'] != null)
+                break;
+            if ($project['import_status'] == 'finished')
+            {
+                $gitLabManager->projects()->update($this->project_id, [
+                    'forking_access_level' => 'disabled'
+                ]);
+                break;
+            }
+            $tries--;
+        }
+        while ($tries != 0);
+    }
+
     public function getDurationAttribute()
     {
         if ($this->finished_at == null)
