@@ -6,7 +6,17 @@
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             @include('courses.partials.taskOverview')
             <x-card name="new" header="New Task" class="xl:col-span-2">
-                <form method="post" action="{{ route('courses.tasks.store', $course) }}">
+                <x-slot name="headerCorner">
+                    <a href="{{ route('courses.manage.index', $course) }}"
+                       class="bg-lime-green-500 flex text-sm items-center px-1 py-0.5 rounded-md hover:bg-lime-green-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </a>
+                </x-slot>
+                <form method="post" action="{{ route('courses.manage.storeTask', $course) }}">
                     @csrf
                     <div class="mb-6 grid grid-cols-2 gap-4">
                         <div>

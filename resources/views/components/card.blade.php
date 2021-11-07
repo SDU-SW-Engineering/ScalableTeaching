@@ -1,12 +1,26 @@
 <div {{ $attributes }}>
     <div class="shadow-lg">
-        <header class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white rounded-t-lg text-lg px-6 py-4 flex justify-between items-center">
+        <header
+            class="bg-gray-200 dark:bg-gray-900 text-black dark:text-white rounded-t-lg text-lg px-6 py-4 flex justify-between items-center">
             {{ $header }}
             @isset($headerCorner)
                 {{ $headerCorner }}
             @endisset
         </header>
-        <div class="bg-white dark:bg-gray-600 rounded-b-lg p-6 ">
+        <div class="bg-white dark:bg-gray-600 rounded-b-lg p-6">
+            @if(session()->has('success-' . $name))
+                <div class="bg-lime-green-200 px-3 py-4 flex rounded mb-4 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-lime-green-500 mr-3" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <div class="text-lime-green-900">
+                        <div class="font-medium">
+                            {{ session('success-' . $name) }}
+                        </div>
+                    </div>
+                </div>
+            @endif
             @if($errors->hasBag($name))
                 <div class="bg-red-200 px-3 py-4 flex rounded mb-4 items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 mr-3"

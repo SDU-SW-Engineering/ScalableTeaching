@@ -77,6 +77,7 @@ class TaskController extends Controller
 
     public function doCreateProject(Course $course, Task $task, GitLabManager $gitLabManager)
     {
+        abort_if($task->starts_at->isFuture(), 410, "The task hasn't started.");
         abort_if($task->ends_at->isPast(), 410, "The task has ended.");
 
         $isSolo            = request('as', 'solo') == 'solo';
@@ -176,7 +177,17 @@ class TaskController extends Controller
             'Courses'     => route('courses.index'),
             $course->name => null
         ];
-        return view('courses.create', compact('course', 'breadcrumbs'));
+        return view('courses.manage.createTask', compact('course', 'breadcrumbs'));
+    }
+
+    public function edit(Course $course, Task $task)
+    {
+        $breadcrumbs = [
+            'Courses'     => route('courses.index'),
+            $course->name => null
+        ];
+
+        return view('courses.manage.editTask', compact('course', 'task', 'breadcrumbs'));
     }
 
     /**
@@ -206,8 +217,8 @@ class TaskController extends Controller
                     ->withInput();
         }
 
-        $snakeName       = Str::snake($validated['name']);
-        $params          = [
+        $snakeName     = Str::snake($validated['name']);
+        $params        = [
             'name'                      => $validated['name'],
             'path'                      => $snakeName,
             'description'               => $validated['description'],
@@ -218,7 +229,7 @@ class TaskController extends Controller
             'auto_devops_enabled'       => false,
             'request_access_enabled'    => false
         ];
-        $response        = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
+        $response      = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
         $groupResponse = json_decode($response->getBody()->getContents(), true);
         if ($response->getStatusCode() != 201)
             return back()
@@ -245,5 +256,46 @@ class TaskController extends Controller
         }
 
         return redirect()->route('courses.manage.index', $course->id);
+    }
+
+    public function update(Course $course, Task $task)
+    {
+        $validated = request()->validateWithBag('task', [
+            'name'        => 'required',
+            'description' => 'required',
+            'from'        => ['required', 'date', 'before:to'],
+            'to'          => ['required', 'date', 'after:from'],
+            'start-time'  => ['required', 'date_format:H:i',],
+            'end-time'    => ['required', 'date_format:H:i'],
+        ]);
+
+        $task->update([
+            'name'              => $validated['name'],
+            'short_description' => $validated['description'],
+            'starts_at'         => Carbon::parse($validated['from'] . " " . $validated['start-time']),
+            'ends_at'           => Carbon::parse($validated['to'] . " " . $validated['end-time']),
+        ]);
+
+        return redirect()->back()->with('success-task', 'The changes were saved.');
+    }
+
+    public function toggleVisibility(Course $course, Task $task)
+    {
+        $task->is_visible = ! $task->is_visible;
+        $task->save();
+        return redirect()->back()->with('success-task', 'The visibility was updated.');
+    }
+
+    public function refreshReadme(Course $course, Task $task)
+    {
+        try
+        {
+            $task->reloadDescriptionFromRepo();
+        }
+        catch (\Exception $exception)
+        {
+        }
+
+        return redirect()->back()->with('success-task', 'The readme was updated.');
     }
 }

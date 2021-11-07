@@ -62,6 +62,8 @@ class Task extends Model
 
     protected $dates = ['ends_at', 'starts_at'];
 
+    protected $casts = ['is_visible' => 'bool'];
+
     public function reloadDescriptionFromRepo()
     {
         $gitlabManager = app(GitLabManager::class);
