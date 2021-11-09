@@ -146,12 +146,10 @@ class Task extends Model
             return $groupProject;
 
         /** @var Project $project */
-        $project = $user->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
+        return $this->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
         {
             $query->where('id', $user->id);
         })->first();
-
-        return $project;
     }
 
     /**

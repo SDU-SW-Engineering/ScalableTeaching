@@ -7,6 +7,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
 
@@ -85,3 +86,12 @@ Route::get('random-name', function ()
 {
     return PhraseGenerator::generate();
 })->middleware('auth');
+
+if (app()->environment('local'))
+{
+    Route::get('impersonate/{user}', function ($user)
+    {
+        auth()->login(User::findOrFail($user));
+        return "authed";
+    });
+}
