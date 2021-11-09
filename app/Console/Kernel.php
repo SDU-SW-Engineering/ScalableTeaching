@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\LoadCurrentProjects;
 use App\Console\Commands\LoadOldReports;
+use App\Console\Commands\MarkExpiredProjects;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -16,7 +17,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         LoadCurrentProjects::class,
-        LoadOldReports::class
+        LoadOldReports::class,
+        MarkExpiredProjects::class
     ];
 
     /**

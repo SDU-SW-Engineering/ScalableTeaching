@@ -15,7 +15,7 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::all()->map(function ($course)
+        $courses = auth()->user()->courses->map(function ($course)
         {
             $tasks = $course->tasks->each(function (Task $task)
             {
@@ -61,7 +61,7 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $tasks = $course->tasks->each(function (Task $task)
+        $tasks = $course->tasks()->where('is_visible', true)->get()->each(function (Task $task)
         {
             $task->project = $task->currentProjectForUser(auth()->user());
         });
@@ -82,6 +82,8 @@ class CourseController extends Controller
         $taskCount = $tasks->count();
         $failed    = $tasks->filter(function ($task)
         {
+            if ($task->project == null && $task->ends_at->isPast())
+                return true;
             if ($task->project == null) // todo: php8 ?->
                 return false;
             return $task->project->status == 'overdue';
@@ -106,7 +108,8 @@ class CourseController extends Controller
             'breadcrumbs'        => [
                 'Courses'     => route('courses.index'),
                 $course->name => null
-            ]
+            ],
+            'tasks'              => $tasks
         ]);
     }
 
@@ -153,7 +156,7 @@ class CourseController extends Controller
         ])->validateWithBag('teachers');
 
         $user = User::find($validated['teacher']);
-        $course->teachers()->syncWithoutDetaching($user);
+        $course->teachers()->syncWithoutDetaching([$user->id => ['role' => 'teacher']]);
 
         return redirect()->back();
     }
@@ -166,5 +169,21 @@ class CourseController extends Controller
         $course->teachers()->detach($teacher);
 
         return redirect()->back();
+    }
+
+    public function showEnroll(Course $course)
+    {
+        if ($course->enroll_token != request('token'))
+            return redirect()->route('home')->withError('Invalid course token');
+
+        if ($course->users()->where(['user_id' => auth()->id()])->exists())
+            return redirect()->route('courses.show', [$course->id]);
+
+        if ( ! request()->has('confirm'))
+            return view('courses.enroll-dialog', compact('course'));
+
+        $course->users()->attach(auth()->id(), ['role' => 'student']);
+
+        return redirect()->route('courses.show', [$course->id]);
     }
 }

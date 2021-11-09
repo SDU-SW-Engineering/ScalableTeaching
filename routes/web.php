@@ -21,10 +21,12 @@ Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'
 Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth'], function ()
 {
     Route::get('/', [CourseController::class, 'index'])->name('index');
-    Route::get('{course}', [CourseController::class, 'show'])->name('show');
+    Route::get('{course}/enroll', [CourseController::class, 'showEnroll'])->name('enroll');
 
-    Route::group(['prefix' => '{course}'], function ()
+    Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function ()
     {
+        Route::get('/', [CourseController::class, 'show'])->name('show');
+
         Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function ()
         {
             Route::get('{task}', [TaskController::class, 'show'])->name('show');
@@ -59,6 +61,12 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function ()
         {
             Route::get('/', [CourseController::class, 'showManage'])->name('index')->middleware('can:manage,course');
+            Route::get('tasks/create', [TaskController::class, 'showCreate'])->name('createTask')->middleware('can:manage,course');
+            Route::get('tasks/{task}/edit', [TaskController::class, 'edit'])->name('editTask')->middleware('can:manage,course');
+            Route::patch('tasks/{task}/edit', [TaskController::class, 'update'])->name('updateTask')->middleware('can:manage,course');
+            Route::get('tasks/{task}/toggle-visibility', [TaskController::class, 'toggleVisibility'])->name('toggleVisibility')->middleware('can:manage,course');
+            Route::get('tasks/{task}/refresh-readme', [TaskController::class, 'refreshReadme'])->name('refreshReadme')->middleware('can:manage,course');
+            Route::post('tasks', [TaskController::class, 'store'])->name('storeTask')->middleware('can:manage,course');
             Route::post('add-teacher', [CourseController::class, 'addTeacher'])->name('addTeacher')->middleware('can:manage,course');
             Route::get('teachers/{teacher}/remove', [CourseController::class, 'removeTeacher'])->name('removeTeacher')->middleware('can:manage,course');
         });

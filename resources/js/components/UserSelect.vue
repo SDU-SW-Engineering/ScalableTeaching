@@ -16,7 +16,8 @@
                         </svg>
                     </span>
                     <div class="flex flex-col ml-2 text-gray-800 dark:text-gray-100">
-                        <strong>{{ option.raw.name }}</strong>
+                        <strong>{{ option.
+                            raw.name }}</strong>
                         <span class="text-sm leading-tight text-gray-700 dark:text-gray-400">{{
                                 option.raw.email
                             }}</span>

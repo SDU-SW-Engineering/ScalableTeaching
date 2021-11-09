@@ -55,9 +55,14 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['description', 'markdown_description'];
+    protected $fillable = [
+        'description', 'markdown_description', 'source_project_id', 'name',
+        'short_description', 'starts_at', 'ends_at', 'gitlab_group_id'
+    ];
 
     protected $dates = ['ends_at', 'starts_at'];
+
+    protected $casts = ['is_visible' => 'bool'];
 
     public function reloadDescriptionFromRepo()
     {
@@ -206,5 +211,19 @@ class Task extends Model
             $file->sha_values = array_unique($shaValues);
             $file->save();
         });
+    }
+
+    public function participants() : \Illuminate\Support\Collection
+    {
+        return $this->projects->reject(function (Project $project)
+        {
+            return $project->ownable_type == null;
+        })->map(function (Project $project)
+        {
+            return $project->owners()->each(function (User $user) use ($project)
+            {
+                $user->project_status = $project->status;
+            });
+        })->flatten();
     }
 }

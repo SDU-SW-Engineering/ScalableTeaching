@@ -103,4 +103,11 @@ class User extends Authenticatable
     {
         return \Str::kebab($this->username);
     }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class)
+            ->as(CourseUser::class)
+            ->withTimestamps();
+    }
 }

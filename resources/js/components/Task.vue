@@ -48,11 +48,11 @@
                     <div
                         class="absolute bg-white p-4 rounded-md shadow-md max-vh70 overflow-x-hidden overflow-scroll dark:bg-gray-800">
                         <div class="prose-sm dark:prose-light"
-                             :class="[hideMissingAssignmentWarning || project != null ? '': 'filter blur-sm']"
+                             :class="[hideMissingAssignmentWarning || project != null || progress.ended ? '': 'filter blur-sm']"
                              v-html="description"/>
                     </div>
                     <div class="absolute flex w-full justify-center"
-                         v-if="!hideMissingAssignmentWarning && project == null">
+                         v-if="!hideMissingAssignmentWarning && project == null && !progress.ended">
                         <div
                             class="bg-white shadow-lg border border-lime-green-600 dark:border-lime-green-400 px-4 py-6 rounded-md mt-8 dark:bg-gray-800">
                             <div class="flex justify-center items-center">
@@ -118,11 +118,11 @@
                 <warning :message="warning" v-if="warning.length > 0"></warning>
                 <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
                              :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
-                             v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null"></not-started>
+                             v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null && !progress.ended"></not-started>
                 <started :project="project" :progress="progress"
                          v-if="project != null && project.status === 'active'"></started>
                 <completed v-if="project != null && project.status === 'finished'" :validation="project.validationStatus"></completed>
-                <overdue v-if="project != null && project.status === 'overdue'"></overdue>
+                <overdue v-if="(project != null && project.status === 'overdue') || (progress.ended && project == null)"></overdue>
                 <div class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>

@@ -1,14 +1,18 @@
 @extends('master')
 
 @section('content')
-    <section class="bg-gray-800">
+    <section class="bg-gray-800 relative">
+        @if(session()->has('error'))
+        <div class="bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700 absolute" style="left: 50%; transform: translateX(-50%);" role="alert">
+            {{ session('error') }}
+        </div>
+        @endif
         <nav class="container p-6 mx-auto lg:flex lg:justify-between lg:items-center">
             <div class="flex items-center justify-between">
                 <div>
                     <a class="text-2xl font-bold text-gray-800 dark:text-white lg:text-3xl hover:text-gray-700 dark:hover:text-gray-300"
                        href="#">WebTech</a>
                 </div>
-
                 <div class="flex lg:hidden">
                     <button @click="show = !show" type="button"
                             class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600"
@@ -49,7 +53,6 @@
                         Get Started Now
                     </a>
                 </div>
-
             </div>
         </div>
     </section>

@@ -25,6 +25,8 @@
                         @break
                     @endswitch
                 </span>
+            @elseif($task->project == null && $task->ends_at->isPast())
+                <span class="px-3 py-1 text-sm font-bold text-gray-100 transform rounded bg-red-500">Failed</span>
             @endif
         </div>
 
@@ -70,8 +72,8 @@
                     </svg>
                 </a>
             @endcan
-            @can('update', $task)
-                <a href="#"
+            @can('manage', $course)
+                <a href="{{ route('courses.manage.editTask', [$course->id, $task->id]) }}"
                    class="flex items-center px-2 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-gray-300 dark:bg-gray-600 rounded-md text-gray-700 dark:text-white dark:hover:bg-gray-700 hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-80">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path
