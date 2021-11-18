@@ -3,6 +3,7 @@
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GradingController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
@@ -57,6 +58,10 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
                 ->middleware('can:delete,groupInvitation');
             Route::delete('{group}/members/{user}', [GroupController::class, 'removeMember'])->name('removeMember')
                 ->middleware('can:removeMember,group,user');
+        });
+
+        Route::group(['prefix' => 'grading', 'as' => 'grading.'], function() {
+            Route::get('/', [GradingController::class, 'index'])->name('index');
         });
 
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function ()
