@@ -84,16 +84,9 @@ class CourseController extends Controller
         {
             if ($task->project == null && $task->ends_at->isPast())
                 return true;
-            if ($task->project == null) // todo: php8 ?->
-                return false;
-            return $task->project->status == 'overdue';
+            return $task->project?->status == 'overdue';
         })->count();
-        $approved  = $tasks->filter(function ($task)
-        {
-            if ($task->project == null) // todo: php8 ?->
-                return false;
-            return $task->project->status == 'finished';
-        })->count();
+        $approved  = $tasks->filter(fn (Task $task) => $task->project?->status == 'finished')->count();
 
         return view('courses.show', [
             'course'             => $course,

@@ -63,13 +63,13 @@ class Course extends Model
     public function hasMaxGroups(User $user) : bool
     {
         $currentCount = $this->userGroups($user)->count();
-        // todo: switch to match statement when using php8 in production
-        if ($this->max_groups == 'same_as_assignments')
-            $upperLimit = $this->tasks()->count();
-        else if ($this->max_groups == 'custom')
-            $upperLimit = $this->max_groups_amount;
-        else
-            $upperLimit = 0;
+
+        $upperLimit = match ($this->max_groups)
+        {
+            'same_as_assignments' => $this->tasks()->count(),
+            'custom'              => $this->max_groupss_amount,
+            default               => 0
+        };
 
         return $currentCount >= $upperLimit;
     }

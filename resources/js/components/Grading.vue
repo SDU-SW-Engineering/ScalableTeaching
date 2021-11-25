@@ -1,34 +1,89 @@
 <template>
     <div>
-        <div>
-            <input type="text" placeholder="Filter"
-                   class="mb-4 bg-gray-50 flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-l-lg focus:outline-none focus:ring-2 focus:ring-lime-green-600  block w-full p-2.5 dark:bg-gray-700 dark:border-gray-700 dark:text-gray-200"/>
-            lol
+        <div class="flex flex-col bg-gray-700 rounded-md px-4 py-3 mb-3">
+            <div class="flex justify-between items-start mb-2">
+                <span class="text-sm text-gray-400">Filter</span>
+                <button @click="expanded = !expanded" class="hover:bg-gray-600 rounded-lg p-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
+                         :class="{'transform rotate-180': expanded}" fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" placeholder="Name" v-model="filter"
+                   class="mb-3 bg-gray-50 flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-green-600  block w-full p-2.5 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"/>
+            <transition name="slide">
+                <div v-if="expanded">
+                    <div class="flex items-center bg-gray-800 rounded-lg p-3 mt-3" v-for="(taskName, taskId) in tasks">
+                        <span class="text-sm text-gray-200 flex-grow">{{ taskName }}</span>
+                        <div>
+                            <button @click="$set(toggleTasks[taskId], 'unbegun', !toggleTasks[taskId].unbegun)"
+                                    :class="[toggleTasks[taskId].unbegun ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
+                                    class="text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors">
+                                Unbegun
+                            </button>
+                            <button
+                                @click="$set(toggleTasks[taskId], 'overdue', !toggleTasks[taskId].overdue)"
+                                :class="[toggleTasks[taskId].overdue ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
+                                class="text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors">
+                                Failed
+                            </button>
+                            <button
+                                @click="$set(toggleTasks[taskId], 'active', !toggleTasks[taskId].active)"
+                                :class="[toggleTasks[taskId].active ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
+                                class="text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors">
+                                In
+                                Progress
+                            </button>
+                            <button
+                                @click="$set(toggleTasks[taskId], 'finished', !toggleTasks[taskId].finished)"
+                                :class="[toggleTasks[taskId].finished ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
+                                class="text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors">
+                                Finished
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </transition>
         </div>
         <table class="w-full text-white">
             <thead>
             <tr>
                 <th class="text-left">Student</th>
-                <th>Task 1</th>
-                <th>Task 2</th>
+                <th v-for="task in tasks">{{ task }}</th>
             </tr>
             </thead>
             <tbody>
-            <tr class="hover:bg-gray-700 hover:rounded-lg">
-                <td class="py-2 px-1">Niels Faurskov</td>
-                <td class="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-full text-lime-green-300" fill="none"
+            <tr v-for="grade in filteredGrades" class="hover:bg-gray-700">
+                <td class="py-2 px-1">{{ grade.student.name }}</td>
+
+                <td class="text-center" v-for="task in grade.tasks">
+                    <svg v-if="task.grade === 'finished'" xmlns="http://www.w3.org/2000/svg"
+                         class="h-6 w-full text-lime-green-300" fill="none"
                          viewBox="0 0 24 24"
                          stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M5 13l4 4L19 7"/>
                     </svg>
-                </td>
-                <td class="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-full text-red-300 fill-current" fill="none"
-                         viewBox="0 0 24 24">
-                        <path
-                            d="M15.566 11.021A7.016 7.016 0 0 0 19 5V4h1V2H4v2h1v1a7.016 7.016 0 0 0 3.434 6.021c.354.208.566.545.566.9v.158c0 .354-.212.69-.566.9A7.016 7.016 0 0 0 5 19v1H4v2h16v-2h-1v-1a7.014 7.014 0 0 0-3.433-6.02c-.355-.21-.567-.547-.567-.901v-.158c0-.355.212-.692.566-.9zM17 19v1H7v-1a5.01 5.01 0 0 1 2.45-4.299A3.111 3.111 0 0 0 10.834 13h2.332c.23.691.704 1.3 1.385 1.702A5.008 5.008 0 0 1 17 19z"></path>
+                    <svg v-else-if="task.grade === 'overdue'" xmlns="http://www.w3.org/2000/svg"
+                         class="h-6 w-full text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <svg v-else-if="task.grade === 'active'" xmlns="http://www.w3.org/2000/svg"
+                         class="h-6 w-full text-blue-300"
+                         fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-full text-gray-300" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </td>
             </tr>
@@ -36,3 +91,93 @@
         </table>
     </div>
 </template>
+
+<script>
+import _ from "lodash";
+
+export default {
+    props: {
+        grades: {
+            type: Object,
+            required: true
+        },
+        tasks: {
+            type: Object,
+            required: true
+        }
+    },
+    data() {
+        return {
+            expanded: false,
+            filter: "",
+            toggleTasks: {},
+        }
+    },
+    computed: {
+        filteredGrades: function () {
+            return _.filter(this.grades, function (grade) {
+                let found = (new RegExp(this.filter, "i")).test(grade.student.name);
+
+                for (const task of grade.tasks) {
+
+                    if (this.toggleTasks[task.task.id] === undefined)
+                        continue;
+                    if (this.toggleTasks[task.task.id].unbegun === false
+                        && this.toggleTasks[task.task.id].finished === false
+                        && this.toggleTasks[task.task.id].active === false
+                        && this.toggleTasks[task.task.id].overdue === false)
+                        continue;
+                    let lookFor = task.grade === null ? 'unbegun' : task.grade;
+                    found &= this.toggleTasks[task.task.id][lookFor];
+                }
+
+                return found;
+            }.bind(this));
+        }
+    },
+    mounted() {
+        for (const [taskId, taskName] of Object.entries(this.tasks)) {
+            this.$set(this.toggleTasks, taskId, {
+                unbegun: false,
+                finished: false,
+                active: false,
+                overdue: false
+            })
+        }
+    }
+}
+</script>
+
+<style>
+.slide-enter-active {
+    -moz-transition-duration: 0.3s;
+    -webkit-transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -moz-transition-timing-function: ease-in;
+    -webkit-transition-timing-function: ease-in;
+    -o-transition-timing-function: ease-in;
+    transition-timing-function: ease-in;
+}
+
+.slide-leave-active {
+    -moz-transition-duration: 0.3s;
+    -webkit-transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+}
+
+.slide-enter-to, .slide-leave {
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.slide-enter, .slide-leave-to {
+    overflow: hidden;
+    max-height: 0;
+}
+</style>

@@ -224,4 +224,24 @@ class Task extends Model
             });
         })->flatten();
     }
+
+    public function grades()
+    {
+        /** @var Collection $students */
+        $students   = $this->course->students;
+        $overridden = OverrideGrade::whereIn('user_id', $students->pluck('id'))->where('task_id', $this->id)
+            ->select('user_id', 'status')->pluck('status', 'user_id');
+
+        $groupUserStatus = GroupUser::whereIn('group_user.user_id', $students->pluck('id'))
+            ->where('projects.ownable_type', Group::class)
+            ->where('task_id', $this->id)
+            ->leftJoin('projects', 'group_user.group_id', '=', 'projects.ownable_id')
+            ->pluck('status', 'user_id');
+        $userStatus      = Project::whereIn('ownable_id', $students->pluck('id'))
+            ->where('ownable_type', User::class)
+            ->where('task_id', $this->id)
+            ->pluck('projects.status', 'ownable_id');
+
+        return collect($overridden->toArray() + $groupUserStatus->toArray() + $userStatus->toArray());
+    }
 }

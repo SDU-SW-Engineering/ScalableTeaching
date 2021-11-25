@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -59,7 +60,8 @@ class Project extends Model
     protected $dates = ['finished_at'];
 
     protected $casts = [
-        'validation_errors' => 'array'
+        'validation_errors' => 'array',
+        'status'            => ProjectStatus::class
     ];
 
     protected $hidden = ['final_commit_sha', 'validation_errors', 'validated_at'];
