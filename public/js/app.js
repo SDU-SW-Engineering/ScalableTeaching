@@ -5645,20 +5645,45 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _Modal_Modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Modal/Modal */ "./resources/js/components/Modal/Modal.vue");
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -5754,7 +5779,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  components: {
+    Modal: _Modal_Modal__WEBPACK_IMPORTED_MODULE_1__["default"]
+  },
   props: {
     grades: {
       type: Object,
@@ -5769,10 +5798,42 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     return {
       expanded: false,
       filter: "",
-      toggleTasks: {}
+      toggleTasks: {},
+      selectedStudent: null
     };
   },
+  methods: {
+    resetFilters: function resetFilters() {
+      for (var _i = 0, _Object$entries = Object.entries(this.tasks); _i < _Object$entries.length; _i++) {
+        var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+            taskId = _Object$entries$_i[0],
+            taskName = _Object$entries$_i[1];
+
+        this.$set(this.toggleTasks, taskId, {
+          unbegun: false,
+          finished: false,
+          active: false,
+          overdue: false
+        });
+        this.filter = "";
+      }
+    }
+  },
   computed: {
+    filtersApplied: function filtersApplied() {
+      if (this.filter !== "") return true;
+
+      for (var _i2 = 0, _Object$entries2 = Object.entries(this.tasks); _i2 < _Object$entries2.length; _i2++) {
+        var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
+            taskId = _Object$entries2$_i[0],
+            taskName = _Object$entries2$_i[1];
+
+        if (this.toggleTasks[taskId] === undefined) continue;
+        if (!(this.toggleTasks[taskId].unbegun === false && this.toggleTasks[taskId].finished === false && this.toggleTasks[taskId].active === false && this.toggleTasks[taskId].overdue === false)) return true;
+      }
+
+      return false;
+    },
     filteredGrades: function filteredGrades() {
       return lodash__WEBPACK_IMPORTED_MODULE_0___default().filter(this.grades, function (grade) {
         var found = new RegExp(this.filter, "i").test(grade.student.name);
@@ -5799,10 +5860,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     }
   },
   mounted: function mounted() {
-    for (var _i = 0, _Object$entries = Object.entries(this.tasks); _i < _Object$entries.length; _i++) {
-      var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
-          taskId = _Object$entries$_i[0],
-          taskName = _Object$entries$_i[1];
+    for (var _i3 = 0, _Object$entries3 = Object.entries(this.tasks); _i3 < _Object$entries3.length; _i3++) {
+      var _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2),
+          taskId = _Object$entries3$_i[0],
+          taskName = _Object$entries3$_i[1];
 
       this.$set(this.toggleTasks, taskId, {
         unbegun: false,
@@ -85986,201 +86047,89 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c(
-      "div",
-      { staticClass: "flex flex-col bg-gray-700 rounded-md px-4 py-3 mb-3" },
-      [
-        _c("div", { staticClass: "flex justify-between items-start mb-2" }, [
-          _c("span", { staticClass: "text-sm text-gray-400" }, [
-            _vm._v("Filter"),
-          ]),
-          _vm._v(" "),
-          _c(
-            "button",
+  return _c(
+    "div",
+    [
+      _vm.selectedStudent !== null
+        ? _c(
+            "modal",
             {
-              staticClass: "hover:bg-gray-600 rounded-lg p-0.5",
+              attrs: {
+                title: "Edit grading for " + _vm.selectedStudent.student.name,
+                type: "info",
+              },
               on: {
-                click: function ($event) {
-                  _vm.expanded = !_vm.expanded
+                cancel: function ($event) {
+                  _vm.selectedStudent = null
                 },
               },
             },
             [
               _c(
-                "svg",
-                {
-                  staticClass: "h-5 w-5 text-gray-400 transition-transform",
-                  class: { "transform rotate-180": _vm.expanded },
-                  attrs: {
-                    xmlns: "http://www.w3.org/2000/svg",
-                    fill: "none",
-                    viewBox: "0 0 24 24",
-                    stroke: "currentColor",
-                  },
-                },
-                [
-                  _c("path", {
-                    attrs: {
-                      "stroke-linecap": "round",
-                      "stroke-linejoin": "round",
-                      "stroke-width": "2",
-                      d: "M19 9l-7 7-7-7",
-                    },
-                  }),
-                ]
-              ),
-            ]
-          ),
-        ]),
-        _vm._v(" "),
-        _c("input", {
-          directives: [
-            {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.filter,
-              expression: "filter",
-            },
-          ],
-          staticClass:
-            "mb-3 bg-gray-50 flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-green-600  block w-full p-2.5 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200",
-          attrs: { type: "text", placeholder: "Name" },
-          domProps: { value: _vm.filter },
-          on: {
-            input: function ($event) {
-              if ($event.target.composing) {
-                return
-              }
-              _vm.filter = $event.target.value
-            },
-          },
-        }),
-        _vm._v(" "),
-        _c("transition", { attrs: { name: "slide" } }, [
-          _vm.expanded
-            ? _c(
                 "div",
-                _vm._l(_vm.tasks, function (taskName, taskId) {
+                { staticClass: "mt-4" },
+                _vm._l(_vm.selectedStudent.tasks, function (task) {
                   return _c(
                     "div",
                     {
                       staticClass:
-                        "flex items-center bg-gray-800 rounded-lg p-3 mt-3",
+                        "flex justify-between items-center bg-gray-900 px-3 py-2 mb-2 rounded-lg",
                     },
                     [
-                      _c(
-                        "span",
-                        { staticClass: "text-sm text-gray-200 flex-grow" },
-                        [_vm._v(_vm._s(taskName))]
-                      ),
+                      _c("span", { staticClass: "text-gray-300" }, [
+                        _vm._v(_vm._s(task.task.name)),
+                      ]),
                       _vm._v(" "),
                       _c("div", [
                         _c(
-                          "button",
+                          "select",
                           {
-                            staticClass:
-                              "text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors",
-                            class: [
-                              _vm.toggleTasks[taskId].unbegun
-                                ? "bg-lime-green-400 hover:bg-lime-green-500"
-                                : "hover:bg-gray-600",
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: task.grade,
+                                expression: "task.grade",
+                              },
                             ],
+                            staticClass:
+                              "py-0 bg-gray-900 text-gray-400 focus:ring-lime-green-500 rounded-sm border-gray-600",
                             on: {
-                              click: function ($event) {
-                                return _vm.$set(
-                                  _vm.toggleTasks[taskId],
-                                  "unbegun",
-                                  !_vm.toggleTasks[taskId].unbegun
+                              change: function ($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function (o) {
+                                    return o.selected
+                                  })
+                                  .map(function (o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  task,
+                                  "grade",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
                                 )
                               },
                             },
                           },
                           [
-                            _vm._v(
-                              "\n                            Unbegun\n                        "
-                            ),
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "button",
-                          {
-                            staticClass:
-                              "text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors",
-                            class: [
-                              _vm.toggleTasks[taskId].overdue
-                                ? "bg-lime-green-400 hover:bg-lime-green-500"
-                                : "hover:bg-gray-600",
-                            ],
-                            on: {
-                              click: function ($event) {
-                                return _vm.$set(
-                                  _vm.toggleTasks[taskId],
-                                  "overdue",
-                                  !_vm.toggleTasks[taskId].overdue
-                                )
-                              },
-                            },
-                          },
-                          [
-                            _vm._v(
-                              "\n                            Failed\n                        "
-                            ),
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "button",
-                          {
-                            staticClass:
-                              "text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors",
-                            class: [
-                              _vm.toggleTasks[taskId].active
-                                ? "bg-lime-green-400 hover:bg-lime-green-500"
-                                : "hover:bg-gray-600",
-                            ],
-                            on: {
-                              click: function ($event) {
-                                return _vm.$set(
-                                  _vm.toggleTasks[taskId],
-                                  "active",
-                                  !_vm.toggleTasks[taskId].active
-                                )
-                              },
-                            },
-                          },
-                          [
-                            _vm._v(
-                              "\n                            In\n                            Progress\n                        "
-                            ),
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "button",
-                          {
-                            staticClass:
-                              "text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors",
-                            class: [
-                              _vm.toggleTasks[taskId].finished
-                                ? "bg-lime-green-400 hover:bg-lime-green-500"
-                                : "hover:bg-gray-600",
-                            ],
-                            on: {
-                              click: function ($event) {
-                                return _vm.$set(
-                                  _vm.toggleTasks[taskId],
-                                  "finished",
-                                  !_vm.toggleTasks[taskId].finished
-                                )
-                              },
-                            },
-                          },
-                          [
-                            _vm._v(
-                              "\n                            Finished\n                        "
-                            ),
+                            _c("option", { attrs: { value: "overdue" } }, [
+                              _vm._v("Overdue"),
+                            ]),
+                            _vm._v(" "),
+                            _c("option", { attrs: { value: "finished" } }, [
+                              _vm._v("Finished"),
+                            ]),
+                            _vm._v(" "),
+                            _c("option", { attrs: { value: "active" } }, [
+                              _vm._v("Active"),
+                            ]),
+                            _vm._v(" "),
+                            _c("option", { domProps: { value: null } }, [
+                              _vm._v("Unbegun"),
+                            ]),
                           ]
                         ),
                       ]),
@@ -86188,69 +86137,37 @@ var render = function () {
                   )
                 }),
                 0
-              )
-            : _vm._e(),
-        ]),
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c("table", { staticClass: "w-full text-white" }, [
-      _c("thead", [
-        _c(
-          "tr",
-          [
-            _c("th", { staticClass: "text-left" }, [_vm._v("Student")]),
-            _vm._v(" "),
-            _vm._l(_vm.tasks, function (task) {
-              return _c("th", [_vm._v(_vm._s(task))])
-            }),
-          ],
-          2
-        ),
-      ]),
+              ),
+            ]
+          )
+        : _vm._e(),
       _vm._v(" "),
       _c(
-        "tbody",
-        _vm._l(_vm.filteredGrades, function (grade) {
-          return _c(
-            "tr",
-            { staticClass: "hover:bg-gray-700" },
-            [
-              _c("td", { staticClass: "py-2 px-1" }, [
-                _vm._v(_vm._s(grade.student.name)),
-              ]),
-              _vm._v(" "),
-              _vm._l(grade.tasks, function (task) {
-                return _c("td", { staticClass: "text-center" }, [
-                  task.grade === "finished"
-                    ? _c(
-                        "svg",
-                        {
-                          staticClass: "h-6 w-full text-lime-green-300",
-                          attrs: {
-                            xmlns: "http://www.w3.org/2000/svg",
-                            fill: "none",
-                            viewBox: "0 0 24 24",
-                            stroke: "currentColor",
-                          },
+        "div",
+        { staticClass: "flex flex-col bg-gray-700 rounded-md px-4 py-3 mb-3" },
+        [
+          _c("div", { staticClass: "flex justify-between items-start mb-2" }, [
+            _c("span", { staticClass: "text-sm text-gray-400" }, [
+              _vm._v("Filter"),
+            ]),
+            _vm._v(" "),
+            _c("div", [
+              _vm.filtersApplied
+                ? _c(
+                    "button",
+                    {
+                      staticClass: "hover:bg-gray-600 rounded-lg p-0.5",
+                      on: {
+                        click: function ($event) {
+                          return _vm.resetFilters()
                         },
-                        [
-                          _c("path", {
-                            attrs: {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2",
-                              d: "M5 13l4 4L19 7",
-                            },
-                          }),
-                        ]
-                      )
-                    : task.grade === "overdue"
-                    ? _c(
+                      },
+                    },
+                    [
+                      _c(
                         "svg",
                         {
-                          staticClass: "h-6 w-full text-red-400",
+                          staticClass: "h-5 w-5 text-gray-400",
                           attrs: {
                             xmlns: "http://www.w3.org/2000/svg",
                             fill: "none",
@@ -86268,71 +86185,360 @@ var render = function () {
                             },
                           }),
                         ]
-                      )
-                    : task.grade === "active"
-                    ? _c(
-                        "svg",
-                        {
-                          staticClass: "h-6 w-full text-blue-300",
-                          attrs: {
-                            xmlns: "http://www.w3.org/2000/svg",
-                            fill: "none",
-                            viewBox: "0 0 24 24",
-                            stroke: "currentColor",
-                          },
-                        },
-                        [
-                          _c("path", {
-                            attrs: {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2",
-                              d: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z",
-                            },
-                          }),
-                          _vm._v(" "),
-                          _c("path", {
-                            attrs: {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2",
-                              d: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-                            },
-                          }),
-                        ]
-                      )
-                    : _c(
-                        "svg",
-                        {
-                          staticClass: "h-6 w-full text-gray-300",
-                          attrs: {
-                            xmlns: "http://www.w3.org/2000/svg",
-                            fill: "none",
-                            viewBox: "0 0 24 24",
-                            stroke: "currentColor",
-                          },
-                        },
-                        [
-                          _c("path", {
-                            attrs: {
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round",
-                              "stroke-width": "2",
-                              d: "M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-                            },
-                          }),
-                        ]
                       ),
-                ])
+                    ]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "hover:bg-gray-600 rounded-lg p-0.5",
+                  on: {
+                    click: function ($event) {
+                      _vm.expanded = !_vm.expanded
+                    },
+                  },
+                },
+                [
+                  _c(
+                    "svg",
+                    {
+                      staticClass: "h-5 w-5 text-gray-400 transition-transform",
+                      class: { "transform rotate-180": _vm.expanded },
+                      attrs: {
+                        xmlns: "http://www.w3.org/2000/svg",
+                        fill: "none",
+                        viewBox: "0 0 24 24",
+                        stroke: "currentColor",
+                      },
+                    },
+                    [
+                      _c("path", {
+                        attrs: {
+                          "stroke-linecap": "round",
+                          "stroke-linejoin": "round",
+                          "stroke-width": "2",
+                          d: "M19 9l-7 7-7-7",
+                        },
+                      }),
+                    ]
+                  ),
+                ]
+              ),
+            ]),
+          ]),
+          _vm._v(" "),
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.filter,
+                expression: "filter",
+              },
+            ],
+            staticClass:
+              "mb-3 bg-gray-50 flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-green-600  block w-full p-2.5 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200",
+            attrs: { type: "text", placeholder: "Name" },
+            domProps: { value: _vm.filter },
+            on: {
+              input: function ($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.filter = $event.target.value
+              },
+            },
+          }),
+          _vm._v(" "),
+          _c("transition", { attrs: { name: "slide" } }, [
+            _vm.expanded
+              ? _c(
+                  "div",
+                  _vm._l(_vm.tasks, function (taskName, taskId) {
+                    return _c(
+                      "div",
+                      {
+                        staticClass:
+                          "flex items-center bg-gray-800 rounded-lg p-3 mt-3",
+                      },
+                      [
+                        _c(
+                          "span",
+                          { staticClass: "text-sm text-gray-200 flex-grow" },
+                          [_vm._v(_vm._s(taskName))]
+                        ),
+                        _vm._v(" "),
+                        _c("div", [
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors",
+                              class: [
+                                _vm.toggleTasks[taskId].unbegun
+                                  ? "bg-lime-green-400 hover:bg-lime-green-500"
+                                  : "hover:bg-gray-600",
+                              ],
+                              on: {
+                                click: function ($event) {
+                                  return _vm.$set(
+                                    _vm.toggleTasks[taskId],
+                                    "unbegun",
+                                    !_vm.toggleTasks[taskId].unbegun
+                                  )
+                                },
+                              },
+                            },
+                            [
+                              _vm._v(
+                                "\n                            Unbegun\n                        "
+                              ),
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors",
+                              class: [
+                                _vm.toggleTasks[taskId].overdue
+                                  ? "bg-lime-green-400 hover:bg-lime-green-500"
+                                  : "hover:bg-gray-600",
+                              ],
+                              on: {
+                                click: function ($event) {
+                                  return _vm.$set(
+                                    _vm.toggleTasks[taskId],
+                                    "overdue",
+                                    !_vm.toggleTasks[taskId].overdue
+                                  )
+                                },
+                              },
+                            },
+                            [
+                              _vm._v(
+                                "\n                            Failed\n                        "
+                              ),
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors",
+                              class: [
+                                _vm.toggleTasks[taskId].active
+                                  ? "bg-lime-green-400 hover:bg-lime-green-500"
+                                  : "hover:bg-gray-600",
+                              ],
+                              on: {
+                                click: function ($event) {
+                                  return _vm.$set(
+                                    _vm.toggleTasks[taskId],
+                                    "active",
+                                    !_vm.toggleTasks[taskId].active
+                                  )
+                                },
+                              },
+                            },
+                            [
+                              _vm._v(
+                                "\n                            In\n                            Progress\n                        "
+                              ),
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors",
+                              class: [
+                                _vm.toggleTasks[taskId].finished
+                                  ? "bg-lime-green-400 hover:bg-lime-green-500"
+                                  : "hover:bg-gray-600",
+                              ],
+                              on: {
+                                click: function ($event) {
+                                  return _vm.$set(
+                                    _vm.toggleTasks[taskId],
+                                    "finished",
+                                    !_vm.toggleTasks[taskId].finished
+                                  )
+                                },
+                              },
+                            },
+                            [
+                              _vm._v(
+                                "\n                            Finished\n                        "
+                              ),
+                            ]
+                          ),
+                        ]),
+                      ]
+                    )
+                  }),
+                  0
+                )
+              : _vm._e(),
+          ]),
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c("table", { staticClass: "w-full text-white" }, [
+        _c("thead", [
+          _c(
+            "tr",
+            [
+              _c("th", { staticClass: "text-left" }, [
+                _vm._v("Student (" + _vm._s(_vm.filteredGrades.length) + ")"),
+              ]),
+              _vm._v(" "),
+              _vm._l(_vm.tasks, function (task) {
+                return _c("th", [_vm._v(_vm._s(task))])
               }),
             ],
             2
-          )
-        }),
-        0
-      ),
-    ]),
-  ])
+          ),
+        ]),
+        _vm._v(" "),
+        _c(
+          "tbody",
+          _vm._l(_vm.filteredGrades, function (grade) {
+            return _c(
+              "tr",
+              {
+                staticClass: "hover:bg-gray-700 cursor-pointer",
+                on: {
+                  click: function ($event) {
+                    _vm.selectedStudent = grade
+                  },
+                },
+              },
+              [
+                _c("td", { staticClass: "py-2 px-1" }, [
+                  _vm._v(_vm._s(grade.student.name)),
+                ]),
+                _vm._v(" "),
+                _vm._l(grade.tasks, function (task) {
+                  return _c("td", { staticClass: "text-center" }, [
+                    task.grade === "finished"
+                      ? _c(
+                          "svg",
+                          {
+                            staticClass: "h-6 w-full text-lime-green-300",
+                            attrs: {
+                              xmlns: "http://www.w3.org/2000/svg",
+                              fill: "none",
+                              viewBox: "0 0 24 24",
+                              stroke: "currentColor",
+                            },
+                          },
+                          [
+                            _c("path", {
+                              attrs: {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M5 13l4 4L19 7",
+                              },
+                            }),
+                          ]
+                        )
+                      : task.grade === "overdue"
+                      ? _c(
+                          "svg",
+                          {
+                            staticClass: "h-6 w-full text-red-400",
+                            attrs: {
+                              xmlns: "http://www.w3.org/2000/svg",
+                              fill: "none",
+                              viewBox: "0 0 24 24",
+                              stroke: "currentColor",
+                            },
+                          },
+                          [
+                            _c("path", {
+                              attrs: {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M6 18L18 6M6 6l12 12",
+                              },
+                            }),
+                          ]
+                        )
+                      : task.grade === "active"
+                      ? _c(
+                          "svg",
+                          {
+                            staticClass: "h-6 w-full text-blue-300",
+                            attrs: {
+                              xmlns: "http://www.w3.org/2000/svg",
+                              fill: "none",
+                              viewBox: "0 0 24 24",
+                              stroke: "currentColor",
+                            },
+                          },
+                          [
+                            _c("path", {
+                              attrs: {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z",
+                              },
+                            }),
+                            _vm._v(" "),
+                            _c("path", {
+                              attrs: {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                              },
+                            }),
+                          ]
+                        )
+                      : _c(
+                          "svg",
+                          {
+                            staticClass: "h-6 w-full text-gray-300",
+                            attrs: {
+                              xmlns: "http://www.w3.org/2000/svg",
+                              fill: "none",
+                              viewBox: "0 0 24 24",
+                              stroke: "currentColor",
+                            },
+                          },
+                          [
+                            _c("path", {
+                              attrs: {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                              },
+                            }),
+                          ]
+                        ),
+                  ])
+                }),
+              ],
+              2
+            )
+          }),
+          0
+        ),
+      ]),
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true

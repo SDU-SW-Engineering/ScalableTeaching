@@ -1,16 +1,41 @@
 <template>
     <div>
+        <modal @cancel="selectedStudent = null" v-if="selectedStudent !== null" :title="'Edit grading for ' + selectedStudent.student.name" type="info">
+            <div class="mt-4">
+                <div v-for="task in selectedStudent.tasks" class="flex justify-between items-center bg-gray-900 px-3 py-2 mb-2 rounded-lg">
+                    <span class="text-gray-300">{{ task.task.name }}</span>
+                    <div>
+                        <select v-model="task.grade" class="py-0 bg-gray-900 text-gray-400 focus:ring-lime-green-500 rounded-sm border-gray-600">
+                            <option value="overdue">Overdue</option>
+                            <option value="finished">Finished</option>
+                            <option value="active">Active</option>
+                            <option :value="null">Unbegun</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </modal>
         <div class="flex flex-col bg-gray-700 rounded-md px-4 py-3 mb-3">
             <div class="flex justify-between items-start mb-2">
                 <span class="text-sm text-gray-400">Filter</span>
-                <button @click="expanded = !expanded" class="hover:bg-gray-600 rounded-lg p-0.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
-                         :class="{'transform rotate-180': expanded}" fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
+                <div>
+                    <button v-if="filtersApplied" @click="resetFilters()" class="hover:bg-gray-600 rounded-lg p-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                    <button @click="expanded = !expanded" class="hover:bg-gray-600 rounded-lg p-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform"
+                             :class="{'transform rotate-180': expanded}" fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <input type="text" placeholder="Name" v-model="filter"
                    class="mb-3 bg-gray-50 flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-green-600  block w-full p-2.5 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"/>
@@ -51,14 +76,13 @@
         <table class="w-full text-white">
             <thead>
             <tr>
-                <th class="text-left">Student</th>
+                <th class="text-left">Student ({{ filteredGrades.length }})</th>
                 <th v-for="task in tasks">{{ task }}</th>
             </tr>
             </thead>
             <tbody>
-            <tr v-for="grade in filteredGrades" class="hover:bg-gray-700">
+            <tr v-for="grade in filteredGrades" class="hover:bg-gray-700 cursor-pointer" @click="selectedStudent = grade">
                 <td class="py-2 px-1">{{ grade.student.name }}</td>
-
                 <td class="text-center" v-for="task in grade.tasks">
                     <svg v-if="task.grade === 'finished'" xmlns="http://www.w3.org/2000/svg"
                          class="h-6 w-full text-lime-green-300" fill="none"
@@ -94,8 +118,10 @@
 
 <script>
 import _ from "lodash";
+import Modal from "./Modal/Modal";
 
 export default {
+    components: {Modal},
     props: {
         grades: {
             type: Object,
@@ -111,9 +137,40 @@ export default {
             expanded: false,
             filter: "",
             toggleTasks: {},
+            selectedStudent: null
+        }
+    },
+    methods: {
+        resetFilters: function () {
+            for (const [taskId, taskName] of Object.entries(this.tasks)) {
+                this.$set(this.toggleTasks, taskId, {
+                    unbegun: false,
+                    finished: false,
+                    active: false,
+                    overdue: false
+                })
+                this.filter = ""
+            }
         }
     },
     computed: {
+        filtersApplied: function() {
+            if (this.filter !== "")
+                return true;
+
+            for (const [taskId, taskName] of Object.entries(this.tasks)) {
+                if (this.toggleTasks[taskId] === undefined)
+                    continue;
+
+                if (!(this.toggleTasks[taskId].unbegun === false
+                    && this.toggleTasks[taskId].finished === false
+                    && this.toggleTasks[taskId].active === false
+                    && this.toggleTasks[taskId].overdue === false))
+                    return true;
+            }
+
+            return false;
+        },
         filteredGrades: function () {
             return _.filter(this.grades, function (grade) {
                 let found = (new RegExp(this.filter, "i")).test(grade.student.name);
