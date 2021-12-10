@@ -21,6 +21,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.3",
+        "league/csv": "^9.7",
         "sdu/laravel-mfa": "^0.9.1",
         "sentry/sentry-laravel": "^2.9"
     },

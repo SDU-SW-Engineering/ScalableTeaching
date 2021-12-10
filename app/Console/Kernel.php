@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Export\TaskStatus;
 use App\Console\Commands\LoadCurrentProjects;
 use App\Console\Commands\LoadOldReports;
 use App\Console\Commands\MarkExpiredProjects;
@@ -18,7 +19,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         LoadCurrentProjects::class,
         LoadOldReports::class,
-        MarkExpiredProjects::class
+        MarkExpiredProjects::class,
+        TaskStatus::class
     ];
 
     /**
