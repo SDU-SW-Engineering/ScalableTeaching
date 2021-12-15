@@ -18,7 +18,7 @@ class CreateOverrideGradesTable extends Migration
             $table->unsignedBigInteger('task_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('overridden_by');
-            $table->enum('status', ['failed', 'finished']);
+            $table->enum('status', ['overdue', 'finished']);
             $table->timestamps();
 
             $table->foreign('task_id')->references('id')->on('tasks');

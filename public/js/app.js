@@ -4089,7 +4089,7 @@ module.exports = function transformData(data, headers, fns) {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-/* provided dependency */ var process = __webpack_require__(/*! process/browser */ "./node_modules/process/browser.js");
+/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
 
 
 var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
@@ -5643,10 +5643,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _Modal_Modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Modal/Modal */ "./resources/js/components/Modal/Modal.vue");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _Modal_Modal__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Modal/Modal */ "./resources/js/components/Modal/Modal.vue");
+/* harmony import */ var _Modal_ModalButton__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Modal/ModalButton */ "./resources/js/components/Modal/ModalButton.vue");
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -5778,11 +5787,39 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
-    Modal: _Modal_Modal__WEBPACK_IMPORTED_MODULE_1__["default"]
+    ModalButton: _Modal_ModalButton__WEBPACK_IMPORTED_MODULE_3__["default"],
+    Modal: _Modal_Modal__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   props: {
     grades: {
@@ -5792,6 +5829,10 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
     tasks: {
       type: Object,
       required: true
+    },
+    courseId: {
+      type: Number,
+      required: true
     }
   },
   data: function data() {
@@ -5799,7 +5840,9 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
       expanded: false,
       filter: "",
       toggleTasks: {},
-      selectedStudent: null
+      selectedStudent: null,
+      saving: false,
+      saved: false
     };
   },
   methods: {
@@ -5817,6 +5860,45 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
         });
         this.filter = "";
       }
+    },
+    submitGrades: function () {
+      var _submitGrades = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                this.saving = true;
+                this.saved = false;
+                _context.next = 4;
+                return axios.put("/courses/".concat(this.courseId, "/grading/users/") + this.selectedStudent.student.id, lodash__WEBPACK_IMPORTED_MODULE_1___default().chain(this.selectedStudent.tasks).filter(function (task) {
+                  return task.grade.grade !== task.grade.originalGrade;
+                }).keyBy(function (t) {
+                  return t.task.id;
+                }).mapValues(function (g) {
+                  return g.grade.grade;
+                }).value());
+
+              case 4:
+                this.saving = false;
+                this.saved = true;
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function submitGrades() {
+        return _submitGrades.apply(this, arguments);
+      }
+
+      return submitGrades;
+    }(),
+    closeModal: function closeModal() {
+      this.selectedStudent = null;
+      this.saved = false;
     }
   },
   computed: {
@@ -5835,7 +5917,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
       return false;
     },
     filteredGrades: function filteredGrades() {
-      return lodash__WEBPACK_IMPORTED_MODULE_0___default().filter(this.grades, function (grade) {
+      return lodash__WEBPACK_IMPORTED_MODULE_1___default().filter(this.grades, function (grade) {
         var found = new RegExp(this.filter, "i").test(grade.student.name);
 
         var _iterator = _createForOfIteratorHelper(grade.tasks),
@@ -5846,8 +5928,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
             var task = _step.value;
             if (this.toggleTasks[task.task.id] === undefined) continue;
             if (this.toggleTasks[task.task.id].unbegun === false && this.toggleTasks[task.task.id].finished === false && this.toggleTasks[task.task.id].active === false && this.toggleTasks[task.task.id].overdue === false) continue;
-            var lookFor = task.grade === null ? 'unbegun' : task.grade;
-            found &= this.toggleTasks[task.task.id][lookFor];
+            found &= this.toggleTasks[task.task.id][task.grade.grade];
           }
         } catch (err) {
           _iterator.e(err);
@@ -86055,14 +86136,37 @@ var render = function () {
             "modal",
             {
               attrs: {
+                "is-loading": _vm.saving,
                 title: "Edit grading for " + _vm.selectedStudent.student.name,
                 type: "info",
               },
-              on: {
-                cancel: function ($event) {
-                  _vm.selectedStudent = null
-                },
-              },
+              on: { cancel: _vm.closeModal },
+              scopedSlots: _vm._u(
+                [
+                  {
+                    key: "buttons",
+                    fn: function () {
+                      return [
+                        _c(
+                          "modal-button",
+                          {
+                            attrs: {
+                              "is-loading": _vm.saving,
+                              type: "success",
+                            },
+                            on: { click: _vm.submitGrades },
+                          },
+                          [_vm._v("Save changes")]
+                        ),
+                      ]
+                    },
+                    proxy: true,
+                  },
+                ],
+                null,
+                false,
+                194530312
+              ),
             },
             [
               _c(
@@ -86076,9 +86180,42 @@ var render = function () {
                         "flex justify-between items-center bg-gray-900 px-3 py-2 mb-2 rounded-lg",
                     },
                     [
-                      _c("span", { staticClass: "text-gray-300" }, [
-                        _vm._v(_vm._s(task.task.name)),
-                      ]),
+                      _c(
+                        "div",
+                        { staticClass: "flex flex-col" },
+                        [
+                          _c("span", { staticClass: "text-gray-300" }, [
+                            _vm._v(_vm._s(task.task.name)),
+                          ]),
+                          _vm._v(" "),
+                          _c("transition", { attrs: { name: "slide" } }, [
+                            task.grade.grade !== task.grade.originalGrade
+                              ? _c(
+                                  "span",
+                                  { staticClass: "text-xs text-yellow-400" },
+                                  [
+                                    _vm._v("Overridden - "),
+                                    _c(
+                                      "a",
+                                      {
+                                        staticClass:
+                                          "cursor-pointer opacity-50",
+                                        on: {
+                                          click: function ($event) {
+                                            task.grade.grade =
+                                              task.grade.originalGrade
+                                          },
+                                        },
+                                      },
+                                      [_vm._v("Clear")]
+                                    ),
+                                  ]
+                                )
+                              : _vm._e(),
+                          ]),
+                        ],
+                        1
+                      ),
                       _vm._v(" "),
                       _c("div", [
                         _c(
@@ -86088,8 +86225,8 @@ var render = function () {
                               {
                                 name: "model",
                                 rawName: "v-model",
-                                value: task.grade,
-                                expression: "task.grade",
+                                value: task.grade.grade,
+                                expression: "task.grade.grade",
                               },
                             ],
                             staticClass:
@@ -86105,7 +86242,7 @@ var render = function () {
                                     return val
                                   })
                                 _vm.$set(
-                                  task,
+                                  task.grade,
                                   "grade",
                                   $event.target.multiple
                                     ? $$selectedVal
@@ -86116,20 +86253,24 @@ var render = function () {
                           },
                           [
                             _c("option", { attrs: { value: "overdue" } }, [
-                              _vm._v("Overdue"),
+                              _vm._v("Failed"),
                             ]),
                             _vm._v(" "),
                             _c("option", { attrs: { value: "finished" } }, [
                               _vm._v("Finished"),
                             ]),
                             _vm._v(" "),
-                            _c("option", { attrs: { value: "active" } }, [
-                              _vm._v("Active"),
-                            ]),
+                            _c(
+                              "option",
+                              { attrs: { value: "active", disabled: "" } },
+                              [_vm._v("Active")]
+                            ),
                             _vm._v(" "),
-                            _c("option", { domProps: { value: null } }, [
-                              _vm._v("Unbegun"),
-                            ]),
+                            _c(
+                              "option",
+                              { attrs: { value: "unbegun", disabled: "" } },
+                              [_vm._v("Unbegun")]
+                            ),
                           ]
                         ),
                       ]),
@@ -86138,7 +86279,45 @@ var render = function () {
                 }),
                 0
               ),
-            ]
+              _vm._v(" "),
+              _c("transition", { attrs: { name: "slide" } }, [
+                _vm.saved === true
+                  ? _c(
+                      "div",
+                      { staticClass: "flex text-sm text-white items-center" },
+                      [
+                        _c(
+                          "svg",
+                          {
+                            staticClass: "h-5 text-lime-green-300",
+                            attrs: {
+                              xmlns: "http://www.w3.org/2000/svg",
+                              fill: "none",
+                              viewBox: "0 0 24 24",
+                              stroke: "currentColor",
+                            },
+                          },
+                          [
+                            _c("path", {
+                              attrs: {
+                                "stroke-linecap": "round",
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                d: "M5 13l4 4L19 7",
+                              },
+                            }),
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c("span", { staticClass: "ml-1" }, [
+                          _vm._v("Changes Saved"),
+                        ]),
+                      ]
+                    )
+                  : _vm._e(),
+              ]),
+            ],
+            1
           )
         : _vm._e(),
       _vm._v(" "),
@@ -86427,7 +86606,7 @@ var render = function () {
                 _vm._v(" "),
                 _vm._l(grade.tasks, function (task) {
                   return _c("td", { staticClass: "text-center" }, [
-                    task.grade === "finished"
+                    task.grade.grade === "finished"
                       ? _c(
                           "svg",
                           {
@@ -86450,7 +86629,7 @@ var render = function () {
                             }),
                           ]
                         )
-                      : task.grade === "overdue"
+                      : task.grade.grade === "overdue"
                       ? _c(
                           "svg",
                           {
@@ -86473,7 +86652,7 @@ var render = function () {
                             }),
                           ]
                         )
-                      : task.grade === "active"
+                      : task.grade.grade === "active"
                       ? _c(
                           "svg",
                           {
@@ -88164,7 +88343,7 @@ var render = function () {
                         },
                       },
                     },
-                    [_vm._v("\n                    Cancel\n                ")]
+                    [_vm._v("\n                    Close\n                ")]
                   ),
                 ],
                 2

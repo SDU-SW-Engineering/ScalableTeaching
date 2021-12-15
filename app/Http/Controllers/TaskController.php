@@ -169,7 +169,8 @@ class TaskController extends Controller
         $params = [
             'name'         => $username,
             'path'         => $username,
-            'namespace_id' => $groupId,
+            'namespace_id'           => $groupId,
+            'shared_runners_enabled' => false
         ];
 
         $id       = rawurlencode((string)$sourceProjectId);

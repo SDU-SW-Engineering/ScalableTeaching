@@ -67,14 +67,14 @@ class Task extends Model
     public function reloadDescriptionFromRepo()
     {
         $gitlabManager = app(GitLabManager::class);
-        $project       = $gitlabManager->projects()->show($this->source_project_id);
-        $branch        = $project['default_branch'];
-        $readme        = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, 'README.md', $branch)['content']);
-        $parseDown     = new \Parsedown();
-        $htmlReadme    = $parseDown->parse($readme);
+        $project = $gitlabManager->projects()->show($this->source_project_id);
+        $branch = $project['default_branch'];
+        $readme = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, 'README.md', $branch)['content']);
+        $parseDown = new \Parsedown();
+        $htmlReadme = $parseDown->parse($readme);
 
         $this->update([
-            'description'          => $htmlReadme,
+            'description' => $htmlReadme,
             'markdown_description' => $readme
         ]);
     }
@@ -89,12 +89,12 @@ class Task extends Model
         return $this->hasManyThrough(JobStatus::class, Project::class)->withTrashedParents();
     }
 
-    public function dailyBuilds(bool $withTrash = false, $withToday = false) : \Illuminate\Support\Collection
+    public function dailyBuilds(bool $withTrash = false, $withToday = false): \Illuminate\Support\Collection
     {
         $query = $this->jobs();
         if ($withTrash)
             $query->withTrashedParents();
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(! $withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 
     public function projects()
@@ -131,14 +131,13 @@ class Task extends Model
         return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
     }
 
-    public function currentProjectForUser(User $user) : ?Project
+    public function currentProjectForUser(User $user): ?Project
     {
-        $myGroups     = $this->course->groups()
+        $myGroups = $this->course->groups()
             ->whereRelation('users', 'user_id', $user->id)
             ->latest()
             ->pluck('name', 'id');
-        $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function (Builder $query) use ($myGroups)
-        {
+        $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function (Builder $query) use ($myGroups) {
             $query->whereIn('id', $myGroups->keys());
         })->first();
 
@@ -146,8 +145,7 @@ class Task extends Model
             return $groupProject;
 
         /** @var Project $project */
-        return $this->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
-        {
+        return $this->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups) {
             $query->where('id', $user->id);
         })->first();
     }
@@ -156,19 +154,17 @@ class Task extends Model
      * @param Collection $users
      * @return Collection
      */
-    public function progressStatus(Collection $users) : Collection
+    public function progressStatus(Collection $users): Collection
     {
-        return $users->filter(function (User $user)
-        {
+        return $users->filter(function (User $user) {
             return $this->currentProjectForUser($user) != null;
         });
     }
 
-    public function projectsForUsers(Collection $users) : Collection
+    public function projectsForUsers(Collection $users): Collection
     {
         $projects = Collection::empty();
-        $users->each(function (User $user) use ($projects)
-        {
+        $users->each(function (User $user) use ($projects) {
             $project = $this->currentProjectForUser($user);
             if ($project == null)
                 return;
@@ -191,44 +187,41 @@ class Task extends Model
             ->selectNodes()
             ->selectName()
             ->selectSha();
-        $client   = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+        $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
         $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes;
         if (count($projects) == 0)
             return;
 
-        collect($projects[0]->repository->tree->blobs->nodes)->each(function ($repoFile) use ($selectFile, $dir)
-        {
+        collect($projects[0]->repository->tree->blobs->nodes)->each(function ($repoFile) use ($selectFile, $dir) {
             if ($selectFile != null && $repoFile->name != $selectFile)
                 return;
-            $fileName         = "/" . trim("$dir/$repoFile->name", " /");
-            $file             = $this->protectedFiles()->firstOrNew([
+            $fileName = "/" . trim("$dir/$repoFile->name", " /");
+            $file = $this->protectedFiles()->firstOrNew([
                 'path' => $fileName
             ]);
-            $shaValues        = is_array($file->sha_values) ? $file->sha_values : [];
-            $shaValues[]      = $repoFile->sha;
+            $shaValues = is_array($file->sha_values) ? $file->sha_values : [];
+            $shaValues[] = $repoFile->sha;
             $file->sha_values = array_unique($shaValues);
             $file->save();
         });
     }
 
-    public function participants() : \Illuminate\Support\Collection
+    public function participants(): \Illuminate\Support\Collection
     {
-        return $this->projects->reject(function (Project $project)
-        {
+        return $this->projects->reject(function (Project $project) {
             return $project->ownable_type == null;
-        })->map(function (Project $project)
-        {
-            return $project->owners()->each(function (User $user) use ($project)
-            {
+        })->map(function (Project $project) {
+            return $project->owners()->each(function (User $user) use ($project) {
                 $user->project_status = $project->status;
             });
         })->flatten();
     }
 
-    public function grades()
+    public function grades(array $users = null)
     {
         /** @var Collection $students */
-        $students   = $this->course->students;
+        $students = $users == null ? $this->course->students : Collection::wrap($users);
+
         $overridden = OverrideGrade::whereIn('user_id', $students->pluck('id'))->where('task_id', $this->id)
             ->select('user_id', 'status')->pluck('status', 'user_id');
 
@@ -237,11 +230,20 @@ class Task extends Model
             ->where('task_id', $this->id)
             ->leftJoin('projects', 'group_user.group_id', '=', 'projects.ownable_id')
             ->pluck('status', 'user_id');
-        $userStatus      = Project::whereIn('ownable_id', $students->pluck('id'))
+        $userStatus = Project::whereIn('ownable_id', $students->pluck('id'))
             ->where('ownable_type', User::class)
             ->where('task_id', $this->id)
             ->pluck('projects.status', 'ownable_id');
 
-        return collect($overridden->toArray() + $groupUserStatus->toArray() + $userStatus->toArray());
+        $registeredUserGrades = $groupUserStatus->union($userStatus);
+
+        return $students->mapWithKeys(function ($user) use ($registeredUserGrades, $overridden) {
+            return [
+                $user->id => [
+                    'grade' => ($overridden->has($user->id) ? $overridden->get($user->id) : $registeredUserGrades->get($user->id)) ?? 'unbegun',
+                    'originalGrade' => $registeredUserGrades->get($user->id) ?? 'unbegun'
+                ]
+            ];
+        });
     }
 }

@@ -5,7 +5,7 @@
         @include('courses.partials.tabs')
         <div class="grid grid-cols-1">
             <x-card name="students" header="Students">
-                <grading :grades="{{ $grades }}" :tasks="{{ $course->tasks->pluck('name', 'id') }}"></grading>
+                <grading :grades="{{ $grades }}" :tasks="{{ $course->tasks->pluck('name', 'id') }}" :course-id="{{ $course->id }}"></grading>
             </x-card>
         </div>
     </div>

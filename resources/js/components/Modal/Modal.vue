@@ -44,7 +44,7 @@
                     <slot name="buttons"></slot>
                     <button :disabled="isLoading" @click="$emit('cancel')" type="button"
                             class="disabled:opacity-50 mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Cancel
+                        Close
                     </button>
                 </div>
             </div>

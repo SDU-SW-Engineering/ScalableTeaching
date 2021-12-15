@@ -1,19 +1,44 @@
 <template>
     <div>
-        <modal @cancel="selectedStudent = null" v-if="selectedStudent !== null" :title="'Edit grading for ' + selectedStudent.student.name" type="info">
+        <modal @cancel="closeModal" v-if="selectedStudent !== null" :is-loading="saving"
+               :title="'Edit grading for ' + selectedStudent.student.name" type="info">
             <div class="mt-4">
-                <div v-for="task in selectedStudent.tasks" class="flex justify-between items-center bg-gray-900 px-3 py-2 mb-2 rounded-lg">
-                    <span class="text-gray-300">{{ task.task.name }}</span>
+                <div v-for="task in selectedStudent.tasks"
+                     class="flex justify-between items-center bg-gray-900 px-3 py-2 mb-2 rounded-lg">
+                    <div class="flex flex-col">
+                        <span class="text-gray-300">{{ task.task.name }}</span>
+                        <transition name="slide">
+                        <span class="text-xs text-yellow-400" v-if="task.grade.grade !== task.grade.originalGrade">Overridden - <a
+                            @click="task.grade.grade = task.grade.originalGrade"
+                            class="cursor-pointer opacity-50">Clear</a></span>
+                        </transition>
+                    </div>
                     <div>
-                        <select v-model="task.grade" class="py-0 bg-gray-900 text-gray-400 focus:ring-lime-green-500 rounded-sm border-gray-600">
-                            <option value="overdue">Overdue</option>
+                        <select v-model="task.grade.grade"
+                                class="py-0 bg-gray-900 text-gray-400 focus:ring-lime-green-500 rounded-sm border-gray-600">
+                            <option value="overdue">Failed</option>
                             <option value="finished">Finished</option>
-                            <option value="active">Active</option>
-                            <option :value="null">Unbegun</option>
+                            <option value="active" disabled>Active</option>
+                            <option value="unbegun" disabled>Unbegun</option>
                         </select>
                     </div>
                 </div>
             </div>
+            <transition name="slide">
+                <div class="flex text-sm text-white items-center" v-if="saved === true">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-5 text-lime-green-300" fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span class="ml-1">Changes Saved</span>
+                </div>
+            </transition>
+            <template v-slot:buttons>
+                <modal-button :is-loading="saving" @click="submitGrades" type="success">Save changes</modal-button>
+            </template>
         </modal>
         <div class="flex flex-col bg-gray-700 rounded-md px-4 py-3 mb-3">
             <div class="flex justify-between items-start mb-2">
@@ -81,21 +106,22 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="grade in filteredGrades" class="hover:bg-gray-700 cursor-pointer" @click="selectedStudent = grade">
+            <tr v-for="grade in filteredGrades" class="hover:bg-gray-700 cursor-pointer"
+                @click="selectedStudent = grade">
                 <td class="py-2 px-1">{{ grade.student.name }}</td>
                 <td class="text-center" v-for="task in grade.tasks">
-                    <svg v-if="task.grade === 'finished'" xmlns="http://www.w3.org/2000/svg"
+                    <svg v-if="task.grade.grade === 'finished'" xmlns="http://www.w3.org/2000/svg"
                          class="h-6 w-full text-lime-green-300" fill="none"
                          viewBox="0 0 24 24"
                          stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M5 13l4 4L19 7"/>
                     </svg>
-                    <svg v-else-if="task.grade === 'overdue'" xmlns="http://www.w3.org/2000/svg"
+                    <svg v-else-if="task.grade.grade === 'overdue'" xmlns="http://www.w3.org/2000/svg"
                          class="h-6 w-full text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                    <svg v-else-if="task.grade === 'active'" xmlns="http://www.w3.org/2000/svg"
+                    <svg v-else-if="task.grade.grade === 'active'" xmlns="http://www.w3.org/2000/svg"
                          class="h-6 w-full text-blue-300"
                          fill="none" viewBox="0 0 24 24"
                          stroke="currentColor">
@@ -119,9 +145,10 @@
 <script>
 import _ from "lodash";
 import Modal from "./Modal/Modal";
+import ModalButton from "./Modal/ModalButton";
 
 export default {
-    components: {Modal},
+    components: {ModalButton, Modal},
     props: {
         grades: {
             type: Object,
@@ -130,6 +157,10 @@ export default {
         tasks: {
             type: Object,
             required: true
+        },
+        courseId: {
+            type: Number,
+            required: true
         }
     },
     data() {
@@ -137,7 +168,9 @@ export default {
             expanded: false,
             filter: "",
             toggleTasks: {},
-            selectedStudent: null
+            selectedStudent: null,
+            saving: false,
+            saved: false
         }
     },
     methods: {
@@ -151,10 +184,26 @@ export default {
                 })
                 this.filter = ""
             }
+        },
+        submitGrades: async function () {
+            this.saving = true;
+            this.saved = false;
+            await axios.put(`/courses/${this.courseId}/grading/users/` + this.selectedStudent.student.id, _.chain(this.selectedStudent.tasks)
+                .filter(task => task.grade.grade !== task.grade.originalGrade)
+                .keyBy(t => t.task.id)
+                .mapValues(g => g.grade.grade)
+                .value()
+            );
+            this.saving = false;
+            this.saved = true;
+        },
+        closeModal: function() {
+            this.selectedStudent = null
+            this.saved = false;
         }
     },
     computed: {
-        filtersApplied: function() {
+        filtersApplied: function () {
             if (this.filter !== "")
                 return true;
 
@@ -184,8 +233,7 @@ export default {
                         && this.toggleTasks[task.task.id].active === false
                         && this.toggleTasks[task.task.id].overdue === false)
                         continue;
-                    let lookFor = task.grade === null ? 'unbegun' : task.grade;
-                    found &= this.toggleTasks[task.task.id][lookFor];
+                    found &= this.toggleTasks[task.task.id][task.grade.grade];
                 }
 
                 return found;
