@@ -60,9 +60,7 @@ class GradingController extends Controller
 
     public function setSelected(Course $course, Grade $grade)
     {
-        Grade::where('user_id', $grade->user_id)
-            ->where('task_id', $grade->task_id)
-            ->update(['selected'=> \DB::raw("id = $grade->id")]);
+        $grade->select();
 
         return "ok";
     }

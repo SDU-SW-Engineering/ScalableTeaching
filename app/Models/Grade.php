@@ -43,16 +43,29 @@ class Grade extends Model
     public static function booted()
     {
         static::creating(function(Grade $grade) {
-            if ($grade->selected == true)
-            {
+            if($grade->selected == true) {
                 Grade::where('user_id', $grade->user_id)
                     ->where('task_id', $grade->task_id)
-                    ->update(['selected'=>false]);
+                    ->update(['selected' => false]);
                 return;
             }
-            $grade->selected = !Grade::where('user_id', $grade->user_id)
+            $userOverridden = Grade::where('user_id', $grade->user_id)
                 ->where('task_id', $grade->task_id)
-                ->where('selected', true)->exists();
+                ->where('source_type', User::class)->exists();
+            $grade->selected = !$userOverridden;
+            if ($userOverridden)
+                return;
+            Grade::where('user_id', $grade->user_id)
+                ->where('task_id', $grade->task_id)
+                ->update(['selected' => false]);
         });
     }
+
+    public function select()
+    {
+        Grade::where('user_id', $this->user_id)
+            ->where('task_id', $this->task_id)
+            ->update(['selected' => \DB::raw("id = $this->id")]);
+    }
 }
+

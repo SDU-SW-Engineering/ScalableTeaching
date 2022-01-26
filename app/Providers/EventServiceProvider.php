@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Listeners\AddProjectsToExistingUsers;
+use App\Models\Project;
+use App\Observers\ProjectObserver;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
@@ -33,6 +35,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Project::observe(ProjectObserver::class);
     }
 }
