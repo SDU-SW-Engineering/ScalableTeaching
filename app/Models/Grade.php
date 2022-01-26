@@ -26,7 +26,7 @@ class Grade extends Model
     protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id'];
 
     protected $casts = [
-        'grade'    => Enums\Grade::class,
+        'value'    => Enums\Grade::class,
         'selected' => 'boolean'
     ];
 
@@ -53,7 +53,7 @@ class Grade extends Model
                 ->where('task_id', $grade->task_id)
                 ->where('source_type', User::class)->exists();
             $grade->selected = !$userOverridden;
-            if ($userOverridden)
+            if($userOverridden)
                 return;
             Grade::where('user_id', $grade->user_id)
                 ->where('task_id', $grade->task_id)
