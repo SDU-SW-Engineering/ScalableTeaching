@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -50,6 +51,8 @@ use Illuminate\Support\Carbon;
  * @property-read mixed $total_projects_per_day
  * @property-read Collection|\App\Models\JobStatus[] $jobs
  * @property-read int|null $jobs_count
+ *
+ * @property Collection|Grade[] $grades
  */
 class Task extends Model
 {
@@ -79,6 +82,7 @@ class Task extends Model
         ]);
     }
 
+    // region relationships
     public function course()
     {
         return $this->belongsTo(Course::class);
@@ -88,6 +92,12 @@ class Task extends Model
     {
         return $this->hasManyThrough(JobStatus::class, Project::class)->withTrashedParents();
     }
+
+    public function grades()
+    {
+        return $this->hasMany(Grade::class);
+    }
+    // endregion
 
     public function dailyBuilds(bool $withTrash = false, $withToday = false): \Illuminate\Support\Collection
     {
@@ -217,7 +227,7 @@ class Task extends Model
         })->flatten();
     }
 
-    public function grades(array $users = null)
+    public function grades2(array $users = null)
     {
         /** @var Collection $students */
         $students = $users == null ? $this->course->students : Collection::wrap($users);
@@ -245,5 +255,12 @@ class Task extends Model
                 ]
             ];
         });
+    }
+
+    public function grade(User $user = null)
+    {
+        if ($user == null)
+            $user = auth()->user();
+        return $this->grades()->where('user_id', $user->id)->first();
     }
 }

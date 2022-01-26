@@ -48,7 +48,7 @@ class MarkExpiredProjects extends Command
                 $this->info('Not expired yet.');
                 continue;
             }
-            $count = $task->projects()->where('status', 'active')->update([
+            $count = $task->projects()->where('status', 'active')->withTrashed()->update([
                 'status' => 'overdue'
             ]);
             $this->info("Marked $count projects as overdue.");

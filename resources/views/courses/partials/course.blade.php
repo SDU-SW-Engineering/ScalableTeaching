@@ -6,27 +6,21 @@
         ]) class="">
         <div class="flex items-center justify-between">
             <span class="text-2xl font-bold text-gray-700 dark:text-white">{{ $task['name'] }}</span>
-            @if($task->project != null)
+            @if($task->grade() != null)
                 <span @class([
                     'px-3 py-1 text-sm font-bold text-gray-100 transform rounded',
-                    'bg-lime-green-600' => $task->project->status == 'finished',
-                    'bg-red-500' => $task->project->status == 'overdue',
-                    'bg-gray-500' => $task->project->status == 'active'
+                    'bg-lime-green-600' => $task->grade()->grade->value == 'passed',
+                    'bg-red-500' => $task->grade()->grade->value == 'failed',
                 ])>
-                    @switch($task->project->status)
-                        @case('finished')
+                    @switch($task->grade()->grade->value)
+                        @case('passed')
                         Passed
                         @break
-                        @case('overdue')
+                        @case('failed')
                         Failed
-                        @break
-                        @case('active')
-                        Active
                         @break
                     @endswitch
                 </span>
-            @elseif($task->project == null && $task->ends_at->isPast())
-                <span class="px-3 py-1 text-sm font-bold text-gray-100 transform rounded bg-red-500">Failed</span>
             @endif
         </div>
 

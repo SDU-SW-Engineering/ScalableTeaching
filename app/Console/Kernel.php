@@ -6,6 +6,7 @@ use App\Console\Commands\Export\TaskStatus;
 use App\Console\Commands\LoadCurrentProjects;
 use App\Console\Commands\LoadOldReports;
 use App\Console\Commands\MarkExpiredProjects;
+use App\Console\Commands\MoveGrades;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -20,7 +21,8 @@ class Kernel extends ConsoleKernel
         LoadCurrentProjects::class,
         LoadOldReports::class,
         MarkExpiredProjects::class,
-        TaskStatus::class
+        TaskStatus::class,
+        MoveGrades::class
     ];
 
     /**

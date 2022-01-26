@@ -198,7 +198,7 @@
                                         {{ $project->jobStatuses->count() }}
                                     </td>
                                     <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap">
-                                        @if($project->status == 'active')
+                                        @if($project->status == \App\ProjectStatus::Active)
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                  class="h-6 w-6 active text-yellow-400" fill="none"
                                                  viewBox="0 0 24 24" stroke="currentColor">

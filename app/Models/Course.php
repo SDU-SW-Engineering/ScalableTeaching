@@ -36,6 +36,7 @@ class Course extends Model
 {
     use HasFactory;
 
+    // region Relationships
     public function tasks() : HasMany
     {
         return $this->hasMany(Task::class);
@@ -45,6 +46,7 @@ class Course extends Model
     {
         return $this->hasMany(Group::class);
     }
+    // endregion
 
     public function userGroups(User $user)
     {

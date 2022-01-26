@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Models\OverrideGrade;
+use App\Models\Grade;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -12,27 +12,25 @@ class GradingController extends Controller
 {
     public function index(Course $course)
     {
-        $taskGrades = $course->tasks->mapWithKeys(fn(Task $task) => [$task->id => $task->grades()]);
+        $taskGrades = $course->tasks()->with('grades')->get()->keyBy('id');
 
-        $grades     = $course->students->map(function (User $student) use ($taskGrades, $course)
-        {
+        $grades = $course->students->map(function(User $student) use ($taskGrades, $course) {
             return [
                 'student' => [
                     'id'   => $student->id,
                     'name' => $student->name
                 ],
                 'tasks'   => $course->tasks->map(fn(Task $task) => [
-                    'task'  => [
+                    'history'        => false,
+                    'historyEntries' => null,
+                    'adding'         => false,
+                    'saving'         => false,
+                    'task'           => [
                         'id'   => $task->id,
                         'name' => $task->name
                     ],
-                    'grade' => $taskGrades[$task->id]->has($student->id)
-                        ? $taskGrades[$task->id][$student->id]
-                        : [
-                            'grade' => 'unbegun',
-                            'originalGrade' => 'unbegun'
-                        ]
-                ])
+                    'grade'          => $taskGrades[$task->id]->grades->where('user_id', $student->id)->firstWhere('selected', true)?->toArray()
+                ]),
             ];
         })->sortBy('student.name');
 
@@ -42,19 +40,30 @@ class GradingController extends Controller
     public function updateGrading(Course $course, User $user)
     {
         abort_unless($course->students->contains('id', $user->id), 400);
-        $actualGrades = $course->tasks->mapWithKeys(fn(Task $task) => [$task->id =>  $task->grades([$user])->first()['grade']]);
-        $override = \request()->all();
-        $changes = collect($override)->intersectByKeys($actualGrades)->filter(fn($status, $key) => $actualGrades[$key] != $status);
-        //OverrideGrade::whereIn('task_id',)
-        OverrideGrade::whereIn('task_id', $actualGrades->diffKeys($override)->keys())->where('user_id', $user->id)->delete();
-        foreach($changes as $taskId => $change) {
-            OverrideGrade::updateOrCreate([
-                'task_id' => $taskId,
-                'user_id' => $user->id,
-            ], [
-                'overridden_by' => auth()->id(),
-                'status' => $change
-            ]);
-        }
+
+        $user->grades()->create([
+            'task_id'     => \request('taskId'),
+            'value'       => \request('grade'),
+            'source_type' => User::class,
+            'source_id'   => auth()->id(),
+            'selected'    => true
+        ]);
+        $user->grades()->firstOrCreate();
+    }
+
+    public function taskInfo(Course $course, Task $task)
+    {
+        return $task->grades()->where([
+            'user_id' => \request('user')
+        ])->orderByDesc('created_at')->get();
+    }
+
+    public function setSelected(Course $course, Grade $grade)
+    {
+        Grade::where('user_id', $grade->user_id)
+            ->where('task_id', $grade->task_id)
+            ->update(['selected'=> \DB::raw("id = $grade->id")]);
+
+        return "ok";
     }
 }

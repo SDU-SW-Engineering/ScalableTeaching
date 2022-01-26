@@ -63,6 +63,8 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
         Route::group(['prefix' => 'grading', 'as' => 'grading.'], function() {
             Route::get('/', [GradingController::class, 'index'])->name('index');
             Route::put('users/{user}', [GradingController::class, 'updateGrading'])->name('updateGrading');
+            Route::get('tasks/{task}', [GradingController::class, 'taskInfo'])->name('task-info');
+            Route::post('{grade}/set-selected', [GradingController::class, 'setSelected'])->name('set-selected');
         });
 
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function ()

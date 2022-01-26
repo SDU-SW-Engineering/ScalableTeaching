@@ -1,44 +1,129 @@
 <template>
     <div>
-        <modal @cancel="closeModal" v-if="selectedStudent !== null" :is-loading="saving"
+        <modal @cancel="closeModal" v-if="selectedStudent !== null"
                :title="'Edit grading for ' + selectedStudent.student.name" type="info">
             <div class="mt-4">
                 <div v-for="task in selectedStudent.tasks"
-                     class="flex justify-between items-center bg-gray-900 px-3 py-2 mb-2 rounded-lg">
-                    <div class="flex flex-col">
-                        <span class="text-gray-300">{{ task.task.name }}</span>
-                        <transition name="slide">
-                        <span class="text-xs text-yellow-400" v-if="task.grade.grade !== task.grade.originalGrade">Overridden - <a
-                            @click="task.grade.grade = task.grade.originalGrade"
-                            class="cursor-pointer opacity-50">Clear</a></span>
-                        </transition>
+                     class="flex flex-col bg-gray-900 px-3 py-2 mb-2 rounded-lg group">
+                    <div class="flex justify-between">
+                        <div class="flex items-center">
+                            <span class="text-gray-300 mr-1">{{ task.task.name }}</span>
+                            <button v-if="task.grade != null" @click="toggleHistory(task)"
+                                    class="hover:bg-gray-600 rounded-lg p-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor" class="h-4 w-4 text-gray-400 transition-transform"
+                                     :class="{'transform rotate-180': task.history}">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div v-if="task.adding">
+                            <div v-if="task.saving" class="text-white flex items-center">
+                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span class="text-sm">Saving...</span>
+                            </div>
+                            <div class="flex items-center" v-else>
+                                <select v-model="task.saveAs" class="py-0 bg-gray-700 text-white border-none rounded-sm mr-2">
+                                    <option value="passed">Passed</option>
+                                    <option value="failed">Failed</option>
+                                </select>
+                                <button @click="saveGrade(task)" class="mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         class="h-5 w-5 text-lime-green-400 hover:text-lime-green-300" fill="none"
+                                         viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </button>
+                                <button @click="task.adding = false">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 hover:text-red-400"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <div v-if="task.grade != null" class="flex items-center">
+                                <button @click="task.adding = true"
+                                        class="hover:bg-gray-400 rounded-sm mr-2 text-white hidden group-hover:block">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                         fill="currentColor">
+                                        <path
+                                            d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                    </svg>
+                                </button>
+                                <span :class="{
+                                                'text-lime-green-300': task.grade.value === 'passed',
+                                                'text-red-400': task.grade.value === 'failed'
+                                                }" v-text="task.grade.value"></span>
+                            </div>
+                            <div class="flex items-center" v-else>
+                                <button class="hover:bg-gray-400 rounded-sm text-white" @click="task.adding = true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                         viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <select v-model="task.grade.grade"
-                                class="py-0 bg-gray-900 text-gray-400 focus:ring-lime-green-500 rounded-sm border-gray-600">
-                            <option value="overdue">Failed</option>
-                            <option value="finished">Finished</option>
-                            <option value="active" disabled>Active</option>
-                            <option value="unbegun" disabled>Unbegun</option>
-                        </select>
-                    </div>
+                    <transition name="slide">
+                        <div class="flex flex-col mt-2" v-if="task.grade != null" v-show="task.history">
+                            <div v-if="task.historyEntries == null" class="flex mb-1 flex-col text-white text-sm justify-between bg-gray-800 px-2 py-2 rounded-md animate-pulse">
+                                <div class="flex justify-between h-5">
+                                    <div class="flex">
+                                        <div class="bg-gray-600 rounded-md" style="width: 40px"></div>
+                                    </div>
+                                    <div class="flex">
+                                        <div class="bg-gray-600 rounded-md" style="width: 50px;"></div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-600 rounded-md h-4 mt-2" style="width: 60px"></div>
+                            </div>
+                            <div v-else class="mb-1">
+                                <div
+                                    class="flex text-white text-sm border justify-between bg-gray-800 hover:bg-gray-700 cursor-pointer px-2 py-1 rounded-md"
+                                    :class="{'mt-2': index > 0, 'border-lime-green-700': entry.selected, 'border-gray-700': !entry.selected }" @click="setSelectedGrade(entry, task)"
+                                    v-for="(entry, index) in task.historyEntries">
+                                    <div>
+                                        <div>
+                                            <b>Grade:</b>
+                                            <span :class="{
+                                                'text-lime-green-300': entry.value === 'passed',
+                                                'text-red-400': entry.value === 'failed'
+                                                }">{{ entry.value }}</span>
+                                        </div>
+                                        <span class="text-xs text-gray-400">{{
+                                                new Date(entry.created_at).toDateString()
+                                            }}</span>
+                                    </div>
+                                    <div>
+                                        <b>Source:</b>
+                                        <span>{{ entry.source_type | lastPart }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
                 </div>
             </div>
             <transition name="slide">
-                <div class="flex text-sm text-white items-center" v-if="saved === true">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-5 text-lime-green-300" fill="none"
-                         viewBox="0 0 24 24"
+                <div class="flex text-sm text-white items-center" v-if="showNewTip">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 text-blue-300" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M5 13l4 4L19 7"/>
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span class="ml-1">Changes Saved</span>
+                    <span class="ml-2 text-xs text-gray-300">User assigned grades takes precedence over other assigned grades.</span>
                 </div>
             </transition>
-            <template v-slot:buttons>
-                <modal-button :is-loading="saving" @click="submitGrades" type="success">Save changes</modal-button>
-            </template>
         </modal>
         <div class="flex flex-col bg-gray-700 rounded-md px-4 py-3 mb-3">
             <div class="flex justify-between items-start mb-2">
@@ -69,29 +154,23 @@
                     <div class="flex items-center bg-gray-800 rounded-lg p-3 mt-3" v-for="(taskName, taskId) in tasks">
                         <span class="text-sm text-gray-200 flex-grow">{{ taskName }}</span>
                         <div>
-                            <button @click="$set(toggleTasks[taskId], 'unbegun', !toggleTasks[taskId].unbegun)"
-                                    :class="[toggleTasks[taskId].unbegun ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
-                                    class="text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors">
-                                Unbegun
-                            </button>
                             <button
-                                @click="$set(toggleTasks[taskId], 'overdue', !toggleTasks[taskId].overdue)"
-                                :class="[toggleTasks[taskId].overdue ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
+                                @click="$set(toggleTasks[taskId], 'failed', !toggleTasks[taskId].failed)"
+                                :class="[toggleTasks[taskId].failed ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
                                 class="text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors">
                                 Failed
                             </button>
                             <button
-                                @click="$set(toggleTasks[taskId], 'active', !toggleTasks[taskId].active)"
-                                :class="[toggleTasks[taskId].active ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
+                                @click="$set(toggleTasks[taskId], 'passed', !toggleTasks[taskId].passed)"
+                                :class="[toggleTasks[taskId].passed ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
                                 class="text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors">
-                                In
-                                Progress
+                                Passed
                             </button>
                             <button
-                                @click="$set(toggleTasks[taskId], 'finished', !toggleTasks[taskId].finished)"
-                                :class="[toggleTasks[taskId].finished ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
+                                @click="$set(toggleTasks[taskId], 'missing', !toggleTasks[taskId].missing)"
+                                :class="[toggleTasks[taskId].missing ? 'bg-lime-green-400 hover:bg-lime-green-500' : 'hover:bg-gray-600']"
                                 class="text-white text-sm px-1.5 py-0.5 rounded-lg transition-colors">
-                                Finished
+                                Missing
                             </button>
                         </div>
                     </div>
@@ -106,34 +185,22 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="grade in filteredGrades" class="hover:bg-gray-700 cursor-pointer"
-                @click="selectedStudent = grade">
-                <td class="py-2 px-1">{{ grade.student.name }}</td>
-                <td class="text-center" v-for="task in grade.tasks">
-                    <svg v-if="task.grade.grade === 'finished'" xmlns="http://www.w3.org/2000/svg"
+            <tr v-for="gradeEntry in filteredGrades" class="hover:bg-gray-700 cursor-pointer"
+                @click="selectedStudent = gradeEntry">
+                <td class="py-2 px-1">{{ gradeEntry.student.name }}</td>
+                <td class="text-center" v-for="task in gradeEntry.tasks">
+                    <svg v-if="task.grade != null && task.grade.value === 'passed'"
+                         xmlns="http://www.w3.org/2000/svg"
                          class="h-6 w-full text-lime-green-300" fill="none"
                          viewBox="0 0 24 24"
                          stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M5 13l4 4L19 7"/>
                     </svg>
-                    <svg v-else-if="task.grade.grade === 'overdue'" xmlns="http://www.w3.org/2000/svg"
+                    <svg v-else-if="task.grade != null && task.grade.value === 'failed'"
+                         xmlns="http://www.w3.org/2000/svg"
                          class="h-6 w-full text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                    <svg v-else-if="task.grade.grade === 'active'" xmlns="http://www.w3.org/2000/svg"
-                         class="h-6 w-full text-blue-300"
-                         fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-full text-gray-300" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </td>
             </tr>
@@ -169,37 +236,58 @@ export default {
             filter: "",
             toggleTasks: {},
             selectedStudent: null,
-            saving: false,
-            saved: false
+            gradeHistory: null
         }
     },
     methods: {
         resetFilters: function () {
             for (const [taskId, taskName] of Object.entries(this.tasks)) {
                 this.$set(this.toggleTasks, taskId, {
-                    unbegun: false,
-                    finished: false,
-                    active: false,
-                    overdue: false
+                    passed: false,
+                    failed: false,
+                    missing: false
                 })
                 this.filter = ""
             }
         },
-        submitGrades: async function () {
-            this.saving = true;
-            this.saved = false;
-            await axios.put(`/courses/${this.courseId}/grading/users/` + this.selectedStudent.student.id, _.chain(this.selectedStudent.tasks)
-                .filter(task => task.grade.grade !== task.grade.originalGrade)
-                .keyBy(t => t.task.id)
-                .mapValues(g => g.grade.grade)
-                .value()
-            );
-            this.saving = false;
-            this.saved = true;
+        saveGrade: async function(task) {
+            if (task.saveAs == null)
+                return;
+            task.saving = true;
+            let response = await axios.put(`/courses/${this.courseId}/grading/users/${this.selectedStudent.student.id}`, {
+                grade: task.saveAs,
+                taskId: task.task.id
+            });
+            let grades = await this.loadTaskHistory(task);
+            task.saving = false;
+            task.adding = false;
+            task.grade = grades[0];
         },
-        closeModal: function() {
+        toggleHistory: async function(task) {
+            task.history = !task.history;
+            if (! (task.history === true && task.historyEntries == null))
+                return;
+
+           await this.loadTaskHistory(task);
+        },
+        loadTaskHistory: async function(task){
+            let resp = await axios.get(`/courses/${this.courseId}/grading/tasks/${task.task.id}`, {
+                params: {
+                    user: this.selectedStudent.student.id
+                }
+            });
+            task.historyEntries = resp.data;
+            return resp.data;
+        },
+        closeModal: function () {
             this.selectedStudent = null
-            this.saved = false;
+        },
+        setSelectedGrade: async function (grade, task) {
+            if (grade.selected)
+                return;
+            await axios.post(`/courses/${this.courseId}/grading/${grade.id}/set-selected`);
+            task.historyEntries.forEach(entry => entry.selected = entry.id === grade.id);
+            task.grade = grade;
         }
     },
     computed: {
@@ -211,10 +299,9 @@ export default {
                 if (this.toggleTasks[taskId] === undefined)
                     continue;
 
-                if (!(this.toggleTasks[taskId].unbegun === false
-                    && this.toggleTasks[taskId].finished === false
-                    && this.toggleTasks[taskId].active === false
-                    && this.toggleTasks[taskId].overdue === false))
+                if (!(this.toggleTasks[taskId].failed === false
+                    && this.toggleTasks[taskId].passed === false
+                    && this.toggleTasks[taskId].missing === false))
                     return true;
             }
 
@@ -226,27 +313,46 @@ export default {
 
                 for (const task of grade.tasks) {
 
-                    if (this.toggleTasks[task.task.id] === undefined)
+                    if (this.toggleTasks[task.task.id] == null)
                         continue;
-                    if (this.toggleTasks[task.task.id].unbegun === false
-                        && this.toggleTasks[task.task.id].finished === false
-                        && this.toggleTasks[task.task.id].active === false
-                        && this.toggleTasks[task.task.id].overdue === false)
+
+                    if (this.toggleTasks[task.task.id].failed === false
+                        && this.toggleTasks[task.task.id].passed === false
+                        && this.toggleTasks[task.task.id].missing === false)
                         continue;
-                    found &= this.toggleTasks[task.task.id][task.grade.grade];
+                    if (task.grade == null && this.toggleTasks[task.task.id].missing === false)
+                        return false;
+
+
+                    found &= this.toggleTasks[task.task.id].missing
+                        ? task.grade?.value == null
+                        : this.toggleTasks[task.task.id][task.grade.value];
                 }
 
                 return found;
             }.bind(this));
+        },
+        showNewTip: function () {
+            if (this.selectedStudent == null)
+                return false;
+            if (this.saved === true)
+                return false;
+            return this.selectedStudent.tasks.some(task => task.adding);
+        }
+    },
+    filters: {
+        lastPart: function (value) {
+            let position = value.lastIndexOf("\\");
+
+            return value.substring(position + 1);
         }
     },
     mounted() {
         for (const [taskId, taskName] of Object.entries(this.tasks)) {
             this.$set(this.toggleTasks, taskId, {
-                unbegun: false,
-                finished: false,
-                active: false,
-                overdue: false
+                failed: false,
+                passed: false,
+                missing: false
             })
         }
     }

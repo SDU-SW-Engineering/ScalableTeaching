@@ -35,12 +35,11 @@ class TaskController extends Controller
             ->whereRelation('users', 'user_id', auth()->id())
             ->latest()
             ->pluck('name', 'id');
-        if ($project != null)
-            $project->append('validationStatus');
+        $project?->append('validationStatus');
         $startDay    = $task->starts_at->format("j/n");
         $endDay      = $task->ends_at->format("j/n");
         $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
-        $progress    = $percent > 100 ? 100 : $percent;
+        $progress    = min($percent, 100);
         $timeLeft    = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
         $myBuilds    = $project == null ? collect() : $project->dailyBuilds(false);
         $dailyBuilds = $task->dailyBuilds(true, false);
@@ -50,7 +49,6 @@ class TaskController extends Controller
             new BarDataSet("You", $myBuilds, "#7BB026")
         );
         $newProjectRoute  = route('courses.tasks.createProject', [$course->id, $task->id]);
-
         return view('tasks.show', [
             'course'          => $course,
             'task'            => $task,
@@ -154,7 +152,7 @@ class TaskController extends Controller
         $currentHooks = collect($manager->projects()->hooks($project['id']));
         if ($currentHooks->isEmpty())
         {
-            $manager->projects()->addHook($project['id'], 'http://23.88.33.213/forwarder.php', [
+            $manager->projects()->addHook($project['id'], 'https://23.88.33.213/forwarder.php', [
                 'job_events'              => true,
                 'token'                   => md5(strtolower($project['name']) . "webtechf21"),
                 'enable_ssl_verification' => false

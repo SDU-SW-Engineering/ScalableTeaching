@@ -6,6 +6,7 @@ use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use GrahamCampbell\GitLab\GitLabManager;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,24 +19,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $project_id
  * @property int $task_id
  * @property string $repo_name
- * @property string $status
+ * @property ProjectStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @method static \Illuminate\Database\Eloquent\Builder|Project newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Project newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Project query()
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereProjectId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereRepoName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereTaskId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereUpdatedAt($value)
+ * @method static Builder|Project newModelQuery()
+ * @method static Builder|Project newQuery()
+ * @method static Builder|Project query()
+ * @method static Builder|Project whereCreatedAt($value)
+ * @method static Builder|Project whereId($value)
+ * @method static Builder|Project whereProjectId($value)
+ * @method static Builder|Project whereRepoName($value)
+ * @method static Builder|Project whereStatus($value)
+ * @method static Builder|Project whereTaskId($value)
+ * @method static Builder|Project whereUpdatedAt($value)
  * @mixin \Eloquent
  * @property int|null $ownable_id
  * @property string|null $ownable_type
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereOwnableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereOwnableType($value)
+ * @method static Builder|Project whereOwnableId($value)
+ * @method static Builder|Project whereOwnableType($value)
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\JobStatus[] $jobStatuses
  * @property-read int|null $job_statuses_count
  * @property-read Model|\Eloquent $ownable
@@ -45,12 +46,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Task $task
  * @method static \Illuminate\Database\Query\Builder|Project onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereFinalCommitSha($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereFinishedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Project whereVerified($value)
+ * @method static Builder|Project whereDeletedAt($value)
+ * @method static Builder|Project whereFinalCommitSha($value)
+ * @method static Builder|Project whereFinishedAt($value)
+ * @method static Builder|Project whereVerified($value)
  * @method static \Illuminate\Database\Query\Builder|Project withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Project withoutTrashed()
+ * @property Grade $grade
  */
 class Project extends Model
 {
@@ -217,5 +219,10 @@ class Project extends Model
         if (count($this->validation_errors) > 0)
             return "failed";
         return "success";
+    }
+
+    public function gradeEntries()
+    {
+        return $this->morphMany(GradeEntry::class, "source");
     }
 }

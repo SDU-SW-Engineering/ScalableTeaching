@@ -110,4 +110,9 @@ class User extends Authenticatable
             ->as(CourseUser::class)
             ->withTimestamps();
     }
+
+    public function grades()
+    {
+        return $this->hasMany(Grade::class);
+    }
 }

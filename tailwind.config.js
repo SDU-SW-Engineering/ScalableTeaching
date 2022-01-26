@@ -95,7 +95,8 @@ module.exports = {
             dropShadow: ['dark'],
             opacity: ['disabled'],
             cursor: ['disabled'],
-            backgroundColor: ['disabled']
+            backgroundColor: ['disabled'],
+            display: ['group-hover']
         },
     },
     plugins: [
