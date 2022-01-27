@@ -152,9 +152,9 @@ class TaskController extends Controller
         $currentHooks = collect($manager->projects()->hooks($project['id']));
         if ($currentHooks->isEmpty())
         {
-            $manager->projects()->addHook($project['id'], 'https://23.88.33.213/forwarder.php', [
+            $manager->projects()->addHook($project['id'], 'https://scalableteaching.sdu.dk/api/reporter', [
                 'job_events'              => true,
-                'token'                   => md5(strtolower($project['name']) . "webtechf21"),
+                'token'                   => md5(strtolower($project['name']) . config('scalable.webhook_secret')),
                 'enable_ssl_verification' => false
             ]);
         }

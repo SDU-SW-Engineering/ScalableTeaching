@@ -62,7 +62,7 @@ class HomeController extends Controller
     {
         abort_unless(\request()->hasHeader('X-Gitlab-Token'), 400, 'No gitlab token supplied');
         $token         = \request()->header('X-Gitlab-Token');
-        $tokenShouldBe = md5(strtolower(\request('repository.name')) . "webtechf21");
+        $tokenShouldBe = md5(strtolower(\request('repository.name')) . config('scalable.webhook_secret'));
         abort_unless($token == $tokenShouldBe, 400, 'Token mismatch');
 
         $project = Project::firstWhere('project_id', request('project_id'));
