@@ -41,7 +41,6 @@ class GradingController extends Controller
     {
         abort_unless($course->students->contains('id', $user->id), 400);
 
-
         $user->grades()->create([
             'task_id'     => \request('taskId'),
             'value'       => GradeEnum::from(request('grade')),

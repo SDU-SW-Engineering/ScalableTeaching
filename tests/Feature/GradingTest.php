@@ -94,3 +94,20 @@ it('disallows students to access grades', function() {
     get(route('courses.grading.task-info', [$this->course->id, $this->task->id]))->assertStatus(403);
     put(route('courses.grading.updateGrading', [$this->course->id, $this->user->id]))->assertStatus(403);
 });
+
+it('allows course responsible to access grades', function() {
+    $courseResponsible = User::factory()->hasAttached($this->course, ['role' => 'teacher'])->create();
+    actingAs($courseResponsible);
+    get(route('courses.grading.index', $this->course->id))->assertStatus(200);
+
+    $grade = Grade::factory([
+        'source_type' => Task::class,
+        'source_id'   => $this->task->id
+    ])->for($this->user)->for($this->task)->create();
+    post(route('courses.grading.set-selected', [$this->course->id, $grade->id]))->assertStatus(200);
+    get(route('courses.grading.task-info', [$this->course->id, $this->task->id]))->assertStatus(200);
+    put(route('courses.grading.updateGrading', [$this->course->id, $this->user->id]), [
+        'grade'  => 'passed',
+        'taskId' => $this->task->id
+    ])->assertStatus(200);
+});
