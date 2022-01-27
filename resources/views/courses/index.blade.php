@@ -32,21 +32,10 @@
                         @endunless
                     </div>
                     <div>
-                        <div class="flex items-center justify-between my-2">
-                            <p class="text-gray-300 text-sm">
-                                @if ($course['taskCount'] == 0)
-                                    0
-                                @else
-                                    {{ $course['completed'] }}/{{ $course['taskCount'] }}
-                                @endif
-                                task completed
+                        <div class="flex items-center justify-between">
+                            <p class="text-gray-400 mt-2 text-sm">
+                                {{ $course['taskCount'] }} tasks
                             </p>
-                        </div>
-                        <div class="w-full h-2 bg-lime-green-200 rounded-full">
-                            <div
-                                style="width: {{ $course['taskCount'] == 0 ? 0 : number_format($course['completed'] / $course['taskCount'] * 100, 2) }}%"
-                                class="h-full text-center text-xs text-white bg-lime-green-600 rounded-full">
-                            </div>
                         </div>
                     </div>
                 </a>

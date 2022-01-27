@@ -9,19 +9,21 @@
             @if($task->grade() != null)
                 <span @class([
                     'px-3 py-1 text-sm font-bold text-gray-100 transform rounded',
-                    'bg-lime-green-600' => $task->grade()->grade->value == 'passed',
-                    'bg-red-500' => $task->grade()->grade->value == 'failed',
+                    'bg-lime-green-600' => $task->grade()->value == \App\Models\Enums\GradeEnum::Passed,
+                    'bg-red-500' => $task->grade()->value == \App\Models\Enums\GradeEnum::Failed,
                 ])>
-                    @switch($task->grade()->grade->value)
-                        @case('passed')
+                    @switch($task->grade()->value)
+                        @case(\App\Models\Enums\GradeEnum::Passed)
                         Passed
                         @break
-                        @case('failed')
+                        @case(\App\Models\Enums\GradeEnum::Failed)
                         Failed
                         @break
+                        @default
                     @endswitch
                 </span>
             @endif
+
         </div>
 
         <div class="mt-2">

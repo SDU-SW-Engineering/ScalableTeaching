@@ -26,7 +26,7 @@ class Grade extends Model
     protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id'];
 
     protected $casts = [
-        'value'    => Enums\Grade::class,
+            'value'    => Enums\GradeEnum::class,
         'selected' => 'boolean'
     ];
 

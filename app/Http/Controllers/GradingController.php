@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Enums\GradeEnum;
 use App\Models\Grade;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class GradingController extends Controller
 {
@@ -44,7 +44,7 @@ class GradingController extends Controller
 
         $user->grades()->create([
             'task_id'     => \request('taskId'),
-            'value'       => \App\Models\Enums\Grade::from(request('grade')),
+            'value'       => GradeEnum::from(request('grade')),
             'source_type' => User::class,
             'source_id'   => auth()->id(),
             'selected'    => true

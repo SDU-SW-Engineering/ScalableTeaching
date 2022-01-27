@@ -1,12 +1,12 @@
 <?php
 
 use App\Models\Course;
+use App\Models\Enums\GradeEnum;
 use App\Models\Grade;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use App\ProjectStatus;
-use App\Models\Enums\Grade as GradeEnum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Enums\GradeEnum;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\ProjectRepositoryArgumentsObject;
@@ -15,45 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
-/**
- * App\Models\Task
- *
- * @property int $id
- * @property int $course_id
- * @property string $name
- * @property string|null $description
- * @property string|null $starts_at
- * @property string $ends_at
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @method static Builder|Task newModelQuery()
- * @method static Builder|Task newQuery()
- * @method static Builder|Task query()
- * @method static Builder|Task whereCourseId($value)
- * @method static Builder|Task whereCreatedAt($value)
- * @method static Builder|Task whereDescription($value)
- * @method static Builder|Task whereEndsAt($value)
- * @method static Builder|Task whereId($value)
- * @method static Builder|Task whereName($value)
- * @method static Builder|Task whereStartsAt($value)
- * @method static Builder|Task whereUpdatedAt($value)
- * @mixin \Eloquent
- * @property int $source_project_id
- * @property string|null $short_description
- * @property string|null $markdown_description
- * @method static Builder|Task whereMarkdownDescription($value)
- * @method static Builder|Task whereShortDescription($value)
- * @method static Builder|Task whereSourceProjectId($value)
- * @property-read Collection|Project[] $projects
- * @property-read int|null $projects_count
- * @property-read mixed $projects_per_day
- * @property-read mixed $total_completed_tasks_per_day
- * @property-read mixed $total_projects_per_day
- * @property-read Collection|\App\Models\JobStatus[] $jobs
- * @property-read int|null $jobs_count
- *
- * @property Collection|Grade[] $grades
- */
 class Task extends Model
 {
     use HasFactory;
@@ -227,40 +189,11 @@ class Task extends Model
         })->flatten();
     }
 
-    public function grades2(array $users = null)
-    {
-        /** @var Collection $students */
-        $students = $users == null ? $this->course->students : Collection::wrap($users);
-
-        $overridden = OverrideGrade::whereIn('user_id', $students->pluck('id'))->where('task_id', $this->id)
-            ->select('user_id', 'status')->pluck('status', 'user_id');
-
-        $groupUserStatus = GroupUser::whereIn('group_user.user_id', $students->pluck('id'))
-            ->where('projects.ownable_type', Group::class)
-            ->where('task_id', $this->id)
-            ->leftJoin('projects', 'group_user.group_id', '=', 'projects.ownable_id')
-            ->pluck('status', 'user_id');
-        $userStatus = Project::whereIn('ownable_id', $students->pluck('id'))
-            ->where('ownable_type', User::class)
-            ->where('task_id', $this->id)
-            ->pluck('projects.status', 'ownable_id');
-
-        $registeredUserGrades = $groupUserStatus->union($userStatus);
-
-        return $students->mapWithKeys(function ($user) use ($registeredUserGrades, $overridden) {
-            return [
-                $user->id => [
-                    'grade' => ($overridden->has($user->id) ? $overridden->get($user->id) : $registeredUserGrades->get($user->id)) ?? 'unbegun',
-                    'originalGrade' => $registeredUserGrades->get($user->id) ?? 'unbegun'
-                ]
-            ];
-        });
-    }
-
     public function grade(User $user = null)
     {
         if ($user == null)
             $user = auth()->user();
+        if ( $this->grades()->where('user_id', $user->id)->first() != null)
         return $this->grades()->where('user_id', $user->id)->first();
     }
 }
