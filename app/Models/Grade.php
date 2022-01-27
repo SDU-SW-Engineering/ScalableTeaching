@@ -26,18 +26,30 @@ class Grade extends Model
     protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id'];
 
     protected $casts = [
-            'value'    => Enums\GradeEnum::class,
+        'value'    => Enums\GradeEnum::class,
         'selected' => 'boolean'
     ];
 
-    public function value()
+    // region relationships
+    public function user()
     {
-        return $this->entries()->first()->value;
+        return $this->belongsTo(User::class);
+    }
+
+    public function task()
+    {
+        return $this->belongsTo(Task::class);
     }
 
     public function source()
     {
         $this->morphTo("source");
+    }
+    // endregion
+
+    public function value()
+    {
+        return $this->entries()->first()->value;
     }
 
     public static function booted()

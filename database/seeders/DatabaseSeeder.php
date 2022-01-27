@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Course;
+use App\Models\Task;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,9 +16,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
-        Course::factory(1)->create()->each(function(Course $course) {
-
-        });
+        $admin = User::factory()->admin()->create();
+        Course::factory()->count(3)
+            ->has(User::factory()->count(10), 'members')
+            ->has(Task::factory()->count(3))
+            ->create()->each(fn(Course $course) => $course->teachers()->attach($admin->id));
     }
 }

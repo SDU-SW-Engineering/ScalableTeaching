@@ -60,7 +60,7 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
                 ->middleware('can:removeMember,group,user');
         });
 
-        Route::group(['prefix' => 'grading', 'as' => 'grading.'], function() {
+        Route::group(['prefix' => 'grading', 'as' => 'grading.', 'middleware' => 'can:grade,course'], function() {
             Route::get('/', [GradingController::class, 'index'])->name('index');
             Route::put('users/{user}', [GradingController::class, 'updateGrading'])->name('updateGrading');
             Route::get('tasks/{task}', [GradingController::class, 'taskInfo'])->name('task-info');

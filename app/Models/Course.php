@@ -48,6 +48,12 @@ class Course extends Model
         return $this->hasMany(Group::class);
     }
 
+    public function members()
+    {
+        return $this->belongsToMany(User::class)
+            ->as(CourseUser::class)
+            ->withTimestamps();
+    }
     // endregion
 
     public static function booted()

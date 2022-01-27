@@ -109,4 +109,9 @@ class CoursePolicy
     {
         return $course->hasTeacher($user);
     }
+
+    public function grade(User $user, Course $course)
+    {
+        return $this->manage($user, $course);
+    }
 }

@@ -49,7 +49,6 @@ class GradingController extends Controller
             'source_id'   => auth()->id(),
             'selected'    => true
         ]);
-        $user->grades()->firstOrCreate();
     }
 
     public function taskInfo(Course $course, Task $task)

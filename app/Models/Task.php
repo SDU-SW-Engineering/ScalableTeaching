@@ -196,4 +196,9 @@ class Task extends Model
         if ( $this->grades()->where('user_id', $user->id)->first() != null)
         return $this->grades()->where('user_id', $user->id)->first();
     }
+
+    public function sourcedGrades()
+    {
+        return $this->morphMany(Grade::class, 'source');
+    }
 }
