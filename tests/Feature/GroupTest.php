@@ -197,7 +197,7 @@ it('allows group members to withdraw invites', function ()
 
 it('prohibits non-members from withdrawing invities', function ()
 {
-    actingAs(User::factory()->create());
+    actingAs($this->user2);
     $groupInvitation = $this->group->invitations()->create([
         'recipient_user_id'  => User::factory()->create()->id,
         'invited_by_user_id' => $this->user->id
