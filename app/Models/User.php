@@ -94,6 +94,14 @@ class User extends Authenticatable
         'is_sys_admin'      => 'bool'
     ];
 
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class)
+            ->using(GroupUser::class)
+            ->withPivot('is_owner')
+            ->withTimestamps();
+    }
+
     public function projects()
     {
         return $this->morphMany(Project::class, 'ownable');

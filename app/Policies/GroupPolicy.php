@@ -116,10 +116,7 @@ class GroupPolicy
         if ($group->course->hasMaxGroups($user))
             return Response::deny("Maximum number of groups reached.");
 
-        $userIsEligible = $group->projects->every(function (Project $project) use ($user)
-        {
-            return $project->task->currentProjectForUser($user) == null;
-        });
+        $userIsEligible = $group->projects->every(fn (Project $project) => $project->task->currentProjectForUser($user) == null);
         if (!$userIsEligible)
             return Response::deny("This group is already working on a project that you have also started.");
 
