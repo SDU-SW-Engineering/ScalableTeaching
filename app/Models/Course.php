@@ -37,13 +37,15 @@ class Course extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['max_groups_amount', 'max_groups', 'max_group_size'];
+
     // region Relationships
-    public function tasks(): HasMany
+    public function tasks() : HasMany
     {
         return $this->hasMany(Task::class);
     }
 
-    public function groups(): HasMany
+    public function groups() : HasMany
     {
         return $this->hasMany(Group::class);
     }
@@ -54,11 +56,13 @@ class Course extends Model
             ->as(CourseUser::class)
             ->withTimestamps();
     }
+
     // endregion
 
     public static function booted()
     {
-        static::creating(function(Course $course) {
+        static::creating(function (Course $course)
+        {
             $course->enroll_token = Str::random(32);
         });
     }
@@ -72,25 +76,26 @@ class Course extends Model
             ->get();
     }
 
-    public function groupInvitations(): HasManyThrough
+    public function groupInvitations() : HasManyThrough
     {
         return $this->hasManyThrough(GroupInvitation::class, Group::class);
     }
 
-    public function hasMaxGroups(User $user): bool
+    public function hasMaxGroups(User $user) : bool
     {
         $currentCount = $this->userGroups($user)->count();
 
-        $upperLimit = match ($this->max_groups) {
+        $upperLimit = match ($this->max_groups)
+        {
             'same_as_assignments' => $this->tasks()->count(),
-            'custom' => $this->max_groupss_amount,
-            default => 0
+            'custom'              => $this->max_groups_amount,
+            default               => 0
         };
 
         return $currentCount >= $upperLimit;
     }
 
-    public function teachers(): BelongsToMany
+    public function teachers() : BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->as(CourseUser::class)
@@ -98,7 +103,7 @@ class Course extends Model
             ->withTimestamps();
     }
 
-    public function students(): BelongsToMany
+    public function students() : BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->as(CourseUser::class)
@@ -106,15 +111,20 @@ class Course extends Model
             ->withTimestamps();
     }
 
-    public function users(): BelongsToMany
+    public function users() : BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->as(CourseUser::class)
             ->withTimestamps();
     }
 
-    public function hasTeacher(User $user): bool
+    public function hasTeacher(User $user) : bool
     {
         return $this->teachers()->where('user_id', $user->id)->exists();
+    }
+
+    public function hasUser(User $user) : bool
+    {
+        return $this->users()->where('user_id', $user->id)->exists();
     }
 }

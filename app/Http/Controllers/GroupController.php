@@ -54,10 +54,10 @@ class GroupController extends Controller
         $group = $course->groups()->create($groupRequest);
         $group->users()->attach(auth()->id(), ['is_owner' => true]);
 
-        return [
+        return response([
             'groups'          => $this->addMetaToUserGroups($course->userGroups(auth()->user(), true)),
             'canCreateGroups' => auth()->user()->can('createGroup', $course)
-        ];
+        ], 201);
     }
 
     private function addMetaToUserGroups(Collection $groups)
@@ -103,6 +103,7 @@ class GroupController extends Controller
             'email' => ['email']
         ]);
         $foundUser = User::where('email', $validated['email'])->firstOrFail();
+        throw_unless($course->hasUser($foundUser), ValidationException::withMessages(['email' => 'This user is not a member of this course.']));
         throw_if($group->users->contains('id', $foundUser->id), ValidationException::withMessages(['email' => 'This user is already a member of this group.']));
         throw_if($group->invitations()->count() >= $group->course->max_group_size - $group->users()->count(), ValidationException::withMessages(['email' => "There is no more room in your group."]));
         throw_if($group->invitations()->where('recipient_user_id', $foundUser->id)->exists(), ValidationException::withMessages(['email' => 'This user has already been invited to your group.']));
@@ -124,7 +125,7 @@ class GroupController extends Controller
         if ($accepting)
         {
             if (auth()->user()->cannot('canAcceptInvite', [$group, $groupInvitation]))
-                return "failed";
+                return response("failed", 422);
 
             $group->users()->attach(auth()->id());
         }
