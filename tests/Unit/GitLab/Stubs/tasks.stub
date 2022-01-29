@@ -1,0 +1,24 @@
+image: node:14.15.1-slim
+
+stages:
+  - install
+  - test
+
+
+install:
+  stage: install
+  artifacts:
+    untracked: true
+  script: npm install
+
+"test 9 equals [5,2,2]":
+  dependencies:
+    - install
+  stage: test
+  script: npx mocha -f "should return [5,2,2] when given 9"  test.mjs
+
+test 11 equals [10, 1]:
+  dependencies:
+    - install
+  stage: test
+  script: npx mocha -f "should return [10,1] when given 11"  test.mjs
