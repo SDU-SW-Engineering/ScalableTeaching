@@ -1,0 +1,51 @@
+{
+    "object_kind": "build",
+    "ref": "main",
+    "tag": false,
+    "before_sha": "0000000000000000000000000000000000000000",
+    "sha": "bccf22832b61fb7232a1f5bd7dbd96184d5d28b4",
+    "build_id": 2030891607,
+    "build_name": "test 9 equals [5,2,2]",
+    "build_stage": "test",
+    "build_status": "created",
+    "build_created_at": "2022-01-29 12:58:36 UTC",
+    "build_started_at": null,
+    "build_finished_at": null,
+    "build_duration": null,
+    "build_queued_duration": null,
+    "build_allow_failure": false,
+    "build_failure_reason": "unknown_failure",
+    "pipeline_id": 459142668,
+    "runner": null,
+    "project_id": 33221062,
+    "project_name": "Niels Faurskov / Change",
+    "user": {
+        "id": 1868773,
+        "name": "Niels Faurskov",
+        "username": "jazerix",
+        "avatar_url": "https://secure.gravatar.com/avatar/6436f675cbc7d0048f6aa1e6250826e6?s=80&d=identicon",
+        "email": "[REDACTED]"
+    },
+    "commit": {
+        "id": 459142668,
+        "sha": "bccf22832b61fb7232a1f5bd7dbd96184d5d28b4",
+        "message": "Update .gitlab-ci.yml",
+        "author_name": "Niels Faurskov",
+        "author_email": "jazerixthegreat@gmail.com",
+        "author_url": "https://gitlab.com/jazerix",
+        "status": "created",
+        "duration": null,
+        "started_at": null,
+        "finished_at": null
+    },
+    "repository": {
+        "name": "Change",
+        "url": "git@gitlab.com:jazerix/change.git",
+        "description": "",
+        "homepage": "https://gitlab.com/jazerix/change",
+        "git_http_url": "https://gitlab.com/jazerix/change.git",
+        "git_ssh_url": "git@gitlab.com:jazerix/change.git",
+        "visibility_level": 0
+    },
+    "environment": null
+}

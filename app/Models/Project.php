@@ -225,4 +225,14 @@ class Project extends Model
     {
         return $this->morphMany(GradeEntry::class, "source");
     }
+
+    public static function isCorrectToken(Project|int $project, string $token) : bool
+    {
+        return self::token($project) === $token;
+    }
+
+    public static function token(Project|int $project) : string
+    {
+        return md5(strtolower($project instanceof Project ? $project->project_id : $project) . config('scalable.webhook_secret'));
+    }
 }

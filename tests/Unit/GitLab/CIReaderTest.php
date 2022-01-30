@@ -5,7 +5,7 @@ use function Pest\testDirectory;
 
 beforeEach(function ()
 {
-    $this->reader = new CIReader(file_get_contents(testDirectory("Unit/GitLab/Stubs/tasks.stub")));
+    $this->reader = new CIReader(file_get_contents(testDirectory("Unit/GitLab/Stubs/tasks.yml")));
 });
 
 it('extracts three tasks from a ci file', function ()
