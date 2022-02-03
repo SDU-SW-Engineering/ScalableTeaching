@@ -1,0 +1,192 @@
+{
+    "object_kind": "pipeline",
+    "object_attributes": {
+        "id": 459142668,
+        "ref": "main",
+        "tag": false,
+        "sha": "bccf22832b61fb7232a1f5bd7dbd96184d5d28b4",
+        "before_sha": "0000000000000000000000000000000000000000",
+        "source": "web",
+        "status": "success",
+        "detailed_status": "success",
+        "stages": [
+            "install",
+            "test"
+        ],
+        "created_at": "2022-01-29 12:58:36 UTC",
+        "finished_at": "2022-01-29 12:59:31 UTC",
+        "duration": 54,
+        "queued_duration": null,
+        "variables": []
+    },
+    "merge_request": null,
+    "user": {
+        "id": 1868773,
+        "name": "Niels Faurskov",
+        "username": "jazerix",
+        "avatar_url": "https://secure.gravatar.com/avatar/6436f675cbc7d0048f6aa1e6250826e6?s=80&d=identicon",
+        "email": "[REDACTED]"
+    },
+    "project": {
+        "id": 33221062,
+        "name": "Change",
+        "description": "",
+        "web_url": "https://gitlab.com/jazerix/change",
+        "avatar_url": null,
+        "git_ssh_url": "git@gitlab.com:jazerix/change.git",
+        "git_http_url": "https://gitlab.com/jazerix/change.git",
+        "namespace": "Niels Faurskov",
+        "visibility_level": 0,
+        "path_with_namespace": "jazerix/change",
+        "default_branch": "main",
+        "ci_config_path": ""
+    },
+    "commit": {
+        "id": "bccf22832b61fb7232a1f5bd7dbd96184d5d28b4",
+        "message": "Update .gitlab-ci.yml",
+        "title": "Update .gitlab-ci.yml",
+        "timestamp": "2022-01-29T12:56:56+00:00",
+        "url": "https://gitlab.com/jazerix/change/-/commit/bccf22832b61fb7232a1f5bd7dbd96184d5d28b4",
+        "author": {
+            "name": "Niels Faurskov",
+            "email": "jazerixthegreat@gmail.com"
+        }
+    },
+    "builds": [
+        {
+            "id": 2030891608,
+            "stage": "test",
+            "name": "test 11 equals [10, 1]",
+            "status": "success",
+            "created_at": "2022-01-29 12:58:36 UTC",
+            "started_at": "2022-01-29 12:59:09 UTC",
+            "finished_at": "2022-01-29 12:59:31 UTC",
+            "duration": 21.305279,
+            "queued_duration": 0.269151,
+            "when": "on_success",
+            "manual": false,
+            "allow_failure": false,
+            "user": {
+                "id": 1868773,
+                "name": "Niels Faurskov",
+                "username": "jazerix",
+                "avatar_url": "https://secure.gravatar.com/avatar/6436f675cbc7d0048f6aa1e6250826e6?s=80&d=identicon",
+                "email": "[REDACTED]"
+            },
+            "runner": {
+                "id": 12270857,
+                "description": "4-green.shared.runners-manager.gitlab.com/default",
+                "runner_type": "instance_type",
+                "active": true,
+                "is_shared": true,
+                "tags": [
+                    "gce",
+                    "east-c",
+                    "linux",
+                    "ruby",
+                    "mysql",
+                    "postgres",
+                    "mongo",
+                    "git-annex",
+                    "shared",
+                    "docker"
+                ]
+            },
+            "artifacts_file": {
+                "filename": null,
+                "size": null
+            },
+            "environment": null
+        },
+        {
+            "id": 2030891607,
+            "stage": "test",
+            "name": "test 9 equals [5,2,2]",
+            "status": "success",
+            "created_at": "2022-01-29 12:58:36 UTC",
+            "started_at": "2022-01-29 12:59:09 UTC",
+            "finished_at": "2022-01-29 12:59:30 UTC",
+            "duration": 20.389179,
+            "queued_duration": 0.245942,
+            "when": "on_success",
+            "manual": false,
+            "allow_failure": false,
+            "user": {
+                "id": 1868773,
+                "name": "Niels Faurskov",
+                "username": "jazerix",
+                "avatar_url": "https://secure.gravatar.com/avatar/6436f675cbc7d0048f6aa1e6250826e6?s=80&d=identicon",
+                "email": "[REDACTED]"
+            },
+            "runner": {
+                "id": 12270859,
+                "description": "5-green.shared.runners-manager.gitlab.com/default",
+                "runner_type": "instance_type",
+                "active": true,
+                "is_shared": true,
+                "tags": [
+                    "gce",
+                    "east-c",
+                    "linux",
+                    "ruby",
+                    "mysql",
+                    "postgres",
+                    "mongo",
+                    "git-annex",
+                    "shared",
+                    "docker"
+                ]
+            },
+            "artifacts_file": {
+                "filename": null,
+                "size": null
+            },
+            "environment": null
+        },
+        {
+            "id": 2030891606,
+            "stage": "install",
+            "name": "install",
+            "status": "success",
+            "created_at": "2022-01-29 12:58:36 UTC",
+            "started_at": "2022-01-29 12:58:36 UTC",
+            "finished_at": "2022-01-29 12:59:09 UTC",
+            "duration": 33.041463,
+            "queued_duration": 0.142427,
+            "when": "on_success",
+            "manual": false,
+            "allow_failure": false,
+            "user": {
+                "id": 1868773,
+                "name": "Niels Faurskov",
+                "username": "jazerix",
+                "avatar_url": "https://secure.gravatar.com/avatar/6436f675cbc7d0048f6aa1e6250826e6?s=80&d=identicon",
+                "email": "[REDACTED]"
+            },
+            "runner": {
+                "id": 12270857,
+                "description": "4-green.shared.runners-manager.gitlab.com/default",
+                "runner_type": "instance_type",
+                "active": true,
+                "is_shared": true,
+                "tags": [
+                    "gce",
+                    "east-c",
+                    "linux",
+                    "ruby",
+                    "mysql",
+                    "postgres",
+                    "mongo",
+                    "git-annex",
+                    "shared",
+                    "docker"
+                ]
+            },
+            "artifacts_file": {
+                "filename": "artifacts.zip",
+                "size": 3607226
+            },
+            "environment": null
+        }
+    ]
+}

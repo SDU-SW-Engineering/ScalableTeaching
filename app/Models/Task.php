@@ -27,7 +27,7 @@ class Task extends Model
 
     protected $dates = ['ends_at', 'starts_at'];
 
-    protected $casts = ['is_visible' => 'bool'];
+    protected $casts = ['is_visible' => 'bool', 'sub_tasks' => 'json'];
 
     public function reloadDescriptionFromRepo()
     {
@@ -52,7 +52,7 @@ class Task extends Model
 
     public function jobs()
     {
-        return $this->hasManyThrough(JobStatus::class, Project::class)->withTrashedParents();
+        return $this->hasManyThrough(Pipeline::class, Project::class)->withTrashedParents();
     }
 
     public function grades()

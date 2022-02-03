@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\JobStatus;
+use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
 use Cache;
@@ -22,18 +22,18 @@ class HomeController extends Controller
     {
         $averageQueueTime = Cache::remember('queue1MonthAvg', 3600, function ()
         {
-            return JobStatus::where('created_at', '>=', now()->subMonth()->toDateString())
+            return Pipeline::where('created_at', '>=', now()->subMonth()->toDateString())
                 ->average('queue_duration');
         });
 
         $builds = Cache::remember('build1MonthCount', 3600, function ()
         {
-            return JobStatus::where('created_at', '>=', now()->subMonth()->toDateString())->count();
+            return Pipeline::where('created_at', '>=', now()->subMonth()->toDateString())->count();
         });
 
         $buildAverageTime = Cache::remember('build1MonthAvg', 3600, function ()
         {
-            return JobStatus::where('created_at', '>=', now()->subMonth()->toDateString())
+            return Pipeline::where('created_at', '>=', now()->subMonth()->toDateString())
                 ->average('duration');
         });
 

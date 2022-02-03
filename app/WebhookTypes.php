@@ -4,7 +4,6 @@ namespace App;
 
 enum WebhookTypes : string
 {
-    case Job = "job";
-    case Pipeline = "pipeline";
-    case Unknown = "unknown";
+    case Job = "Job Hook";
+    case Pipeline = "Pipeline Hook";
 }

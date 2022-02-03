@@ -37,8 +37,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $ownable_type
  * @method static Builder|Project whereOwnableId($value)
  * @method static Builder|Project whereOwnableType($value)
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\JobStatus[] $jobStatuses
- * @property-read int|null $job_statuses_count
  * @property-read Model|\Eloquent $ownable
  * @property int $verified
  * @property string|null $final_commit_sha
@@ -78,14 +76,19 @@ class Project extends Model
         return $this->morphTo();
     }
 
-    public function jobStatuses()
+    public function pipelines()
     {
-        return $this->hasMany(JobStatus::class);
+        return $this->hasMany(Pipeline::class);
     }
 
     public function task()
     {
         return $this->belongsTo(Task::class);
+    }
+
+    public function subTasks()
+    {
+        return $this->hasMany(ProjectSubTask::class);
     }
 
     public function refreshGitlabAccess()
