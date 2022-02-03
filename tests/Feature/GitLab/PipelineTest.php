@@ -225,7 +225,7 @@ it('ensures failing pipelines don\t overwrite the status of a finished project',
     expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
 });
 
-it('ensures running pipelines gets updated to a running failed', function() {
+it('ensures running pipelines gets updated to a failed status', function() {
     $pipeline = sendPendingPipeline();
     sendFailedPipeline();
 
@@ -234,3 +234,20 @@ it('ensures running pipelines gets updated to a running failed', function() {
     expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
 });
 
+it('ensures succeeded pipelines can\'t be updated to a failing', function() {
+    $pipeline = sendSucceedingPipeline();
+    sendFailedPipeline();
+
+    $pipeline->refresh();
+    expect($pipeline->project->status)->toBe(ProjectStatus::Finished);
+    expect($pipeline->status)->toBe(PipelineStatusEnum::Success);
+});
+
+it('ensures failing pipelines can\'t be updated to a succeeding', function() {
+    $pipeline = sendFailedPipeline();
+    sendSucceedingPipeline();
+
+    $pipeline->refresh();
+    expect($pipeline->project->status)->toBe(ProjectStatus::Active);
+    expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
+});

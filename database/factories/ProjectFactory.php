@@ -17,8 +17,36 @@ class ProjectFactory extends Factory
         return [
             'task_id'      => '',
             'project_id'   => $this->faker->randomNumber(),
-            'repo_name'    => $this->faker->word,
+            'repo_name'    => $this->faker->bothify("?????##"),
             'status'       => ProjectStatus::Active,
         ];
+    }
+
+    /**
+     * Indicate that the project is active.
+     *
+     * @return Factory
+     */
+    public function active()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => ProjectStatus::Active,
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the project is active.
+     *
+     * @return Factory
+     */
+    public function finished()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => ProjectStatus::Finished,
+            ];
+        });
     }
 }
