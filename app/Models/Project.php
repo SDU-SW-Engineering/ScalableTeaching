@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\ProjectCreated;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -69,6 +70,10 @@ class Project extends Model
     protected $fillable = [
         'project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
         'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at'
+    ];
+
+    protected $dispatchesEvents = [
+        'created' => ProjectCreated::class
     ];
 
     public function ownable()
@@ -205,11 +210,6 @@ class Project extends Model
         if(count($this->validation_errors) > 0)
             return "failed";
         return "success";
-    }
-
-    public function gradeEntries()
-    {
-        return $this->morphMany(GradeEntry::class, "source");
     }
 
     public static function isCorrectToken(Project|int $project, string $token): bool
