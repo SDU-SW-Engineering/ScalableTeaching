@@ -18,11 +18,12 @@
         "graham-campbell/gitlab": "5.4",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.54",
+        "laravel/horizon": "^5.8",
         "laravel/sanctum": "^2.11",
+        "laravel/socialite": "^5.5",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.3",
         "league/csv": "^9.7",
-        "sdu/laravel-mfa": "^0.9.1",
         "sentry/sentry-laravel": "^2.9",
         "symfony/yaml": "^6.0"
     },

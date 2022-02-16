@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Project;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -14,23 +15,18 @@ class ProjectCreated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public Project $project;
+
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Project $project)
     {
-        //
+        $this->project = $project;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
-     */
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
-    }
+
 }

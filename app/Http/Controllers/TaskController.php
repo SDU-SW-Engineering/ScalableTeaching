@@ -117,11 +117,8 @@ class TaskController extends Controller
         $owner = $isSolo ? auth()->user() : $group;
 
         $project = $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
-        $project->addUsersToGitlab($registeredGitLabUsers->pluck('gitlab_id', 'name'), $warnings);
         #$project->unprotectBranches();
         $project->disableForking();
-        if (is_array($warnings) && count($warnings) > 0)
-            session()->flash('warning', implode("<br>", $warnings));
 
         return "OK";
     }
@@ -149,15 +146,6 @@ class TaskController extends Controller
             'repo_name'  => $project['name'],
         ]);
 
-        $currentHooks = collect($manager->projects()->hooks($project['id']));
-        if ($currentHooks->isEmpty())
-        {
-            $manager->projects()->addHook($project['id'], 'https://scalableteaching.sdu.dk/api/reporter', [
-                'job_events'              => true,
-                'token'                   => md5(strtolower($project['name']) . config('scalable.webhook_secret')),
-                'enable_ssl_verification' => false
-            ]);
-        }
 
         return $dbProject;
     }

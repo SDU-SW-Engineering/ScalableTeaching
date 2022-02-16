@@ -101,7 +101,6 @@ class WebhookController extends Controller
         if($pipeline != null && !$pipeline->isUpgradable(PipelineStatusEnum::tryFrom(request('object_attributes.status'))))
             return "OK";
 
-        //$test = collect(request('builds'))->keyBy('');
         if($pipeline == null)
             $pipeline = $this->createPipeline($project);
         else
@@ -110,7 +109,6 @@ class WebhookController extends Controller
                 'duration'       => request('object_attributes.duration') ?? null,
                 'queue_duration' => request('object_attributes.queued_duration') ?? null,
             ]);
-
 
         $tracking = collect($project->task->sub_tasks)->pluck('test_name', 'id');
         $builds = collect(request('builds'));

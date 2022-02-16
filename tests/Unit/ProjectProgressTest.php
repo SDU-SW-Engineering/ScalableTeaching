@@ -25,7 +25,7 @@ beforeEach(function() {
                 'test_name' => 'test 2 equals [2]',
             ]
         ]
-    ])->for(Course::factory()))->create();
+    ])->for(Course::factory()))->createQuietly();
 });
 
 it('returns 0 when 0 of 3 subtasks are complete', function() {
@@ -77,12 +77,12 @@ it('returns 100 when 3 of 3 subtasks are complete', function() {
 });
 
 it('returns 100 when project is finished and it has no sub-tasks', function() {
-    $project = Project::factory()->finished()->for(Task::factory()->for(Course::factory()))->create();
+    $project = Project::factory()->finished()->for(Task::factory()->for(Course::factory()))->createQuietly();
     expect($project->progress())->toBe(100);
 });
 
 it('returns 0 when project is active and it has no sub-tasks', function() {
-    $project = Project::factory()->active()->for(Task::factory()->for(Course::factory()))->create();
+    $project = Project::factory()->active()->for(Task::factory()->for(Course::factory()))->createQuietly();
     expect($project->progress())->toBe(0);
 });
 

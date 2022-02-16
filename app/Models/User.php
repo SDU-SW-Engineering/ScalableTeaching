@@ -65,9 +65,10 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $fillable = [
-        'guid',
+        'username',
         'name',
         'email',
+        'gitlab_id'
     ];
 
     /**
@@ -76,9 +77,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password',
         'remember_token',
-        'ad_groups',
         'is_sys_admin',
         'is_admin'
     ];
@@ -93,6 +92,8 @@ class User extends Authenticatable
         'is_admin'          => 'bool',
         'is_sys_admin'      => 'bool'
     ];
+
+    protected $dates = ['last_login'];
 
     public function groups()
     {

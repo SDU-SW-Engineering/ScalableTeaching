@@ -27,11 +27,11 @@ beforeEach(function() {
     $this->project = Project::factory()
         ->for($this->task)
         ->for($this->user, 'ownable')
-        ->create();
+        ->createQuietly();
     $this->groupProject = Project::factory()
         ->for($this->task)
         ->for($this->group, 'ownable')
-        ->create();
+        ->createQuietly();
 });
 
 it('fails a user when a project is marked as overdue', function() {

@@ -96,32 +96,6 @@ class Project extends Model
         return $this->hasMany(ProjectSubTask::class);
     }
 
-    public function refreshGitlabAccess()
-    {
-        $gitLabManager = app(GitLabManager::class);
-        $supposedMembers = $this->owners()->map(function($user) use ($gitLabManager) {
-            $users = $gitLabManager->users()->all([
-                'username' => $user->username
-            ]);
-            if(count($users) == 1)
-                return $users[0]['id'];
-            return null;
-        })->reject(function($gitlabId) {
-            return $gitlabId == null;
-        });
-        $currentMembers = collect($gitLabManager->projects()->members($this->project_id))->pluck('id');
-        $add = $supposedMembers->diff($currentMembers);
-        $remove = $currentMembers->diff($supposedMembers);
-        $this->addUsersToGitlab($add);
-        $remove->each(function($gitlabUserId) use ($gitLabManager) {
-            try {
-                $gitLabManager->projects()->removeMember($this->project_id, $gitlabUserId);
-            } catch(\Exception $ignored) {
-
-            }
-        });
-    }
-
     /**
      * returns a collection of users that own the project
      * @return Collection
@@ -131,24 +105,6 @@ class Project extends Model
         if($this->ownable_type == User::class)
             return Collection::wrap($this->ownable);
         return $this->ownable->users()->get();
-    }
-
-    public function addUsersToGitlab($gitlabIds, &$errors = [])
-    {
-        foreach($gitlabIds as $user => $gitlabId) {
-            $gitLabManager = app(GitLabManager::class);
-            try {
-                $gitLabManager->projects()->addMember($this->project_id, $gitlabId, 30);
-            } catch(\Exception $e) {
-                $message = strtolower($e->getMessage());
-                if(\Str::contains($message, 'should be greater than or equal to'))
-                    continue;
-                if($message == 'member already exists')
-                    continue;
-
-                $errors[] = "$user: " . $e->getMessage();
-            }
-        }
     }
 
     public function unprotectBranches()
@@ -165,25 +121,6 @@ class Project extends Model
                 $protectedBranches->each(function($protectedBranch) use ($gitLabManager) {
                     $gitLabManager->repositories()->unprotectBranch($this->project_id, $protectedBranch['name']);
                 });
-                break;
-            }
-            $tries--;
-        } while($tries != 0);
-    }
-
-    public function disableForking()
-    {
-        $gitLabManager = app(GitLabManager::class);
-        $tries = 3;
-        do {
-            sleep(1);  // todo: this should be switched out with a queue worker that is delayed
-            $project = $gitLabManager->projects()->show($this->project_id);
-            if($project['import_error'] != null)
-                break;
-            if($project['import_status'] == 'finished') {
-                $gitLabManager->projects()->update($this->project_id, [
-                    'forking_access_level' => 'disabled'
-                ]);
                 break;
             }
             $tries--;

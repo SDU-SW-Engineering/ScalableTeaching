@@ -2,7 +2,9 @@
 
 namespace App\Listeners\GitLab\Project;
 
-use App\Events\GitLabProjectCreated;
+use App\Events\ProjectCreated;
+use App\Models\Project;
+use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class RegisterWebhook implements ShouldQueue
@@ -20,11 +22,23 @@ class RegisterWebhook implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @param  \App\Events\GitLabProjectCreated  $event
+     * @param ProjectCreated $event
      * @return void
      */
-    public function handle(GitLabProjectCreated $event)
+    public function handle(ProjectCreated $event)
     {
-        //
+        $manager = app(GitLabManager::class);
+        $currentHooks = collect($manager->projects()->hooks($event->project->project_id));
+        if ($currentHooks->isEmpty())
+        {
+            $hookId = $manager->projects()->addHook($event->project->project_id, 'https://scalableteaching.sdu.dk/api/reporter', [
+                'job_events'              => true,
+                'token'                   => Project::token($event->project),
+                'enable_ssl_verification' => false
+            ]);
+            $event->project->update([
+                'hook_id' => $hookId
+            ]);
+        }
     }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GitLabOAuthController;
 use App\Http\Controllers\GradingController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
@@ -12,7 +13,7 @@ use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index'])->middleware('auth')->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('start', [HomeController::class, 'start'])->middleware('auth')->name('start');
 
@@ -103,3 +104,14 @@ if (app()->environment('local'))
         return "authed";
     });
 }
+
+Route::controller(GitLabOAuthController::class)->prefix('login')->group(function () {
+    Route::get('/', 'login')->name('login');
+    Route::get('callback', 'callback')->name('callback');
+});
+
+
+Route::get('logout', function() {
+    auth()->logout();
+    return redirect()->home();
+});

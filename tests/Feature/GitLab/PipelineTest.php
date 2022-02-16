@@ -27,7 +27,7 @@ beforeEach(function() {
                 'test_name' => 'test 9 equals [5,2,2]',
             ]
         ]
-    ])->for(Course::factory()))->create();
+    ])->for(Course::factory()))->createQuietly();
     $this->pipelinePendingRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline1.json')), true);
     $this->pipelinePendingRequest['project']['id'] = $this->project->project_id;
     $this->pipelineRunningRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline2.json')), true);
