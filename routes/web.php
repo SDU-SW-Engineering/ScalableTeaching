@@ -21,32 +21,27 @@ Route::get('status', [HomeController::class, 'status'])->middleware('auth')->nam
 
 Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 
-Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth'], function ()
-{
+Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth'], function() {
     Route::get('/', [CourseController::class, 'index'])->name('index');
     Route::get('{course}/enroll', [CourseController::class, 'showEnroll'])->name('enroll');
 
-    Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function ()
-    {
+    Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function() {
         Route::get('/', [CourseController::class, 'show'])->name('show');
 
-        Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function ()
-        {
+        Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function() {
             Route::get('{task}', [TaskController::class, 'show'])->name('show');
             Route::get('{task}/projects/{project}', [TaskController::class, 'showProject'])->name('showProject')->middleware('can:view,project');
             Route::get('{task}/projects/{project}/download', [ProjectController::class, 'download'])->name('downloadProject')->middleware('can:download,project');
             Route::get('{task}/projects/{project}/validate', [ProjectController::class, 'validateProject'])->name('validateProject')->middleware('can:validate,project');
             Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
 
-            Route::group(['prefix' => '{task}/analytics', 'as' => 'analytics.'], function ()
-            {
+            Route::group(['prefix' => '{task}/analytics', 'as' => 'analytics.'], function() {
                 Route::get('/', [AnalyticsController::class, 'index'])->name('index')->middleware('can:view,task');
                 Route::get('builds', [AnalyticsController::class, 'builds'])->name('builds')->middleware('can:view,task');
             });
         });
 
-        Route::group(['prefix' => 'groups', 'as' => 'groups.'], function ()
-        {
+        Route::group(['prefix' => 'groups', 'as' => 'groups.'], function() {
             Route::get('/', [GroupController::class, 'index'])->name('index');
             Route::post('/', [GroupController::class, 'create'])->name('create')->middleware('can:createGroup,course');
             Route::delete('{group}', [GroupController::class, 'destroy'])->name('destroy')->middleware('can:delete,group');
@@ -68,8 +63,7 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
             Route::post('{grade}/set-selected', [GradingController::class, 'setSelected'])->name('set-selected');
         });
 
-        Route::group(['prefix' => 'manage', 'as' => 'manage.'], function ()
-        {
+        Route::group(['prefix' => 'manage', 'as' => 'manage.'], function() {
             Route::get('/', [CourseController::class, 'showManage'])->name('index')->middleware('can:manage,course');
             Route::get('tasks/create', [TaskController::class, 'showCreate'])->name('createTask')->middleware('can:manage,course');
             Route::get('tasks/{task}/edit', [TaskController::class, 'edit'])->name('editTask')->middleware('can:manage,course');
@@ -83,29 +77,25 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
     });
 });
 
-Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['auth']], function ()
-{
+Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['auth']], function() {
     Route::get('{project}/builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
     Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
     Route::post('{project}/migrate/{group}', [ProjectController::class, 'migrate'])->middleware(['can:migrate,project,group', 'throttle:5']);
     Route::post('{project}/refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
 });
 
-Route::get('random-name', function ()
-{
+Route::get('random-name', function() {
     return PhraseGenerator::generate();
 })->middleware('auth');
 
-if (app()->environment('local'))
-{
-    Route::get('impersonate/{user}', function ($user)
-    {
+if(app()->environment('local')) {
+    Route::get('impersonate/{user}', function($user) {
         auth()->login(User::findOrFail($user));
         return "authed";
     });
 }
 
-Route::controller(GitLabOAuthController::class)->prefix('login')->group(function () {
+Route::controller(GitLabOAuthController::class)->prefix('login')->middleware('guest')->group(function() {
     Route::get('/', 'login')->name('login');
     Route::get('callback', 'callback')->name('callback');
 });

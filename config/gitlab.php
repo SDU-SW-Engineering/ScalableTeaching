@@ -46,16 +46,16 @@ return [
             // 'backoff' => false,
             // 'cache'   => false,
             // 'sudo'    => null,
-            'url'    => 'https://gitlab.sdu.dk',
+            'url'    => env('GITLAB_HOST'),
         ],
 
-        'alternative' => [
-            'token'  => 'your-token',
+        'user' => [
+            'token'  => '',
             'method' => 'oauth',
             // 'backoff' => false,
             // 'cache'   => false,
             // 'sudo'    => null,
-            // 'url'     => null,
+            'url'     => env('GITLAB_HOST'),
         ],
 
     ],

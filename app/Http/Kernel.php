@@ -3,7 +3,6 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use SDU\MFA\Authenticate;
 
 class Kernel extends HttpKernel
 {

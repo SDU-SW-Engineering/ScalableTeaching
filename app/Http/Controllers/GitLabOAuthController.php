@@ -21,11 +21,11 @@ class GitLabOAuthController extends Controller
 
         $dbUser = User::firstOrNew([
             'gitlab_id' => $user->getId(),
-        ], [
-            'name'     => $user->getName(),
-            'email'    => $user->getEmail(),
-            'username' => $user->getNickname(),
         ]);
+        $dbUser->name = $user->getName();
+        $dbUser->email = $user->getEmail();
+        $dbUser->username = $user->getNickname();
+        $dbUser->access_token = $user->token;
         $dbUser->last_login = now();
         $dbUser->save();
 

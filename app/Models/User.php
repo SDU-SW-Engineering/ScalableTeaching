@@ -39,7 +39,7 @@ use SDU\MFA\SDUUser;
  * @mixin \Eloquent
  * @property string $guid
  * @method static \Illuminate\Database\Eloquent\Builder|User whereGuid($value)
- * @property-read mixed $username
+ * @property mixed $username
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Project[] $projects
  * @property-read int|null $projects_count
  * @property string|null $given_name
@@ -57,7 +57,7 @@ use SDU\MFA\SDUUser;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SDUUser;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.

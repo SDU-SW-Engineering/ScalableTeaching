@@ -15,8 +15,9 @@ class UpdateUserTableToReflectGitlabOauth extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn(['guid', 'given_name', 'sur_name', 'title', 'ad_groups']);
-            $table->string('username');
-            $table->integer('gitlab_id');
+            $table->string('username')->nullable();
+            $table->string('access_token')->nullable();
+            $table->integer('gitlab_id')->unique();
             $table->datetime('last_login');
         });
     }

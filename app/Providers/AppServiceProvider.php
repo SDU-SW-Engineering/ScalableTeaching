@@ -38,18 +38,5 @@ class AppServiceProvider extends ServiceProvider
         Http::macro('gitlab', function() {
             return Http::withToken(config('scalable.gitlab_token'))->baseUrl(config('scalable.gitlab_url') . '/api/v4');
         });
-
-        $this->createGitlabDriver();
-    }
-
-    protected function createGitlabDriver()
-    {
-        $config = config('services.gitlab');
-
-
-        $socialite = app(Factory::class);
-        $socialite->extend('gitlab-new', function() use ($config, $socialite) {
-            return $socialite->buildProvider(GitLabSocialite::class, $config)->setHost($config['host'] ?? null);
-        });
     }
 }
