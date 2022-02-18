@@ -115,10 +115,7 @@ class TaskController extends Controller
             . "They should log in to GitLab first.");
 
         $owner = $isSolo ? auth()->user() : $group;
-
-        $project = $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
-        #$project->unprotectBranches();
-        $project->disableForking();
+        $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
 
         return "OK";
     }
@@ -153,8 +150,8 @@ class TaskController extends Controller
     private function forkProject(GitLabManager $manager, $username, int $sourceProjectId, $groupId)
     {
         $params = [
-            'name'         => $username,
-            'path'         => $username,
+            'name'                   => $username,
+            'path'                   => $username,
             'namespace_id'           => $groupId,
             'shared_runners_enabled' => false
         ];
@@ -210,8 +207,8 @@ class TaskController extends Controller
                     ->withInput();
         }
 
-        $snakeName     = Str::snake($validated['name']);
-        $params        = [
+        $snakeName = Str::snake($validated['name']);
+        $params    = [
             'name'                      => $validated['name'],
             'path'                      => $snakeName,
             'description'               => $validated['description'],
@@ -222,12 +219,19 @@ class TaskController extends Controller
             'auto_devops_enabled'       => false,
             'request_access_enabled'    => false
         ];
-        $response      = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
-        $groupResponse = json_decode($response->getBody()->getContents(), true);
-        if ($response->getStatusCode() != 201)
-            return back()
-                ->withErrors(['project-id' => 'Couldn\'t create the project. Refrain from using symbols or foreign characters in the name.'], 'new')
-                ->withInput();
+
+        $currentGroup = $manager->groups()->subgroups($course->gitlab_group_id, ['search' => $snakeName]);
+        if (count($currentGroup) == 0)
+        {
+            $response      = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
+            $groupResponse = json_decode($response->getBody()->getContents(), true);
+            if ($response->getStatusCode() != 201)
+                return back()
+                    ->withErrors(['project-id' => 'Couldn\'t create the project. Refrain from using symbols or foreign characters in the name.'], 'new')
+                    ->withInput();
+        }
+        else
+            $groupResponse = $currentGroup[0];
 
 
         /** @var Task $task */
@@ -239,6 +243,8 @@ class TaskController extends Controller
             'ends_at'           => Carbon::parse($validated['to'] . " " . $validated['end-time']),
             'gitlab_group_id'   => $groupResponse['id']
         ]);
+
+        dd($task->ciFile());
 
         try
         {

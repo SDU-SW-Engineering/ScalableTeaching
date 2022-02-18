@@ -46,7 +46,7 @@ return [
             // 'backoff' => false,
             // 'cache'   => false,
             // 'sudo'    => null,
-            'url'    => env('GITLAB_HOST'),
+            'url'    => env('GITLAB_URL'),
         ],
 
         'user' => [
@@ -55,7 +55,7 @@ return [
             // 'backoff' => false,
             // 'cache'   => false,
             // 'sudo'    => null,
-            'url'     => env('GITLAB_HOST'),
+            'url'     => env('GITLAB_URL'),
         ],
 
     ],

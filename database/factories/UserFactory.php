@@ -25,7 +25,7 @@ class UserFactory extends Factory
         return [
             'name'           => $this->faker->name(),
             'email'          => $this->faker->unique()->safeEmail(),
-            'gitlab_id'      => $this->faker->randomNumber(),
+            'gitlab_id'      => $this->faker->unique()->randomNumber(),
             'remember_token' => Str::random(10),
             'username'       => $this->faker->userName,
             'last_login'     => now()

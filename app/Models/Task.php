@@ -201,4 +201,21 @@ class Task extends Model
     {
         return $this->morphMany(Grade::class, 'source');
     }
+
+    public function ciFile()
+    {
+        $gitlabManager = app(GitLabManager::class);
+
+
+        $project = $gitlabManager->repositoryFiles()->getFile($this->source_project_id, '.gitlab-ci.yml');
+        $branch = $project['default_branch'];
+        $readme = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, 'README.md', $branch)['content']);
+        $parseDown = new \Parsedown();
+        $htmlReadme = $parseDown->parse($readme);
+
+        $this->update([
+            'description' => $htmlReadme,
+            'markdown_description' => $readme
+        ]);
+    }
 }

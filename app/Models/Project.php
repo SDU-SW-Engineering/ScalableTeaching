@@ -137,7 +137,7 @@ class Project extends Model
 
     public function dailyBuilds($withToday = false): \Illuminate\Support\Collection
     {
-        return $this->jobStatuses()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(!$withToday))->get();
+        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(!$withToday))->get();
     }
 
     public function getValidationStatusAttribute()
