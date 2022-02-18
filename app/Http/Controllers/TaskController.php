@@ -12,6 +12,7 @@ use Carbon\CarbonInterface;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
+use Domain\GitLab\CIReader;
 use Gitlab\Exception\RuntimeException;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -243,8 +244,6 @@ class TaskController extends Controller
             'ends_at'           => Carbon::parse($validated['to'] . " " . $validated['end-time']),
             'gitlab_group_id'   => $groupResponse['id']
         ]);
-
-        dd($task->ciFile());
 
         try
         {

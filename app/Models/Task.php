@@ -6,6 +6,7 @@ use App\Models\Enums\GradeEnum;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\ProjectRepositoryArgumentsObject;
+use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
 use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
@@ -159,7 +160,7 @@ class Task extends Model
             ->selectNodes()
             ->selectName()
             ->selectSha();
-        $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+        $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
         $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes;
         if (count($projects) == 0)
             return;
@@ -204,7 +205,23 @@ class Task extends Model
 
     public function ciFile()
     {
-        $gitlabManager = app(GitLabManager::class);
+        $rootObject = new RootQueryObject();
+        $rootObject->selectProjects((new RootProjectsArgumentsObject())
+            ->setIds(["gid://gitlab/Project/$this->source_project_id"])
+            ->setFirst(1))
+            ->selectNodes()
+            ->selectRepository()
+            ->selectBlobs((new RepositoryBlobsArgumentsObject())->setPaths(['.gitlab-ci.yml']))
+            ->selectNodes()
+            ->selectName()
+            ->selectRawBlob();
+        $client = new Client(config('scalable.gitlab_url') .'/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
+        $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes;
+        if (count($projects) == 0)
+            return null;
+
+        return $projects[0]->repository->blobs->nodes[0]->rawBlob;
+        /*$gitlabManager = app(GitLabManager::class);
 
 
         $project = $gitlabManager->repositoryFiles()->getFile($this->source_project_id, '.gitlab-ci.yml');
@@ -216,6 +233,6 @@ class Task extends Model
         $this->update([
             'description' => $htmlReadme,
             'markdown_description' => $readme
-        ]);
+        ]);*/
     }
 }
