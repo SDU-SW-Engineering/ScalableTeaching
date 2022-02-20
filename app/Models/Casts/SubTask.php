@@ -83,4 +83,20 @@ class SubTask
     {
         $this->id = $id;
     }
+
+    /**
+     * @param string $name
+     */
+    public function setName(string $name) : void
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @param string|null $alias
+     */
+    public function setAlias(?string $alias) : void
+    {
+        $this->alias = $alias;
+    }
 }

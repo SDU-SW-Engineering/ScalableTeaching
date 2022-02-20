@@ -78,6 +78,23 @@ class SubTaskCollection implements Castable
                 ->reduce(fn($carry, SubTask $task) => $carry + $task->getPoints()) ?? 0;
     }
 
+    public function add(SubTask $subTask)
+    {
+        $this->tasks[] = $subTask;
+    }
+
+    public function update(int $id, SubTask $subTask)
+    {
+        /** @var SubTask $update */
+        $update = $this->tasks->first(fn(SubTask $subTask) => $subTask->getId() == $id);
+        $update->setPoints($subTask->getPoints());
+        $update->setIsRequired($subTask->isRequired());
+        $update->setName($subTask->getName());
+        $update->setAlias($subTask->getAlias());
+
+        dd(2);
+    }
+
     public static function castUsing(array $arguments) : CastsAttributes
     {
         return new class implements CastsAttributes {

@@ -6,21 +6,21 @@
                     <p class="text-white mr-2">Correction type:</p>
                     <select v-model="correctionType"
                             class="py-0 text-black dark:bg-gray-700 dark:text-white border-none rounded-sm mr-2">
-                        <option value="all">All</option>
-                        <option value="number">Number of tasks</option>
-                        <option value="required">Required tasks</option>
-                        <option value="points">Points</option>
+                        <option value="all_tasks">All</option>
+                        <option value="number_of_tasks">Number of tasks</option>
+                        <option value="required_tasks">Required tasks</option>
+                        <option value="points_required">Points</option>
                     </select>
                 </div>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'all'">All sub-tasks must be completed for the
+                <p class="text-sm text-gray-300" v-if="correctionType === 'all_tasks'">All sub-tasks must be completed for the
                     task to be considered complete.</p>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'number'"><b>{{ numberOfTasks }}</b> sub-tasks
+                <p class="text-sm text-gray-300" v-if="correctionType === 'number_of_tasks'"><b>{{ numberOfTasks }}</b> sub-tasks
                     must be completed for the
                     task to be considered complete.</p>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'required'">Only sub-tasks marked as required
+                <p class="text-sm text-gray-300" v-if="correctionType === 'required_tasks'">Only sub-tasks marked as required
                     must
                     be completed for the task to be considered complete.</p>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'points'">Students need to reach
+                <p class="text-sm text-gray-300" v-if="correctionType === 'points_required'">Students need to reach
                     <b>{{ pointThreshold }}</b> points for the
                     task to be considered complete.</p>
                 <div class="mt-4" v-if="correctionType === 'number'">
@@ -29,17 +29,16 @@
                     <input type="number" v-model="numberOfTasks" min="0" :max="maxNumber" class="bg-gray-50
                            flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-md focus:outline-none  block w-full p-2.5 dark:bg-gray-700 dark:border-gray-700 dark:text-gray-200">
                 </div>
-                <div class="mt-4" v-if="correctionType === 'points'">
+                <div class="mt-4" v-if="correctionType === 'points_required'">
                     <label
                         class="text-sm font-medium text-gray-900 block dark:text-gray-300 mb-2">Points needed</label>
                     <input type="number" v-model="pointThreshold" min="0" :max="maxPoints" class="bg-gray-50
                            flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-md focus:outline-none  block w-full p-2.5 dark:bg-gray-700 dark:border-gray-700 dark:text-gray-200">
                 </div>
             </div>
-            <div>
-                <button type="submit"
+            <div class="mt-2">
+                <button type="submit" @click="saveSubtasks" v-text="saving ? 'Saving...' : 'Save Changes'"
                         class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium rounded-lg px-3 py-2 text-center transition-colors">
-                    Save Changes
                 </button>
             </div>
         </div>
@@ -59,12 +58,12 @@
                         v-if="task.alias !== ''" class="bx bx-chevron-right"></i>
                         <span v-if="task.alias !== ''">{{ task.alias }}</span>
                     </div>
-                    <span v-if="correctionType==='required' && task.required && task.isSelected"
+                    <span v-if="correctionType==='required_tasks' && task.required && task.isSelected"
                           class="text-red-500 text-2xl -mt-1">∗</span>
                 </div>
                 <transition name="slide">
                     <div class="px-4 py-2 bg-gray-700 rounded-b grid"
-                         :class="{'grid-cols-2 gap-4': correctionType === 'points' || correctionType === 'required'}"
+                         :class="{'grid-cols-2 gap-4': correctionType === 'points_required' || correctionType === 'required_tasks'}"
                          v-if="task.isSelected">
                         <div>
                             <label
@@ -72,13 +71,13 @@
                             <input maxlength="70" type="text" name="name" v-model="task.alias" class="bg-gray-50
                            flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-md focus:outline-none  block w-full p-2.5 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
                         </div>
-                        <div v-if="correctionType === 'points'">
+                        <div v-if="correctionType === 'points_required'">
                             <label
                                 class="text-sm font-medium text-gray-900 block dark:text-gray-300 mb-2">Points</label>
                             <input min="0" type="number" v-model="task.points" class="bg-gray-50
                            flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-md focus:outline-none  block w-full p-2.5 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
                         </div>
-                        <div v-if="correctionType === 'required'">
+                        <div v-if="correctionType === 'required_tasks'">
                             <label
                                 class="text-sm font-medium text-gray-900 block dark:text-gray-300 mb-2">Required</label>
                             <select v-model="task.required"
@@ -99,9 +98,10 @@
 import _ from "lodash";
 
 export default {
-    props: ['tasks'],
+    props: ['tasks', 'task'],
     data() {
         return {
+            saving: false,
             subTasks: [],
             correctionType: 'all',
             numberOfTasks: 0,
@@ -122,8 +122,24 @@ export default {
             return sum;
         }
     },
+    methods: {
+        saveSubtasks: async function () {
+            if (this.saving)
+                return;
+            this.saving = true;
+            await axios.post(`/courses/${this.task.course_id}/manage/tasks/${this.task.id}/subtasks`, {
+                tasks: this.subTasks,
+                correctionType: this.correctionType,
+                requiredTasks: this.numberOfTasks,
+                requiredPoints: this.pointThreshold
+            });
+            this.saving = false;
+        }
+    }
+    ,
     mounted() {
         _.each(this.tasks, (task) => this.subTasks.push({
+            id: null,
             name: task.name,
             alias: '',
             isSelected: false,

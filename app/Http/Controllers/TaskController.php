@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Casts\SubTask;
 use App\Models\Course;
+use App\Models\Enums\CorrectionType;
 use App\Models\Group;
 use App\Models\Project;
 use App\Models\Task;
@@ -13,6 +15,7 @@ use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
 use Domain\GitLab\CIReader;
+use Domain\GitLab\CITask;
 use Gitlab\Exception\RuntimeException;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -230,8 +233,7 @@ class TaskController extends Controller
                 return back()
                     ->withErrors(['project-id' => 'Couldn\'t create the project. Refrain from using symbols or foreign characters in the name.'], 'new')
                     ->withInput();
-        }
-        else
+        } else
             $groupResponse = $currentGroup[0];
 
 
@@ -306,9 +308,57 @@ class TaskController extends Controller
 
         $ciFile = $task->ciFile();
         if ($ciFile == null)
-            return redirect()->back()->withErrors('Source project doesn\'t contain the .gitlab-ci.yml file.','task');
-        $tasks = (new CIReader($ciFile))->tasks();
+            return redirect()->back()->withErrors('Source project doesn\'t contain the .gitlab-ci.yml file.', 'task');
+        $tasks = collect((new CIReader($ciFile))->tasks())->map(fn(CITask $task) => [
+            'stage'      => $task->getStage(),
+            'name'       => $task->getName(),
+            'id'         => null,
+            'alias'      => '',
+            'points'     => 0,
+            'isRequired' => false
+        ]);
+
+        /** @var SubTask $subTask */
+        foreach ($task->sub_tasks->all() as $subTask)
+        {
+            $found = $tasks->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
+            if ($found == false)
+                continue;
+            dd($tasks[$found]->up);
+            $tasks[$found]->isRequired = $subTask->isRequired();
+            dd($tasks);
+        }
 
         return view('courses.manage.taskSubtasks', compact('course', 'task', 'breadcrumbs', 'tasks'));
+    }
+
+    public function updateSubtasks(Course $course, Task $task)
+    {
+        $tasks          = collect(request('tasks'));
+        $correctionType = CorrectionType::from(request('correctionType'));
+
+        $selected        = $tasks->filter(fn($task) => $task['isSelected']);
+        $currentSubTasks = $task->sub_tasks;
+        $selected->each(function ($task) use ($currentSubTasks)
+        {
+            $subTask = (new SubTask($task['name'], $task['alias'] == '' ? null : $task['alias']))
+                ->setPoints($task['points'])
+                ->setIsRequired($task['required']);
+            if ($task['id'] == null)
+                $currentSubTasks->add($subTask);
+            else
+                $currentSubTasks->update($task['id'], $subTask);
+
+        });
+        $task->correction_type  = $correctionType;
+        $task->correction_value = match ($correctionType)
+        {
+            default                        => null,
+            CorrectionType::PointsRequired => request('requiredPoints'),
+            CorrectionType::NumberOfTasks  => request('requiredTasks')
+        };
+        $task->save();
+
+        return "OK";
     }
 }
