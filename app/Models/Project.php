@@ -70,7 +70,7 @@ class Project extends Model
 
     protected $fillable = [
         'project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
-        'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at'
+        'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at', 'hook_id'
     ];
 
     protected $dispatchesEvents = [

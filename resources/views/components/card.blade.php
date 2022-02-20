@@ -8,7 +8,7 @@
             @endisset
         </header>
         @isset($toolbar)
-        <div class="flex bg-gray-200 dark:bg-gray-900 px-6 pb-2 text-xs">
+        <div class="flex bg-gray-200 dark:bg-gray-800 px-6 py-1 text-xs">
             {{ $toolbar }}
         </div>
         @endisset

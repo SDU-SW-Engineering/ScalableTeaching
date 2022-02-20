@@ -21,7 +21,6 @@
                 </x-slot>
                 @yield('task')
             </x-card>
-
         </div>
     </div>
 @endsection
