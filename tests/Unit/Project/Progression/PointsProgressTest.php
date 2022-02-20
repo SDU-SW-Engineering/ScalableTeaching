@@ -12,7 +12,7 @@ beforeEach(function ()
 {
     $this->project = Project::factory()->for(Task::factory([
         'correction_type'  => CorrectionType::PointsRequired,
-        'correction_value' => 75,
+        'correction_points_required' => 75,
         'sub_tasks'        => [
             (new SubTask('11 Equals [10, 1]', 'test 11 equals [10, 1]'))->setPoints(50),
             (new SubTask('9 Equals [5,2,2]', 'test 9 equals [5,2,2]'))->setPoints(25),

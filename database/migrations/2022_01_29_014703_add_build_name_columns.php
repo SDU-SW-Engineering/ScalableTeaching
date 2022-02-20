@@ -20,7 +20,8 @@ class AddBuildNameColumns extends Migration
                 ->enum('correction_type', ['none', 'pipeline_success', 'all_tasks', 'required_tasks', 'number_of_tasks', 'points_required'])
                 ->default('pipeline_success')
                 ->after('sub_tasks');
-            $table->unsignedInteger('correction_value')->nullable()->after('correction_type');
+            $table->unsignedInteger('correction_tasks_required')->nullable()->after('correction_type');
+            $table->unsignedInteger('correction_points_required')->nullable()->after('correction_tasks_required');
         });
     }
 

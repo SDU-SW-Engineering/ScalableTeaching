@@ -86,13 +86,22 @@ class SubTaskCollection implements Castable
     public function update(int $id, SubTask $subTask)
     {
         /** @var SubTask $update */
-        $update = $this->tasks->first(fn(SubTask $subTask) => $subTask->getId() == $id);
-        $update->setPoints($subTask->getPoints());
-        $update->setIsRequired($subTask->isRequired());
-        $update->setName($subTask->getName());
-        $update->setAlias($subTask->getAlias());
+        $update = $this->tasks->search(fn(SubTask $subTask) => $subTask->getId() == $id);
+        $this->tasks[$update]->setPoints($subTask->getPoints());
+        $this->tasks[$update]->setIsRequired($subTask->isRequired());
+        $this->tasks[$update]->setName($subTask->getName());
+        $this->tasks[$update]->setAlias($subTask->getAlias());
+    }
 
-        dd(2);
+    public function remove(array $ids)
+    {
+        foreach($ids as $id)
+        {
+            $foundId = $this->tasks->search(fn(SubTask $subTask) => $subTask->getId() == $id);
+            if ($foundId === false)
+                continue;
+            $this->tasks->forget($foundId);
+        }
     }
 
     public static function castUsing(array $arguments) : CastsAttributes
@@ -118,7 +127,7 @@ class SubTaskCollection implements Castable
             {
                 $values = $value instanceof SubTaskCollection ? $value->all() : collect($value);
                 throw_unless($values->every(fn($v) => $v instanceof SubTask), InvalidArgumentException::class, "Every item must be an SubTask instance.");
-                $id = $values->max('id') ?? 0;
+                $id = $values->max(fn(SubTask $task) => $task->getId()) ?? 0;
 
                 return $values->map(function (SubTask $subTask) use (&$id)
                 {

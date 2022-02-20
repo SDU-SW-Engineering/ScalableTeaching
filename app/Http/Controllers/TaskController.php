@@ -315,18 +315,22 @@ class TaskController extends Controller
             'id'         => null,
             'alias'      => '',
             'points'     => 0,
-            'isRequired' => false
-        ]);
+            'isRequired' => false,
+            'isSelected' => false
+        ])->toArray();
 
         /** @var SubTask $subTask */
         foreach ($task->sub_tasks->all() as $subTask)
         {
-            $found = $tasks->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
+            $found = collect($tasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
             if ($found == false)
                 continue;
-            dd($tasks[$found]->up);
-            $tasks[$found]->isRequired = $subTask->isRequired();
-            dd($tasks);
+            $tasks[$found]['name'] = $subTask->getName();
+            $tasks[$found]['alias'] = $subTask->getAlias();
+            $tasks[$found]['id'] = $subTask->getId();
+            $tasks[$found]['points'] = $subTask->getPoints();
+            $tasks[$found]['isRequired'] = $subTask->isRequired();
+            $tasks[$found]['isSelected'] = true;
         }
 
         return view('courses.manage.taskSubtasks', compact('course', 'task', 'breadcrumbs', 'tasks'));
@@ -339,6 +343,8 @@ class TaskController extends Controller
 
         $selected        = $tasks->filter(fn($task) => $task['isSelected']);
         $currentSubTasks = $task->sub_tasks;
+        $removeIds = $task->sub_tasks->all()->map(fn(SubTask $subTask) => $subTask->getId())->diff($selected->pluck('id'));
+        $currentSubTasks->remove($removeIds->toArray());
         $selected->each(function ($task) use ($currentSubTasks)
         {
             $subTask = (new SubTask($task['name'], $task['alias'] == '' ? null : $task['alias']))
@@ -351,12 +357,8 @@ class TaskController extends Controller
 
         });
         $task->correction_type  = $correctionType;
-        $task->correction_value = match ($correctionType)
-        {
-            default                        => null,
-            CorrectionType::PointsRequired => request('requiredPoints'),
-            CorrectionType::NumberOfTasks  => request('requiredTasks')
-        };
+        $task->correction_points_required = request('requiredPoints');
+        $task->correction_tasks_required = request('requiredTasks');
         $task->save();
 
         return "OK";

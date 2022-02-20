@@ -6,12 +6,14 @@
                     <p class="text-white mr-2">Correction type:</p>
                     <select v-model="correctionType"
                             class="py-0 text-black dark:bg-gray-700 dark:text-white border-none rounded-sm mr-2">
+                        <option value="pipeline_success">Pipeline succeeds (default)</option>
                         <option value="all_tasks">All</option>
                         <option value="number_of_tasks">Number of tasks</option>
                         <option value="required_tasks">Required tasks</option>
                         <option value="points_required">Points</option>
                     </select>
                 </div>
+                <p class="text-sm text-gray-300" v-if="correctionType === 'pipeline_success'">Task will be considered completed when one pipeline succeeds.</p>
                 <p class="text-sm text-gray-300" v-if="correctionType === 'all_tasks'">All sub-tasks must be completed for the
                     task to be considered complete.</p>
                 <p class="text-sm text-gray-300" v-if="correctionType === 'number_of_tasks'"><b>{{ numberOfTasks }}</b> sub-tasks
@@ -23,7 +25,7 @@
                 <p class="text-sm text-gray-300" v-if="correctionType === 'points_required'">Students need to reach
                     <b>{{ pointThreshold }}</b> points for the
                     task to be considered complete.</p>
-                <div class="mt-4" v-if="correctionType === 'number'">
+                <div class="mt-4" v-if="correctionType === 'number_of_tasks'">
                     <label
                         class="text-sm font-medium text-gray-900 block dark:text-gray-300 mb-2">Number of tasks</label>
                     <input type="number" v-model="numberOfTasks" min="0" :max="maxNumber" class="bg-gray-50
@@ -40,6 +42,7 @@
                 <button type="submit" @click="saveSubtasks" v-text="saving ? 'Saving...' : 'Save Changes'"
                         class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium rounded-lg px-3 py-2 text-center transition-colors">
                 </button>
+                <p v-if="saved" class="text-gray-300 text-sm mt-2"><i class="bx text-lg bx-check text-lime-green-400"></i> changes saved</p>
             </div>
         </div>
         <div class="">
@@ -102,8 +105,9 @@ export default {
     data() {
         return {
             saving: false,
+            saved: false,
             subTasks: [],
-            correctionType: 'all',
+            correctionType: 'all_tasks',
             numberOfTasks: 0,
             pointThreshold: 0
         }
@@ -124,6 +128,7 @@ export default {
     },
     methods: {
         saveSubtasks: async function () {
+            this.saved = false;
             if (this.saving)
                 return;
             this.saving = true;
@@ -134,17 +139,21 @@ export default {
                 requiredPoints: this.pointThreshold
             });
             this.saving = false;
+            this.saved = true;
         }
     }
     ,
     mounted() {
+        this.correctionType = this.task.correction_type;
+        this.numberOfTasks = this.task.correction_tasks_required;
+        this.pointThreshold = this.task.correction_points_required;
         _.each(this.tasks, (task) => this.subTasks.push({
-            id: null,
+            id: task.id,
             name: task.name,
-            alias: '',
-            isSelected: false,
-            required: false,
-            points: 0
+            alias: task.alias ?? '',
+            isSelected: task.isSelected,
+            required: task.isRequired,
+            points: task.points
         }))
     }
 }

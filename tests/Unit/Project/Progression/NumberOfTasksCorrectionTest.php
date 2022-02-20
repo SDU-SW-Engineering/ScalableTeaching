@@ -12,7 +12,7 @@ beforeEach(function ()
 {
     $this->project = Project::factory()->for(Task::factory([
         'correction_type'  => CorrectionType::NumberOfTasks,
-        'correction_value' => 2,
+        'correction_tasks_required' => 2,
         'sub_tasks'        => [
             (new SubTask('11 Equals [10, 1]', 'test 11 equals [10, 1]'))->setIsRequired(true),
             new SubTask('9 Equals [5,2,2]', 'test 9 equals [5,2,2]'),
@@ -33,6 +33,7 @@ it('ensures projects to be active when 1 of 3 subtasks are complete', function (
         'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 1
     ]);
+    $this->project->refresh();
     expect($this->project->status)->toBe(ProjectStatus::Active);
 });
 

@@ -26,13 +26,6 @@ class ProjectSubTask extends Model
         static::created(function (ProjectSubTask $projectSubTask)
         {
             $project   = $projectSubTask->project;
-            $completed = $project->subTasks->pluck('sub_task_id');
-            /*$missing          = $requiredSubTasks->diff($completed);
-            if ($requiredSubTasks->count() == 0)
-                return;
-
-            if ($missing->count() > 0)
-                return;*/
             $isFinished = static::isFinished($project);
 
             if ($isFinished == false)
@@ -46,7 +39,6 @@ class ProjectSubTask extends Model
 
     /**
      * @param Project $project
-     * @param Task $task
      * @return bool
      * @throws \Exception
      */
@@ -54,14 +46,13 @@ class ProjectSubTask extends Model
     {
         $completedSubTasks = $project->subTasks->pluck('sub_task_id');
         $task              = $project->task;
-
         return match ($task->correction_type)
         {
             CorrectionType::None, CorrectionType::PipelineSuccess => false,
             CorrectionType::AllTasks                              => ! $task->sub_tasks->isMissingAny($completedSubTasks),
             CorrectionType::RequiredTasks                         => ! $task->sub_tasks->isMissingAnyRequired($completedSubTasks),
-            CorrectionType::NumberOfTasks                         => $completedSubTasks->count() >= $task->correction_value,
-            CorrectionType::PointsRequired                        => $task->sub_tasks->points($completedSubTasks) >= $task->correction_value
+            CorrectionType::NumberOfTasks                         => $completedSubTasks->count() >= $task->correction_tasks_required,
+            CorrectionType::PointsRequired                        => $task->sub_tasks->points($completedSubTasks) >= $task->correction_points_required
         };
     }
 

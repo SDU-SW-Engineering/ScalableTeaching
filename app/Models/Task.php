@@ -26,7 +26,7 @@ class Task extends Model
 
     protected $fillable = [
         'description', 'markdown_description', 'source_project_id', 'name',
-        'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_value'
+        'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required'
     ];
 
     protected $dates = ['ends_at', 'starts_at'];
