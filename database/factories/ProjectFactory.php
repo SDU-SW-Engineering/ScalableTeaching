@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -15,10 +16,10 @@ class ProjectFactory extends Factory
     public function definition()
     {
         return [
-            'task_id'      => '',
-            'project_id'   => $this->faker->randomNumber(),
-            'repo_name'    => $this->faker->bothify("?????##"),
-            'status'       => ProjectStatus::Active,
+            'task_id'         => '',
+            'project_id'      => $this->faker->randomNumber(),
+            'repo_name'       => $this->faker->bothify("?????##"),
+            'status'          => ProjectStatus::Active,
         ];
     }
 
@@ -29,7 +30,8 @@ class ProjectFactory extends Factory
      */
     public function active()
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes)
+        {
             return [
                 'status' => ProjectStatus::Active,
             ];
@@ -43,7 +45,8 @@ class ProjectFactory extends Factory
      */
     public function finished()
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes)
+        {
             return [
                 'status' => ProjectStatus::Finished,
             ];

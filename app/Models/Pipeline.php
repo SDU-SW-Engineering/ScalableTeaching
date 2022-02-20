@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Enums\CorrectionType;
 use App\Models\Enums\PipelineStatusEnum;
+use App\ProjectStatus;
 use Carbon\CarbonInterval;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Database\Eloquent\Builder;
@@ -62,9 +64,25 @@ class Pipeline extends Model
         'running' => [PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
     ];
 
-    public function isUpgradable(PipelineStatusEnum $to): bool
+    protected static function booted()
     {
-        if(!array_key_exists($this->status->value, static::$upgradable))
+        static::created(function (Pipeline $pipeline)
+        {
+            if ($pipeline->project->task->correction_type != CorrectionType::PipelineSuccess)
+                return;
+
+            if ($pipeline->status != PipelineStatusEnum::Success)
+                return;
+
+            $pipeline->project->update([
+                'status' => ProjectStatus::Finished
+            ]);
+        });
+    }
+
+    public function isUpgradable(PipelineStatusEnum $to) : bool
+    {
+        if ( ! array_key_exists($this->status->value, static::$upgradable))
             return false;
         return in_array($to, static::$upgradable[$this->status->value]);
     }

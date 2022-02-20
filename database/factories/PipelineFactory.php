@@ -28,4 +28,44 @@ class PipelineFactory extends Factory
             'queue_duration' => $this->faker->randomFloat(1, 20, 120),
         ];
     }
+
+    public function succeeding()
+    {
+        return $this->state(function (array $attributes)
+        {
+            return [
+                'status' => PipelineStatusEnum::Success
+            ];
+        });
+    }
+
+    public function failing()
+    {
+        return $this->state(function (array $attributes)
+        {
+            return [
+                'status' => PipelineStatusEnum::Failed
+            ];
+        });
+    }
+
+    public function running()
+    {
+        return $this->state(function (array $attributes)
+        {
+            return [
+                'status' => PipelineStatusEnum::Running
+            ];
+        });
+    }
+
+    public function pending()
+    {
+        return $this->state(function (array $attributes)
+        {
+            return [
+                'status' => PipelineStatusEnum::Pending
+            ];
+        });
+    }
 }

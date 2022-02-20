@@ -14,7 +14,7 @@
     @foreach($course->tasks as $task)
         <a href="{{ route('courses.manage.editTask', [$course->id, $task->id]) }}"
            class="cursor-pointer hover:bg-gray-700 hover:border-transparent hover:shadow-lg group block rounded-lg p-4 border border-gray-200 dark:border-gray-500 mb-4
-           @if(request()->is("*manage/tasks/$task->id/edit")) dark:bg-gray-800 dark:border-gray-600 @else border-gray-200 @endif">
+           @if(request()->is("*manage/tasks/$task->id/*")) dark:bg-gray-800 dark:border-gray-600 @else border-gray-200 @endif">
             <dl class="grid sm:block lg:grid xl:block grid-cols-2 grid-rows-2 items-center">
                 <div class="flex justify-between items-center mb-2">
                     <dd class="group-hover:text-white leading-6 font-medium text-black dark:text-white">

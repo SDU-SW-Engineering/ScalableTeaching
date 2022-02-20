@@ -7,6 +7,11 @@
                 {{ $headerCorner }}
             @endisset
         </header>
+        @isset($toolbar)
+        <div class="flex bg-gray-200 dark:bg-gray-900 px-6 pb-2 text-xs">
+            {{ $toolbar }}
+        </div>
+        @endisset
         <div class="bg-white dark:bg-gray-600 rounded-b-lg p-6">
             @if(session()->has('success-' . $name))
                 <div class="bg-lime-green-200 px-3 py-4 flex rounded mb-4 items-center">
@@ -31,8 +36,8 @@
                               clip-rule="evenodd"/>
                     </svg>
                     <div class="text-red-900">
-                        <div class="font-medium">There were {{ $errors->getBag($name)->count() }} errors with your
-                            form
+                        <div class="font-medium">
+                            An error occurred
                         </div>
                         <ul class="list-disc list-inside text-sm">
                             @foreach($errors->getBag($name)->all() as $error)

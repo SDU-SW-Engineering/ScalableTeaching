@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Casts\SubTask;
 use App\Models\Course;
+use App\Models\Enums\CorrectionType;
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
 use App\Models\Project;
@@ -13,33 +15,27 @@ use function Pest\testDirectory;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function() {
-    $this->project = Project::factory()->for(Task::factory([
-        'sub_tasks' => [
-            [
-                'id'        => 1,
-                'name'      => '11 Equals [10, 1]',
-                'test_name' => 'test 11 equals [10, 1]',
-            ],
-            [
-                'id'        => 2,
-                'name'      => '9 Equals [5,2,2]',
-                'test_name' => 'test 9 equals [5,2,2]',
-            ]
-        ]
+beforeEach(function ()
+{
+    $this->project                                    = Project::factory()->for(Task::factory([
+        'correction_type' => CorrectionType::PipelineSuccess,
+        'sub_tasks'       => [
+            new SubTask('test 11 equals [10, 1]', '11 Equals [10, 1]'),
+            new SubTask('test 9 equals [5,2,2]', '9 Equals [5,2,2]')
+        ],
     ])->for(Course::factory()))->createQuietly();
-    $this->pipelinePendingRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline1.json')), true);
-    $this->pipelinePendingRequest['project']['id'] = $this->project->project_id;
-    $this->pipelineRunningRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline2.json')), true);
-    $this->pipelineRunningRequest['project']['id'] = $this->project->project_id;
-    $this->pipelineFailedRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline3.json')), true);
-    $this->pipelineFailedRequest['project']['id'] = $this->project->project_id;
-    $this->pipelineSucceedingRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline4.json')), true);
+    $this->pipelinePendingRequest                     = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline1.json')), true);
+    $this->pipelinePendingRequest['project']['id']    = $this->project->project_id;
+    $this->pipelineRunningRequest                     = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline2.json')), true);
+    $this->pipelineRunningRequest['project']['id']    = $this->project->project_id;
+    $this->pipelineFailedRequest                      = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline3.json')), true);
+    $this->pipelineFailedRequest['project']['id']     = $this->project->project_id;
+    $this->pipelineSucceedingRequest                  = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline4.json')), true);
     $this->pipelineSucceedingRequest['project']['id'] = $this->project->project_id;
 });
 
 
-function sendPendingPipeline(): Pipeline
+function sendPendingPipeline() : Pipeline
 {
     postJson(route('reporter'), test()->pipelinePendingRequest, [
         'X-Gitlab-Event' => 'Pipeline Hook',
@@ -50,7 +46,7 @@ function sendPendingPipeline(): Pipeline
     return $project->pipelines()->first();
 }
 
-function sendRunningPipeline(): Pipeline
+function sendRunningPipeline() : Pipeline
 {
     postJson(route('reporter'), test()->pipelineRunningRequest, [
         'X-Gitlab-Event' => 'Pipeline Hook',
@@ -61,7 +57,7 @@ function sendRunningPipeline(): Pipeline
     return $project->pipelines()->first();
 }
 
-function sendFailedPipeline(): Pipeline
+function sendFailedPipeline() : Pipeline
 {
     postJson(route('reporter'), test()->pipelineFailedRequest, [
         'X-Gitlab-Event' => 'Pipeline Hook',
@@ -72,7 +68,7 @@ function sendFailedPipeline(): Pipeline
     return $project->pipelines()->first();
 }
 
-function sendSucceedingPipeline(): Pipeline
+function sendSucceedingPipeline() : Pipeline
 {
     postJson(route('reporter'), test()->pipelineSucceedingRequest, [
         'X-Gitlab-Event' => 'Pipeline Hook',
@@ -83,7 +79,8 @@ function sendSucceedingPipeline(): Pipeline
     return $project->pipelines()->first();
 }
 
-it('only accepts request with correct GitLab headers', function() {
+it('only accepts request with correct GitLab headers', function ()
+{
     postJson(route('reporter'))->assertStatus(400);
     postJson(route('reporter'), [], ['X-Gitlab-Event' => 'test', 'X-Gitlab-Token' => Project::token($this->project)])->assertStatus(400);
     postJson(route('reporter'), ['project_id' => 22], ['X-Gitlab-Token' => Project::token($this->project)])->assertStatus(400);
@@ -95,7 +92,8 @@ it('only accepts request with correct GitLab headers', function() {
     ])->assertStatus(200);
 });
 
-it('stores a pipeline request', function() {
+it('stores a pipeline request', function ()
+{
     postJson(route('reporter'), $this->pipelinePendingRequest, [
         'X-Gitlab-Event' => 'Pipeline Hook',
         'X-Gitlab-Token' => Project::token($this->project),
@@ -104,7 +102,8 @@ it('stores a pipeline request', function() {
     expect(Pipeline::where('project_id', $this->project->id)->exists())->toBeTrue();
 });
 
-it('processes a pending pipeline request', function() {
+it('processes a pending pipeline request', function ()
+{
     $pipeline = sendPendingPipeline();
 
     expect($pipeline->pipeline_id)->toBe($this->pipelinePendingRequest['object_attributes']['id']);
@@ -113,7 +112,8 @@ it('processes a pending pipeline request', function() {
     expect($pipeline->queue_duration)->toBe($this->pipelinePendingRequest['object_attributes']['queued_duration']);
 });
 
-it('converts timestamps to the current timezone', function() {
+it('converts timestamps to the current timezone', function ()
+{
     $pipeline = sendPendingPipeline();
 
     $expectedTime = Carbon::parse($this->pipelinePendingRequest['object_attributes']['created_at'])->setTimezone(config('app.timezone'));
@@ -128,7 +128,8 @@ it('requests info about pipelines that have gone stale', function ()
 
 });*/
 
-it('processes a running pipeline', function() {
+it('processes a running pipeline', function ()
+{
     $pipeline = sendRunningPipeline();
 
     expect($pipeline->pipeline_id)->toBe($this->pipelineRunningRequest['object_attributes']['id']);
@@ -137,7 +138,8 @@ it('processes a running pipeline', function() {
     expect($pipeline->queue_duration)->toBe($this->pipelineRunningRequest['object_attributes']['queued_duration']);
 });
 
-it('processes a failing pipeline', function() {
+it('processes a failing pipeline', function ()
+{
     $pipeline = sendFailedPipeline();
 
     expect($pipeline->pipeline_id)->toBe($this->pipelineFailedRequest['object_attributes']['id']);
@@ -146,7 +148,8 @@ it('processes a failing pipeline', function() {
     expect($pipeline->queue_duration)->toBe($this->pipelineFailedRequest['object_attributes']['queued_duration']);
 });
 
-it('processes a succeeding pipeline', function() {
+it('processes a succeeding pipeline', function ()
+{
     $pipeline = sendSucceedingPipeline();
 
     expect($pipeline->pipeline_id)->toBe($this->pipelineSucceedingRequest['object_attributes']['id']);
@@ -155,22 +158,25 @@ it('processes a succeeding pipeline', function() {
     expect($pipeline->queue_duration)->toBe($this->pipelineSucceedingRequest['object_attributes']['queued_duration']);
 });
 
-it('ensures subtasks completion isn\'t overwritten should they fail in the future', function() {
+it('ensures subtasks completion isn\'t overwritten should they fail in the future', function ()
+{
     sendFailedPipeline();
     $this->pipelineRunningRequest['builds'][0]['status'] = 'failed';
-    $pipeline = sendRunningPipeline();
+    $pipeline                                            = sendRunningPipeline();
     expect($pipeline->project->subTasks()->where('sub_task_id', 2)->exists())->toBeTrue();
     expect($pipeline->project->subTasks()->where('sub_task_id', 1)->exists())->toBeFalse();
 });
 
-it('marks one subtask as complete when one build succeeds', function() {
+it('marks one subtask as complete when one build succeeds', function ()
+{
     $pipeline = sendFailedPipeline();
 
     expect($pipeline->project->subTasks()->where('sub_task_id', 2)->exists())->toBeTrue();
     expect($pipeline->project->subTasks()->where('sub_task_id', 1)->exists())->toBeFalse();
 });
 
-it('marks the task as complete when all builds succeeds', function() {
+it('marks the task as complete when all builds succeeds', function ()
+{
     $pipeline = sendSucceedingPipeline();
 
     expect($pipeline->project->subTasks()->where('sub_task_id', 2)->exists())->toBeTrue();
@@ -180,7 +186,8 @@ it('marks the task as complete when all builds succeeds', function() {
     expect($pipeline->project->status)->toBe(ProjectStatus::Finished);
 });
 
-it('ensures pending and running pipelines don\'t overwrite a finished pipeline', function() {
+it('ensures pending and running pipelines don\'t overwrite a finished pipeline', function ()
+{
     sendSucceedingPipeline();
     $pipeline = sendPendingPipeline();
 
@@ -188,7 +195,8 @@ it('ensures pending and running pipelines don\'t overwrite a finished pipeline',
     expect($pipeline->status)->toBe(PipelineStatusEnum::Success);
 });
 
-it('ensures pending pipelines don\'t overwrite a running or finished pipeline', function() {
+it('ensures pending pipelines don\'t overwrite a running or finished pipeline', function ()
+{
     sendRunningPipeline();
     $pipeline = sendPendingPipeline();
 
@@ -196,7 +204,8 @@ it('ensures pending pipelines don\'t overwrite a running or finished pipeline', 
     expect($pipeline->status)->toBe(PipelineStatusEnum::Running);
 });
 
-it('ensures pending pipelines gets updated to a running pipeline', function() {
+it('ensures pending pipelines gets updated to a running pipeline', function ()
+{
     $pipeline = sendPendingPipeline();
     sendRunningPipeline();
 
@@ -205,7 +214,8 @@ it('ensures pending pipelines gets updated to a running pipeline', function() {
     expect($pipeline->status)->toBe(PipelineStatusEnum::Running);
 });
 
-it('ensures failing pipelines changes the project', function() {
+it('ensures failing pipelines changes the project', function ()
+{
     $pipeline = sendPendingPipeline();
     sendFailedPipeline();
 
@@ -214,7 +224,8 @@ it('ensures failing pipelines changes the project', function() {
     expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
 });
 
-it('ensures failing pipelines don\t overwrite the status of a finished project', function() {
+it('ensures failing pipelines don\t overwrite the status of a finished project', function ()
+{
     $this->project->update([
         'status' => ProjectStatus::Finished
     ]);
@@ -225,7 +236,8 @@ it('ensures failing pipelines don\t overwrite the status of a finished project',
     expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
 });
 
-it('ensures running pipelines gets updated to a failed status', function() {
+it('ensures running pipelines gets updated to a failed status', function ()
+{
     $pipeline = sendPendingPipeline();
     sendFailedPipeline();
 
@@ -234,7 +246,8 @@ it('ensures running pipelines gets updated to a failed status', function() {
     expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
 });
 
-it('ensures succeeded pipelines can\'t be updated to a failing', function() {
+it('ensures succeeded pipelines can\'t be updated to a failing', function ()
+{
     $pipeline = sendSucceedingPipeline();
     sendFailedPipeline();
 
@@ -243,7 +256,8 @@ it('ensures succeeded pipelines can\'t be updated to a failing', function() {
     expect($pipeline->status)->toBe(PipelineStatusEnum::Success);
 });
 
-it('ensures failing pipelines can\'t be updated to a succeeding', function() {
+it('ensures failing pipelines can\'t be updated to a succeeding', function ()
+{
     $pipeline = sendFailedPipeline();
     sendSucceedingPipeline();
 

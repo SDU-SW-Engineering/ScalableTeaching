@@ -2,6 +2,7 @@
 
 namespace Domain\GitLab;
 
+use JsonSerializable;
 use Symfony\Component\Yaml\Yaml;
 
 class CIReader

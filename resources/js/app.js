@@ -19,6 +19,7 @@ Vue.component("tippy", TippyComponent);
 Vue.component("user-select", require('./components/UserSelect').default)
 Vue.component("date-range", require('./components/Elements/DateRangePicker').default)
 Vue.component("grading", require('./components/Grading').default)
+Vue.component("subtasks", require('./components/Tasks/Subtasks').default)
 
 const settings = {
     't-rich-select': {

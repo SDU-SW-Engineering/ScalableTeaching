@@ -296,4 +296,19 @@ class TaskController extends Controller
 
         return redirect()->back()->with('success-task', 'The readme was updated.');
     }
+
+    public function subtasks(Course $course, Task $task)
+    {
+        $breadcrumbs = [
+            'Courses'     => route('courses.index'),
+            $course->name => null
+        ];
+
+        $ciFile = $task->ciFile();
+        if ($ciFile == null)
+            return redirect()->back()->withErrors('Source project doesn\'t contain the .gitlab-ci.yml file.','task');
+        $tasks = (new CIReader($ciFile))->tasks();
+
+        return view('courses.manage.taskSubtasks', compact('course', 'task', 'breadcrumbs', 'tasks'));
+    }
 }

@@ -2,12 +2,17 @@
 
 namespace Domain\GitLab;
 
-class CITask
+
+use JsonSerializable;
+
+class CITask implements JsonSerializable
 {
     public function __construct(
         private string $stage,
         private string $name
-    ) {}
+    )
+    {
+    }
 
     /**
      * @return string
@@ -39,5 +44,13 @@ class CITask
     public function setName(string $name) : void
     {
         $this->name = $name;
+    }
+
+    public function jsonSerialize() : array
+    {
+        return [
+            'name'  => $this->name,
+            'stage' => $this->stage
+        ];
     }
 }
