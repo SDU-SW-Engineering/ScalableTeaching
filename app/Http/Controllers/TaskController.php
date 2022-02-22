@@ -48,13 +48,13 @@ class TaskController extends Controller
         $myBuilds    = $project == null ? collect() : $project->dailyBuilds(false);
         $dailyBuilds = $task->dailyBuilds(true, false);
 
-        $completedSubTasks = $project->subTasks->keyBy('sub_task_id');
+        $completedSubTasks = $project?->subTasks->keyBy('sub_task_id');
         $subTasks = $task->sub_tasks->all()->map(fn(SubTask $subTask) => [
             'name' => $subTask->getDisplayName(),
-            'completed' => $completedSubTasks->has($subTask->getId()),
+            'completed' => $completedSubTasks?->has($subTask->getId()),
             'points' => $subTask->getPoints(),
             'required' => $subTask->isRequired(),
-            'when' => $completedSubTasks->has($subTask->getId())
+            'when' => $completedSubTasks?->has($subTask->getId())
                 ? $completedSubTasks->get($subTask->getId())->created_at->diffForHumans()
                 : null
         ]);
@@ -67,11 +67,11 @@ class TaskController extends Controller
         $newProjectRoute  = route('courses.tasks.createProject', [$course->id, $task->id]);
         return view('tasks.show', [
             'course'          => $course,
-            'task'            => $task,
+            'task'            => $task->setHidden(['markdown_description']),
             'bg'              => 'bg-gray-50 dark:bg-gray-600',
             'project'         => $project,
-            'subTasks' => in_array($project->task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks])
-                ? ['list' => $subTasks, 'progress' => $project->progress()]
+            'subTasks' => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks])
+                ? ['list' => $subTasks, 'progress' => $project?->progress()]
                 : null,
             'progress'        => [
                 'startDay' => $startDay,
@@ -338,7 +338,7 @@ class TaskController extends Controller
         foreach ($task->sub_tasks->all() as $subTask)
         {
             $found = collect($tasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
-            if ($found == false)
+            if ($found === false)
                 continue;
             $tasks[$found]['name'] = $subTask->getName();
             $tasks[$found]['alias'] = $subTask->getAlias();

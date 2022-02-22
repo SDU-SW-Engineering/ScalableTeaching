@@ -3,9 +3,9 @@
         <div class="flex flex-col justify-between">
             <div>
                 <div class="flex items-center mb-2">
-                    <p class="text-white mr-2">Correction type:</p>
+                    <p class="text-black dark:text-white mr-2">Correction type:</p>
                     <select v-model="correctionType"
-                            class="py-0 text-black dark:bg-gray-700 dark:text-white border-none rounded-sm mr-2">
+                            class="py-0 text-black bg-gray-200 dark:bg-gray-700 dark:text-white border-none rounded-sm mr-2">
                         <option value="pipeline_success">Pipeline succeeds (default)</option>
                         <option value="all_tasks">All</option>
                         <option value="number_of_tasks">Number of tasks</option>
@@ -13,16 +13,16 @@
                         <option value="points_required">Points</option>
                     </select>
                 </div>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'pipeline_success'">Task will be considered completed when one pipeline succeeds.</p>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'all_tasks'">All sub-tasks must be completed for the
+                <p class="text-sm text-gray-400 dark:text-gray-300" v-if="correctionType === 'pipeline_success'">Task will be considered completed when one pipeline succeeds.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-300" v-if="correctionType === 'all_tasks'">All sub-tasks must be completed for the
                     task to be considered complete.</p>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'number_of_tasks'"><b>{{ numberOfTasks }}</b> sub-tasks
+                <p class="text-sm text-gray-400 dark:text-gray-300" v-if="correctionType === 'number_of_tasks'"><b>{{ numberOfTasks }}</b> sub-tasks
                     must be completed for the
                     task to be considered complete.</p>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'required_tasks'">Only sub-tasks marked as required
+                <p class="text-sm text-gray-400 dark:text-gray-300" v-if="correctionType === 'required_tasks'">Only sub-tasks marked as required
                     must
                     be completed for the task to be considered complete.</p>
-                <p class="text-sm text-gray-300" v-if="correctionType === 'points_required'">Students need to reach
+                <p class="text-sm text-gray-400 dark:text-gray-300" v-if="correctionType === 'points_required'">Students need to reach
                     <b>{{ pointThreshold }}</b> points for the
                     task to be considered complete.</p>
                 <div class="mt-4" v-if="correctionType === 'number_of_tasks'">
@@ -51,11 +51,11 @@
             <div class="flex mt-4 flex-col w-full shadow-md"
                  v-for="(task, index) in subTasks">
                 <div
-                    class="bg-gray-800 py-2 px-4 text-white cursor-pointer hover:bg-gray-900 flex items-center justify-between"
+                    class="bg-gray-300 dark:bg-gray-800 py-2 px-4 text-gray-700 dark:text-white cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900 flex items-center justify-between"
                     :class="{ 'rounded': !task.isSelected, 'rounded-t': task.isSelected }"
                     @click="task.isSelected = !task.isSelected">
                     <div class="flex items-center">
-                        <i :class="{ 'bx-check bx-sm text-lime-green-400': task.isSelected, 'bx-x bx-sm text-red-400': !task.isSelected }"
+                        <i :class="{ 'bx-check bx-sm text-lime-green-500 dark:text-lime-green-400': task.isSelected, 'bx-x bx-sm text-red-400': !task.isSelected }"
                            class="bx mr-2"></i> <span
                         :class="{ 'line-through text-gray-400': task.alias !== '' }">{{ task.name }}</span> <i
                         v-if="task.alias !== ''" class="bx bx-chevron-right"></i>
@@ -65,7 +65,7 @@
                           class="text-red-500 text-2xl -mt-1">∗</span>
                 </div>
                 <transition name="slide">
-                    <div class="px-4 py-2 bg-gray-700 rounded-b grid"
+                    <div class="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-b grid"
                          :class="{'grid-cols-2 gap-4': correctionType === 'points_required' || correctionType === 'required_tasks'}"
                          v-if="task.isSelected">
                         <div>

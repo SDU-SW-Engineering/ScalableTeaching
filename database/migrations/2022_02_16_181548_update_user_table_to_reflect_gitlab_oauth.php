@@ -17,8 +17,8 @@ class UpdateUserTableToReflectGitlabOauth extends Migration
             $table->dropColumn(['guid', 'given_name', 'sur_name', 'title', 'ad_groups']);
             $table->string('username')->nullable();
             $table->string('access_token')->nullable();
-            $table->integer('gitlab_id')->unique();
-            $table->datetime('last_login');
+            $table->integer('gitlab_id')->unique()->nullable();
+            $table->datetime('last_login')->nullable();
         });
     }
 

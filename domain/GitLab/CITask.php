@@ -8,24 +8,21 @@ use JsonSerializable;
 class CITask implements JsonSerializable
 {
     public function __construct(
-        private string $stage,
+        private ?string $stage,
         private string $name
     )
     {
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getStage() : string
+    public function getStage() : ?string
     {
         return $this->stage;
     }
 
-    /**
-     * @param string $stage
-     */
-    public function setStage(string $stage) : void
+    public function setStage(?string $stage) : void
     {
         $this->stage = $stage;
     }

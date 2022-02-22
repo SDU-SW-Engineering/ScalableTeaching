@@ -19,9 +19,7 @@ class GitLabOAuthController extends Controller
         if($user->user['state'] != 'active')
             return redirect()->route('login.disabled');
 
-        $dbUser = User::firstOrNew([
-            'gitlab_id' => $user->getId(),
-        ]);
+        $dbUser = User::where('gitlab_id', $user->getId())->orWhere('email', $user->getEmail())->firstOrNew();
         $dbUser->name = $user->getName();
         $dbUser->email = $user->getEmail();
         $dbUser->username = $user->getNickname();

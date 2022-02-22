@@ -17,7 +17,7 @@
                     </a>
                 </x-slot>
                 <x-slot name="toolbar">
-                    <a href="{{ route('courses.manage.subtasks', [$course, $task]) }}" class="text-gray-300 hover:bg-gray-500 px-1 py-0.5 rounded-sm mr-2">Tasks</a>
+                    <a href="{{ route('courses.manage.subtasks', [$course, $task]) }}" class="text-black hover:bg-gray-300 dark:text-gray-300 dark:hover:bg-gray-500 px-1 py-0.5 rounded-sm mr-2">Tasks</a>
                 </x-slot>
                 @yield('task')
             </x-card>
