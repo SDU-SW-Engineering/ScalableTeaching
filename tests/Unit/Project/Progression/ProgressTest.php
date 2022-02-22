@@ -5,6 +5,9 @@ use App\Models\Course;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function ()
 {
