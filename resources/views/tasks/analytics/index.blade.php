@@ -195,7 +195,7 @@
                                         @endif
                                     </td>
                                     <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
-                                        {{ $project->jobStatuses->count() }}
+                                        {{ $project->pipelines->count() }}
                                     </td>
                                     <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap">
                                         @if($project->status == \App\ProjectStatus::Active)

@@ -25,11 +25,11 @@ class AnalyticsController extends Controller
         $failedCount     = $task->projects()->where('status', 'failed')->count();
         $failedPercent   = $projectCount == 0 ? 0 : $failedCount / $projectCount * 100;
         $buildCount      = $task->jobs()->count();
-        $buildsToday     = $task->jobs()->whereRaw("date(job_statuses.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
+        $buildsToday     = $task->jobs()->whereRaw("date(pipelines.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
 
         $projectQuery = $task->projects()
             ->select('*', \DB::raw('TIMESTAMPDIFF(second,created_at, finished_at) as duration'))
-            ->withCount('jobStatuses')
+            ->withCount('pipelines')
             ->orderBy(request('sort', 'created_at'), request('direction', 'desc'));
 
         if (request('status', 'all') != 'all')
