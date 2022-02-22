@@ -24,14 +24,16 @@ class ProjectController extends Controller
 {
     public function builds(Project $project)
     {
-        return $project->jobStatuses()->latest()->get()->makeHidden(['history', 'log'])->map(function (Pipeline $job)
+        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(function (Pipeline $job)
         {
             $job->run_time   = CarbonInterval::seconds($job->duration)->forHumans();
             $job->queued_for = CarbonInterval::seconds($job->queue_duration)->forHumans();
             $job->ran        = $job->updated_at->diffForHumans();
             $job->ran_date   = $job->updated_at->toDateTimeString();
+            $job->makeHidden('project');
+
             return $job;
-        });
+        })->each(fn(Pipeline $pipeline) => $pipeline->unsetRelation('subTasks'));
     }
 
     /**

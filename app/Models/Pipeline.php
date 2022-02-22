@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Casts\SubTask;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\PipelineStatusEnum;
 use App\ProjectStatus;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $build_id
  * @property int $project_id
  * @property PipelineStatusEnum $status
+ * @property Project $project
  * @property string $repo_name
  * @property string $repo_branch
  * @property string|null $runner
@@ -52,7 +54,7 @@ class Pipeline extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['project_id', 'pipeline_id', 'status', 'user_name', 'runners', 'queue_duration', 'created_at'];
+    protected $fillable = ['project_id', 'pipeline_id', 'status', 'user_name', 'runners', 'duration', 'queue_duration', 'created_at'];
 
     protected $casts = [
         'status'  => PipelineStatusEnum::class,
@@ -66,12 +68,11 @@ class Pipeline extends Model
 
     protected static function booted()
     {
-        static::created(function (Pipeline $pipeline)
-        {
-            if ($pipeline->project->task->correction_type != CorrectionType::PipelineSuccess)
+        static::created(function(Pipeline $pipeline) {
+            if($pipeline->project->task->correction_type != CorrectionType::PipelineSuccess)
                 return;
 
-            if ($pipeline->status != PipelineStatusEnum::Success)
+            if($pipeline->status != PipelineStatusEnum::Success)
                 return;
 
             $pipeline->project->update([
@@ -80,9 +81,9 @@ class Pipeline extends Model
         });
     }
 
-    public function isUpgradable(PipelineStatusEnum $to) : bool
+    public function isUpgradable(PipelineStatusEnum $to): bool
     {
-        if ( ! array_key_exists($this->status->value, static::$upgradable))
+        if(!array_key_exists($this->status->value, static::$upgradable))
             return false;
         return in_array($to, static::$upgradable[$this->status->value]);
     }
@@ -95,6 +96,22 @@ class Pipeline extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function subTasks()
+    {
+        return $this->hasMany(ProjectSubTask::class);
+    }
+
+    public function getPrettySubTasksAttribute()
+    {
+        $availableSubTasks = $this->project->task->sub_tasks;
+        $completedSubTasks = $this->subTasks->pluck('sub_task_id');
+
+        return $availableSubTasks->all()->map(fn(SubTask $subTask) => [
+            'name'      => $subTask->getDisplayName(),
+            'completed' => $completedSubTasks->contains($subTask->getId())
+        ]);
     }
 
     public function getRunTimeAttribute()

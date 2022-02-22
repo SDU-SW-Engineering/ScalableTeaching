@@ -48,16 +48,31 @@ class TaskController extends Controller
         $myBuilds    = $project == null ? collect() : $project->dailyBuilds(false);
         $dailyBuilds = $task->dailyBuilds(true, false);
 
+        $completedSubTasks = $project->subTasks->keyBy('sub_task_id');
+        $subTasks = $task->sub_tasks->all()->map(fn(SubTask $subTask) => [
+            'name' => $subTask->getDisplayName(),
+            'completed' => $completedSubTasks->has($subTask->getId()),
+            'points' => $subTask->getPoints(),
+            'required' => $subTask->isRequired(),
+            'when' => $completedSubTasks->has($subTask->getId())
+                ? $completedSubTasks->get($subTask->getId())->created_at->diffForHumans()
+                : null
+        ]);
+
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
             new BarDataSet("Total", $dailyBuilds->subtractByKey($myBuilds), "#6B7280"),
             new BarDataSet("You", $myBuilds, "#7BB026")
         );
+
         $newProjectRoute  = route('courses.tasks.createProject', [$course->id, $task->id]);
         return view('tasks.show', [
             'course'          => $course,
             'task'            => $task,
             'bg'              => 'bg-gray-50 dark:bg-gray-600',
             'project'         => $project,
+            'subTasks' => in_array($project->task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks])
+                ? ['list' => $subTasks, 'progress' => $project->progress()]
+                : null,
             'progress'        => [
                 'startDay' => $startDay,
                 'endDay'   => $endDay,

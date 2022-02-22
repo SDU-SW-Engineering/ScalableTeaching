@@ -42,6 +42,11 @@ class SubTask
         return $this->id;
     }
 
+    public function getDisplayName() : string
+    {
+        return $this->alias ?? $this->name;
+    }
+
     /**
      * @return bool|null
      */

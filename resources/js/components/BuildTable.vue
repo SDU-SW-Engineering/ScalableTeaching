@@ -17,10 +17,6 @@
                                 </th>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Branch
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Run Time
                                 </th>
                                 <th scope="col"
@@ -67,8 +63,8 @@
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                                 <span class="capitalize" v-text="build.status"></span>
                                             </div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ build.runner }}
+                                            <div class="text-lime-green-500 text-xs dark:text-lime-green-400">
+                                                {{ build.prettySubTasks.filter(t => t.completed).length }}/{{ build.prettySubTasks.length }} tasks completed
                                             </div>
                                         </div>
                                     </div>
@@ -77,14 +73,11 @@
                                     <div class="text-sm text-gray-900 dark:text-gray-200">{{ build.user_name }}</div>
                                     <div class="text-sm text-gray-500">{{ build.user_email }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-gray-700 dark:text-gray-200 text-sm">{{ build.repo_branch }}</span>
-                                </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                         <span>{{ build.run_time }}</span>
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400 overflow">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 overflow">
                                         Queued for {{ build.queued_for}}
                                     </div>
                                 </td>
