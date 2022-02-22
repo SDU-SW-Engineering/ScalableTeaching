@@ -16,7 +16,7 @@ class TaskFactory extends Factory
             'gitlab_group_id'   => $this->faker->randomNumber(1, 2000),
             'correction_type'   => CorrectionType::None,
             'starts_at'         => now(),
-            'ends_at'           => $this->faker->dateTimeBetween("1 week", "5 weeks"),
+            'ends_at'           => $this->faker->dateTimeBetween("-11 week", "-6 weeks"),
             'is_visible'        => true
         ];
     }

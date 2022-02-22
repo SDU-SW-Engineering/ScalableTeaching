@@ -23,6 +23,8 @@ beforeEach(function ()
             new SubTask('test 11 equals [10, 1]', '11 Equals [10, 1]'),
             new SubTask('test 9 equals [5,2,2]', '9 Equals [5,2,2]')
         ],
+        'starts_at' => Carbon::create(2022,1, 21),
+        'ends_at' => Carbon::create(2022,2,3)
     ])->for(Course::factory()))->createQuietly();
     $this->pipelinePendingRequest                     = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline1.json')), true);
     $this->pipelinePendingRequest['project']['id']    = $this->project->project_id;
@@ -79,7 +81,7 @@ function sendSucceedingPipeline() : Pipeline
     return $project->pipelines()->first();
 }
 
-it('only accepts request with correct GitLab headers', function ()
+it('only accepts requests with correct GitLab headers', function ()
 {
     postJson(route('reporter'))->assertStatus(400);
     postJson(route('reporter'), [], ['X-Gitlab-Event' => 'test', 'X-Gitlab-Token' => Project::token($this->project)])->assertStatus(400);
@@ -90,6 +92,40 @@ it('only accepts request with correct GitLab headers', function ()
         'X-Gitlab-Event' => 'ok',
         'X-Gitlab-Token' => Project::token($this->project),
     ])->assertStatus(200);
+});
+
+it('rejects requests that are past the due date of the task', function ()
+{
+    $this->project->task->update([
+        'ends_at' => Carbon::create(2022, 1, 26)
+    ]);
+
+    postJson(route('reporter'))->assertStatus(400);
+    postJson(route('reporter'), [], ['X-Gitlab-Event' => 'test', 'X-Gitlab-Token' => Project::token($this->project)])->assertStatus(400);
+    postJson(route('reporter'), ['project_id' => 22], ['X-Gitlab-Token' => Project::token($this->project)])->assertStatus(400);
+    postJson(route('reporter'), ['project_id' => 22], ['X-Gitlab-Event' => 'test'])->assertStatus(400);
+
+    postJson(route('reporter'), $this->pipelinePendingRequest, [
+        'X-Gitlab-Event' => 'Pipeline Hook',
+        'X-Gitlab-Token' => Project::token($this->project),
+    ])->assertStatus(400);
+});
+
+it('rejects requests that are before the start date of the task', function ()
+{
+    $this->project->task->update([
+        'starts_at' => Carbon::create(2022, 2, 1)
+    ]);
+
+    postJson(route('reporter'))->assertStatus(400);
+    postJson(route('reporter'), [], ['X-Gitlab-Event' => 'test', 'X-Gitlab-Token' => Project::token($this->project)])->assertStatus(400);
+    postJson(route('reporter'), ['project_id' => 22], ['X-Gitlab-Token' => Project::token($this->project)])->assertStatus(400);
+    postJson(route('reporter'), ['project_id' => 22], ['X-Gitlab-Event' => 'test'])->assertStatus(400);
+
+    postJson(route('reporter'), $this->pipelinePendingRequest, [
+        'X-Gitlab-Event' => 'Pipeline Hook',
+        'X-Gitlab-Token' => Project::token($this->project),
+    ])->assertStatus(400);
 });
 
 it('stores a pipeline request', function ()
