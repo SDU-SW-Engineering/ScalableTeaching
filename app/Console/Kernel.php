@@ -19,7 +19,6 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         LoadCurrentProjects::class,
-        LoadOldReports::class,
         MarkExpiredProjects::class,
         TaskStatus::class,
         MoveGrades::class

@@ -19,7 +19,7 @@ class ProjectObserver
      */
     public function saving(Project $project)
     {
-        if($project->status == ProjectStatus::Active || $project->status == null)
+        if($project->status == ProjectStatus::Active || $project->status == null || $project->ownable_id == null)
             return;
 
         $project->owners()->each(fn(User $user) => Grade::create([

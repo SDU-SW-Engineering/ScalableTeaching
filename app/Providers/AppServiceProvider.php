@@ -2,8 +2,15 @@
 
 namespace App\Providers;
 
+use App\GitLabSocialite;
+use Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Horizon\Horizon;
+use Laravel\Socialite\Contracts\Factory;
+use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\SocialiteManager;
+use Laravel\Socialite\Two\GitlabProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +33,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Validator::extend('alpha_hyphen', function($attribute, $value) {
             return preg_match("/^[A-Za-z-0-9]+$/", $value) === 1;
+        });
+
+        Http::macro('gitlab', function() {
+            return Http::withToken(config('scalable.gitlab_token'))->baseUrl(config('scalable.gitlab_url') . '/api/v4');
         });
     }
 }

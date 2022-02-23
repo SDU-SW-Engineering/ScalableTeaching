@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\Enums\GradeEnum;
+use App\Models\Casts\SubTask;
+use App\Models\Casts\SubTaskCollection;
+use App\Models\Enums\CorrectionType;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
-use GraphQL\SchemaObject\ProjectRepositoryArgumentsObject;
+use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
 use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
@@ -13,33 +15,39 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
 
+/**
+ * @property SubTaskCollection $sub_tasks
+ * @property CorrectionType $correction_type
+ */
 class Task extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'description', 'markdown_description', 'source_project_id', 'name',
-        'short_description', 'starts_at', 'ends_at', 'gitlab_group_id'
+        'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required'
     ];
 
     protected $dates = ['ends_at', 'starts_at'];
 
-    protected $casts = ['is_visible' => 'bool'];
+    protected $casts = [
+        'is_visible'      => 'bool',
+        'sub_tasks'       => SubTaskCollection::class,
+        'correction_type' => CorrectionType::class
+    ];
 
     public function reloadDescriptionFromRepo()
     {
         $gitlabManager = app(GitLabManager::class);
-        $project = $gitlabManager->projects()->show($this->source_project_id);
-        $branch = $project['default_branch'];
-        $readme = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, 'README.md', $branch)['content']);
-        $parseDown = new \Parsedown();
-        $htmlReadme = $parseDown->parse($readme);
+        $project       = $gitlabManager->projects()->show($this->source_project_id);
+        $branch        = $project['default_branch'];
+        $readme        = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, 'README.md', $branch)['content']);
+        $parseDown     = new \Parsedown();
+        $htmlReadme    = $parseDown->parse($readme);
 
         $this->update([
-            'description' => $htmlReadme,
+            'description'          => $htmlReadme,
             'markdown_description' => $readme
         ]);
     }
@@ -52,21 +60,22 @@ class Task extends Model
 
     public function jobs()
     {
-        return $this->hasManyThrough(JobStatus::class, Project::class)->withTrashedParents();
+        return $this->hasManyThrough(Pipeline::class, Project::class)->withTrashedParents();
     }
 
     public function grades()
     {
         return $this->hasMany(Grade::class);
     }
+
     // endregion
 
-    public function dailyBuilds(bool $withTrash = false, $withToday = false): \Illuminate\Support\Collection
+    public function dailyBuilds(bool $withTrash = false, $withToday = false) : \Illuminate\Support\Collection
     {
         $query = $this->jobs();
         if ($withTrash)
             $query->withTrashedParents();
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(! $withToday))->get();
     }
 
     public function projects()
@@ -103,13 +112,14 @@ class Task extends Model
         return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
     }
 
-    public function currentProjectForUser(User $user): ?Project
+    public function currentProjectForUser(User $user) : ?Project
     {
-        $myGroups = $this->course->groups()
+        $myGroups     = $this->course->groups()
             ->whereRelation('users', 'user_id', $user->id)
             ->latest()
             ->pluck('name', 'id');
-        $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function (Builder $query) use ($myGroups) {
+        $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function (Builder $query) use ($myGroups)
+        {
             $query->whereIn('id', $myGroups->keys());
         })->first();
 
@@ -117,7 +127,8 @@ class Task extends Model
             return $groupProject;
 
         /** @var Project $project */
-        return $this->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups) {
+        return $this->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
+        {
             $query->where('id', $user->id);
         })->first();
     }
@@ -126,17 +137,19 @@ class Task extends Model
      * @param Collection $users
      * @return Collection
      */
-    public function progressStatus(Collection $users): Collection
+    public function progressStatus(Collection $users) : Collection
     {
-        return $users->filter(function (User $user) {
+        return $users->filter(function (User $user)
+        {
             return $this->currentProjectForUser($user) != null;
         });
     }
 
-    public function projectsForUsers(Collection $users): Collection
+    public function projectsForUsers(Collection $users) : Collection
     {
         $projects = Collection::empty();
-        $users->each(function (User $user) use ($projects) {
+        $users->each(function (User $user) use ($projects)
+        {
             $project = $this->currentProjectForUser($user);
             if ($project == null)
                 return;
@@ -159,31 +172,35 @@ class Task extends Model
             ->selectNodes()
             ->selectName()
             ->selectSha();
-        $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+        $client   = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
         $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes;
         if (count($projects) == 0)
             return;
 
-        collect($projects[0]->repository->tree->blobs->nodes)->each(function ($repoFile) use ($selectFile, $dir) {
+        collect($projects[0]->repository->tree->blobs->nodes)->each(function ($repoFile) use ($selectFile, $dir)
+        {
             if ($selectFile != null && $repoFile->name != $selectFile)
                 return;
-            $fileName = "/" . trim("$dir/$repoFile->name", " /");
-            $file = $this->protectedFiles()->firstOrNew([
+            $fileName         = "/" . trim("$dir/$repoFile->name", " /");
+            $file             = $this->protectedFiles()->firstOrNew([
                 'path' => $fileName
             ]);
-            $shaValues = is_array($file->sha_values) ? $file->sha_values : [];
-            $shaValues[] = $repoFile->sha;
+            $shaValues        = is_array($file->sha_values) ? $file->sha_values : [];
+            $shaValues[]      = $repoFile->sha;
             $file->sha_values = array_unique($shaValues);
             $file->save();
         });
     }
 
-    public function participants(): \Illuminate\Support\Collection
+    public function participants() : \Illuminate\Support\Collection
     {
-        return $this->projects->reject(function (Project $project) {
+        return $this->projects->reject(function (Project $project)
+        {
             return $project->ownable_type == null;
-        })->map(function (Project $project) {
-            return $project->owners()->each(function (User $user) use ($project) {
+        })->map(function (Project $project)
+        {
+            return $project->owners()->each(function (User $user) use ($project)
+            {
                 $user->project_status = $project->status;
             });
         })->flatten();
@@ -193,12 +210,32 @@ class Task extends Model
     {
         if ($user == null)
             $user = auth()->user();
-        if ( $this->grades()->where('user_id', $user->id)->first() != null)
-        return $this->grades()->where('user_id', $user->id)->first();
+        if ($this->grades()->where('user_id', $user->id)->first() != null)
+            return $this->grades()->where('user_id', $user->id)->first();
     }
 
     public function sourcedGrades()
     {
         return $this->morphMany(Grade::class, 'source');
+    }
+
+    public function ciFile()
+    {
+        $rootObject = new RootQueryObject();
+        $rootObject->selectProjects((new RootProjectsArgumentsObject())
+            ->setIds(["gid://gitlab/Project/$this->source_project_id"])
+            ->setFirst(1))
+            ->selectNodes()
+            ->selectRepository()
+            ->selectBlobs((new RepositoryBlobsArgumentsObject())->setPaths(['.gitlab-ci.yml']))
+            ->selectNodes()
+            ->selectName()
+            ->selectRawBlob();
+        $client = new Client(config('scalable.gitlab_url') . '/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
+        $files  = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes[0]->repository->blobs->nodes;
+        if (count($files) == 0)
+            return null;
+
+        return $files[0]->rawBlob;
     }
 }

@@ -136,7 +136,10 @@
                     Dashboard
                 </a>
             @else
-                Login
+                <a class="block px-5 py-2 mt-4 font-medium leading-5 text-center text-white hover:text-white capitalize bg-lime-green-500 rounded-lg lg:mt-0 hover:bg-lime-green-400 lg:w-auto"
+                   href="{{ route('login') }}">
+                    Login
+                </a>
             @endauth
         </nav>
 

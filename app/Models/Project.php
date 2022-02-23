@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Events\ProjectCreated;
+use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -37,14 +39,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $ownable_type
  * @method static Builder|Project whereOwnableId($value)
  * @method static Builder|Project whereOwnableType($value)
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\JobStatus[] $jobStatuses
- * @property-read int|null $job_statuses_count
  * @property-read Model|\Eloquent $ownable
  * @property int $verified
  * @property string|null $final_commit_sha
  * @property \Illuminate\Support\Carbon|null $finished_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\Task $task
+ * @property-read Task $task
  * @method static \Illuminate\Database\Query\Builder|Project onlyTrashed()
  * @method static Builder|Project whereDeletedAt($value)
  * @method static Builder|Project whereFinalCommitSha($value)
@@ -70,7 +70,11 @@ class Project extends Model
 
     protected $fillable = [
         'project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
-        'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at'
+        'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at', 'hook_id'
+    ];
+
+    protected $dispatchesEvents = [
+        'created' => ProjectCreated::class
     ];
 
     public function ownable()
@@ -78,9 +82,9 @@ class Project extends Model
         return $this->morphTo();
     }
 
-    public function jobStatuses()
+    public function pipelines()
     {
-        return $this->hasMany(JobStatus::class);
+        return $this->hasMany(Pipeline::class);
     }
 
     public function task()
@@ -88,36 +92,9 @@ class Project extends Model
         return $this->belongsTo(Task::class);
     }
 
-    public function refreshGitlabAccess()
+    public function subTasks()
     {
-        $gitLabManager   = app(GitLabManager::class);
-        $supposedMembers = $this->owners()->map(function ($user) use ($gitLabManager)
-        {
-            $users = $gitLabManager->users()->all([
-                'username' => $user->username
-            ]);
-            if (count($users) == 1)
-                return $users[0]['id'];
-            return null;
-        })->reject(function ($gitlabId)
-        {
-            return $gitlabId == null;
-        });
-        $currentMembers  = collect($gitLabManager->projects()->members($this->project_id))->pluck('id');
-        $add             = $supposedMembers->diff($currentMembers);
-        $remove          = $currentMembers->diff($supposedMembers);
-        $this->addUsersToGitlab($add);
-        $remove->each(function ($gitlabUserId) use ($gitLabManager)
-        {
-            try
-            {
-                $gitLabManager->projects()->removeMember($this->project_id, $gitlabUserId);
-            }
-            catch (\Exception $ignored)
-            {
-
-            }
-        });
+        return $this->hasMany(ProjectSubTask::class);
     }
 
     /**
@@ -129,28 +106,6 @@ class Project extends Model
         if ($this->ownable_type == User::class)
             return Collection::wrap($this->ownable);
         return $this->ownable->users()->get();
-    }
-
-    public function addUsersToGitlab($gitlabIds, &$errors = [])
-    {
-        foreach ($gitlabIds as $user => $gitlabId)
-        {
-            $gitLabManager = app(GitLabManager::class);
-            try
-            {
-                $gitLabManager->projects()->addMember($this->project_id, $gitlabId, 30);
-            }
-            catch (\Exception $e)
-            {
-                $message = strtolower($e->getMessage());
-                if (\Str::contains($message, 'should be greater than or equal to'))
-                    continue;
-                if ($message == 'member already exists')
-                    continue;
-
-                $errors[] = "$user: " . $e->getMessage();
-            }
-        }
     }
 
     public function unprotectBranches()
@@ -177,28 +132,6 @@ class Project extends Model
         while ($tries != 0);
     }
 
-    public function disableForking()
-    {
-        $gitLabManager = app(GitLabManager::class);
-        $tries         = 3;
-        do
-        {
-            sleep(1);  // todo: this should be switched out with a queue worker that is delayed
-            $project = $gitLabManager->projects()->show($this->project_id);
-            if ($project['import_error'] != null)
-                break;
-            if ($project['import_status'] == 'finished')
-            {
-                $gitLabManager->projects()->update($this->project_id, [
-                    'forking_access_level' => 'disabled'
-                ]);
-                break;
-            }
-            $tries--;
-        }
-        while ($tries != 0);
-    }
-
     public function getDurationAttribute()
     {
         if ($this->finished_at == null)
@@ -209,7 +142,7 @@ class Project extends Model
 
     public function dailyBuilds($withToday = false) : \Illuminate\Support\Collection
     {
-        return $this->jobStatuses()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(! $withToday))->get();
+        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(! $withToday))->get();
     }
 
     public function getValidationStatusAttribute()
@@ -221,8 +154,48 @@ class Project extends Model
         return "success";
     }
 
-    public function gradeEntries()
+    public static function isCorrectToken(Project|int $project, string $token) : bool
     {
-        return $this->morphMany(GradeEntry::class, "source");
+        return self::token($project) === $token;
+    }
+
+    public static function token(Project|int $project) : string
+    {
+        return md5(strtolower($project instanceof Project ? $project->project_id : $project) . config('scalable.webhook_secret'));
+    }
+
+    public function progress() : int
+    {
+        return match ($this->task->correction_type)
+        {
+            CorrectionType::PointsRequired => $this->pointProgress(),
+            default                        => $this->plainProgress()
+        };
+    }
+
+    private function pointProgress() : int
+    {
+        $completed = $this->subTasks->pluck('sub_task_id');
+        if ($completed->isEmpty())
+            return 0;
+
+        $maxPoints = $this->task->sub_tasks->maxPoints();
+        $points = $this->task->sub_tasks->points($completed);
+
+        return (int)(round($points / $maxPoints * 100));
+    }
+
+    private function plainProgress() : int
+    {
+        if ($this->status == ProjectStatus::Finished && $this->task->correction_type != CorrectionType::RequiredTasks)
+            return 100;
+
+        $subTasks = $this->task->sub_tasks;
+        if ($subTasks->isEmpty())
+            return 0;
+
+        $completed = $this->subTasks()->count();
+
+        return (int)(round($completed / $subTasks->count() * 100));
     }
 }

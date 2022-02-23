@@ -2,15 +2,15 @@
 
 namespace App\Providers;
 
-use App\Listeners\AddProjectsToExistingUsers;
+use App\Events\ProjectCreated;
+use App\Listeners\GitLab\Project\DisableForking;
+use App\Listeners\GitLab\Project\RefreshMemberAccess;
+use App\Listeners\GitLab\Project\RegisterWebhook;
 use App\Models\Project;
 use App\Observers\ProjectObserver;
-use Illuminate\Auth\Events\Authenticated;
-use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -23,8 +23,10 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        Login::class => [
-            AddProjectsToExistingUsers::class
+        ProjectCreated::class => [
+            RefreshMemberAccess::class,
+            DisableForking::class,
+            RegisterWebhook::class
         ]
     ];
 

@@ -227,8 +227,8 @@ it('prohibits students from joining a group that is working on a project that th
         'invited_by_user_id' => $this->user->id
     ]);
 
-    Project::factory()->for($this->user2, 'ownable')->for($task)->create();
-    Project::factory()->for($this->group, 'ownable')->for($task)->create();
+    Project::factory()->for($this->user2, 'ownable')->for($task)->createQuietly();
+    Project::factory()->for($this->group, 'ownable')->for($task)->createQuietly();
     actingAs($this->user2);
 
     getJson(route('courses.groups.respondInvite', [$this->course, $this->group, $groupInvitation, 'accept']))->assertStatus(422);

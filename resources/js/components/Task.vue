@@ -15,6 +15,16 @@
                             Description
                         </span>
                     </button>
+                    <button v-if="subTasks != null" @click="tab = 'tasks'"
+                            :class="[tab === 'tasks' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
+                            class="py-2 px-3 rounded-md font-semibold flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>
+                            Tasks <span v-if="project != null">({{ subTasks.list.filter(t => t.completed).length }}/{{ subTasks.list.length }})</span>
+                        </span>
+                    </button>
                     <button v-if="project != null" @click="tab = 'builds'"
                             :class="[tab === 'builds' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
                             class="py-2 px-3 rounded-md font-semibold flex">
@@ -49,7 +59,7 @@
                         class="absolute bg-white p-4 rounded-md shadow-md max-vh70 overflow-x-hidden overflow-scroll dark:bg-gray-800">
                         <div class="prose-sm dark:prose-light"
                              :class="[hideMissingAssignmentWarning || project != null || progress.ended ? '': 'filter blur-sm']"
-                             v-html="description"/>
+                             v-html="task.description"/>
                     </div>
                     <div class="absolute flex w-full justify-center"
                          v-if="!hideMissingAssignmentWarning && project == null && !progress.ended">
@@ -102,6 +112,9 @@
                         </div>
                     </div>
                 </div>
+                <div v-if="subTasks != null" v-show="tab === 'tasks'">
+                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended" :tasks="subTasks" :tasks-required="task.correction_tasks_required" :points-required="task.correction_points_required" :correction-type="task.correction_type"></sub-tasks>
+                </div>
                 <div v-show="tab === 'builds'">
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
                 </div>
@@ -150,10 +163,13 @@ import Overdue from "./Widgets/Overdue";
 import Alert from "./Alert";
 import BarChart from "./BarChart";
 import Warning from "./Widgets/Warning";
+import SubTasks from "./SubTasks";
 
 export default {
-    components: {Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
-    props: ['description', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning'],
+    components: {
+        SubTasks,
+        Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
+    props: ['task', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks'],
     methods: {
         startAssignment: async function (startAs) {
             let createAs = startAs == null ? this.startAs : startAs;

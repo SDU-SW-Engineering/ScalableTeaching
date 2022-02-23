@@ -7,7 +7,7 @@
             </svg>
             <div class="flex flex-col w-full justify-center">
                 <h3 class="font-bold text-lg dark:text-white">Deadline missed</h3>
-                <p class="text-gray-600 dark:text-gray-300">You have failed to submit a passing build within the deadline, and the assignment has been marked as failed.</p>
+                <p class="text-gray-600 dark:text-gray-300">You have failed to meet the requirements within the deadline.</p>
             </div>
         </div>
     </div>
