@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property SubTaskCollection $sub_tasks
@@ -53,7 +55,7 @@ class Task extends Model
     }
 
     // region relationships
-    public function course()
+    public function course() : BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
@@ -78,7 +80,7 @@ class Task extends Model
         return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(! $withToday))->get();
     }
 
-    public function projects()
+    public function projects() : HasMany
     {
         return $this->hasMany(Project::class);
     }
@@ -127,10 +129,9 @@ class Task extends Model
             return $groupProject;
 
         /** @var Project $project */
-        return $this->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
-        {
-            $query->where('id', $user->id);
-        })->first();
+        return $this->projects()
+            ->whereHasMorph('ownable', User::class, fn (Builder $query) => $query->where('id', $user->id))
+            ->first();
     }
 
     /**

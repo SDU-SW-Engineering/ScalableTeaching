@@ -11,6 +11,7 @@ use GrahamCampbell\ResultType\Success;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\JobStatus
@@ -29,22 +30,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property array $log
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline query()
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereBuildId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereDuration($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereHistory($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereLog($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereProjectId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereQueueDuration($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereRepoBranch($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereRepoName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereRunner($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereUpdatedAt($value)
  * @mixin \Eloquent
  * @property string $user_name
  * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereUserEmail($value)
@@ -98,7 +83,7 @@ class Pipeline extends Model
         return $this->belongsTo(Project::class);
     }
 
-    public function subTasks()
+    public function subTasks() : HasMany
     {
         return $this->hasMany(ProjectSubTask::class);
     }

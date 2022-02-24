@@ -47,11 +47,6 @@ class Grade extends Model
     }
     // endregion
 
-    public function value()
-    {
-        return $this->entries()->first()->value;
-    }
-
     public static function booted()
     {
         static::creating(function(Grade $grade) {
