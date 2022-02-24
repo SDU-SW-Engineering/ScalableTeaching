@@ -126,7 +126,7 @@ class SubTaskCollection implements Castable
             public function set($model, string $key, $value, array $attributes) : bool|string
             {
                 $values = $value instanceof SubTaskCollection ? $value->all() : collect($value);
-                throw_unless($values->every(fn($v) => $v instanceof SubTask), InvalidArgumentException::class, "Every item must be an SubTask instance.");
+                throw_unless($values->every(fn($v) => $v instanceof SubTask), InvalidArgumentException::class, "Every item must be a SubTask instance.");
                 $id = $values->max(fn(SubTask $task) => $task->getId()) ?? 0;
 
                 return $values->map(function (SubTask $subTask) use (&$id)

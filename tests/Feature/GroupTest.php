@@ -120,7 +120,7 @@ it('allows students to accepts invites', function ()
     actingAs($this->user2);
     getJson(route('courses.groups.respondInvite', [$this->course, $this->group, $groupInvitation, 'accept']))->assertStatus(200);
     expect($this->group->hasMember($this->user2))->toBeTrue();
-    assertDeleted($groupInvitation);
+    assertModelMissing($groupInvitation);
 });
 
 it('allows students to decline invites', function ()
@@ -134,7 +134,7 @@ it('allows students to decline invites', function ()
     actingAs($this->user2);
     getJson(route('courses.groups.respondInvite', [$this->course, $this->group, $groupInvitation, 'decline']))->assertStatus(200);
     expect($this->group->hasMember($this->user2))->toBeFalse();
-    assertDeleted($groupInvitation);
+    assertModelMissing($groupInvitation);
 });
 
 it('allows students to leave groups', function ()
@@ -161,7 +161,7 @@ it('allows the group owner to delete groups', function ()
     ]);
     actingAs($this->user);
     deleteJson(route('courses.groups.destroy', [$this->course, $this->group]))->assertStatus(200);
-    assertDeleted($this->group);
+    assertModelMissing($this->group);
 });
 
 it('prohibits deletion of a group by non-owners', function ()
@@ -192,7 +192,7 @@ it('allows group members to withdraw invites', function ()
         'invited_by_user_id' => $this->user->id
     ]);
     deleteJson(route('courses.groups.invitations.delete', [$this->course, $this->group, $groupInvitation]))->assertStatus(200);
-    assertDeleted($groupInvitation);
+    assertModelMissing($groupInvitation);
 });
 
 it('prohibits non-members from withdrawing invities', function ()
