@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -35,12 +36,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Project whereStatus($value)
  * @method static Builder|Project whereTaskId($value)
  * @method static Builder|Project whereUpdatedAt($value)
- * @mixin \Eloquent
  * @property int|null $ownable_id
  * @property string|null $ownable_type
  * @method static Builder|Project whereOwnableId($value)
  * @method static Builder|Project whereOwnableType($value)
- * @property-read Model|\Eloquent $ownable
+ * @property-read User|Group $ownable
  * @property int $verified
  * @property string|null $final_commit_sha
  * @property \Illuminate\Support\Carbon|null $finished_at
@@ -78,7 +78,7 @@ class Project extends Model
         'created' => ProjectCreated::class
     ];
 
-    public function ownable()
+    public function ownable() : MorphTo
     {
         return $this->morphTo();
     }
@@ -100,9 +100,9 @@ class Project extends Model
 
     /**
      * returns a collection of users that own the project
-     * @return Collection
+     * @return Collection<User>
      */
-    public function owners()
+    public function owners(): Collection
     {
         if ($this->ownable_type == User::class)
             return Collection::wrap($this->ownable);

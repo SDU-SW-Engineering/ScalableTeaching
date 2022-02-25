@@ -7,9 +7,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Console\Command;
-use League\Csv\Reader;
 use League\Csv\Writer;
-use SplTempFileObject;
 
 class TaskStatus extends Command
 {
@@ -37,12 +35,7 @@ class TaskStatus extends Command
         parent::__construct();
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
-    public function handle()
+    public function handle() : int
     {
         $task = Task::findOrFail($this->argument('task'));
         $csvWriter = Writer::createFromPath(storage_path(date("Y-m-d H:i:s")  . " - $task->name status.csv"), 'w');
@@ -60,6 +53,6 @@ class TaskStatus extends Command
             });
         });
 
-        return Command::SUCCESS;
+        return 0;
     }
 }

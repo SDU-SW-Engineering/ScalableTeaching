@@ -17,18 +17,22 @@ class CourseController extends Controller
     {
         $courses = auth()->user()->courses->map(function ($course)
         {
-            $tasks = $course->tasks->each(function (Task $task)
-            {
-                $project      = $task->currentProjectForUser(auth()->user());
-                $task->status = $project == null ? null : $project->status;
+
+            $tasks = $course->tasks->map(function (Task $task) {
+                $project = $task->currentProjectForUser(auth()->user());
+                return [
+                    'task' => $task,
+                    'project'      => $project,
+                    'status' => $project?->status
+                ];
             });
 
             $deadline = $tasks->sort(function ($a, $b)
             {
-                $startsAtA = Carbon::parse($a->starts_at);
-                $endsAtA   = Carbon::parse($a->ends_at);
-                $startsAtB = Carbon::parse($b->starts_at);
-                $endsAtB   = Carbon::parse($b->ends_at);
+                $startsAtA = Carbon::parse($a['task']->starts_at);
+                $endsAtA   = Carbon::parse($a['task']->ends_at);
+                $startsAtB = Carbon::parse($b['task']->starts_at);
+                $endsAtB   = Carbon::parse($b['task']->ends_at);
 
                 if (now()->between($startsAtA, $endsAtA))
                     return -1;
@@ -46,7 +50,7 @@ class CourseController extends Controller
                 'name'          => $course->name,
                 'taskCount'     => $tasks->count(),
                 'completed'     => $tasks->where('status', 'finished')->count(),
-                'next_deadline' => $deadline == null ? null : $deadline->ends_at
+                'next_deadline' => $deadline != null ? $deadline['task']->ends_at : null
             ];
         });
 
@@ -61,32 +65,32 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $tasks = $course->tasks()->where('is_visible', true)->get()->each(function (Task $task)
-        {
-            $task->project = $task->currentProjectForUser(auth()->user());
-        });
+        $tasks = $course->tasks()->where('is_visible', true)->get()->map(fn (Task $task) => [
+            'details' => $task,
+            'project' => $task->currentProjectForUser(auth()->user())
+        ]);
 
         $inProgress = $tasks->filter(function ($task)
         {
-            return now()->isBetween($task->starts_at, $task->ends_at);
+            return now()->isBetween($task['details']->starts_at, $task['details']->ends_at);
         });
         $past       = $tasks->filter(function ($task)
         {
-            return now()->isAfter($task->ends_at);
+            return now()->isAfter($task['details']->ends_at);
         });
         $upcoming   = $tasks->filter(function ($task)
         {
-            return now()->isBefore($task->starts_at);
+            return now()->isBefore($task['details']->starts_at);
         });
 
         $taskCount = $tasks->count();
         $failed    = $tasks->filter(function ($task)
         {
-            if ($task->project == null && $task->ends_at->isPast())
+            if ($task['project'] == null && $task['details']->ends_at->isPast())
                 return true;
-            return $task->project?->status == 'overdue';
+            return $task['project']?->status == 'overdue';
         })->count();
-        $approved  = $tasks->filter(fn (Task $task) => $task->project?->status == 'finished')->count();
+        $approved  = $tasks->filter(fn ($task) => $task['project']?->status == 'finished')->count();
 
         return view('courses.show', [
             'course'             => $course,

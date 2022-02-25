@@ -54,7 +54,7 @@ class GroupPolicy
         if ($member == null)
             return Response::deny('Not a member of the group.');
 
-        if ($member->pivot->is_owner == true)
+        if ($member->getRelationValue('pivot')->is_owner == true)
             return Response::deny('Owners can\'t leave the group, they should delete it instead.');
 
         return true;

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * App\Models\GroupInvitation
@@ -31,7 +32,7 @@ class GroupInvitation extends Model
 
     protected $fillable = ['recipient_user_id', 'invited_by_user_id'];
 
-    public function group()
+    public function group() : BelongsTo
     {
         return $this->belongsTo(Group::class);
     }
