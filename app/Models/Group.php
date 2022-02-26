@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Group extends Model
 {
@@ -11,7 +15,7 @@ class Group extends Model
 
     protected $fillable = ['name'];
 
-    public function users()
+    public function users() : BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->using(GroupUser::class)
@@ -19,17 +23,17 @@ class Group extends Model
             ->withTimestamps();
     }
 
-    public function invitations()
+    public function invitations() : HasMany
     {
         return $this->hasMany(GroupInvitation::class);
     }
 
-    public function course()
+    public function course() : BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
-    public function projects()
+    public function projects() : MorphMany
     {
         return $this->morphMany(Project::class, 'ownable');
     }

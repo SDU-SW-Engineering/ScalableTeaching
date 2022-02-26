@@ -33,10 +33,8 @@ class MarkExpiredProjects extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle() : int
     {
         foreach (Task::all() as $task)
         {
@@ -53,5 +51,7 @@ class MarkExpiredProjects extends Command
             ]);
             $this->info("Marked $count projects as overdue.");
         }
+
+        return 0;
     }
 }

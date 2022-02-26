@@ -5,8 +5,8 @@
         'rounded-lg' => isset($cantOpen)
         ]) class="">
         <div class="flex items-center justify-between">
-            <span class="text-2xl font-bold text-gray-700 dark:text-white">{{ $task['name'] }}</span>
-            @if($task->grade() != null)
+            <span class="text-2xl font-bold text-gray-700 dark:text-white">{{ $task['details']['name'] }}</span>
+            @if($task['details']->grade() != null)
                 <span @class([
                     'px-3 py-1 text-sm font-bold text-gray-100 transform rounded',
                     'bg-lime-green-600' => $task->grade()->value == \App\Models\Enums\GradeEnum::Passed,
@@ -27,19 +27,19 @@
         </div>
 
         <div class="mt-2">
-            <p class="mt-2 text-gray-600 dark:text-gray-300 h-12 overflow-hidden overflow-ellipsis">{{ $task['short_description'] }}</p>
+            <p class="mt-2 text-gray-600 dark:text-gray-300 h-12 overflow-hidden overflow-ellipsis">{{ $task['details']['short_description'] }}</p>
         </div>
 
         <div class="flex items-end justify-between mt-4">
             <div class="flex gap-2 text-lime-green-600 dark:text-lime-green-400 text-sm">
                 <div class="flex flex-col">
-                    <span class="font-bold">{{ $task->starts_at->toDateString() }}</span>
-                    <span class="text-xs text-gray-400">{{ $task->starts_at->toTimeString() }}</span>
+                    <span class="font-bold">{{ $task['details']->starts_at->toDateString() }}</span>
+                    <span class="text-xs text-gray-400">{{ $task['details']->starts_at->toTimeString() }}</span>
                 </div>
                 -
                 <div class="flex flex-col">
-                    <span class="font-bold">{{ $task->ends_at->toDateString() }}</span>
-                    <span class="text-xs text-gray-400">{{ $task->ends_at->toTimeString() }}</span>
+                    <span class="font-bold">{{ $task['details']->ends_at->toDateString() }}</span>
+                    <span class="text-xs text-gray-400">{{ $task['details']->ends_at->toTimeString() }}</span>
                 </div>
             </div>
 
@@ -49,18 +49,18 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                @if ($task->starts_at->isFuture())
-                    <span>{{ $task->starts_at->diffForHumans() }}</span>
+                @if ($task['details']->starts_at->isFuture())
+                    <span>{{ $task['details']->starts_at->diffForHumans() }}</span>
                 @else
-                    <span>{{ $task->ends_at->diffForHumans() }}</span>
+                    <span>{{ $task['details']->ends_at->diffForHumans() }}</span>
                 @endif
             </div>
         </div>
     </div>
-    @canany(['view-analytics', 'update'], $task)
+    @canany(['view-analytics', 'update'], $task['details'])
         <div class="bg-gray-100 dark:bg-gray-500 flex px-8 py-2 gap-2">
-            @can('view-analytics', $task)
-                <a href="{{ route('courses.tasks.analytics.index', [$course->id, $task->id]) }}"
+            @can('view-analytics', $task['details'])
+                <a href="{{ route('courses.tasks.analytics.index', [$course->id, $task['details']->id]) }}"
                    class="flex items-cente px-2 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-gray-300 dark:bg-gray-600 rounded-md text-gray-700 dark:text-white dark:hover:bg-gray-700 hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-80">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                         <path
@@ -69,7 +69,7 @@
                 </a>
             @endcan
             @can('manage', $course)
-                <a href="{{ route('courses.manage.editTask', [$course->id, $task->id]) }}"
+                <a href="{{ route('courses.manage.editTask', [$course->id, $task['details']->id]) }}"
                    class="flex items-center px-2 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-gray-300 dark:bg-gray-600 rounded-md text-gray-700 dark:text-white dark:hover:bg-gray-700 hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-80">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path
@@ -81,7 +81,7 @@
     @endcanany
     @isset($cantOpen)
     @else
-        <a href="{{ route('courses.tasks.show', [$course->id, $task->id]) }}"
+        <a href="{{ route('courses.tasks.show', [$course->id, $task['details']->id]) }}"
            class="shadow-lg bg-gray-200 dark:bg-gray-800 py-2 dark:text-white text-gray-600 hover:text-gray-700 dark:hover:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors rounded-b-lg flex items-center justify-center">
             Open Task
         </a>

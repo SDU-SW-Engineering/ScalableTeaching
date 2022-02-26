@@ -8,16 +8,16 @@ use Illuminate\Support\Carbon;
 
 
 /**
- * @property int id
- * @property int task_id
- * @property int user_id
- * @property string source_type
- * @property int source_id
- * @property boolean selected
- * @property Enums\Grade value
- * @property ?string value_raw
- * @property Carbon created_at
- * @property Carbon updated_at
+ * @property int $id
+ * @property int $task_id
+ * @property int $user_id
+ * @property string $source_type
+ * @property int $source_id
+ * @property boolean $selected
+ * @property Enums\GradeEnum $value
+ * @property string|null $value_raw
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Grade extends Model
 {
@@ -46,11 +46,6 @@ class Grade extends Model
         $this->morphTo("source");
     }
     // endregion
-
-    public function value()
-    {
-        return $this->entries()->first()->value;
-    }
 
     public static function booted()
     {

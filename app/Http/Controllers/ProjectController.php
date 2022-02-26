@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ProjectCreated;
+use App\Listeners\GitLab\Project\RefreshMemberAccess;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Pipeline;
@@ -24,16 +26,13 @@ class ProjectController extends Controller
 {
     public function builds(Project $project)
     {
-        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(function (Pipeline $job)
-        {
-            $job->run_time   = CarbonInterval::seconds($job->duration)->forHumans();
-            $job->queued_for = CarbonInterval::seconds($job->queue_duration)->forHumans();
-            $job->ran        = $job->updated_at->diffForHumans();
-            $job->ran_date   = $job->updated_at->toDateTimeString();
-            $job->makeHidden('project');
+        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(fn (Pipeline $job) => [
 
-            return $job;
-        })->each(fn(Pipeline $pipeline) => $pipeline->unsetRelation('subTasks'));
+            'run_time'   => CarbonInterval::seconds($job->duration)->forHumans(),
+            'queued_for' => CarbonInterval::seconds($job->queue_duration)->forHumans(),
+            'ran'        => $job->updated_at->diffForHumans(),
+            'ran_date'   => $job->updated_at->toDateTimeString()
+        ]);
     }
 
     /**
@@ -77,13 +76,14 @@ class ProjectController extends Controller
             . $activeUsers->join(", ") . '<br><br>They will need to delete their project for the group to start the project.');
 
         $project->ownable()->associate($group)->save();
-        $project->refreshGitlabAccess();
+
+        \App\Jobs\Project\RefreshMemberAccess::dispatch($project);
         return "ok";
     }
 
     public function refreshAccess(Project $project)
     {
-        $project->refreshGitlabAccess();
+        \App\Jobs\Project\RefreshMemberAccess::dispatch($project);
         return "ok";
     }
 
@@ -124,7 +124,7 @@ class ProjectController extends Controller
                 ->selectName()
                 ->selectSha();
             $client   = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
-            $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes;
+            $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
             if (count($projects) == 0)
                 throw new \Exception("Project with id $project->id wasn't found.");

@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use SDU\MFA\SDUUser;
 
 /**
  * App\Models\User
@@ -24,36 +24,18 @@ use SDU\MFA\SDUUser;
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Sanctum\PersonalAccessToken[] $tokens
  * @property-read int|null $tokens_count
- * @method static \Database\Factories\UserFactory factory(...$parameters)
- * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|User query()
- * @method static \Illuminate\Database\Eloquent\Builder|User whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereEmailVerifiedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User wherePassword($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  * @mixin \Eloquent
  * @property string $guid
- * @method static \Illuminate\Database\Eloquent\Builder|User whereGuid($value)
  * @property mixed $username
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Project[] $projects
  * @property-read int|null $projects_count
+ * @property-read Collection|Course[] $courses
  * @property string|null $given_name
  * @property string|null $sur_name
  * @property string|null $title
  * @property bool $is_admin
  * @property bool $is_sys_admin
  * @property array|null $ad_groups
- * @method static \Illuminate\Database\Eloquent\Builder|User whereAdGroups($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereGivenName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereIsAdmin($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereIsSysAdmin($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereSurName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereTitle($value)
  */
 class User extends Authenticatable
 {
@@ -79,7 +61,8 @@ class User extends Authenticatable
     protected $hidden = [
         'remember_token',
         'is_sys_admin',
-        'is_admin'
+        'is_admin',
+        'last_login'
     ];
 
     /**
@@ -95,7 +78,7 @@ class User extends Authenticatable
 
     protected $dates = ['last_login'];
 
-    public function groups()
+    public function groups() : BelongsToMany
     {
         return $this->belongsToMany(Group::class)
             ->using(GroupUser::class)

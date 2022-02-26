@@ -15,10 +15,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property SubTaskCollection $sub_tasks
  * @property CorrectionType $correction_type
+ * @property string $name
+ * @method Task findOrFail($id, $columns = []) {
+ *     @throws ModelNotFoundException<Task>
+ * }
+ *
  */
 class Task extends Model
 {
@@ -53,7 +61,7 @@ class Task extends Model
     }
 
     // region relationships
-    public function course()
+    public function course() : BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
@@ -63,7 +71,7 @@ class Task extends Model
         return $this->hasManyThrough(Pipeline::class, Project::class)->withTrashedParents();
     }
 
-    public function grades()
+    public function grades() : HasMany
     {
         return $this->hasMany(Grade::class);
     }
@@ -78,12 +86,12 @@ class Task extends Model
         return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(! $withToday))->get();
     }
 
-    public function projects()
+    public function projects() : HasMany
     {
         return $this->hasMany(Project::class);
     }
 
-    public function protectedFiles()
+    public function protectedFiles() : HasMany
     {
         return $this->hasMany(TaskProtectedFile::class);
     }
@@ -126,11 +134,9 @@ class Task extends Model
         if ($groupProject != null)
             return $groupProject;
 
-        /** @var Project $project */
-        return $this->projects()->whereHasMorph('ownable', User::class, function (Builder $query) use ($user, $myGroups)
-        {
-            $query->where('id', $user->id);
-        })->first();
+        return $this->projects()
+            ->whereHasMorph('ownable', User::class, fn (Builder $query) => $query->where('id', $user->id))
+            ->first();
     }
 
     /**
@@ -173,7 +179,7 @@ class Task extends Model
             ->selectName()
             ->selectSha();
         $client   = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
-        $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes;
+        $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
         if (count($projects) == 0)
             return;
 
@@ -199,10 +205,9 @@ class Task extends Model
             return $project->ownable_type == null;
         })->map(function (Project $project)
         {
-            return $project->owners()->each(function (User $user) use ($project)
-            {
-                $user->project_status = $project->status;
-            });
+            return $project->owners()->map(fn (User $user) => [
+                'project_status' => $project->status
+            ]);
         })->flatten();
     }
 
@@ -232,7 +237,7 @@ class Task extends Model
             ->selectName()
             ->selectRawBlob();
         $client = new Client(config('scalable.gitlab_url') . '/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
-        $files  = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes[0]->repository->blobs->nodes;
+        $files  = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes[0]->repository->blobs->nodes; // @phpstan-ignore-line
         if (count($files) == 0)
             return null;
 

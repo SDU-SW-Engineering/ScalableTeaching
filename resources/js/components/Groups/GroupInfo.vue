@@ -60,7 +60,7 @@
                 <div>
                     <h2 class="text-lg dark:text-gray-200">Members <span
                         class="text-gray-400 dark:text-gray-300">({{ group.users.length }}/{{
-                            group.member_cap
+                            group.memberCap
                         }})</span></h2>
                     <div class="mt-2">
                         <member @remove="removeUserFromGroup(user)" :key="user.id" :is-you="user.isYou"
@@ -69,7 +69,7 @@
                         <member @remove="removeInvitation(invitation)" :key="invitation.id" :can-remove="group.isOwner"
                                 v-for="invitation in group.invitations" :name="invitation.recipient.name"
                                 :is-invited="true"></member>
-                        <div v-if="group.users.length < group.member_cap" class="mt-4">
+                        <div v-if="group.users.length < group.memberCap" class="mt-4">
                             <label class="text-sm text-black dark:text-gray-100">Add user to group</label>
                             <div class="flex mt-1">
                                 <input @keydown.enter="addUser" v-model="userEmail" :disabled="addingUser" type="email"

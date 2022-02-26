@@ -42,7 +42,7 @@ class ProjectSubTask extends Model
      * @return bool
      * @throws \Exception
      */
-    private static function isFinished(Project $project) : bool
+    protected static function isFinished(Project $project) : bool
     {
         $completedSubTasks = $project->subTasks->pluck('sub_task_id');
         $task              = $project->task;

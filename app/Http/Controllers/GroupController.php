@@ -2,31 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\Groups\GroupInformation;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\GroupInvitation;
 use App\Models\User;
-use App\Models\User as UserModel;
-use Badcow\PhraseGenerator\PhraseGenerator;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
 
 class GroupController extends Controller
 {
-    public function index(Course $course)
+    public function index(Request $request, Course $course)
     {
         $invitations = $course->groupInvitations()
             ->with(['invitedBy', 'group.users'])
-            ->where('recipient_user_id', auth()->id())->get()->each(function ($invite)
-            {
-                $invite->acceptRoute  = route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'accept']);
-                $invite->declineRoute = route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'decline']);
-                $invite->canAccept    = \Gate::inspect('canAcceptInvite', [$invite->group, $invite])->toArray();
-            });
-
-        $groups = $this->addMetaToUserGroups($course->userGroups(auth()->user(), true));
+            ->where('recipient_user_id', auth()->id())->get()->map(fn(GroupInvitation $invite) => [
+                'acceptRoute'  => route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'accept']),
+                'declineRoute' => route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'decline']),
+                'canAccept'    => \Gate::inspect('canAcceptInvite', [$invite->group, $invite])->toArray()
+            ]);
 
         return view('groups.index', [
             'canCreateGroup' => \Gate::inspect('createGroup', $course)->toArray(),
@@ -35,7 +29,7 @@ class GroupController extends Controller
                 'Courses'     => route('courses.index'),
                 $course->name => null
             ],
-            'groups'         => $groups,
+            'groups'         => GroupInformation::collection($course->userGroups(auth()->user())),
             'invitations'    => $invitations
         ]);
     }
@@ -55,34 +49,9 @@ class GroupController extends Controller
         $group->users()->attach(auth()->id(), ['is_owner' => true]);
 
         return response([
-            'groups'          => $this->addMetaToUserGroups($course->userGroups(auth()->user(), true)),
+            'groups'          => GroupInformation::collection($course->userGroups(auth()->user())),
             'canCreateGroups' => auth()->user()->can('createGroup', $course)
         ], 201);
-    }
-
-    private function addMetaToUserGroups(Collection $groups)
-    {
-        return $groups->each(function (Group $group)
-        {
-            $group->member_cap = $group->course->max_group_size;
-            $group->makeHidden('course');
-            $group->invitations->each(function ($invitation) use ($group)
-            {
-                $invitation->deleteRoute = route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]);
-            });
-            $group->users->each(function ($member) use ($group)
-            {
-                $member->isYou           = $member->id == auth()->id();
-                $member->removeUserRoute = route('courses.groups.removeMember', [$group->course_id, $group->id, $member->id]);
-            });
-            $group->deleteRoute = route('courses.groups.destroy', [$group->course_id, $group->id]);
-            $group->inviteRoute = route('courses.groups.invite', [$group->course_id, $group->id]);
-            $group->leaveRoute  = route('courses.groups.leave', [$group->course_id, $group->id]);
-            $group->canDelete   = \Gate::inspect('delete', $group)->toArray();
-            $group->canLeave    = \Gate::inspect('leave', $group)->toArray();
-            $group->isOwner     = $group->users()->where('user_id', auth()->id())->wherePivot('is_owner', true)->exists();
-            return $group;
-        });
     }
 
     public function destroy(Course $course, Group $group)
@@ -113,10 +82,12 @@ class GroupController extends Controller
             'invited_by_user_id' => auth()->id()
         ]);
 
-        $invitation->deleteRoute = route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]);
         $invitation->load('recipient');
 
-        return $invitation;
+        return response([
+            'invitation'  => $invitation,
+            'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id])
+        ], 201);
     }
 
     public function respondToInvite(Course $course, Group $group, GroupInvitation $groupInvitation, $mode)
@@ -154,7 +125,7 @@ class GroupController extends Controller
 
         return [
             'group_id'  => $group->id,
-            'canDelete' => $group->canDelete = \Gate::inspect('delete', $group)->toArray()
+            'canDelete' => \Gate::inspect('delete', $group)->toArray()
         ];
     }
 }

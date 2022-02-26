@@ -15,17 +15,6 @@ class GroupPolicy
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can view any models.
-     *
-     * @param User $user
-     * @return Response|bool
-     */
-    public function viewAny(User $user)
-    {
-        //
-    }
-
-    /**
      * Determine whether the user can view the model.
      *
      * @param User $user
@@ -35,29 +24,6 @@ class GroupPolicy
     public function view(User $user, Group $group)
     {
         return $group->users()->where('user_id', $user->id)->exists();
-    }
-
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param User $user
-     * @return Response|bool
-     */
-    public function create(User $user)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param User $user
-     * @param Group $group
-     * @return Response|bool
-     */
-    public function update(User $user, Group $group)
-    {
-        //
     }
 
     /**
@@ -88,7 +54,7 @@ class GroupPolicy
         if ($member == null)
             return Response::deny('Not a member of the group.');
 
-        if ($member->pivot->is_owner == true)
+        if ($member->getRelationValue('pivot')->is_owner == true)
             return Response::deny('Owners can\'t leave the group, they should delete it instead.');
 
         return true;
@@ -131,30 +97,6 @@ class GroupPolicy
             return false;
 
         return true;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param \App\Models\User $user
-     * @param Group $group
-     * @return Response|bool
-     */
-    public function restore(User $user, Group $group)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param \App\Models\User $user
-     * @param Group $group
-     * @return Response|bool
-     */
-    public function forceDelete(User $user, Group $group)
-    {
-        //
     }
 
     /**

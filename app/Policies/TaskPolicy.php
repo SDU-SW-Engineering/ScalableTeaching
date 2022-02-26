@@ -11,16 +11,6 @@ class TaskPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param User $user
-     * @return Response|bool
-     */
-    public function viewAny(User $user)
-    {
-        //
-    }
 
     /**
      * Determine whether the user can view the model.
@@ -36,57 +26,10 @@ class TaskPolicy
         return false;
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param User $user
-     * @param Task $task
-     * @return Response|bool
-     */
-    public function update(User $user, Task $task)
-    {
-    }
-
     public function viewAnalytics(User $user, Task $task)
     {
         if ($task->course->hasTeacher($user))
             return true;
         return false;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param User $user
-     * @param Task $task
-     * @return Response|bool
-     */
-    public function delete(User $user, Task $task)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param User $user
-     * @param Task $task
-     * @return Response|bool
-     */
-    public function restore(User $user, Task $task)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param User $user
-     * @param Task $task
-     * @return Response|bool
-     */
-    public function forceDelete(User $user, Task $task)
-    {
-        //
     }
 }
