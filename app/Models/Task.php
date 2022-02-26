@@ -76,6 +76,10 @@ class Task extends Model
         return $this->hasMany(Grade::class);
     }
 
+    public function track(): ?BelongsTo
+    {
+        return $this->belongsTo(CourseTrack::class);
+    }
     // endregion
 
     public function dailyBuilds(bool $withTrash = false, $withToday = false) : \Illuminate\Support\Collection
