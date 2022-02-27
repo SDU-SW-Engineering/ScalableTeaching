@@ -277,7 +277,7 @@ class Task extends Model
 
     private function otherTrackHasBeenPicked($users, $groups): bool
     {
-        $siblings = $this->track->siblings()->pluck('id');
+        $siblings = $this->track->rootChildrenNotInPath(false)->pluck('id');
         $siblingTasks = Task::whereIn('track_id', $siblings)->get();
 
         if ($siblingTasks->count() == 0)

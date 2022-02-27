@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read CourseTrack|null $parent
- * @property-read CourseTrack[]|Collection $children
+ * @property-read CourseTrack[]|Collection $immediateChildren
  */
 class CourseTrack extends Model
 {
@@ -20,9 +21,8 @@ class CourseTrack extends Model
 
     public static function booted()
     {
-        static::creating(function (CourseTrack $track)
-        {
-            if ($track->parent_id != null)
+        static::creating(function(CourseTrack $track) {
+            if($track->parent_id != null)
                 $track->course_id = $track->root()->course_id;
 
         });
@@ -33,19 +33,36 @@ class CourseTrack extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function parent() : ?BelongsTo
+    public function parent(): ?BelongsTo
     {
         return $this->belongsTo(CourseTrack::class);
     }
 
-    public function children() : HasMany
+    public function immediateChildren(): HasMany
     {
         return $this->hasMany(CourseTrack::class, 'parent_id');
     }
 
-    public function root() : CourseTrack
+    /**
+     * @return Collection<CourseTrack>
+     */
+    public function children(): Collection
     {
-        if ($this->parent_id == null)
+        $found = CourseTrack::hydrate(DB::select("with recursive cte (id, name, parent_id) as (
+	        select id, name, parent_id from course_tracks where parent_id = ?
+            union all
+	        select t.id, t.name, t.parent_id
+	        from course_tracks t
+	        inner join cte on t.parent_id = cte.id
+        )
+        select * from cte", [$this->id]));
+
+        return $found;
+    }
+
+    public function root(): CourseTrack
+    {
+        if($this->parent_id == null)
             return $this;
 
         return $this->parent->root();
@@ -55,12 +72,10 @@ class CourseTrack extends Model
     {
         $path = [];
         $pointer = $this;
-        do
-        {
+        do {
             $path[] = $pointer;
             $pointer = $pointer->parent;
-        }
-        while($pointer != null);
+        } while($pointer != null);
 
         return collect($path);
     }
@@ -73,17 +88,17 @@ class CourseTrack extends Model
     /**
      * @return \Illuminate\Support\Collection<CourseTrack>
      */
-    public function siblings() : \Illuminate\Support\Collection
+    public function siblings(): \Illuminate\Support\Collection
     {
-        if ($this->parent_id == null)
+        if($this->parent_id == null)
             return collect();
 
-        return $this->parent->children->reject(fn(CourseTrack $track) => $track->id == $this->id);
+        return $this->parent->immediateChildren->reject(fn(CourseTrack $track) => $track->id == $this->id);
     }
 
-    public function isOn(User $user) : bool
+    public function isOn(User $user): bool
     {
-        if ($this->parent_id == null)
+        if($this->parent_id == null)
             return false;
 
         $tasks = $this->tasks()->with('projects.ownable')->get();
@@ -95,5 +110,16 @@ class CourseTrack extends Model
             ->flatten();
 
         return $userIds->contains($user->id);
+    }
+
+    public function rootChildrenNotInPath($withChildren = true)
+    {
+        $ignore = $this->path()->pluck('id');
+        $remaining = $this->root()->children()->whereNotIn('id', $ignore);
+
+        if ($withChildren)
+            return $remaining;
+
+        return $remaining->whereNotIn('id', $this->children()->pluck('id'));
     }
 }

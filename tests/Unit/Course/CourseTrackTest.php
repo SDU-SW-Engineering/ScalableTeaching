@@ -20,7 +20,7 @@ beforeEach(function() {
 });
 
 test('creating a child track automatically populates the course_id from parent track', function() {
-    $track = $this->base->children()->create([
+    $track = $this->base->immediateChildren()->create([
         'name'        => 'test',
         'description' => 'testing'
     ]);
@@ -49,8 +49,8 @@ it('has children', function() {
 
     $track3 = CourseTrack::factory()->for($this->course)->create();
 
-    expect($this->base->children->pluck('id'))->toContain($this->track1->id, $this->track2->id);
-    expect($this->base->children->pluck('id'))->not()->toContain($track3->id);
+    expect($this->base->immediateChildren->pluck('id'))->toContain($this->track1->id, $this->track2->id);
+    expect($this->base->immediateChildren->pluck('id'))->not()->toContain($track3->id);
 });
 
 it('belongs to a course', function(){
@@ -60,11 +60,79 @@ it('belongs to a course', function(){
 it('has a root', function() {
 
     /** @var CourseTrack $track2 */
-    $track2 = $this->track1->children()->create([
+    $track2 = $this->track1->immediateChildren()->create([
         'name' => 'track 2'
     ]);
 
     expect($track2->root()->id)->toBe($this->base->id);
+});
+
+it('has children that can be traversed', function() {
+    $track3 = CourseTrack::factory()->for($this->track1, 'parent')->create();
+    $track4 = CourseTrack::factory()->for($this->track1, 'parent')->create();
+    $track5 = CourseTrack::factory()->for($this->track2, 'parent')->create();
+    $track6 = CourseTrack::factory()->for($this->track2, 'parent')->create();
+    $track7 = CourseTrack::factory()->for($this->track2, 'parent')->create();
+
+    expect($this->base->children()->pluck('id')->toArray())->toEqualCanonicalizing([
+        $this->track1->id,
+        $this->track2->id,
+        $track3->id,
+        $track4->id,
+        $track5->id,
+        $track6->id,
+        $track7->id
+    ]);
+
+   expect($this->track1->children()->pluck('id')->toArray())->toEqualCanonicalizing([
+        $track3->id,
+        $track4->id
+    ]);
+
+    expect($this->track2->children()->pluck('id')->toArray())->toEqualCanonicalizing([
+        $track5->id,
+        $track6->id,
+        $track7->id
+    ]);
+});
+
+it('traverses nodes that are part of the tree but not part of the path', function() {
+    $track3 = CourseTrack::factory()->for($this->track1, 'parent')->create();
+    $track4 = CourseTrack::factory()->for($this->track1, 'parent')->create();
+    $track5 = CourseTrack::factory()->for($this->track2, 'parent')->create();
+    $track6 = CourseTrack::factory()->for($this->track2, 'parent')->create();
+    $track7 = CourseTrack::factory()->for($this->track2, 'parent')->create();
+
+    expect($track7->rootChildrenNotInPath()->pluck('id')->toArray())->toEqualCanonicalizing([
+        $this->track1->id,
+        $track3->id,
+        $track4->id,
+        $track5->id,
+        $track6->id,
+    ]);
+
+    expect($track4->rootChildrenNotInPath()->pluck('id')->toArray())->toEqualCanonicalizing([
+        $this->track2->id,
+        $track3->id,
+        $track5->id,
+        $track6->id,
+        $track7->id
+    ]);
+
+    expect($this->track2->rootChildrenNotInPath()->pluck('id')->toArray())->toEqualCanonicalizing([
+        $this->track1->id,
+        $track3->id,
+        $track4->id,
+        $track5->id,
+        $track6->id,
+        $track7->id
+    ]);
+
+    expect($this->track2->rootChildrenNotInPath(false)->pluck('id')->toArray())->toEqualCanonicalizing([
+        $this->track1->id,
+        $track3->id,
+        $track4->id
+    ]);
 });
 
 it('has a path', function() {
