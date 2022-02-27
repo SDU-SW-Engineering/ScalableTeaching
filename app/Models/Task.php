@@ -257,6 +257,7 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
+<<<<<<< HEAD
         if(self::usersHaveBegunTasks($user->id, $this->id)->count() > 0)
             return false;
 
@@ -264,6 +265,15 @@ class Task extends Model
             return false;
 
         if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
+=======
+        if(static::usersHaveBegunTasks($user->id, $this->id)->count() > 0)
+            return false;
+
+        if(static::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
+            return false;
+
+        if(static::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
+>>>>>>> origin/track-system
             return false;
 
         if($this->track_id == null)
@@ -283,8 +293,13 @@ class Task extends Model
         if ($siblingTasks->count() == 0)
             return false;
 
+<<<<<<< HEAD
         $startedUserTasks = self::usersHaveBegunTasks($users, $siblingTasks->pluck('id'));
         $startedGroupTasks = self::groupsHaveBegunTasks($groups, $siblingTasks->pluck('id'));
+=======
+        $startedUserTasks = static::usersHaveBegunTasks($users, $siblingTasks->pluck('id'));
+        $startedGroupTasks = static::groupsHaveBegunTasks($groups, $siblingTasks->pluck('id'));
+>>>>>>> origin/track-system
 
         return $startedUserTasks->count() > 0 || $startedGroupTasks->count() > 0;
     }
