@@ -2,6 +2,7 @@
 
 use App\Models\Course;
 use App\Models\CourseTrack;
+use App\Models\Group;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -66,6 +67,13 @@ it('has a root', function() {
     expect($track2->root()->id)->toBe($this->base->id);
 });
 
+it('has a path', function() {
+    $track3 = CourseTrack::factory()->for($this->track1, 'parent')->create();
+
+    expect($track3->path())->toBeCollection();
+    expect($track3->path()->pluck('id')->toArray())->toBe([$track3->id, $this->track1->id, $this->base->id]);
+});
+
 test('isOn should return false if on the root node', function() {
     $user = User::factory()->hasAttached($this->course)->create();
 
@@ -74,13 +82,28 @@ test('isOn should return false if on the root node', function() {
 
 test('isOn returns true if the user has started a project on the current track', function() {
     $user = User::factory()->hasAttached($this->course)->create();
-    $project = Project::factory()->for($this->task)->for($user, 'ownable')->createQuietly();
+    Project::factory()->for($this->task)->for($user, 'ownable')->createQuietly();
 
     expect($this->track1->isOn($user))->toBeTrue();
 });
 
-test('isOn returns false if the user not started a project on the current track');
+test('isOn returns false if the user has not started a project on the current track', function() {
+    $user = User::factory()->hasAttached($this->course)->create();
 
-test('isOn returns true if the user belongs to a group that has started a project on the current track');
+    expect($this->track1->isOn($user))->toBeFalse();
+});
 
-test('isOn returns false if the user belongs to a group that has not started a project on the current track');
+test('isOn returns true if the user belongs to a group that has started a project on the current track', function() {
+    $user = User::factory()->hasAttached($this->course)->create();
+    $group = Group::factory()->hasAttached($user)->for($this->course);
+    Project::factory()->for($this->task)->for($group, 'ownable')->createQuietly();
+
+    expect($this->track1->isOn($user))->toBeTrue();
+});
+
+test('isOn returns false if the user belongs to a group that has not started a project on the current track', function() {
+    $user = User::factory()->hasAttached($this->course)->create();
+    Group::factory()->hasAttached($user)->for($this->course);
+
+    expect($this->track1->isOn($user))->toBeFalse();
+});

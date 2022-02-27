@@ -51,6 +51,20 @@ class CourseTrack extends Model
         return $this->parent->root();
     }
 
+    public function path()
+    {
+        $path = [];
+        $pointer = $this;
+        do
+        {
+            $path[] = $pointer;
+            $pointer = $pointer->parent;
+        }
+        while($pointer != null);
+
+        return collect($path);
+    }
+
     public function tasks()
     {
         return $this->hasMany(Task::class, 'track_id');
@@ -73,7 +87,6 @@ class CourseTrack extends Model
             return false;
 
         $tasks = $this->tasks()->with('projects.ownable')->get();
-
 
         $userIds = $tasks->pluck('projects')
             ->flatten()
