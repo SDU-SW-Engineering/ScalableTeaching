@@ -65,7 +65,7 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $tasks = $course->tasks()->where('is_visible', true)->get()->map(fn (Task $task) => [
+        $tasks = $course->tasks()->whereNull('track_id')->where('is_visible', true)->get()->map(fn (Task $task) => [
             'details' => $task,
             'project' => $task->currentProjectForUser(auth()->user())
         ]);

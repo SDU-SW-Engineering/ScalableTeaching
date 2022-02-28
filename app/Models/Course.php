@@ -118,6 +118,11 @@ class Course extends Model
             ->withTimestamps();
     }
 
+    public function tracks() : HasMany
+    {
+        return $this->hasMany(CourseTrack::class);
+    }
+
     public function hasTeacher(User $user) : bool
     {
         return $this->teachers()->where('user_id', $user->id)->exists();

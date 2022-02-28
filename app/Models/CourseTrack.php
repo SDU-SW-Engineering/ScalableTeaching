@@ -112,7 +112,7 @@ class CourseTrack extends Model
         return $userIds->contains($user->id);
     }
 
-    public function rootChildrenNotInPath($withChildren = true)
+    public function rootChildrenNotInPath($withChildren = true): Collection
     {
         $ignore = $this->path()->pluck('id');
         $remaining = $this->root()->children()->whereNotIn('id', $ignore);
