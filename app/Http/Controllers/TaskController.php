@@ -28,7 +28,7 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task)
     {
-        abort_if(! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
+        abort_if(!$task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
         return $this->showProject($course, $task, $project);
     }
@@ -39,22 +39,21 @@ class TaskController extends Controller
             ->whereRelation('users', 'user_id', auth()->id())
             ->latest()
             ->pluck('name', 'id');
-        $project?->append('validationStatus');
-        $startDay    = $task->starts_at->format("j/n");
-        $endDay      = $task->ends_at->format("j/n");
-        $percent     = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
-        $progress    = min($percent, 100);
-        $timeLeft    = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
-        $myBuilds    = $project == null ? collect() : $project->dailyBuilds(false);
+        $startDay = $task->starts_at->format("j/n");
+        $endDay = $task->ends_at->format("j/n");
+        $percent = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
+        $progress = min($percent, 100);
+        $timeLeft = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
+        $myBuilds = $project == null ? collect() : $project->dailyBuilds(false);
         $dailyBuilds = $task->dailyBuilds(true, false);
 
         $completedSubTasks = $project?->subTasks->keyBy('sub_task_id');
         $subTasks = $task->sub_tasks->all()->map(fn(SubTask $subTask) => [
-            'name' => $subTask->getDisplayName(),
+            'name'      => $subTask->getDisplayName(),
             'completed' => $completedSubTasks?->has($subTask->getId()),
-            'points' => $subTask->getPoints(),
-            'required' => $subTask->isRequired(),
-            'when' => $completedSubTasks?->has($subTask->getId())
+            'points'    => $subTask->getPoints(),
+            'required'  => $subTask->isRequired(),
+            'when'      => $completedSubTasks?->has($subTask->getId())
                 ? $completedSubTasks->get($subTask->getId())->created_at->diffForHumans()
                 : null
         ]);
@@ -64,13 +63,13 @@ class TaskController extends Controller
             new BarDataSet("You", $myBuilds, "#7BB026")
         );
 
-        $newProjectRoute  = route('courses.tasks.createProject', [$course->id, $task->id]);
+        $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
         return view('tasks.show', [
             'course'          => $course,
             'task'            => $task->setHidden(['markdown_description']),
             'bg'              => 'bg-gray-50 dark:bg-gray-600',
             'project'         => $project,
-            'subTasks' => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks])
+            'subTasks'        => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks])
                 ? ['list' => $subTasks, 'progress' => $project?->progress()]
                 : null,
             'progress'        => [
@@ -80,6 +79,7 @@ class TaskController extends Controller
                 'timeLeft' => $timeLeft,
                 'ended'    => $task->ends_at->isPast()
             ],
+            'track'           => $task->track,
             'builds'          => $dailyBuilds,
             'myBuilds'        => $myBuilds,
             'buildGraph'      => $dailyBuildsGraph,
@@ -95,43 +95,12 @@ class TaskController extends Controller
 
     public function doCreateProject(Course $course, Task $task, GitLabManager $gitLabManager)
     {
-        abort_if($task->starts_at->isFuture(), 410, "The task hasn't started.");
-        abort_if($task->ends_at->isPast(), 410, "The task has ended.");
+        $isSolo = request('as', 'solo') == 'solo';
+        $group = $isSolo ? null : Group::findOrFail(request('as'));
 
-        $isSolo            = request('as', 'solo') == 'solo';
-        $group             = $isSolo ? null : Group::findOrFail(request('as'));
-        $users             = $isSolo ? Collection::wrap(auth()->user()) : $group->users;
-        $membersInProgress = $task->progressStatus($users);
+        abort_if(!$isSolo && !auth()->user()->can('canStartProject', $group), "You don't have access to this project.");
+        abort_if(!$task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
 
-        abort_if($membersInProgress->count() > 0, 409, "The following members have already started a project: "
-            . $membersInProgress->pluck('name')->map(function ($name)
-            {
-                return "<b>$name</b>";
-            })->join(', ') . ".<br><br>"
-            . "They will need to delete their project for the group to start the project.");
-
-        if ($group != null)
-            abort_unless(auth()->user()->can('canStartProject', $group), "You don't have access to this project.");
-
-        $registeredGitLabUsers = $users->filter(function ($user) use ($gitLabManager)
-        {
-            $users = $gitLabManager->users()->all([
-                'username' => $user->username
-            ]);
-            if (count($users) != 1)
-                return false;
-            $user->gitlab_id = $users[0]['id'];
-            return true;
-        });
-        $missingGitLabUsers    = $users->pluck('name', 'username')->diffKeys($registeredGitLabUsers->pluck('name', 'username'));
-
-
-        abort_if($missingGitLabUsers->count() > 0, 409, "The following members have not been registered at GitLab: "
-            . $missingGitLabUsers->map(function ($name)
-            {
-                return "<b>$name</b>";
-            })->join(', ') . ".<br><br>"
-            . "They should log in to GitLab first.");
 
         $owner = $isSolo ? auth()->user() : $group;
         $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
@@ -148,12 +117,12 @@ class TaskController extends Controller
      * @return Project
      * @throws Exception
      */
-    private function createProject(GitLabManager $manager, Task $task, string $name, $owner) : Project
+    private function createProject(GitLabManager $manager, Task $task, string $name, $owner): Project
     {
         $resultPager = new ResultPager($manager->connection());
-        $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [$task->gitlab_group_id]));
-        $project     = $projects->firstWhere('name', $name);
-        if ($project == null)
+        $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$task->gitlab_group_id]));
+        $project = $projects->firstWhere('name', $name);
+        if($project == null)
             $project = $this->forkProject($manager, $name, $task->source_project_id, $task->gitlab_group_id);
 
         $dbProject = $owner->projects()->updateOrCreate([
@@ -161,7 +130,6 @@ class TaskController extends Controller
             'task_id'    => $task->id,
             'repo_name'  => $project['name'],
         ]);
-
 
         return $dbProject;
     }
@@ -175,7 +143,7 @@ class TaskController extends Controller
             'shared_runners_enabled' => false
         ];
 
-        $id       = rawurlencode((string)$sourceProjectId);
+        $id = rawurlencode((string)$sourceProjectId);
         $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
         return json_decode($response->getBody()->getContents(), true);
     }
@@ -214,20 +182,17 @@ class TaskController extends Controller
             'end-time'    => ['required', 'date_format:H:i'],
         ]);
 
-        try
-        {
+        try {
             $manager->projects()->show($validated['project-id']);
-        }
-        catch (RuntimeException $runtimeException)
-        {
-            if ($runtimeException->getCode() == 404)
+        } catch(RuntimeException $runtimeException) {
+            if($runtimeException->getCode() == 404)
                 return back()
                     ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
                     ->withInput();
         }
 
         $snakeName = Str::snake($validated['name']);
-        $params    = [
+        $params = [
             'name'                      => $validated['name'],
             'path'                      => $snakeName,
             'description'               => $validated['description'],
@@ -240,11 +205,10 @@ class TaskController extends Controller
         ];
 
         $currentGroup = $manager->groups()->subgroups($course->gitlab_group_id, ['search' => $snakeName]);
-        if (count($currentGroup) == 0)
-        {
-            $response      = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
+        if(count($currentGroup) == 0) {
+            $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
             $groupResponse = json_decode($response->getBody()->getContents(), true);
-            if ($response->getStatusCode() != 201)
+            if($response->getStatusCode() != 201)
                 return back()
                     ->withErrors(['project-id' => 'Couldn\'t create the project. Refrain from using symbols or foreign characters in the name.'], 'new')
                     ->withInput();
@@ -262,12 +226,9 @@ class TaskController extends Controller
             'gitlab_group_id'   => $groupResponse['id']
         ]);
 
-        try
-        {
+        try {
             $task->reloadDescriptionFromRepo();
-        }
-        catch (\Exception $ignored)
-        {
+        } catch(\Exception $ignored) {
         }
 
         return redirect()->route('courses.manage.index', $course->id);
@@ -296,19 +257,16 @@ class TaskController extends Controller
 
     public function toggleVisibility(Course $course, Task $task)
     {
-        $task->is_visible = ! $task->is_visible;
+        $task->is_visible = !$task->is_visible;
         $task->save();
         return redirect()->back()->with('success-task', 'The visibility was updated.');
     }
 
     public function refreshReadme(Course $course, Task $task)
     {
-        try
-        {
+        try {
             $task->reloadDescriptionFromRepo();
-        }
-        catch (\Exception $exception)
-        {
+        } catch(\Exception $exception) {
         }
 
         return redirect()->back()->with('success-task', 'The readme was updated.');
@@ -322,7 +280,7 @@ class TaskController extends Controller
         ];
 
         $ciFile = $task->ciFile();
-        if ($ciFile == null)
+        if($ciFile == null)
             return redirect()->back()->withErrors('Source project doesn\'t contain the .gitlab-ci.yml file.', 'task');
         $tasks = collect((new CIReader($ciFile))->tasks())->map(fn(CITask $task) => [
             'stage'      => $task->getStage(),
@@ -335,10 +293,9 @@ class TaskController extends Controller
         ])->toArray();
 
         /** @var SubTask $subTask */
-        foreach ($task->sub_tasks->all() as $subTask)
-        {
+        foreach($task->sub_tasks->all() as $subTask) {
             $found = collect($tasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
-            if ($found === false)
+            if($found === false)
                 continue;
             $tasks[$found]['name'] = $subTask->getName();
             $tasks[$found]['alias'] = $subTask->getAlias();
@@ -353,25 +310,24 @@ class TaskController extends Controller
 
     public function updateSubtasks(Course $course, Task $task)
     {
-        $tasks          = collect(request('tasks'));
+        $tasks = collect(request('tasks'));
         $correctionType = CorrectionType::from(request('correctionType'));
 
-        $selected        = $tasks->filter(fn($task) => $task['isSelected']);
+        $selected = $tasks->filter(fn($task) => $task['isSelected']);
         $currentSubTasks = $task->sub_tasks;
         $removeIds = $task->sub_tasks->all()->map(fn(SubTask $subTask) => $subTask->getId())->diff($selected->pluck('id'));
         $currentSubTasks->remove($removeIds->toArray());
-        $selected->each(function ($task) use ($currentSubTasks)
-        {
+        $selected->each(function($task) use ($currentSubTasks) {
             $subTask = (new SubTask($task['name'], $task['alias'] == '' ? null : $task['alias']))
                 ->setPoints($task['points'])
                 ->setIsRequired($task['required']);
-            if ($task['id'] == null)
+            if($task['id'] == null)
                 $currentSubTasks->add($subTask);
             else
                 $currentSubTasks->update($task['id'], $subTask);
 
         });
-        $task->correction_type  = $correctionType;
+        $task->correction_type = $correctionType;
         $task->correction_points_required = request('requiredPoints');
         $task->correction_tasks_required = request('requiredTasks');
         $task->save();

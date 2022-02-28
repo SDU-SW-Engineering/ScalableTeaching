@@ -245,34 +245,49 @@ class Task extends Model
         return $files[0]->rawBlob;
     }
 
-    public function canStart(User $user, &$message = null): bool
+    public function canStart(Group | User $entity, &$message = null): bool
     {
         if(!now()->isBetween($this->starts_at, $this->ends_at)) {
             $message = 'The task cannot be started outside of the task time frame';
             return false;
         }
 
-        $groups = $user->groups()->where('course_id', $this->course_id)->get();
+        $groups = $entity instanceof Group ? Collection::wrap([$entity]) : $entity->groups()->where('course_id', $this->course_id)->get();
         $usersInGroups = $groups->pluck('users')
             ->flatten()
             ->unique('id');
 
-        if(self::usersHaveBegunTasks($user->id, $this->id)->count() > 0)
+        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
+            $message = "You have already started this task";
             return false;
+        }
 
-        if(self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
-            return false;
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
+            $message = 'Another user in your group have already started this task';
             return false;
+        }
+
+        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
+            $message = "Your group have already started this task";
+            return false;
+        }
 
         if($this->track_id == null)
             return true;
 
-        return !$this->otherTrackHasBeenPicked(
-            collect($usersInGroups->pluck('id'))->add($user->id)->unique(),
+        $otherTrackHaveBeenPicked = $this->otherTrackHasBeenPicked(
+            $entity instanceof Group
+                ? collect($usersInGroups->pluck('id'))->add($entity->id)->unique()
+                : collect([$entity->id]),
             $groups->pluck('id')
         );
+
+        if($otherTrackHaveBeenPicked) {
+            $message = "A conflicting track have already been started, and thus this task cannot be started.";
+            return false;
+        }
+        return true;
     }
 
     private function otherTrackHasBeenPicked($users, $groups): bool
@@ -280,7 +295,7 @@ class Task extends Model
         $siblings = $this->track->rootChildrenNotInPath(false)->pluck('id');
         $siblingTasks = Task::whereIn('track_id', $siblings)->get();
 
-        if ($siblingTasks->count() == 0)
+        if($siblingTasks->count() == 0)
             return false;
 
         $startedUserTasks = self::usersHaveBegunTasks($users, $siblingTasks->pluck('id'));
