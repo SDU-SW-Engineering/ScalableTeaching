@@ -63,15 +63,14 @@
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                                 <span class="capitalize" v-text="build.status"></span>
                                             </div>
-                                            <div class="text-lime-green-500 text-xs dark:text-lime-green-400">
-                                                {{ build.prettySubTasks.filter(t => t.completed).length }}/{{ build.prettySubTasks.length }} tasks completed
+                                            <div class="text-lime-green-500 text-xs dark:text-lime-green-400" v-if="build.sub_tasks.length > 0">
+                                                {{ build.sub_tasks.filter(t => t.completed).length }}/{{ build.sub_tasks.length }} tasks completed
                                             </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-gray-200">{{ build.user_name }}</div>
-                                    <div class="text-sm text-gray-500">{{ build.user_email }}</div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
@@ -85,7 +84,7 @@
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                         <span v-text="build.ran"></span>
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
                                         {{ build.ran_date }}
                                     </div>
                                 </td>
