@@ -129,6 +129,7 @@
                     </div>
                 </div>
                 <warning :message="warning" v-if="warning.length > 0"></warning>
+                <part-of-track v-if="task.track != null" :track="task.track" :is-started="project != null"></part-of-track>
                 <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
                              :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
                              v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null && !progress.ended"></not-started>
@@ -164,9 +165,11 @@ import Alert from "./Alert";
 import BarChart from "./BarChart";
 import Warning from "./Widgets/Warning";
 import SubTasks from "./SubTasks";
+import PartOfTrack from "./Widgets/PartOfTrack";
 
 export default {
     components: {
+        PartOfTrack,
         SubTasks,
         Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
     props: ['task', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks'],
@@ -201,6 +204,10 @@ export default {
             datasets: this.buildGraph.datasets,
             startAs: "solo"
         }
+    },
+    mounted() {
+        if (this.task.track != null)
+            this.hideMissingAssignmentWarning = true;
     }
 }
 </script>

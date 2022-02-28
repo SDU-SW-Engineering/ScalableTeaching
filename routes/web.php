@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseTrackController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GitLabOAuthController;
 use App\Http\Controllers\GradingController;
@@ -39,6 +40,10 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
                 Route::get('/', [AnalyticsController::class, 'index'])->name('index')->middleware('can:view,task');
                 Route::get('builds', [AnalyticsController::class, 'builds'])->name('builds')->middleware('can:view,task');
             });
+        });
+
+        Route::prefix('tracks')->as('tracks.')->controller(CourseTrackController::class)->group(function() {
+            Route::get('{track}', 'show')->name('show');
         });
 
         Route::group(['prefix' => 'groups', 'as' => 'groups.'], function() {

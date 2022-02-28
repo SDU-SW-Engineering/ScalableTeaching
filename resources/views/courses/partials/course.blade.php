@@ -1,4 +1,4 @@
-<div class="mb-4">
+<div>
     <div @class([
         'px-8 py-4 mx-auto bg-white shadow-md dark:bg-gray-600',
         'rounded-t-lg' => !isset($cantOpen),

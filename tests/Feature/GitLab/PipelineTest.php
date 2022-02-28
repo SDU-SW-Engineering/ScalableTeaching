@@ -260,7 +260,7 @@ it('ensures failing pipelines changes the project', function ()
     expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
 });
 
-it('ensures failing pipelines don\t overwrite the status of a finished project', function ()
+it('ensures failing pipelines don\'t overwrite the status of a finished project', function ()
 {
     $this->project->update([
         'status' => ProjectStatus::Finished
