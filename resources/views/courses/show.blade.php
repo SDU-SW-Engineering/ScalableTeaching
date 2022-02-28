@@ -18,7 +18,7 @@
                                     <path
                                         d="m4.939 17.939 2.122 2.122L12 15.121l4.939 4.94 2.122-2.122L12 10.879z"></path>
                                 </svg>
-                                <div class="flex flex-col justify-between">
+                                <div class="flex flex-col flex-grow justify-between">
                                     <div class="flex flex-row my-1 justify-between w-full">
                                         <div class="flex flex-col">
                                             <h1 class="font-light text-2xl">Track</h1>
