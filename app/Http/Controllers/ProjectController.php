@@ -26,12 +26,14 @@ class ProjectController extends Controller
 {
     public function builds(Project $project)
     {
-        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(fn (Pipeline $job) => [
-
+        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(fn(Pipeline $job) => [
+            'status'     => $job->status,
             'run_time'   => CarbonInterval::seconds($job->duration)->forHumans(),
             'queued_for' => CarbonInterval::seconds($job->queue_duration)->forHumans(),
             'ran'        => $job->updated_at->diffForHumans(),
-            'ran_date'   => $job->updated_at->toDateTimeString()
+            'ran_date'   => $job->updated_at->toDateTimeString(),
+            'sub_tasks'  => $job->prettySubTasks,
+            'user_name'  => $job->user_name
         ]);
     }
 
@@ -41,19 +43,15 @@ class ProjectController extends Controller
     public function reset(GitLabManager $gitLabManager, Project $project)
     {
         abort_unless($project->status == 'active', 400);
-        \DB::transaction(function () use ($gitLabManager, $project)
-        {
+        \DB::transaction(function() use ($gitLabManager, $project) {
             $found = true;
-            try
-            {
+            try {
                 $gitLabManager->projects()->show($project->project_id);
-            }
-            catch (RuntimeException $runtimeException)
-            {
+            } catch(RuntimeException $runtimeException) {
                 $found = $runtimeException->getCode() != 404;
             }
 
-            if ($found)
+            if($found)
                 $gitLabManager->projects()->remove($project->project_id);
 
             $project->delete();
@@ -64,11 +62,9 @@ class ProjectController extends Controller
 
     public function migrate(Project $project, Group $group)
     {
-        $activeUsers = $project->task->projectsForUsers($group->users)->reject(function (Project $currentProject) use ($project)
-        {
+        $activeUsers = $project->task->projectsForUsers($group->users)->reject(function(Project $currentProject) use ($project) {
             return $currentProject->id == $project->id;
-        })->map(function (Project $project)
-        {
+        })->map(function(Project $project) {
             return $project->owners()->pluck('name');
         })->flatten();
 
@@ -91,8 +87,7 @@ class ProjectController extends Controller
     {
         $sha = $project->final_commit_sha;
         abort_if($sha == null, 404);
-        return response()->streamDownload(function () use ($sha, $project, $gitLabManager)
-        {
+        return response()->streamDownload(function() use ($sha, $project, $gitLabManager) {
             echo $gitLabManager->repositories()->archive($project->project_id, [
                 'sha' => $sha
             ], 'zip');
@@ -104,14 +99,13 @@ class ProjectController extends Controller
      */
     public function validateProject(Course $course, Task $task, Project $project)
     {
-        if ($project->final_commit_sha == null)
+        if($project->final_commit_sha == null)
             return redirect()->back()->withErrors('Can\'t validate this project as it isn\' finished yet');
         /** @var Collection $files */
-        $files       = $project->task->protectedFiles;
+        $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
-        $errors      = [];
-        foreach ($directories as $directory => $files)
-        {
+        $errors = [];
+        foreach($directories as $directory => $files) {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
                 ->setIds(["gid://gitlab/Project/$project->project_id"])
@@ -123,26 +117,24 @@ class ProjectController extends Controller
                 ->selectNodes()
                 ->selectName()
                 ->selectSha();
-            $client   = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
-            if (count($projects) == 0)
+            if(count($projects) == 0)
                 throw new \Exception("Project with id $project->id wasn't found.");
 
             $repoFiles = collect($projects[0]->repository->tree->blobs->nodes);
-            foreach ($files as $file)
-            {
+            foreach($files as $file) {
                 $lookFor = $file->baseName;
-                $found   = $repoFiles->firstWhere('name', $lookFor);
-                if ($found == null)
-                {
+                $found = $repoFiles->firstWhere('name', $lookFor);
+                if($found == null) {
                     $errors[] = "The file \"{$file->path}\" is missing.";
                     continue;
                 }
 
                 $shaValues = collect($file->sha_values);
                 $shaIntact = $shaValues->contains($found->sha);
-                if ( ! $shaIntact)
+                if(!$shaIntact)
                     $errors[] = "The file \"{$file->path}\" has been altered! Expected one of [{$shaValues->join(', ')}] but got $found->sha.";
             }
         }
