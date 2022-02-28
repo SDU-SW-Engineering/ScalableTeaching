@@ -50,7 +50,7 @@
                         </div>
                     </div>
                 @endif
-                @if($tasks->count() == 0)
+                @if($tasks->count() == 0 && $track->parent_id != null)
                     <h1 class="dark:text-gray-400 w-full text-center mt-12 col-span-2 text-xl">No tasks available. Check
                         back
                         later.</h1>
