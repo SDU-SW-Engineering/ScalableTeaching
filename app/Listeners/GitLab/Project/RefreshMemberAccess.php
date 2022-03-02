@@ -28,7 +28,7 @@ class RefreshMemberAccess
      */
     public function handle(ProjectCreated $event)
     {
-        \App\Jobs\Project\RefreshMemberAccess::dispatch($event->project);
+        \App\Jobs\Project\RefreshMemberAccess::dispatch($event->project)->delay(5);
     }
 
 }
