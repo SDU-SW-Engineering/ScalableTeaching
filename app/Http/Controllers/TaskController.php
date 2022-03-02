@@ -79,6 +79,7 @@ class TaskController extends Controller
                 'timeLeft' => $timeLeft,
                 'ended'    => $task->ends_at->isPast()
             ],
+            'pushes'          => $project?->pushes()->pluck('created_at') ?? [],
             'track'           => $task->track,
             'builds'          => $dailyBuilds,
             'myBuilds'        => $myBuilds,

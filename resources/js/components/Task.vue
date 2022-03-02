@@ -130,13 +130,15 @@
                 </div>
                 <warning :message="warning" v-if="warning.length > 0"></warning>
                 <part-of-track v-if="task.track != null" :track="task.track" :is-started="project != null"></part-of-track>
+
                 <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
                              :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
                              v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null && !progress.ended"></not-started>
                 <started :project="project" :progress="progress"
-                         v-if="project != null && project.status === 'active'"></started>
-                <completed v-if="project != null && project.status === 'finished'" :validation="project.validationStatus"></completed>
-                <overdue v-if="(project != null && project.status === 'overdue') || (progress.ended && project == null)"></overdue>
+                         v-else-if="project != null && project.status === 'active' && !progress.ended"></started>
+                <waiting v-else-if="project != null && project.status === 'active' && progress.ended && pushes.length > 0"></waiting>
+                <completed v-else-if="project != null && project.status === 'finished'" :validation="project.validationStatus"></completed>
+                <overdue v-else-if="(project != null && (project.status === 'overdue' || pushes.length === 0)) || (progress.ended && project == null)"></overdue>
                 <div class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>
@@ -166,13 +168,14 @@ import BarChart from "./BarChart";
 import Warning from "./Widgets/Warning";
 import SubTasks from "./SubTasks";
 import PartOfTrack from "./Widgets/PartOfTrack";
+import Waiting from "./Widgets/Waiting";
 
 export default {
     components: {
         PartOfTrack,
         SubTasks,
-        Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert},
-    props: ['task', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks'],
+        Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert, Waiting},
+    props: ['task','pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks'],
     methods: {
         startAssignment: async function (startAs) {
             let createAs = startAs == null ? this.startAs : startAs;
