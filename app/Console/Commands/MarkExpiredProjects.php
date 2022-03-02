@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Enums\CorrectionType;
 use App\Models\Task;
 use Illuminate\Console\Command;
 
@@ -36,7 +37,7 @@ class MarkExpiredProjects extends Command
      */
     public function handle() : int
     {
-        foreach (Task::all() as $task)
+        foreach (Task::where('correction_type', '!=', 'none')->get() as $task)
         {
             $this->info("Marking tasks under [{$task->course->name}] $task->name");
             $overDueTime = $task->ends_at->addMinutes(5);
@@ -46,6 +47,7 @@ class MarkExpiredProjects extends Command
                 $this->info('Not expired yet.');
                 continue;
             }
+
             $count = $task->projects()->where('status', 'active')->withTrashed()->update([
                 'status' => 'overdue'
             ]);
