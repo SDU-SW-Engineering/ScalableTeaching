@@ -18,10 +18,10 @@ class WebhookController extends Controller
      */
     public function reporter()
     {
-        #abort_unless(request()->hasHeader('X-Gitlab-Token'), 400, 'No GitLab token supplied');
-        #abort_unless(request()->hasHeader('X-GitLab-Event'), 400, 'GitLab event missing');
-        #abort_unless(request()->has('project_id') || request()->has('project.id'), 400, 'Project ID missing');
-        #abort_unless(Project::isCorrectToken(request('project_id', request('project.id')), request()->header('X-Gitlab-Token')), 400, 'Token mismatch');
+        abort_unless(request()->hasHeader('X-Gitlab-Token'), 400, 'No GitLab token supplied');
+        abort_unless(request()->hasHeader('X-GitLab-Event'), 400, 'GitLab event missing');
+        abort_unless(request()->has('project_id') || request()->has('project.id'), 400, 'Project ID missing');
+        abort_unless(Project::isCorrectToken(request('project_id', request('project.id')), request()->header('X-Gitlab-Token')), 400, 'Token mismatch');
 
         return match (WebhookTypes::tryFrom(request()->header('X-GitLab-Event')))
         {
