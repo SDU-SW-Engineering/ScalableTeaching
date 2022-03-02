@@ -9,6 +9,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class RegisterWebhook implements ShouldQueue
 {
+    public int $delay = 5;
+
+    public int $tries = 3;
+
+    public $backoff = [10, 30];
+
     /**
      * Create the event listener.
      *

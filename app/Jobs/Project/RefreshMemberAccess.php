@@ -19,6 +19,12 @@ class RefreshMemberAccess implements ShouldQueue
 
     protected Project $project;
 
+    public $delay = 5;
+
+    public $tries = 5;
+
+    public $backoff = [10, 30];
+
     /**
      * Create a new job instance.
      *
