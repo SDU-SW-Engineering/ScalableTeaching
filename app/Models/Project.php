@@ -88,6 +88,11 @@ class Project extends Model
         return $this->hasMany(Pipeline::class);
     }
 
+    public function pushes()
+    {
+        return $this->hasMany(ProjectPush::class);
+    }
+
     public function task()
     {
         return $this->belongsTo(Task::class);

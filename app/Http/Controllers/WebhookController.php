@@ -26,6 +26,7 @@ class WebhookController extends Controller
         return match (WebhookTypes::tryFrom(request()->header('X-GitLab-Event')))
         {
             WebhookTypes::Pipeline => $this->pipeline(),
+            WebhookTypes::Push => $this->push(),
             default                => "ignored",
         };
     }
@@ -74,5 +75,20 @@ class WebhookController extends Controller
             'queue_duration' => request('object_attributes.queued_duration') ?? null,
             'created_at'     => Carbon::parse(request('object_attributes.created_at'))->setTimezone(config('app.timezone'))
         ]);
+    }
+
+    private function push()
+    {
+        /** @var Project $project */
+        $project = Project::firstWhere('project_id', request('project.id'));
+        abort_if($project == null,404);
+        $project->pushes()->create([
+            'before_sha' => request('before'),
+            'after_sha' => request('after'),
+            'ref' => request('ref'),
+            'username' => request('user_username')
+        ]);
+
+        return "OK";
     }
 }

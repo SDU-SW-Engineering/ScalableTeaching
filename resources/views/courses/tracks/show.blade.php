@@ -8,7 +8,7 @@
                 @if($track->immediateChildren->count() > 0)
                     <div class="flex flex-row h-44 w-full xl:col-span-2">
                         <div class="flex bg-lime-green-700 rounded-l-lg shadow-md border-r-4 border-lime-green-800">
-                            <div class="flex-1 -mr-2 flex flex-col pl-4 justify-center" style="max-width: 10rem">
+                            <div class="flex-1 -mr-2 flex flex-col pl-4 justify-center" style="max-width: 11rem">
                                 <span class="text-white text-lg font-light">Track</span>
                                 <span class="text-white text-3xl font-semibold -mt-2 ">{{ $track->name }}</span>
                             </div>
