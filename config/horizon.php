@@ -177,7 +177,7 @@ return [
     ],
 
     'environments' => [
-        'production' => [
+        'prod' => [
             'supervisor-1' => [
                 'maxProcesses' => 10,
                 'balanceMaxShift' => 1,
