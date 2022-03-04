@@ -8,6 +8,6 @@ class LineDataSet extends DataSet
 {
     public function __construct($label, Collection $data, $color, $transparent = false)
     {
-        parent::__construct($label, $data, $color, true);
+        parent::__construct($label, $data, $color, $transparent);
     }
 }
