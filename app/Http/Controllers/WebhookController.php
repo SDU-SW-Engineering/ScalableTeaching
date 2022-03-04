@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\Webhook\WebhookException;
 use App\Models\Casts\SubTask;
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\WebhookTypes;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
 class WebhookController extends Controller
 {
