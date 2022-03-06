@@ -10,7 +10,7 @@ class Graph implements Arrayable
 {
     private $dataSets = [];
     /**
-     * @var array
+     * @var Collection
      */
     private $labels;
 

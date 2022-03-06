@@ -4,6 +4,6 @@ namespace Domain\GitLab\Definitions;
 
 class ArtifactsFile
 {
-    private ?string $filename;
-    private ?int $size;
+    public function __construct(
+    ) {}
 }

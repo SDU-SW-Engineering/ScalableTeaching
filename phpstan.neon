@@ -4,5 +4,6 @@ includes:
 parameters:
     paths:
         - app
-    level: 2
+        - domain
+    level: 4
     checkMissingIterableValueType: false

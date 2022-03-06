@@ -10,7 +10,7 @@ use InvalidArgumentException;
 class SubTaskCollection implements Castable
 {
     /**
-     * @var Collection
+     * @var Collection<int, SubTask>
      */
     private Collection $tasks;
 
@@ -75,7 +75,7 @@ class SubTaskCollection implements Castable
     {
         return $this->tasks
                 ->filter(fn(SubTask $task) => $completedIds->contains($task->getId()))
-                ->reduce(fn($carry, SubTask $task) => $carry + $task->getPoints()) ?? 0;
+                ->reduce(fn($carry, SubTask $task) => $carry + ($task->getPoints() ?? 0));
     }
 
     public function add(SubTask $subTask)
@@ -85,12 +85,11 @@ class SubTaskCollection implements Castable
 
     public function update(int $id, SubTask $subTask)
     {
-        /** @var SubTask $update */
-        $update = $this->tasks->search(fn(SubTask $subTask) => $subTask->getId() == $id);
-        $this->tasks[$update]->setPoints($subTask->getPoints());
-        $this->tasks[$update]->setIsRequired($subTask->isRequired());
-        $this->tasks[$update]->setName($subTask->getName());
-        $this->tasks[$update]->setAlias($subTask->getAlias());
+        $updateIndex = $this->tasks->search(fn(SubTask $subTask) => $subTask->getId() == $id);
+        $this->tasks[$updateIndex]->setPoints($subTask->getPoints());
+        $this->tasks[$updateIndex]->setIsRequired($subTask->isRequired());
+        $this->tasks[$updateIndex]->setName($subTask->getName());
+        $this->tasks[$updateIndex]->setAlias($subTask->getAlias());
     }
 
     public function remove(array $ids)
