@@ -10,6 +10,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\VSCodeController;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
@@ -89,6 +90,11 @@ Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['aut
     Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
     Route::post('{project}/migrate/{group}', [ProjectController::class, 'migrate'])->middleware(['can:migrate,project,group', 'throttle:5']);
     Route::post('{project}/refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
+});
+
+Route::controller(VSCodeController::class)->prefix('vs-code')->group(function() {
+    Route::get('authenticate', 'authenticate')->middleware('auth');
+    Route::get('retrieve-authentication', 'retrieveAuthentication');
 });
 
 Route::get('random-name', function() {

@@ -29,7 +29,7 @@ class GitLabOAuthController extends Controller
 
         \Auth::login($dbUser);
 
-        return redirect()->route('home');
+        return redirect()->intended(route('home'));
     }
 
     public function disabled()
