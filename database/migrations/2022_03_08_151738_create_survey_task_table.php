@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('survey_id');
             $table->unsignedBigInteger('task_id');
-            $table->boolean('required')->default(false);
             $table->dateTime('deadline');
             $table->timestamps();
 

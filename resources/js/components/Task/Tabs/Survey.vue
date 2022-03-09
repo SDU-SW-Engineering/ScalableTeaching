@@ -1,6 +1,7 @@
 <template>
         <div class="bg-white p-4 rounded-md shadow-md max-vh70 overflow-x-hidden overflow-scroll dark:bg-gray-800">
-        <h1 class="text-xl font-semibold mb-4 dark:text-white">Survey</h1>
+        <h1 class="text-xl font-semibold dark:text-white">Survey</h1>
+        <h2 class="mb-4 text-gray-700 dark:text-gray-400" v-if="!submitted">Due date: {{ survey.details.pivot.deadline }}</h2>
         <div v-if="!submitted" v-for="(field, index) in survey.details.fields" class="mb-4">
             <h2 class="font-light text-lg mb-2 dark:text-white"><span class="font-medium">{{ index + 1 }}</span>. {{ field.question }}</h2>
             <h3 class="font-medium text-sm text-red-800 dark:text-red-500 mb-2 -mt-1" v-if="validated['v'+field.id] != null" v-text="validated['v'+field.id]"></h3>

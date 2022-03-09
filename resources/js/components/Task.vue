@@ -3,7 +3,7 @@
         <div class="flex gap-6 flex-wrap-reverse">
             <div class="flex-1 w-full lg:w-2/3">
                 <div class="flex gap-5 mb-3">
-                    <button @click="tab = 'survey'"
+                    <button v-if="showSurvey"  @click="tab = 'survey'"
                             :class="[tab === 'survey' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
                             class="py-2 px-3 rounded-md font-semibold flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -35,7 +35,7 @@
                             Tasks <span v-if="project != null">({{ subTasks.list.filter(t => t.completed).length }}/{{ subTasks.list.length }})</span>
                         </span>
                     </button>
-                    <button v-if="project != null" @click="tab = 'builds'"
+                    <button v-if="project != null && showBuilds" @click="tab = 'builds'"
                             :class="[tab === 'builds' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
                             class="py-2 px-3 rounded-md font-semibold flex">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24"
@@ -64,7 +64,7 @@
                         </span>
                     </button>
                 </div>
-                <div v-if="project != null && survey != null" v-show="tab === 'survey'">
+                <div v-if="showSurvey" v-show="tab === 'survey'">
                     <survey :project-id="project.id" :survey="survey"></survey>
                 </div>
                 <div v-show="tab === 'description'" class="relative">
@@ -151,8 +151,8 @@
                          v-else-if="project != null && project.status === 'active' && !progress.ended"></started>
                 <waiting v-else-if="project != null && project.status === 'active' && progress.ended && pushes.length > 0"></waiting>
                 <completed v-else-if="project != null && project.status === 'finished'" :validation="project.validationStatus"></completed>
-                <overdue v-else-if="(project != null && (project.status === 'overdue' || pushes.length === 0)) || (progress.ended && project == null)"></overdue>
-                <div class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
+                <overdue v-else-if="project != null && project.isMissed"></overdue>
+                <div v-if="showBuilds" class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>
                         <bar-chart :height="200" :data="datasets" :labels="labels"></bar-chart>
@@ -214,7 +214,7 @@ export default {
     },
     data: function () {
         return {
-            tab: 'survey',
+            tab:  'description',
             errorMessage: '',
             hideMissingAssignmentWarning: false,
             startingAssignment: false,
@@ -223,9 +223,20 @@ export default {
             startAs: "solo"
         }
     },
+    computed: {
+        showSurvey: function() {
+            return this.project != null && this.survey.details != null && this.survey.can.view;
+        },
+        showBuilds: function() {
+            return this.task.correction_type !== 'none';
+        }
+    },
     mounted() {
         if (this.task.track != null)
             this.hideMissingAssignmentWarning = true;
+        if (this.showSurvey)
+            this.tab = 'survey';
+
     }
 }
 </script>

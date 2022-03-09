@@ -48,6 +48,7 @@ class TaskController extends Controller
         $myBuilds = $project == null ? collect() : $project->dailyBuilds(false);
         $dailyBuilds = $task->dailyBuilds(true, false);
 
+        $project?->append('isMissed');
         $completedSubTasks = $project?->subTasks->keyBy('sub_task_id');
         $subTasks = $task->sub_tasks->all()->map(fn(SubTask $subTask) => [
             'name'      => $subTask->getDisplayName(),
@@ -95,7 +96,11 @@ class TaskController extends Controller
             'availableGroups' => $myGroups,
             'survey'          => [
                 'details' => $survey,
-                'submitted' =>  $survey?->responses()->user(auth()->id())->exists() ?? false
+                'submitted' => $project == null ? false : ($survey?->responses()->project($project)->user(auth()->id())->exists() ?? false),
+                'can' => [
+                    'view' => $survey == null ? false : auth()->user()->can('view', [$survey, $project]),
+                    'answer' => $survey == null ? false : auth()->user()->can('answer', [$survey, $project])
+                ]
             ],
             'breadcrumbs'     => [
                 'Courses'     => route('courses.index'),

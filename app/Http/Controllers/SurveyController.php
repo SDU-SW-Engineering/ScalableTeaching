@@ -13,7 +13,7 @@ class SurveyController extends Controller
 {
     public function projectSurvey(Request $request, Project $project, Survey $survey)
     {
-        abort_if($survey->responses()->user(auth()->id())->first(), 409, "You have already submitted this survey");
+        abort_unless(auth()->user()->can('answer', [$survey, $project]), 400, "You cannot answer this survey");
         $fields = [];
 
         $surveyFields = $survey->fields;
@@ -23,11 +23,11 @@ class SurveyController extends Controller
         ];
 
         foreach($surveyFields as $field) {
-            if ($field->type == SurveyFieldType::Environment) {
+            if($field->type == SurveyFieldType::Environment) {
                 $fields[] = [
-                    'field' => $field->id,
+                    'field'  => $field->id,
                     'values' => [
-                        'value' => strtr($field->question, $environment),
+                        'value'  => strtr($field->question, $environment),
                         'extras' => null
                     ]
                 ];
@@ -35,20 +35,18 @@ class SurveyController extends Controller
             }
 
             $validItemIds = $field->items->pluck('id');
-            $value = $request->json('values.v'.$field->id);
-            if (is_array($value))
-            {
+            $value = $request->json('values.v' . $field->id);
+            if(is_array($value)) {
                 $temp = [];
-                foreach($value as $item)
-                {
+                foreach($value as $item) {
                     abort_if(!$validItemIds->contains($item), 400, 'Invalid option supplied.');
                     $temp[] = [
-                        'value' => $item,
+                        'value'  => $item,
                         'extras' => $request->json('extras.v' . $item)
                     ];
                 }
-                $fields[]  =[
-                    'field' => $field->id,
+                $fields[] = [
+                    'field'  => $field->id,
                     'values' => $temp
                 ];
                 continue;
@@ -56,18 +54,19 @@ class SurveyController extends Controller
             abort_if(!$validItemIds->contains($value), 400, 'Invalid option supplied.');
 
             $fields[] = [
-                'field' => $field->id,
+                'field'  => $field->id,
                 'values' => [
-                    'value' => $value,
+                    'value'  => $value,
                     'extras' => $request->json('extras.v' . $value)
                 ]
             ];
         }
 
         $survey->responses()->create([
-            'ownable_id' => auth()->id(),
-            'ownable_type' => User::class,
-            'response' => $fields
+            'user_id'      => auth()->id(),
+            'ownable_id'   => $project->id,
+            'ownable_type' => Project::class,
+            'response'     => $fields
         ]);
 
         return "OK";

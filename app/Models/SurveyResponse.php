@@ -10,7 +10,7 @@ class SurveyResponse extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['ownable_id', 'ownable_type', 'response'];
+    protected $fillable = ['ownable_id', 'ownable_type', 'response', 'user_id'];
 
     protected $casts = [
         'response' => 'array'
@@ -21,13 +21,22 @@ class SurveyResponse extends Model
         return $this->morphTo();
     }
 
-    public function scopeUsers($query)
+    public function scopeProjects($query)
     {
-        return $query->where('ownable_type', User::class);
+        return $query->where('ownable_type', Project::class);
     }
 
-    public function scopeUser($query, int $userId)
+    public function scopeProject($query, Project|int $project)
     {
-        return $query->where('ownable_type', User::class)->where('ownable_id', $userId);
+        if ($project instanceof Project)
+            $project = $project->id;
+        return $query->where('ownable_type', Project::class)->where('ownable_id', $project);
+    }
+
+    public function scopeUser($query, User|int $user)
+    {
+        if ($user instanceof User)
+            $user = $user->id;
+        return $query->where('user_id', $user);
     }
 }

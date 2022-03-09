@@ -17,11 +17,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('ownable_id');
             $table->string('ownable_type');
+            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('survey_id');
             $table->json('response');
             $table->timestamps();
 
             $table->foreign('survey_id')->references('id')->on('surveys');
+            $table->foreign('user_id')->references('id')->on('users');
 
         });
     }

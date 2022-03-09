@@ -13,6 +13,7 @@ use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +31,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method Task findOrFail($id, $columns = []) {
  * @property SubTaskCollection $sub_tasks
  * @property-read CourseTrack|null $track
+ * @property-read SurveyTask|null $pivot
+ * @property-read bool $hasEnded
  */
 class Task extends Model
 {
@@ -87,7 +90,7 @@ class Task extends Model
     public function survey(): ?Survey
     {
         return $this->belongsToMany(Survey::class)->using(SurveyTask::class)
-            ->withPivot('required', 'deadline')
+            ->withPivot('deadline')
             ->withTimestamps()->first();
     }
 
@@ -119,6 +122,13 @@ class Task extends Model
     public function getTotalProjectsPerDayAttribute()
     {
         return $this->projects()->daily($this->starts_at, $this->earliestEndDate())->total();
+    }
+
+    public function hasEnded() : Attribute
+    {
+        return Attribute::make(
+            get: fn($value, $attributes) => now()->isAfter($attributes['ends_at'])
+        );
     }
 
     public function getTotalCompletedTasksPerDayAttribute()
