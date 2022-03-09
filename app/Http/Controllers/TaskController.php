@@ -22,6 +22,7 @@ use GrahamCampbell\GitLab\GitLabManager;
 use Http\Client\Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class TaskController extends Controller
@@ -58,6 +59,10 @@ class TaskController extends Controller
                 : null
         ]);
 
+        $survey = $task->survey()?->load(['fields' => function(HasMany $query) {
+            $query->where('type', '!=', 'environment');
+        }, 'fields.items']);
+
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
             new BarDataSet("Total", $dailyBuilds->subtractByKey($myBuilds), "#6B7280"),
             new BarDataSet("You", $myBuilds, "#7BB026")
@@ -88,6 +93,10 @@ class TaskController extends Controller
             'buildGraph'      => $dailyBuildsGraph,
             'newProjectRoute' => $newProjectRoute,
             'availableGroups' => $myGroups,
+            'survey'          => [
+                'details' => $survey,
+                'submitted' =>  $survey?->responses()->user(auth()->id())->exists() ?? false
+            ],
             'breadcrumbs'     => [
                 'Courses'     => route('courses.index'),
                 $course->name => route('courses.show', $course->id),

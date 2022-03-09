@@ -72,7 +72,7 @@
                         <span class="font-semibold dark:text-white">What are tracks?</span>
                     </div>
                     <div class="text-sm dark:text-gray-300 mt-2">
-                        <p>Tracks allows you to choose specific pathways you'd like to take. Each pathway have different
+                        <p>Tracks allow you to choose specific pathways you'd like to take. Each pathway have different
                             tasks, and may lead to new tracks. <span class="font-semibold">Be aware</span>, that once
                             you
                             start a project within a track, you wont be able to pick another track.</p>

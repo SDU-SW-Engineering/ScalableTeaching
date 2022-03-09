@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -81,6 +82,13 @@ class Task extends Model
     public function track(): ?BelongsTo
     {
         return $this->belongsTo(CourseTrack::class);
+    }
+
+    public function survey(): ?Survey
+    {
+        return $this->belongsToMany(Survey::class)->using(SurveyTask::class)
+            ->withPivot('required', 'deadline')
+            ->withTimestamps()->first();
     }
 
     // endregion
