@@ -9,6 +9,7 @@ use App\Http\Controllers\GradingController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\TaskController;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
@@ -84,11 +85,15 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
     });
 });
 
-Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['auth']], function() {
-    Route::get('{project}/builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
-    Route::get('{project}/reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
-    Route::post('{project}/migrate/{group}', [ProjectController::class, 'migrate'])->middleware(['can:migrate,project,group', 'throttle:5']);
-    Route::post('{project}/refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
+Route::group(['prefix' => 'projects/{project}', 'as' => 'projects.', 'middleware' => ['auth']], function() {
+    Route::get('builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
+    Route::get('reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
+    Route::post('migrate/{group}', [ProjectController::class, 'migrate'])->middleware(['can:migrate,project,group', 'throttle:5']);
+    Route::post('refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
+
+    Route::controller(SurveyController::class)->prefix('surveys/{survey}')->group(function() {
+        Route::post('/', 'projectSurvey');
+    });
 });
 
 Route::get('random-name', function() {
