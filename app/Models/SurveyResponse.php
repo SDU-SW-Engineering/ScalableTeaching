@@ -33,6 +33,18 @@ class SurveyResponse extends Model
         return $query->where('ownable_type', Project::class)->where('ownable_id', $project);
     }
 
+    public function scopeTasks($query)
+    {
+        return $query->where('ownable_type', Task::class);
+    }
+
+    public function scopeTask($query, Task|int $task)
+    {
+        if ($task instanceof Task)
+            $task = $task->id;
+        return $query->where('ownable_type', Task::class)->where('ownable_id', $task);
+    }
+
     public function scopeUser($query, User|int $user)
     {
         if ($user instanceof User)

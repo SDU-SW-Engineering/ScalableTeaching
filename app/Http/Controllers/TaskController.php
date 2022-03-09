@@ -96,7 +96,11 @@ class TaskController extends Controller
             'availableGroups' => $myGroups,
             'survey'          => [
                 'details' => $survey,
-                'submitted' => $project == null ? false : ($survey?->responses()->project($project)->user(auth()->id())->exists() ?? false),
+                'submitted' => $project != null && ($survey?->isAnswered(auth()->user(), $task) ?? false),
+                'deadline' => [
+                    'forHumans' => $survey?->pivot->deadline->diffForHumans(),
+                    'date' => $survey?->pivot->deadline->toDateTimeString()
+                ],
                 'can' => [
                     'view' => $survey == null ? false : auth()->user()->can('view', [$survey, $project]),
                     'answer' => $survey == null ? false : auth()->user()->can('answer', [$survey, $project])

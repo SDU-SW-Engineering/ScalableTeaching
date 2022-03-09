@@ -28,6 +28,9 @@ class SurveyPolicy
         if ($project == null)
             return false;
 
+        if ($survey->isAnswered($user, $project->task_id))
+            return true;
+
         if ($project->isMissed)
             return false;
 
@@ -49,6 +52,6 @@ class SurveyPolicy
         if (!$this->view($user, $survey, $project))
             return false;
 
-        return !$survey->responses()->project($project)->user($user)->exists();
+        return !$survey->responses()->task($project->task_id)->user($user)->exists();
     }
 }

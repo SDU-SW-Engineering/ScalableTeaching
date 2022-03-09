@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property-read SurveyTask|null $pivot
+ */
 class Survey extends Model
 {
     use HasFactory;
@@ -24,6 +27,11 @@ class Survey extends Model
     public function responses() : HasMany
     {
         return $this->hasMany(SurveyResponse::class);
+    }
+
+    public function isAnswered(User $user, Task|int $task) : bool
+    {
+        return $this->responses()->task($task)->user($user)->exists();
     }
 
     public function tasks(): BelongsToMany

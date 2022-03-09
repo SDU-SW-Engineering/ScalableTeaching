@@ -6,6 +6,7 @@ use App\Models\Enums\SurveyFieldType;
 use App\Models\Project;
 use App\Models\Survey;
 use App\Models\SurveyResponse;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -64,8 +65,8 @@ class SurveyController extends Controller
 
         $survey->responses()->create([
             'user_id'      => auth()->id(),
-            'ownable_id'   => $project->id,
-            'ownable_type' => Project::class,
+            'ownable_id'   => $project->task_id,
+            'ownable_type' => Task::class,
             'response'     => $fields
         ]);
 
