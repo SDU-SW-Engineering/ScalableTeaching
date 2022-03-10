@@ -25,4 +25,5 @@ Route::get('users/search', [UserController::class, 'search'])->middleware('auth'
 Route::controller(VSCodeController::class)->prefix('vs-code')->group(function() {
     Route::get('retrieve-authentication', 'retrieveAuthentication');
     Route::get('courses', 'courses')->middleware('auth:sanctum');
+    Route::get('courses/{course}/tasks', 'courseTasks')->middleware('auth:sanctum');
 });

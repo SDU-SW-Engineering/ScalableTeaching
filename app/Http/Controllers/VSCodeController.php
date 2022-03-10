@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\User;
 use Cache;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -44,5 +45,15 @@ class VSCodeController extends Controller
     public function courses()
     {
         return auth()->user()->courses()->withCount('members')->get();
+    }
+
+    public function courseTasks(Course $course)
+    {
+        $tasks = $course->tasks()->with(['projects'=> function(HasMany $query){
+     
+        }])->get();
+        $tasks->makeHidden('description');
+        $tasks->makeHidden('markdown_description');
+        return $tasks;
     }
 }
