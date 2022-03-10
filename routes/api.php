@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\VSCodeController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,3 +21,8 @@ use Illuminate\Support\Facades\Route;
 Route::any('reporter', [WebhookController::class, 'reporter'])->name('reporter');
 
 Route::get('users/search', [UserController::class, 'search'])->middleware('auth');
+
+Route::controller(VSCodeController::class)->prefix('vs-code')->group(function() {
+    Route::get('retrieve-authentication', 'retrieveAuthentication');
+    Route::get('courses', 'courses')->middleware('auth:sanctum');
+});

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\User;
 use Cache;
 use Illuminate\Http\Request;
@@ -38,5 +39,10 @@ class VSCodeController extends Controller
             'token' => $userToken->plainTextToken,
             'name' => $user->name
         ];
+    }
+
+    public function courses()
+    {
+        return auth()->user()->courses()->withCount('members')->get();
     }
 }

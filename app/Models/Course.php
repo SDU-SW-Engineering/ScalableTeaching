@@ -38,6 +38,7 @@ class Course extends Model
     use HasFactory;
 
     protected $fillable = ['max_groups_amount', 'max_groups', 'max_group_size'];
+    protected $hidden = ['enroll_token'];
 
     // region Relationships
     public function tasks() : HasMany

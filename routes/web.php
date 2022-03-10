@@ -92,10 +92,9 @@ Route::group(['prefix' => 'projects', 'as' => 'projects.', 'middleware' => ['aut
     Route::post('{project}/refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
 });
 
-Route::controller(VSCodeController::class)->prefix('vs-code')->group(function() {
-    Route::get('authenticate', 'authenticate')->middleware('auth');
-    Route::get('retrieve-authentication', 'retrieveAuthentication');
-});
+Route::get('vs-code/authenticate', [VSCodeController::class, 'authenticate'])->middleware('auth');
+
+
 
 Route::get('random-name', function() {
     return PhraseGenerator::generate();
