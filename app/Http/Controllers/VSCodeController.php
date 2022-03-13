@@ -101,4 +101,21 @@ class VSCodeController extends Controller
 
         dd($contents);*/
     }
+
+    public function file(Course $course, Task $task, Project $project)
+    {
+        $file = \request('file');
+
+        $fileOnDisk = \Storage::disk('local')->path("tasks/{$project->task_id}/projects/{$project->id}_main.zip");
+        $zip = new ZipArchive();
+        $zip->open($fileOnDisk);
+        $fp = $zip->getStream($file);
+        $contents = null;
+        while(!feof($fp)) {
+            $contents .= fread($fp, 2);
+        }
+        fclose($fp);
+
+        return $contents;
+    }
 }
