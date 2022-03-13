@@ -2,19 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\Project\DownloadProject;
 use App\Models\Course;
+use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Cache;
+use Domain\Files\Directory;
+use Domain\Files\File;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Scalar\MagicConst\Dir;
+use ZipArchive;
 
 class VSCodeController extends Controller
 {
     public function authenticate(Request $request)
     {
         $validated = Validator::make($request->all(), ['token' => 'required']);
-        if ($validated->fails())
+        if($validated->fails())
             return "Token missing";
         Cache::remember('vs-code-auth:' . $request->get('token'), 180, fn() => auth()->id());
 
@@ -24,10 +31,10 @@ class VSCodeController extends Controller
     public function retrieveAuthentication(Request $request)
     {
         $validated = Validator::make($request->all(), ['token' => 'required']);
-        if ($validated->fails())
+        if($validated->fails())
             return response("Token missing", 400);
         $token = $request->get('token');
-        if (!Cache::has("vs-code-auth:$token"))
+        if(!Cache::has("vs-code-auth:$token"))
             return response(['type' => 'error', 'message' => 'Not found'], 404);
 
         $userId = Cache::get("vs-code-auth:$token");
@@ -36,9 +43,9 @@ class VSCodeController extends Controller
         Cache::forget("vs-code-auth:$token");
 
         return [
-            'type' => 'success',
+            'type'  => 'success',
             'token' => $userToken->plainTextToken,
-            'name' => $user->name
+            'name'  => $user->name
         ];
     }
 
@@ -49,11 +56,49 @@ class VSCodeController extends Controller
 
     public function courseTasks(Course $course)
     {
-        $tasks = $course->tasks()->with(['projects'=> function(HasMany $query){
-     
+        $tasks = $course->tasks()->with(['projects' => function(HasMany $query) {
+
         }])->get();
         $tasks->makeHidden('description');
         $tasks->makeHidden('markdown_description');
         return $tasks;
+    }
+
+    public function fileTree(Course $course, Task $task, Project $project)
+    {
+        // dispatch(new DownloadProject($project, 'main'));
+        $file = \Storage::disk('local')->path("tasks/{$project->task_id}/projects/{$project->id}_main.zip");
+
+        $zip = new \ZipArchive();
+        $zip->open($file, ZipArchive::RDONLY);
+        $root = new Directory(".");
+        for($i = 0; $i < $zip->numFiles; $i++) {
+            $fileName = $zip->getNameIndex($i);
+            $path = explode('/', $fileName);
+            $currentDir = $root;
+            for($j = 0; $j < count($path); $j++)
+            {
+                $file = $path[$j];
+                if ($j +1 < count($path))
+                {
+                    $nextDirectory = $currentDir->getDirectory($file) ?? $currentDir->addDirectory(new Directory($file));
+                    $currentDir = $nextDirectory;
+                    continue;
+                }
+                if ($file == "")
+                    continue;
+               $currentDir->addFile(new File($fileName));;
+            }
+        }
+
+        return $root->nextDirectoryWithFiles();
+        /*$fp = $zip->getStream('maloe18-master-10300b59cc3241fa0e81f264011039d94ec943cd/readme.md');
+        $contents = null;
+        while(!feof($fp)) {
+            $contents .= fread($fp, 2);
+        }
+        fclose($fp);
+
+        dd($contents);*/
     }
 }
