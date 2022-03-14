@@ -92,14 +92,6 @@ class VSCodeController extends Controller
         }
 
         return $root->nextDirectoryWithFiles();
-        /*$fp = $zip->getStream('maloe18-master-10300b59cc3241fa0e81f264011039d94ec943cd/readme.md');
-        $contents = null;
-        while(!feof($fp)) {
-            $contents .= fread($fp, 2);
-        }
-        fclose($fp);
-
-        dd($contents);*/
     }
 
     public function file(Course $course, Task $task, Project $project)
@@ -116,6 +108,8 @@ class VSCodeController extends Controller
         }
         fclose($fp);
 
-        return $contents;
+        return [
+            'file' => $contents
+        ];
     }
 }

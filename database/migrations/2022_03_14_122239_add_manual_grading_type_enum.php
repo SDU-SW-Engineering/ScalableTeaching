@@ -13,14 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('project_downloads', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('project_id');
-            $table->string('location');
-            $table->dateTime('expire_at');
-            $table->string('ref');
-            $table->timestamps();
-        });
+        DB::statement("ALTER TABLE `tasks` CHANGE `correction_type` `correction_type` ENUM('none','pipeline_success','all_tasks','required_tasks','number_of_tasks','points_required', 'manual')");
     }
 
     /**
@@ -30,6 +23,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('project_downloads');
+        DB::statement("ALTER TABLE `tasks` CHANGE `correction_type` `correction_type` ENUM('none','pipeline_success','all_tasks','required_tasks','number_of_tasks','points_required')");
     }
 };
