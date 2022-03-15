@@ -103,6 +103,11 @@ class Project extends Model
         return $this->hasMany(ProjectSubTask::class);
     }
 
+    public function downloads() : HasMany
+    {
+        return $this->hasMany(ProjectDownload::class);
+    }
+
     /**
      * returns a collection of users that own the project
      * @return Collection<User>
@@ -203,5 +208,9 @@ class Project extends Model
         $completed = $this->subTasks()->count();
 
         return (int)(round($completed / $subTasks->count() * 100));
+    }
+
+    public function latestDownload()
+    {
     }
 }

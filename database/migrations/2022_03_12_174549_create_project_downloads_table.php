@@ -16,9 +16,10 @@ return new class extends Migration
         Schema::create('project_downloads', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('project_id');
-            $table->string('location');
+            $table->string('location')->nullable();
             $table->dateTime('expire_at');
             $table->string('ref');
+            $table->dateTime('downloaded_at')->nullable();
             $table->timestamps();
         });
     }

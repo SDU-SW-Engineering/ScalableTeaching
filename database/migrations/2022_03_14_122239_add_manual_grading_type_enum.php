@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Enums\CorrectionType;
+use App\Models\Task;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +25,9 @@ return new class extends Migration
      */
     public function down()
     {
+        Task::where('correction_type', 'manual')->update([
+            'correction_type' => CorrectionType::None
+        ]);
         DB::statement("ALTER TABLE `tasks` CHANGE `correction_type` `correction_type` ENUM('none','pipeline_success','all_tasks','required_tasks','number_of_tasks','points_required')");
     }
 };
