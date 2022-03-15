@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Project $project
  * @property Carbon $downloaded_at
  * @property string $ref
+ * @property-read bool $isDownloaded
+ * @property string $location
  */
 class ProjectDownload extends Model
 {
@@ -30,5 +32,10 @@ class ProjectDownload extends Model
     public function scopeQueued(Builder $query) : Builder
     {
         return $query->whereNull('downloaded_at');
+    }
+
+    public function getIsDownloadedAttribute() : bool
+    {
+        return $this->downloaded_at != null;
     }
 }

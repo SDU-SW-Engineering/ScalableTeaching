@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\Project\DownloadProject;
+use App\Models\Casts\SubTask;
+use App\Models\Casts\SubTaskCollection;
 use App\Models\Course;
 use App\Models\Project;
 use App\Models\Task;
@@ -10,10 +12,13 @@ use App\Models\User;
 use Cache;
 use Domain\Files\Directory;
 use Domain\Files\File;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PhpParser\Node\Scalar\MagicConst\Dir;
+use Storage;
 use ZipArchive;
 
 class VSCodeController extends Controller
@@ -54,22 +59,90 @@ class VSCodeController extends Controller
         return auth()->user()->courses()->withCount('members')->get();
     }
 
+    public function gradingScheme()
+    {
+        /** @var Task $task */
+        $task = Task::find(9);
+        /*$task->update([
+            'sub_tasks' => new SubTaskCollection([
+                (new SubTask("Declared 2 variables with right types", null, '1A: public class Brewery'))->setPoints(2),
+                (new SubTask("Appropriate access modifiers on the variables", null, '1A: public class Brewery'))->setPoints(2),
+                (new SubTask("Constructor with relevant parameters and variables instantiation in 2 constructor", null, '1A: public class Brewery'))->setPoints(2),
+                (new SubTask("Getter methods for the 2 variables", null, '1A: public class Brewery'))->setPoints(2),
+                (new SubTask("CompareTo() method implemented correctly", null, '1A: public class Brewery'))->setPoints(4),
+                (new SubTask("CompareTo() method not implemented correctly with getter methods", null, '1A: public class Brewery'))->setPoints(2),
+                (new SubTask("Is the code runnable / has the correct output?", null, '1A: public class Brewery'))->setPoints(3),
+
+                (new SubTask("createMaps(): Created Map instance correctly", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("createMaps(): Declare a scanner outside a try/catch or as a parameter to the try clause of 2 autoclosable", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("createMaps(): Catch clause catch relevant exceptions", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("createMaps(): Scanner is closed (either directly or with autocloseable)", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("createMaps(): Relevant parameters are extracted from each line in the file using a right 4 splitter parameter (“\\t”)", null, '1B: public class BreweriesAndBeers'))->setPoints(4),
+                (new SubTask("createMaps(): trim() method used on the name and id read from the file to remove 1 unwanted stuff from the string.", null, '1B: public class BreweriesAndBeers'))->setPoints(1),
+                (new SubTask("createMaps(): Name and id are added to the map using put().", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("createMaps(): Map instance is returned.", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("write2File(): Writer object is declared outside a try/catch or as a parameter to the try 2 clause of autoclosable.", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("write2File(): Writer object is created in a correct way using “append mode”.", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("write2File(): Writer object is created but not using “append mode”.", null, '1B: public class BreweriesAndBeers'))->setPoints(1),
+                (new SubTask("write2File(): Iterated over brewerySet correctly and used toString() method 4 Brewery.java to write in the file", null, '1B: public class BreweriesAndBeers'))->setPoints(4),
+                (new SubTask("write2File(): Catch clause to catch relevant exceptions", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("Is the code runnable / has the correct output?", null, '1B: public class BreweriesAndBeers'))->setPoints(3),
+
+                (new SubTask("Compare() method implemented correctly?", null, '1C: public class BreweryComparator'))->setPoints(5),
+                (new SubTask("Compare() method not implemented with getter methods?", null, '1C: public class BreweryComparator'))->setPoints(2),
+
+                (new SubTask("Sorted Set of type Brewery is created correctly (using TreeSet and 3 Brewerycomparator as an argument)", null, '1C: public class BreweriesAndBeers'))->setPoints(3),
+                (new SubTask("brewerySet elements are added to the sorted set correctly", null, '1C: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("Sorted Set is assigned to brewerySet", null, '1C: public class BreweriesAndBeers'))->setPoints(2),
+                (new SubTask("Is the code runnable / has the correct output?", null, '1C: public class BreweriesAndBeers'))->setPoints(3),
+
+                (new SubTask("countryList is initialized correctly in the constructor", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
+                (new SubTask("readFile(): Declare a scanner outside a try/catch or as a parameter to the try clause of 2 autoclosable", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
+                (new SubTask("readFile(): Catch clause catch relevant exceptions", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
+                (new SubTask("readFile(): Scanner is closed (either directly or with autocloseable)", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
+                (new SubTask("readFile(): Relevant parameters are extracted from each line in the file using a right 5 splitter parameter (“\\t”)", null, '2A: public class WhiskeyStatistics'))->setPoints(5),
+                (new SubTask("readFile(): Extracted parameters are used to instantiate a Country object", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
+                (new SubTask("readFile(): Country object is added to the countryList", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
+                (new SubTask("Is the code runnable / has the correct output?", null, '2A: public class WhiskeyStatistics'))->setPoints(3),
+
+                (new SubTask("Declared an instance of WhiskeyStatistics", null, '2B: public class PrimaryController'))->setPoints(2),
+                (new SubTask("Initialized the declared instance of WhiskeyStatistics in the initialize() 2 method", null, '2B: public class PrimaryController'))->setPoints(2),
+                (new SubTask("There is a check for selected Buttons", null, '2B: public class PrimaryController'))->setPoints(2),
+                (new SubTask("On clicking \"Read File\" button, the file Whiskey.txt is read and file content 4 appears in the TextArea", null, '2B: public class PrimaryController'))->setPoints(4),
+                (new SubTask("On clicking \"Clear\" button, the TextArea is cleared", null, '2B: public class PrimaryController'))->setPoints(2),
+                (new SubTask("On clicking \"Sort\" button, the sort() method in the WhiskeyStatistic class is 5 called and the sorted content is displayed in the TextArea.", null, '2B: public class PrimaryController'))->setPoints(5),
+                (new SubTask("Is the code runnable / has the correct output?", null, '2B: public class PrimaryController'))->setPoints(5),
+            ])
+        ]);*/
+        return $task->sub_tasks->all()->groupBy('group')->map(fn($tasks, $group) => ['group' => $group, 'tasks' => $tasks])->values();
+    }
+
     public function courseTasks(Course $course)
     {
-        $tasks = $course->tasks()->with(['projects' => function(HasMany $query) {
-
-        }])->get();
+        $tasks = $course->tasks()->with('projects')->get()->keyBy('id');
         $tasks->makeHidden('description');
         $tasks->makeHidden('markdown_description');
-        return $tasks;
+
+
+        $delegatedProjectIds =  auth()->user()->gradeDelegations()->pluck('projects.id');
+        $delegatedProjects = Project::with(['task' => function(BelongsTo $query) {
+            $query->select('id', 'name');
+        }])->whereIn('task_id', $tasks->pluck('id'))
+            ->whereIn('id', $delegatedProjectIds)->get();
+
+        return $delegatedProjects->groupBy('task.id')
+            ->map(fn($projects, $taskId) => ['id' => $taskId, 'name' => $tasks[$taskId]->name, 'projects' => $projects])
+            ->values();
     }
 
     public function fileTree(Course $course, Task $task, Project $project)
     {
-        // dispatch(new DownloadProject($project, 'main'));
-        $file = \Storage::disk('local')->path("tasks/{$project->task_id}/projects/{$project->id}_main.zip");
+        $download = $project->latestDownload();
+        if ($download == null || $download->isDownloaded == false)
+            return response("This task is not available yet. Try again later.", 404);
 
-        $zip = new \ZipArchive();
+        $file = Storage::disk('local')->path($download->location);
+        $zip = new ZipArchive();
         $zip->open($file, ZipArchive::RDONLY);
         $root = new Directory(".");
         for($i = 0; $i < $zip->numFiles; $i++) {
@@ -98,7 +171,11 @@ class VSCodeController extends Controller
     {
         $file = \request('file');
 
-        $fileOnDisk = \Storage::disk('local')->path("tasks/{$project->task_id}/projects/{$project->id}_main.zip");
+        $download = $project->latestDownload();
+        if ($download == null || $download->isDownloaded == false)
+            return response("This task is not available yet. Try again later.", 404);
+
+        $fileOnDisk = Storage::disk('local')->path($download->location);
         $zip = new ZipArchive();
         $zip->open($fileOnDisk);
         $fp = $zip->getStream($file);

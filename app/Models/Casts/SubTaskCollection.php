@@ -118,6 +118,7 @@ class SubTaskCollection implements Castable
                     $task->setId($v['id']);
                     $task->setIsRequired($v['required'] ?? null);
                     $task->setPoints($v['points'] ?? null);
+                    $task->setGroup($v['group'] ?? null);
                     return $task;
                 })->toArray());
             }
@@ -135,7 +136,8 @@ class SubTaskCollection implements Castable
                         'name'     => $subTask->getName(),
                         'alias'    => $subTask->getAlias(),
                         'points'   => $subTask->getPoints(),
-                        'required' => $subTask->isRequired()
+                        'required' => $subTask->isRequired(),
+                        'group'    => $subTask->getGroup()
                     ];
                 })->toJson();
             }

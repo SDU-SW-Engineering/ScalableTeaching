@@ -59,7 +59,7 @@ class DownloadProjects extends Command
                 continue;
             }
 
-            if (ProjectPush::where('project_id', $project->id)->where('ref', $latestPush->after_sha)->exists())
+            if (ProjectDownload::where('project_id', $project->id)->where('ref', $latestPush->after_sha)->exists())
             {
                 $this->info("[Project $project->repo_name] Already been downloaded. Skipping.");
                 continue;

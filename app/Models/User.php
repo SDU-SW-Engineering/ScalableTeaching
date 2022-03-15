@@ -107,4 +107,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Grade::class);
     }
+
+    public function gradeDelegations() : BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'grade_delegations')->withTimestamps();
+    }
 }

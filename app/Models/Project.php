@@ -210,7 +210,14 @@ class Project extends Model
         return (int)(round($completed / $subTasks->count() * 100));
     }
 
-    public function latestDownload()
+    public function latestDownload() : null|ProjectDownload
     {
+        /** @var ProjectPush | null $latestPush */
+        $latestPush = $this->pushes()
+            ->where('created_at', '<=', $this->task->ends_at)->latest()->first();
+        if ($latestPush == null)
+            return null;
+
+        return $latestPush->download();
     }
 }

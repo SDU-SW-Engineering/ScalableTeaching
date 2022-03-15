@@ -48,11 +48,11 @@ class ProjectSubTask extends Model
         $task              = $project->task;
         return match ($task->correction_type)
         {
-            CorrectionType::None, CorrectionType::PipelineSuccess => false,
             CorrectionType::AllTasks                              => ! $task->sub_tasks->isMissingAny($completedSubTasks),
             CorrectionType::RequiredTasks                         => ! $task->sub_tasks->isMissingAnyRequired($completedSubTasks),
             CorrectionType::NumberOfTasks                         => $completedSubTasks->count() >= $task->correction_tasks_required,
-            CorrectionType::PointsRequired                        => $task->sub_tasks->points($completedSubTasks) >= $task->correction_points_required
+            CorrectionType::PointsRequired                        => $task->sub_tasks->points($completedSubTasks) >= $task->correction_points_required,
+            default => false
         };
     }
 

@@ -27,5 +27,6 @@ Route::controller(VSCodeController::class)->prefix('vs-code')->group(function() 
     Route::get('courses', 'courses')->middleware('auth:sanctum');
     Route::get('courses/{course}/tasks', 'courseTasks')->middleware('auth:sanctum');
     Route::get('courses/{course}/tasks/{task}/projects/{project}/tree', 'fileTree')->middleware('auth:sanctum');
+    Route::get('courses/{course}/tasks/{task}/projects/{project}/grading-scheme', 'gradingScheme')->middleware('auth:sanctum');
     Route::post('courses/{course}/tasks/{task}/projects/{project}/file', 'file')->middleware('auth:sanctum');
 });
