@@ -7,11 +7,13 @@ use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Exception;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -106,6 +108,11 @@ class Project extends Model
     public function downloads() : HasMany
     {
         return $this->hasMany(ProjectDownload::class);
+    }
+
+    public function gradeDelegations() : HasMany
+    {
+        return $this->hasMany(GradeDelegation::class);
     }
 
     /**
@@ -210,14 +217,34 @@ class Project extends Model
         return (int)(round($completed / $subTasks->count() * 100));
     }
 
-    public function latestDownload() : null|ProjectDownload
+    public function latestDownload() : bool|null|ProjectDownload
     {
         /** @var ProjectPush | null $latestPush */
         $latestPush = $this->pushes()
             ->where('created_at', '<=', $this->task->ends_at)->latest()->first();
         if ($latestPush == null)
-            return null;
+            return false;
 
         return $latestPush->download();
+    }
+
+    public function setProjectStatus(string $ownableType, int $ownableId, ProjectStatus $status, $gradeMeta = []) : void
+    {
+        $this->update(['status' => $status]);
+
+        $this->owners()->each(/**
+         * @throws Exception
+         */ fn(User $user) => Grade::create([
+            'task_id'     => $this->task_id,
+            'source_type' => $ownableType,
+            'source_id'   => $ownableId,
+            'user_id'     => $user->id,
+            'value'       => match ($status) {
+                ProjectStatus::Overdue => 'failed',
+                ProjectStatus::Finished => 'passed',
+                default => throw new Exception("Passes status must be a final value.")
+            },
+            'value_raw' => $gradeMeta
+        ]));
     }
 }

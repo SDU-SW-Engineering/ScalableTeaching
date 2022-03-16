@@ -48,15 +48,16 @@ class TaskController extends Controller
         $dailyBuilds = $task->dailyBuilds(true, false);
 
         $completedSubTasks = $project?->subTasks->keyBy('sub_task_id');
-        $subTasks = $task->sub_tasks->all()->map(fn(SubTask $subTask) => [
-            'name'      => $subTask->getDisplayName(),
-            'completed' => $completedSubTasks?->has($subTask->getId()),
-            'points'    => $subTask->getPoints(),
-            'required'  => $subTask->isRequired(),
-            'when'      => $completedSubTasks?->has($subTask->getId())
-                ? $completedSubTasks->get($subTask->getId())->created_at->diffForHumans()
-                : null
-        ]);
+        $subTasks = $task->sub_tasks->all()->groupBy('group')->map(fn(\Illuminate\Support\Collection $subTasks, $group) => [
+            'group' => $group,
+            'tasks' => $subTasks->map(fn(SubTask $subTask) => [
+                'name'      => $subTask->getDisplayName(),
+                'completed' => $completedSubTasks?->has($subTask->getId()),
+                'points'    => $subTask->getPoints(),
+                'required'  => $subTask->isRequired(),
+                'group'     => $subTask->getGroup()
+            ])
+        ])->values();
 
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
             new BarDataSet("Total", $dailyBuilds->subtractByKey($myBuilds), "#6B7280"),
@@ -69,7 +70,7 @@ class TaskController extends Controller
             'task'            => $task->setHidden(['markdown_description']),
             'bg'              => 'bg-gray-50 dark:bg-gray-600',
             'project'         => $project,
-            'subTasks'        => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks])
+            'subTasks'        => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks, CorrectionType::Manual])
                 ? ['list' => $subTasks, 'progress' => $project?->progress()]
                 : null,
             'progress'        => [

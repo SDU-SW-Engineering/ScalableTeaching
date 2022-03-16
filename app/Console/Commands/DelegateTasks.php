@@ -51,10 +51,11 @@ class DelegateTasks extends Command
             return self::FAILURE;
         }
 
-        $projects = Project::whereIn('task_id', $this->argument('tasks'))->get();
+        $tasks = Task::whereIn('id', $this->argument('tasks'))->get();
+        $projects = Project::whereIn('task_id', $this->argument('tasks'))
+            ->get()->filter(fn(Project $project) => $project->latestDownload() !== false);
 
-        $taskNames = Task::whereIn('id', $this->argument('tasks'))->get()->map(fn(Task $task) => $task->name)->join(', ');
-
+        $taskNames = $tasks->map(fn(Task $task) => $task->name)->join(', ');
         $confirmed = $this->confirm("{$projects->count()} projects from task(s) [$taskNames] will be delegated between " . $users->map(fn(User $user) => $user->name)->join(', '));
 
         if ($confirmed == false)
@@ -64,7 +65,6 @@ class DelegateTasks extends Command
         }
 
         DB::table('grade_delegations')->whereIn('project_id', $projects->pluck('id'))->delete();
-
         $splits = $projects->shuffle()->split($users->count());
         foreach($users as $index => $user)
         {
@@ -74,4 +74,5 @@ class DelegateTasks extends Command
 
         return self::SUCCESS;
     }
+
 }

@@ -6,9 +6,11 @@ use App\Jobs\Project\DownloadProject;
 use App\Models\Casts\SubTask;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Course;
+use App\Models\GradeDelegation;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\ProjectStatus;
 use Cache;
 use Domain\Files\Directory;
 use Domain\Files\File;
@@ -62,9 +64,15 @@ class VSCodeController extends Controller
     public function gradingScheme()
     {
         /** @var Task $task */
-        $task = Task::find(9);
-        /*$task->update([
-            'sub_tasks' => new SubTaskCollection([
+        $task = Task::find(14);
+        //$this->createDemoSubTasks($task);
+        return $task->sub_tasks->all()->groupBy('group')->map(fn($tasks, $group) => ['group' => $group, 'tasks' => $tasks])->values();
+    }
+
+    private function createDemoSubTasks(Task $task)
+    {
+        $task->update([
+            'sub_tasks' => new SubTaskCollection(collect([
                 (new SubTask("Declared 2 variables with right types", null, '1A: public class Brewery'))->setPoints(2),
                 (new SubTask("Appropriate access modifiers on the variables", null, '1A: public class Brewery'))->setPoints(2),
                 (new SubTask("Constructor with relevant parameters and variables instantiation in 2 constructor", null, '1A: public class Brewery'))->setPoints(2),
@@ -112,9 +120,8 @@ class VSCodeController extends Controller
                 (new SubTask("On clicking \"Clear\" button, the TextArea is cleared", null, '2B: public class PrimaryController'))->setPoints(2),
                 (new SubTask("On clicking \"Sort\" button, the sort() method in the WhiskeyStatistic class is 5 called and the sorted content is displayed in the TextArea.", null, '2B: public class PrimaryController'))->setPoints(5),
                 (new SubTask("Is the code runnable / has the correct output?", null, '2B: public class PrimaryController'))->setPoints(5),
-            ])
-        ]);*/
-        return $task->sub_tasks->all()->groupBy('group')->map(fn($tasks, $group) => ['group' => $group, 'tasks' => $tasks])->values();
+            ]))
+        ]);
     }
 
     public function courseTasks(Course $course)
@@ -124,13 +131,20 @@ class VSCodeController extends Controller
         $tasks->makeHidden('markdown_description');
 
 
-        $delegatedProjectIds =  auth()->user()->gradeDelegations()->pluck('projects.id');
+        $delegatedProjectIds = auth()->user()->gradeDelegations()->pluck('grade_delegations.pseudonym', 'projects.id');
         $delegatedProjects = Project::with(['task' => function(BelongsTo $query) {
             $query->select('id', 'name');
         }])->whereIn('task_id', $tasks->pluck('id'))
-            ->whereIn('id', $delegatedProjectIds)->get();
+            ->whereIn('id', $delegatedProjectIds->flip())
+            ->get()
+            ->map(fn(Project $project) => [
+                'repo_name' => $delegatedProjectIds[$project->id],
+                'task_id'   => $project->task_id,
+                'id'        => $project->id
+            ]);
 
-        return $delegatedProjects->groupBy('task.id')
+
+        return $delegatedProjects->groupBy('task_id')
             ->map(fn($projects, $taskId) => ['id' => $taskId, 'name' => $tasks[$taskId]->name, 'projects' => $projects])
             ->values();
     }
@@ -138,7 +152,10 @@ class VSCodeController extends Controller
     public function fileTree(Course $course, Task $task, Project $project)
     {
         $download = $project->latestDownload();
-        if ($download == null || $download->isDownloaded == false)
+        if($download === false)
+            return response("Project not available, as student hasn't handed in before deadline.", 404);
+
+        if($download === null || $download->isDownloaded == false)
             return response("This task is not available yet. Try again later.", 404);
 
         $file = Storage::disk('local')->path($download->location);
@@ -149,18 +166,16 @@ class VSCodeController extends Controller
             $fileName = $zip->getNameIndex($i);
             $path = explode('/', $fileName);
             $currentDir = $root;
-            for($j = 0; $j < count($path); $j++)
-            {
+            for($j = 0; $j < count($path); $j++) {
                 $file = $path[$j];
-                if ($j +1 < count($path))
-                {
+                if($j + 1 < count($path)) {
                     $nextDirectory = $currentDir->getDirectory($file) ?? $currentDir->addDirectory(new Directory($file));
                     $currentDir = $nextDirectory;
                     continue;
                 }
-                if ($file == "")
+                if($file == "")
                     continue;
-               $currentDir->addFile(new File($fileName));;
+                $currentDir->addFile(new File($fileName));;
             }
         }
 
@@ -172,7 +187,7 @@ class VSCodeController extends Controller
         $file = \request('file');
 
         $download = $project->latestDownload();
-        if ($download == null || $download->isDownloaded == false)
+        if($download == null || $download->isDownloaded == false)
             return response("This task is not available yet. Try again later.", 404);
 
         $fileOnDisk = Storage::disk('local')->path($download->location);
@@ -188,5 +203,26 @@ class VSCodeController extends Controller
         return [
             'file' => $contents
         ];
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function submitGrading(Course $course, Task $task, Project $project)
+    {
+        $userDelegation = $project->gradeDelegations()->firstWhere('user_id', auth()->id());
+        abort_if($userDelegation == null, 403, "You can't grade this project.");
+        $project->subTasks()->delete();
+        $project->subTasks()->createMany(collect(request()->all())->map(fn($subTaskId) => [
+            'sub_task_id' => $subTaskId,
+            'source_type' => GradeDelegation::class,
+            'source_id'   => $userDelegation->id
+        ]));
+
+        $project->setProjectStatus(GradeDelegation::class, $userDelegation->id, ProjectStatus::Finished, [
+            'subtasks' => \request()->all()
+        ]);
+
+        return "OK";
     }
 }

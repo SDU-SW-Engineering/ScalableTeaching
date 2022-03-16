@@ -22,7 +22,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>
-                            Tasks <span v-if="project != null">({{ subTasks.list.filter(t => t.completed).length }}/{{ subTasks.list.length }})</span>
+                            Tasks <span v-if="project != null">({{ completedTaskCount }}/{{ taskCount }})</span>
                         </span>
                     </button>
                     <button v-if="project != null" @click="tab = 'builds'"
@@ -196,6 +196,15 @@ export default {
                 this.startingAssignment = false;
             }
         },
+    },
+    computed: {
+        taskCount: function()
+        {
+            return this.subTasks.list.reduce((total, group) => total + group.tasks.length, 0);
+        },
+        completedTaskCount: function() {
+            return this.subTasks.list.reduce((total, group) => total + group.tasks.filter(x => x.completed).length, 0);
+        }
     },
     data: function () {
         return {
