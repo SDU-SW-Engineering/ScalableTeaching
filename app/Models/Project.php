@@ -222,12 +222,14 @@ class Project extends Model
 
     public function getIsMissedAttribute() : bool
     {
-        if (!$this->task->hasEnded)
+        if(!$this->task->hasEnded)
             return false;
-        if ($this->task->correction_type == CorrectionType::None)
+        if(in_array($this->task->correction_type, [CorrectionType::None, CorrectionType::Manual]))
             return $this->pushes()->where('created_at', '<', $this->task->ends_at)->count() == 0;
 
         return $this->status == ProjectStatus::Overdue;
+    }
+
     public function latestDownload() : bool|null|ProjectDownload
     {
         /** @var ProjectPush | null $latestPush */
