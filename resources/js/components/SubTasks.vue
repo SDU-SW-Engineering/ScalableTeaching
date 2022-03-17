@@ -10,7 +10,16 @@
             <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'required_tasks'">Specific tasks required</h2>
             <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'number_of_tasks'"><b>{{ tasksRequired }}</b> tasks required</h2>
             <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'points_required'"><b>{{ pointsRequired }}</b> points required to complete</h2>
-            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual'">Your assignment has not been graded yet.</h2>
+            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && !graded">Your assignment has <strong class="text-lime-green-500 dark:text-lime-green-400">not</strong> been graded yet.</h2>
+            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && graded">Your assignment has been graded.</h2>
+            <div v-if="tasks.gradeDelegations != null && tasks.gradeDelegations.length > 0" class="text-sm mt-2 text-black dark:text-gray-200">
+                Graded by:
+                <ul>
+                    <li class="text-black dark:text-gray-300" v-for="gradeDelegation in tasks.gradeDelegations"><strong class="text-lime-green-600">{{ gradeDelegation.by }}</strong> (id: <i>{{ gradeDelegation.identifier }})</i></li>
+                </ul>
+                <span class="text-xs text-gray-500 dark:text-gray-400">Use the id when communicating with the grader.</span>
+            </div>
+
             <div class="mt-4" v-if="tasks.list.length === 1">
                 <div v-for="task in tasks.list" class="flex items-center bg-gray-300 dark:bg-gray-600 rounded-lg mb-4 w-full py-2">
                     <i class="bx bx-x text-3xl w-12 text-center text-red-400" v-if="ended && !task.completed"></i>
@@ -28,22 +37,25 @@
                 </div>
             </div>
             <div class="mt-4">
-                <div v-for="group in tasks.list" class="flex flex-col bg-white dark:bg-gray-600 rounded-lg mb-4 w-full py-2 px-4 shadow-md border">
-                    <h1 class="font-medium text-lg">{{ group.group }}</h1>
+                <div v-for="group in tasks.list" class="flex flex-col bg-white dark:bg-gray-600 rounded-lg mb-4 w-full py-2 px-4 shadow-md border dark:border-none">
+                    <h1 class="font-medium text-lg text-black dark:text-gray-200">{{ group.group }}</h1>
                     <div class="flex flex-col">
                         <ul>
-                            <li class="flex justify-between items-center hover:bg-gray-200 rounded-sm" v-for="task in group.tasks">
+                            <li class="flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm" v-for="task in group.tasks">
                                 <div class="flex items-center">
-                                    <svg v-if="ended && !task.completed" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <svg v-if="ended && !task.completed" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
-                                    <span class="text-xs mr-2">{{ task.name }}</span>
+                                    <svg v-else-if="ended && task.completed"  class="h-4 w-4 text-lime-green-600 mr-1 flex-shrink-0"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span class="text-xs mr-2 text-black dark:text-gray-300">{{ task.name }}</span>
                                 </div>
-                                <span class="text-xs py-0.5 font-medium">{{ task.points}}</span>
+                                <span class="text-xs py-0.5 text-black dark:text-gray-300 font-medium">{{ task.points}}</span>
                             </li>
                         </ul>
                     </div>
-                    <div class="flex justify-between font-bold">
+                    <div class="flex justify-between font-bold text-black dark:text-gray-200">
                         <span>Total</span>
                         <span>{{ completedPoints(group) }}/{{ maxPoints(group) }}</span>
                     </div>
@@ -55,18 +67,23 @@
 
 <script>
 export default {
-    props: ['tasks', 'correctionType', 'tasksRequired', 'pointsRequired', 'ended'],
+    props: ['tasks', 'correctionType', 'tasksRequired', 'pointsRequired', 'ended', 'projectStatus'],
     computed: {
         pointSum: function() {
-            return this.tasks.list
-                .filter(t => t.completed)
-                .map(t => t.points)
-                .reduce((sum, points) => sum + points);
+            return this.tasks.list.reduce((total, group) => {
+                return total + group.tasks.filter(t => t.completed).reduce((total, c) => total + c.points, 0);
+            }, 0)
         },
         pointMax: function() {
-            return this.tasks.list
-                .map(t => t.points)
-                .reduce((sum, points) => sum + points);
+            return this.tasks.list.reduce((total, group) => {
+                return total + group.tasks.reduce((total, c) => total + c.points, 0);
+            }, 0)
+        },
+        graded: function() {
+            if (this.correctionType === 'manual')
+                return this.projectStatus === 'finished';
+
+            return true;
         }
     },
     methods: {

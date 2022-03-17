@@ -205,7 +205,7 @@ class Project extends Model
 
     private function plainProgress() : int
     {
-        if ($this->status == ProjectStatus::Finished && $this->task->correction_type != CorrectionType::RequiredTasks)
+        if ($this->status == ProjectStatus::Finished && !in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
             return 100;
 
         $subTasks = $this->task->sub_tasks;

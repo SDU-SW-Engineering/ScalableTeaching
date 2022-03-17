@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Str;
 
@@ -23,5 +24,10 @@ class GradeDelegation extends Model
             } while(static::where('pseudonym', $pseudonym)->where('user_id', $gradeDelegation->user_id)->exists());
             $gradeDelegation->pseudonym = $pseudonym;
         });
+    }
+
+    public function user() : BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\CorrectionType;
+use App\Models\Grade;
+use App\Models\GradeDelegation;
 use App\Models\Group;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
@@ -64,6 +67,11 @@ class TaskController extends Controller
             new BarDataSet("You", $myBuilds, "#7BB026")
         );
 
+        $gradeDelegations = $project->status == ProjectStatus::Finished ? $project->gradeDelegations()->with('user')->get()->map(fn(GradeDelegation $gradeDelegation) => [
+            'by' => $gradeDelegation->user->name,
+            'identifier' => $gradeDelegation->pseudonym
+        ]) : null;
+
         $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
         return view('tasks.show', [
             'course'          => $course,
@@ -71,7 +79,7 @@ class TaskController extends Controller
             'bg'              => 'bg-gray-50 dark:bg-gray-600',
             'project'         => $project,
             'subTasks'        => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks, CorrectionType::Manual])
-                ? ['list' => $subTasks, 'progress' => $project?->progress()]
+                ? ['list' => $subTasks, 'progress' => $project?->progress(), 'gradeDelegations' => $gradeDelegations]
                 : null,
             'progress'        => [
                 'startDay' => $startDay,
