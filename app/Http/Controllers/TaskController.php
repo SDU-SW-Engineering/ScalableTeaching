@@ -25,6 +25,7 @@ use GrahamCampbell\GitLab\GitLabManager;
 use Http\Client\Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class TaskController extends Controller
@@ -50,6 +51,7 @@ class TaskController extends Controller
         $myBuilds = $project == null ? collect() : $project->dailyBuilds(false);
         $dailyBuilds = $task->dailyBuilds(true, false);
 
+        $project?->append('isMissed');
         $completedSubTasks = $project?->subTasks->keyBy('sub_task_id');
         $subTasks = $task->sub_tasks->all()->groupBy('group')->map(fn(\Illuminate\Support\Collection $subTasks, $group) => [
             'group' => $group,
@@ -61,6 +63,10 @@ class TaskController extends Controller
                 'group'     => $subTask->getGroup()
             ])
         ])->values();
+
+        $survey = $task->survey()?->load(['fields' => function(HasMany $query) {
+            $query->where('type', '!=', 'environment');
+        }, 'fields.items']);
 
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
             new BarDataSet("Total", $dailyBuilds->subtractByKey($myBuilds), "#6B7280"),
@@ -97,6 +103,18 @@ class TaskController extends Controller
             'buildGraph'      => $dailyBuildsGraph,
             'newProjectRoute' => $newProjectRoute,
             'availableGroups' => $myGroups,
+            'survey'          => [
+                'details' => $survey,
+                'submitted' => $project != null && ($survey?->isAnswered(auth()->user(), $task) ?? false),
+                'deadline' => [
+                    'forHumans' => $survey?->pivot->deadline->diffForHumans(),
+                    'date' => $survey?->pivot->deadline->toDateTimeString()
+                ],
+                'can' => [
+                    'view' => $survey == null ? false : auth()->user()->can('view', [$survey, $project]),
+                    'answer' => $survey == null ? false : auth()->user()->can('answer', [$survey, $project])
+                ]
+            ],
             'breadcrumbs'     => [
                 'Courses'     => route('courses.index'),
                 $course->name => route('courses.show', $course->id),

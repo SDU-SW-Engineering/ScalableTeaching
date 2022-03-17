@@ -9,7 +9,10 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Exception;
 use GrahamCampbell\GitLab\GitLabManager;
+use Illuminate\Contracts\Auth\Access\Authorizable;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -217,6 +220,14 @@ class Project extends Model
         return (int)(round($completed / $subTasks->count() * 100));
     }
 
+    public function getIsMissedAttribute() : bool
+    {
+        if (!$this->task->hasEnded)
+            return false;
+        if ($this->task->correction_type == CorrectionType::None)
+            return $this->pushes()->where('created_at', '<', $this->task->ends_at)->count() == 0;
+
+        return $this->status == ProjectStatus::Overdue;
     public function latestDownload() : bool|null|ProjectDownload
     {
         /** @var ProjectPush | null $latestPush */
