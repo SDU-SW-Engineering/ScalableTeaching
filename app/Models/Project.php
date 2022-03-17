@@ -228,7 +228,7 @@ class Project extends Model
         return $latestPush->download();
     }
 
-    public function setProjectStatus(string $ownableType, int $ownableId, ProjectStatus $status, $gradeMeta = []) : void
+    public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, $gradeMeta = [])
     {
         $this->update(['status' => $status]);
 
@@ -246,5 +246,13 @@ class Project extends Model
             },
             'value_raw' => $gradeMeta
         ]));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function setProjectStatus(ProjectStatus $status) : void
+    {
+        $this->setProjectStatusFor($status, Project::class, $this->id, null);
     }
 }

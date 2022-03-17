@@ -32,7 +32,8 @@ it('returns 0 when 0 of 3 subtasks are complete', function ()
 it('returns 33 when 1 of 3 subtasks are complete', function ()
 {
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
         'sub_task_id' => 1
     ]);
     $this->project->refresh();
@@ -43,11 +44,13 @@ it('returns 67 when 2 of 3 subtasks are complete', function ()
 {
     $this->project->subTasks()->createMany([
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1
         ],
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2
         ]
     ]);
@@ -59,15 +62,18 @@ it('returns 100 when 3 of 3 subtasks are complete', function ()
 {
     $this->project->subTasks()->createMany([
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1
         ],
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2
         ],
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 3
         ]
     ]);
@@ -80,11 +86,13 @@ it('returns 67 when project is finished but only 2 of 3 tasks are completed', fu
     $this->project->update(['status' => ProjectStatus::Finished]);
     $this->project->subTasks()->createMany([
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1
         ],
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2
         ],
     ]);

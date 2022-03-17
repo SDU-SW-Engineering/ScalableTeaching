@@ -219,7 +219,7 @@ class VSCodeController extends Controller
             'source_id'   => $userDelegation->id
         ]));
 
-        $project->setProjectStatus(GradeDelegation::class, $userDelegation->id, ProjectStatus::Finished, [
+        $project->setProjectStatusFor(ProjectStatus::Finished, GradeDelegation::class, $userDelegation->id, [
             'subtasks' => \request()->all()
         ]);
 

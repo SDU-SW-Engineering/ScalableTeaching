@@ -62,15 +62,18 @@ it('ensures sub tasks do not affect the project when pipeline correction is set'
 {
     $this->project->subTasks()->createMany([
         [
-            'pipeline_id' => Pipeline::factory()->failing()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->failing()->for($this->project)->create()->id,
             'sub_task_id' => 1
         ],
         [
-            'pipeline_id' => Pipeline::factory()->failing()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->failing()->for($this->project)->create()->id,
             'sub_task_id' => 2
         ],
         [
-            'pipeline_id' => Pipeline::factory()->failing()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->failing()->for($this->project)->create()->id,
             'sub_task_id' => 3
         ]
     ]);
