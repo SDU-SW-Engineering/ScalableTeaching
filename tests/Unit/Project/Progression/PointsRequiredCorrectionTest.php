@@ -32,7 +32,8 @@ it('ensures projects are active when 0 subtasks have been completed', function (
 it('ensures projects are active when 50 of 75 points have been reached', function ()
 {
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 1
     ]);
     $this->project->refresh();
@@ -43,7 +44,8 @@ it('ensures projects are active when 50 of 75 points have been reached', functio
 it('ensures projects are active when 25 of 75 points have been reached', function ()
 {
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 2
     ]);
     $this->project->refresh();
@@ -54,11 +56,13 @@ it('ensures projects are active when 25 of 75 points have been reached', functio
 it('ensures projects are finished when 75 of 75 points have been reached', function ()
 {
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 1
     ]);
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 2
     ]);
     $this->project->refresh();
@@ -69,15 +73,18 @@ it('ensures projects are finished when 75 of 75 points have been reached', funct
 it('ensures projects are finished when 115 of 75 points have been reached', function ()
 {
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 1
     ]);
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 2
     ]);
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 3
     ]);
     $this->project->refresh();
@@ -88,11 +95,13 @@ it('ensures projects are finished when 115 of 75 points have been reached', func
 it('ensures projects are active when 65 of 75 points have been reached', function ()
 {
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 2
     ]);
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 3
     ]);
     $this->project->refresh();

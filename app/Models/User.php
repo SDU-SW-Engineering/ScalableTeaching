@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -106,5 +107,10 @@ class User extends Authenticatable
     public function grades()
     {
         return $this->hasMany(Grade::class);
+    }
+
+    public function gradeDelegations() : HasMany
+    {
+        return $this->hasMany(GradeDelegation::class);
     }
 }

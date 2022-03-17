@@ -7,6 +7,7 @@ use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Exception;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Access\Gate;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -104,6 +106,16 @@ class Project extends Model
     public function subTasks() : HasMany
     {
         return $this->hasMany(ProjectSubTask::class);
+    }
+
+    public function downloads() : HasMany
+    {
+        return $this->hasMany(ProjectDownload::class);
+    }
+
+    public function gradeDelegations() : HasMany
+    {
+        return $this->hasMany(GradeDelegation::class);
     }
 
     /**
@@ -196,7 +208,7 @@ class Project extends Model
 
     private function plainProgress() : int
     {
-        if ($this->status == ProjectStatus::Finished && $this->task->correction_type != CorrectionType::RequiredTasks)
+        if ($this->status == ProjectStatus::Finished && !in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
             return 100;
 
         $subTasks = $this->task->sub_tasks;
@@ -210,11 +222,50 @@ class Project extends Model
 
     public function getIsMissedAttribute() : bool
     {
-        if (!$this->task->hasEnded)
+        if(!$this->task->hasEnded)
             return false;
-        if ($this->task->correction_type == CorrectionType::None)
+        if(in_array($this->task->correction_type, [CorrectionType::None, CorrectionType::Manual]))
             return $this->pushes()->where('created_at', '<', $this->task->ends_at)->count() == 0;
 
         return $this->status == ProjectStatus::Overdue;
+    }
+
+    public function latestDownload() : bool|null|ProjectDownload
+    {
+        /** @var ProjectPush | null $latestPush */
+        $latestPush = $this->pushes()
+            ->where('created_at', '<=', $this->task->ends_at)->latest()->first();
+        if ($latestPush == null)
+            return false;
+
+        return $latestPush->download();
+    }
+
+    public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, $gradeMeta = [])
+    {
+        $this->update(['status' => $status]);
+
+        $this->owners()->each(/**
+         * @throws Exception
+         */ fn(User $user) => Grade::create([
+            'task_id'     => $this->task_id,
+            'source_type' => $ownableType,
+            'source_id'   => $ownableId,
+            'user_id'     => $user->id,
+            'value'       => match ($status) {
+                ProjectStatus::Overdue => 'failed',
+                ProjectStatus::Finished => 'passed',
+                default => throw new Exception("Passes status must be a final value.")
+            },
+            'value_raw' => $gradeMeta
+        ]));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function setProjectStatus(ProjectStatus $status) : void
+    {
+        $this->setProjectStatusFor($status, Project::class, $this->id, null);
     }
 }

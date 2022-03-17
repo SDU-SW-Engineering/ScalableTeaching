@@ -36,9 +36,7 @@ beforeEach(function() {
 
 it('fails a user when a project is marked as overdue', function() {
 
-    $this->project->update([
-        'status' => ProjectStatus::Overdue
-    ]);
+    $this->project->setProjectStatus(ProjectStatus::Overdue);
 
     expect(Grade::firstWhere([
         'user_id'  => $this->user->id,
@@ -49,9 +47,7 @@ it('fails a user when a project is marked as overdue', function() {
 
 it('passes a user when a project is marked as finished', function() {
 
-    $this->project->update([
-        'status' => ProjectStatus::Finished
-    ]);
+    $this->project->setProjectStatus(ProjectStatus::Finished);
 
     expect(Grade::firstWhere([
         'user_id'  => $this->user->id,
@@ -61,9 +57,7 @@ it('passes a user when a project is marked as finished', function() {
 });
 
 it('passes both users when a group project is finished', function() {
-    $this->groupProject->update([
-        'status' => ProjectStatus::Finished
-    ]);
+    $this->groupProject->setProjectStatus(ProjectStatus::Finished);
 
     expect(Grade::whereIn('user_id', $this->group->users->pluck('id'))
         ->where('task_id', $this->task->id)
@@ -72,9 +66,7 @@ it('passes both users when a group project is finished', function() {
 });
 
 it('fails both users when a group project is overdue', function() {
-    $this->groupProject->update([
-        'status' => ProjectStatus::Overdue
-    ]);
+    $this->groupProject->setProjectStatus(ProjectStatus::Overdue);
 
     expect(Grade::whereIn('user_id', $this->group->users->pluck('id'))
         ->where('task_id', $this->task->id)

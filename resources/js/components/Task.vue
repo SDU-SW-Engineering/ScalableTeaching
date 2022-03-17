@@ -32,7 +32,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>
-                            Tasks <span v-if="project != null">({{ subTasks.list.filter(t => t.completed).length }}/{{ subTasks.list.length }})</span>
+                            Tasks <span v-if="project != null">({{ completedTaskCount }}/{{ taskCount }})</span>
                         </span>
                     </button>
                     <button v-if="project != null && showBuilds" @click="tab = 'builds'"
@@ -126,7 +126,7 @@
                     </div>
                 </div>
                 <div v-if="subTasks != null" v-show="tab === 'tasks'">
-                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended" :tasks="subTasks" :tasks-required="task.correction_tasks_required" :points-required="task.correction_points_required" :correction-type="task.correction_type"></sub-tasks>
+                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended" :tasks="subTasks" :tasks-required="task.correction_tasks_required" :points-required="task.correction_points_required" :correction-type="task.correction_type" :project-status="project.status"></sub-tasks>
                 </div>
                 <div v-show="tab === 'builds'">
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
@@ -211,6 +211,15 @@ export default {
                 this.startingAssignment = false;
             }
         },
+    },
+    computed: {
+        taskCount: function()
+        {
+            return this.subTasks.list.reduce((total, group) => total + group.tasks.length, 0);
+        },
+        completedTaskCount: function() {
+            return this.subTasks.list.reduce((total, group) => total + group.tasks.filter(x => x.completed).length, 0);
+        }
     },
     data: function () {
         return {

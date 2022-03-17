@@ -4,15 +4,16 @@ namespace App\Models\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Contracts\Support\Arrayable;
 use InvalidArgumentException;
 
-class SubTask
+class SubTask implements Arrayable
 {
     private ?int $id = null;
     private ?bool $isRequired = null;
     private ?int $points = null;
 
-    public function __construct(private string $name, private ?string $alias = null)
+    public function __construct(private string $name, private ?string $alias = null, public ?string $group = null)
     {
     }
 
@@ -27,22 +28,22 @@ class SubTask
     /**
      * @return string|null
      */
-    public function getAlias() : ?string
+    public function getAlias(): ?string
     {
         return $this->alias;
     }
 
-    public function hasId() : bool
+    public function hasId(): bool
     {
         return $this->id != null;
     }
 
-    public function getId() : ?int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDisplayName() : string
+    public function getDisplayName(): string
     {
         return $this->alias ?? $this->name;
     }
@@ -50,7 +51,7 @@ class SubTask
     /**
      * @return bool|null
      */
-    public function isRequired() : ?bool
+    public function isRequired(): ?bool
     {
         return $this->isRequired;
     }
@@ -58,7 +59,7 @@ class SubTask
     /**
      * @param bool|null $isRequired
      */
-    public function setIsRequired(?bool $isRequired) : SubTask
+    public function setIsRequired(?bool $isRequired): SubTask
     {
         $this->isRequired = $isRequired;
         return $this;
@@ -67,7 +68,7 @@ class SubTask
     /**
      * @return int|null
      */
-    public function getPoints() : ?int
+    public function getPoints(): ?int
     {
         return $this->points;
     }
@@ -76,7 +77,7 @@ class SubTask
     /**
      * @param int|null $points
      */
-    public function setPoints(?int $points) : SubTask
+    public function setPoints(?int $points): SubTask
     {
         $this->points = $points;
 
@@ -92,7 +93,7 @@ class SubTask
     /**
      * @param string $name
      */
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -100,8 +101,35 @@ class SubTask
     /**
      * @param string|null $alias
      */
-    public function setAlias(?string $alias) : void
+    public function setAlias(?string $alias): void
     {
         $this->alias = $alias;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getGroup(): ?string
+    {
+        return $this->group;
+    }
+
+    /**
+     * @param string|null $group
+     */
+    public function setGroup(?string $group): void
+    {
+        $this->group = $group;
+    }
+
+    public function toArray()
+    {
+        return [
+            'id'     => $this->id,
+            'points' => $this->points,
+            'group'  => $this->group,
+            'name'   => $this->name,
+            'alias'  => $this->alias
+        ];
     }
 }

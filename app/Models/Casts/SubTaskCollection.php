@@ -14,9 +14,11 @@ class SubTaskCollection implements Castable
      */
     private Collection $tasks;
 
-    public function __construct(array $tasks = [])
+    public function __construct(Collection $tasks = null)
     {
-        $this->tasks = collect($tasks);
+        if ($tasks == null)
+            $tasks = collect();
+        $this->tasks = $tasks;
     }
 
     public function isEmpty() : bool
@@ -118,8 +120,9 @@ class SubTaskCollection implements Castable
                     $task->setId($v['id']);
                     $task->setIsRequired($v['required'] ?? null);
                     $task->setPoints($v['points'] ?? null);
+                    $task->setGroup($v['group'] ?? null);
                     return $task;
-                })->toArray());
+                }));
             }
 
             public function set($model, string $key, $value, array $attributes) : bool|string
@@ -135,7 +138,8 @@ class SubTaskCollection implements Castable
                         'name'     => $subTask->getName(),
                         'alias'    => $subTask->getAlias(),
                         'points'   => $subTask->getPoints(),
-                        'required' => $subTask->isRequired()
+                        'required' => $subTask->isRequired(),
+                        'group'    => $subTask->getGroup()
                     ];
                 })->toJson();
             }

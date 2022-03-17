@@ -15,4 +15,9 @@ class ProjectPush extends Model
     {
         return $this->belongsTo(Project::class);
     }
+
+    public function download(): ProjectDownload|null
+    {
+        return ProjectDownload::where('project_id', $this->project_id)->where('ref', $this->after_sha)->first();
+    }
 }

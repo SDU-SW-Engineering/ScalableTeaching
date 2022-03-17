@@ -27,7 +27,8 @@ class Grade extends Model
 
     protected $casts = [
         'value'    => Enums\GradeEnum::class,
-        'selected' => 'boolean'
+        'selected' => 'boolean',
+        'value_raw' => 'array'
     ];
 
     // region relationships

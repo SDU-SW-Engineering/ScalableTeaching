@@ -33,7 +33,8 @@ it('ensures projects to be active when no subtasks are complete', function ()
 it('ensures projects to be active when 1 of 3 subtasks are complete', function ()
 {
     $this->project->subTasks()->create([
-        'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+        'source_type' => Pipeline::class,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 1
     ]);
     $this->project->refresh();
@@ -44,11 +45,13 @@ it('ensures projects to be finished when 2 of 3 subtasks are  complete', functio
 {
     $this->project->subTasks()->createMany([
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1
         ],
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2
         ]
     ]);
@@ -61,15 +64,18 @@ it('ensures projects to be finished when 3 of 3 subtasks are complete', function
 {
     $this->project->subTasks()->createMany([
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1
         ],
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2
         ],
         [
-            'pipeline_id' => Pipeline::factory()->for($this->project)->create()->id,
+            'source_type' => Pipeline::class,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 3
         ]
     ]);
