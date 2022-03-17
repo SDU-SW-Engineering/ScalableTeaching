@@ -75,5 +75,7 @@ class DownloadProjects extends Command
             dispatch(new DownloadProject($projectDownload))->delay(now()->addMinutes($queuedCount / 3));
             $this->info("[Project $project->repo_name] Queued download.");
         }
+
+        return self::SUCCESS;
     }
 }

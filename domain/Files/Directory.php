@@ -7,8 +7,6 @@ class Directory implements \JsonSerializable
 {
     private string $path;
 
-    private string $fullPath;
-
     /**
      * @return string
      */
