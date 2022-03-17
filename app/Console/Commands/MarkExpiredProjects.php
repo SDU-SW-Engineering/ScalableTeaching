@@ -37,7 +37,7 @@ class MarkExpiredProjects extends Command
      */
     public function handle() : int
     {
-        foreach (Task::where('correction_type', '!=', 'none')->get() as $task)
+        foreach (Task::whereNotIn('correction_type', [CorrectionType::Manual, CorrectionType::None])->get() as $task)
         {
             $this->info("Marking tasks under [{$task->course->name}] $task->name");
             $overDueTime = $task->ends_at->addMinutes(5);

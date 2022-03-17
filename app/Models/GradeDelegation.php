@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 class GradeDelegation extends Model
 {
     protected $table = 'grade_delegations';
+    protected $fillable = ['project_id'];
 
     public static function booted()
     {

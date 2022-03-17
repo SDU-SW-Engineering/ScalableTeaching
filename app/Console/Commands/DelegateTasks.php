@@ -68,7 +68,9 @@ class DelegateTasks extends Command
         $splits = $projects->shuffle()->split($users->count());
         foreach($users as $index => $user)
         {
-            $user->gradeDelegations()->attach($splits[$index]);
+            $user->gradeDelegations()->createMany($splits[$index]->map(fn(Project $project) => [
+                'project_id' => $project->id
+            ]));
         }
         $this->info("Tasks delegated!");
 

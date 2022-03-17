@@ -69,7 +69,7 @@ class VSCodeController extends Controller
         return $task->sub_tasks->all()->groupBy('group')->map(fn($tasks, $group) => ['group' => $group, 'tasks' => $tasks])->values();
     }
 
-    private function createDemoSubTasks(Task $task)
+    public function createDemoSubTasks(Task $task)
     {
         $task->update([
             'sub_tasks' => new SubTaskCollection(collect([
@@ -130,8 +130,7 @@ class VSCodeController extends Controller
         $tasks->makeHidden('description');
         $tasks->makeHidden('markdown_description');
 
-
-        $delegatedProjectIds = auth()->user()->gradeDelegations()->pluck('grade_delegations.pseudonym', 'projects.id');
+        $delegatedProjectIds = auth()->user()->gradeDelegations()->pluck('pseudonym', 'project_id');
         $delegatedProjects = Project::with(['task' => function(BelongsTo $query) {
             $query->select('id', 'name');
         }])->whereIn('task_id', $tasks->pluck('id'))
@@ -140,6 +139,7 @@ class VSCodeController extends Controller
             ->map(fn(Project $project) => [
                 'repo_name' => $delegatedProjectIds[$project->id],
                 'task_id'   => $project->task_id,
+                'status'    => $project->status,
                 'id'        => $project->id
             ]);
 
