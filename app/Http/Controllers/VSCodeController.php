@@ -73,53 +73,52 @@ class VSCodeController extends Controller
     {
         $task->update([
             'sub_tasks' => new SubTaskCollection(collect([
-                (new SubTask("Declared 2 variables with right types", null, '1A: public class Brewery'))->setPoints(2),
-                (new SubTask("Appropriate access modifiers on the variables", null, '1A: public class Brewery'))->setPoints(2),
-                (new SubTask("Constructor with relevant parameters and variables instantiation in 2 constructor", null, '1A: public class Brewery'))->setPoints(2),
+                // 15 points
+                (new SubTask("Declared 2 variables with right types", null, '1A: public class Brewery'))->setPoints(3),
+                (new SubTask("Appropriate access modifiers on the variables", null, '1A: public class Brewery'))->setPoints(3),
+                (new SubTask("Constructor with relevant parameters and variables instantiation in 2 constructor", null, '1A: public class Brewery'))->setPoints(3),
                 (new SubTask("Getter methods for the 2 variables", null, '1A: public class Brewery'))->setPoints(2),
                 (new SubTask("CompareTo() method implemented correctly", null, '1A: public class Brewery'))->setPoints(4),
-                (new SubTask("CompareTo() method not implemented correctly with getter methods", null, '1A: public class Brewery'))->setPoints(2),
-                (new SubTask("Is the code runnable / has the correct output?", null, '1A: public class Brewery'))->setPoints(3),
 
+                // 30
                 (new SubTask("createMaps(): Created Map instance correctly", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("createMaps(): Declare a scanner outside a try/catch or as a parameter to the try clause of 2 autoclosable", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("createMaps(): Catch clause catch relevant exceptions", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("createMaps(): Scanner is closed (either directly or with autocloseable)", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("createMaps(): Relevant parameters are extracted from each line in the file using a right 4 splitter parameter (“\\t”)", null, '1B: public class BreweriesAndBeers'))->setPoints(4),
-                (new SubTask("createMaps(): trim() method used on the name and id read from the file to remove 1 unwanted stuff from the string.", null, '1B: public class BreweriesAndBeers'))->setPoints(1),
-                (new SubTask("createMaps(): Name and id are added to the map using put().", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("createMaps(): Map instance is returned.", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("write2File(): Writer object is declared outside a try/catch or as a parameter to the try 2 clause of autoclosable.", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("write2File(): Writer object is created in a correct way using “append mode”.", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("write2File(): Writer object is created but not using “append mode”.", null, '1B: public class BreweriesAndBeers'))->setPoints(1),
-                (new SubTask("write2File(): Iterated over brewerySet correctly and used toString() method 4 Brewery.java to write in the file", null, '1B: public class BreweriesAndBeers'))->setPoints(4),
-                (new SubTask("write2File(): Catch clause to catch relevant exceptions", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("Is the code runnable / has the correct output?", null, '1B: public class BreweriesAndBeers'))->setPoints(3),
+                (new SubTask("createMaps(): Declare a scanner outside a try/catch or as a parameter to the try clause of 2 autoclosable", null, '1B: public class BreweriesAndBeers'))->setPoints(3), // 5
+                (new SubTask("createMaps(): Catch clause catch relevant exceptions", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 7
+                (new SubTask("createMaps(): Scanner is closed (either directly or with autocloseable)", null, '1B: public class BreweriesAndBeers'))->setPoints(4), // 11
 
+                (new SubTask("createMaps(): Relevant parameters are extracted from each line in the file using a right 4 splitter parameter (“\\t”)", null, '1B: public class BreweriesAndBeers'))->setPoints(4), // 15
+                (new SubTask("createMaps(): trim() method used on the name and id read from the file to remove 1 unwanted stuff from the string.", null, '1B: public class BreweriesAndBeers'))->setPoints(1), // 16
+                (new SubTask("createMaps(): Name and id are added to the map using put().", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 18
+                (new SubTask("createMaps(): Map instance is returned.", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 20
+                (new SubTask("write2File(): Writer object is declared outside a try/catch or as a parameter to the try 2 clause of autoclosable.", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 22
+                (new SubTask("write2File(): Writer object is created in a correct way using “append mode”.", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 24
+                (new SubTask("write2File(): Iterated over brewerySet correctly and used toString() method 4 Brewery.java to write in the file", null, '1B: public class BreweriesAndBeers'))->setPoints(4), // 28
+                (new SubTask("write2File(): Catch clause to catch relevant exceptions", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 30
+
+                // 5
                 (new SubTask("Compare() method implemented correctly?", null, '1C: public class BreweryComparator'))->setPoints(5),
-                (new SubTask("Compare() method not implemented with getter methods?", null, '1C: public class BreweryComparator'))->setPoints(2),
 
-                (new SubTask("Sorted Set of type Brewery is created correctly (using TreeSet and 3 Brewerycomparator as an argument)", null, '1C: public class BreweriesAndBeers'))->setPoints(3),
-                (new SubTask("brewerySet elements are added to the sorted set correctly", null, '1C: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("Sorted Set is assigned to brewerySet", null, '1C: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("Is the code runnable / has the correct output?", null, '1C: public class BreweriesAndBeers'))->setPoints(3),
+                // 10
+                (new SubTask("Sorted Set of type Brewery is created correctly (using TreeSet and 3 Brewerycomparator as an argument)", null, '1C: public class BreweriesAndBeers'))->setPoints(4),
+                (new SubTask("brewerySet elements are added to the sorted set correctly", null, '1C: public class BreweriesAndBeers'))->setPoints(3),
+                (new SubTask("Sorted Set is assigned to brewerySet", null, '1C: public class BreweriesAndBeers'))->setPoints(3),
 
+                // 20
                 (new SubTask("countryList is initialized correctly in the constructor", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
-                (new SubTask("readFile(): Declare a scanner outside a try/catch or as a parameter to the try clause of 2 autoclosable", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
+                (new SubTask("readFile(): Declare a scanner outside a try/catch or as a parameter to the try clause of 2 autoclosable", null, '2A: public class WhiskeyStatistics'))->setPoints(3),
                 (new SubTask("readFile(): Catch clause catch relevant exceptions", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
-                (new SubTask("readFile(): Scanner is closed (either directly or with autocloseable)", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
+                (new SubTask("readFile(): Scanner is closed (either directly or with autocloseable)", null, '2A: public class WhiskeyStatistics'))->setPoints(4),
                 (new SubTask("readFile(): Relevant parameters are extracted from each line in the file using a right 5 splitter parameter (“\\t”)", null, '2A: public class WhiskeyStatistics'))->setPoints(5),
                 (new SubTask("readFile(): Extracted parameters are used to instantiate a Country object", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
                 (new SubTask("readFile(): Country object is added to the countryList", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
-                (new SubTask("Is the code runnable / has the correct output?", null, '2A: public class WhiskeyStatistics'))->setPoints(3),
 
+                // 20
                 (new SubTask("Declared an instance of WhiskeyStatistics", null, '2B: public class PrimaryController'))->setPoints(2),
-                (new SubTask("Initialized the declared instance of WhiskeyStatistics in the initialize() 2 method", null, '2B: public class PrimaryController'))->setPoints(2),
-                (new SubTask("There is a check for selected Buttons", null, '2B: public class PrimaryController'))->setPoints(2),
-                (new SubTask("On clicking \"Read File\" button, the file Whiskey.txt is read and file content 4 appears in the TextArea", null, '2B: public class PrimaryController'))->setPoints(4),
-                (new SubTask("On clicking \"Clear\" button, the TextArea is cleared", null, '2B: public class PrimaryController'))->setPoints(2),
-                (new SubTask("On clicking \"Sort\" button, the sort() method in the WhiskeyStatistic class is 5 called and the sorted content is displayed in the TextArea.", null, '2B: public class PrimaryController'))->setPoints(5),
-                (new SubTask("Is the code runnable / has the correct output?", null, '2B: public class PrimaryController'))->setPoints(5),
+                (new SubTask("Initialized the declared instance of WhiskeyStatistics in the initialize() 2 method", null, '2B: public class PrimaryController'))->setPoints(3),
+                (new SubTask("There is a check for selected Buttons", null, '2B: public class PrimaryController'))->setPoints(3),
+                (new SubTask("On clicking \"Read File\" button, the file Whiskey.txt is read and file content 4 appears in the TextArea", null, '2B: public class PrimaryController'))->setPoints(3),
+                (new SubTask("On clicking \"Clear\" button, the TextArea is cleared", null, '2B: public class PrimaryController'))->setPoints(3),
+                (new SubTask("On clicking \"Sort\" button, the sort() method in the WhiskeyStatistic class is 5 called and the sorted content is displayed in the TextArea.", null, '2B: public class PrimaryController'))->setPoints(6),
             ]))
         ]);
     }

@@ -4,18 +4,23 @@
             <simple-doughnut-chart :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%" :data="[tasks.progress, 100 - tasks.progress]"></simple-doughnut-chart>
         </div>
         <div class="flex-1">
-            <h1 class="text-black dark:text-white text-2xl font-bold" v-if="correctionType === 'points_required'">{{ pointSum }}/{{ pointMax }} points</h1>
-            <h1 class="text-black dark:text-white text-2xl font-bold" v-if="correctionType === 'all_tasks' || correctionType === 'required_tasks' || correctionType === 'number_of_tasks' || correctionType === 'manual'">Tasks</h1>
-            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'all_tasks'">All tasks required</h2>
-            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'required_tasks'">Specific tasks required</h2>
-            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'number_of_tasks'"><b>{{ tasksRequired }}</b> tasks required</h2>
-            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'points_required'"><b>{{ pointsRequired }}</b> points required to complete</h2>
-            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && !graded">Your assignment has <strong class="text-lime-green-500 dark:text-lime-green-400">not</strong> been graded yet.</h2>
-            <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && graded">Your assignment has been graded.</h2>
+            <div class="flex">
+                <div class="flex-1">
+                    <h1 class="text-black dark:text-white text-2xl font-medium" v-if="correctionType === 'points_required'">{{ pointSum }}/{{ pointMax }} points</h1>
+                    <h1 class="text-black dark:text-white text-2xl font-medium" v-if="correctionType === 'all_tasks' || correctionType === 'required_tasks' || correctionType === 'number_of_tasks' || correctionType === 'manual'">Tasks</h1>
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'all_tasks'">All tasks required</h2>
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'required_tasks'">Specific tasks required</h2>
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'number_of_tasks'"><b>{{ tasksRequired }}</b> tasks required</h2>
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'points_required'"><b>{{ pointsRequired }}</b> points required to complete</h2>
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && !graded">Your assignment has <strong class="text-lime-green-500 dark:text-lime-green-400">not</strong> been graded yet.</h2>
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && graded">Your assignment has been graded.</h2>
+                </div>
+                <h3 v-if="graded" class="font-thin dark:text-lime-green-400 text-2xl flex-shrink-0">{{ pointSum }} / {{ pointMax }} points</h3>
+            </div>
             <div v-if="tasks.gradeDelegations != null && tasks.gradeDelegations.length > 0" class="text-sm mt-2 text-black dark:text-gray-200">
                 Graded by:
                 <ul>
-                    <li class="text-black dark:text-gray-300" v-for="gradeDelegation in tasks.gradeDelegations"><strong class="text-lime-green-600">{{ gradeDelegation.by }}</strong> (id: <i>{{ gradeDelegation.identifier }})</i></li>
+                    <li class="text-black dark:text-gray-300" v-for="gradeDelegation in tasks.gradeDelegations"><strong class="text-lime-green-600 dark:text-lime-green-400">{{ gradeDelegation.by }}</strong> (id: <i>{{ gradeDelegation.identifier }})</i></li>
                 </ul>
                 <span class="text-xs text-gray-500 dark:text-gray-400">Use the id when communicating with the grader.</span>
             </div>
