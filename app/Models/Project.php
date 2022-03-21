@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\ProjectCreated;
+use App\Exceptions\Project\DownloadException;
 use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use Carbon\Carbon;
@@ -59,6 +60,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Query\Builder|Project withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Project withoutTrashed()
  * @property Grade $grade
+ * @property-read bool $isMissed
  */
 class Project extends Model
 {
@@ -120,37 +122,13 @@ class Project extends Model
 
     /**
      * returns a collection of users that own the project
-     * @return Collection<User>
+     * @return Collection<int, User>
      */
     public function owners(): Collection
     {
         if ($this->ownable_type == User::class)
             return Collection::wrap($this->ownable);
         return $this->ownable->users()->get();
-    }
-
-    public function unprotectBranches()
-    {
-        $gitLabManager = app(GitLabManager::class);
-        $tries         = 3;
-        do
-        {
-            sleep(1);  // todo: this should be switched out with a queue worker that is delayed
-            $project = $gitLabManager->projects()->show($this->project_id);
-            if ($project['import_error'] != null)
-                break;
-            if ($project['import_status'] == 'finished')
-            {
-                $protectedBranches = collect($gitLabManager->projects()->protectedBranches($this->project_id));
-                $protectedBranches->each(function ($protectedBranch) use ($gitLabManager)
-                {
-                    $gitLabManager->repositories()->unprotectBranch($this->project_id, $protectedBranch['name']);
-                });
-                break;
-            }
-            $tries--;
-        }
-        while ($tries != 0);
     }
 
     public function getDurationAttribute()
@@ -230,13 +208,15 @@ class Project extends Model
         return $this->status == ProjectStatus::Overdue;
     }
 
-    public function latestDownload() : bool|null|ProjectDownload
+    /**
+     */
+    public function latestDownload() : null|ProjectDownload
     {
         /** @var ProjectPush | null $latestPush */
         $latestPush = $this->pushes()
             ->where('created_at', '<=', $this->task->ends_at)->latest()->first();
         if ($latestPush == null)
-            return false;
+            return null;
 
         return $latestPush->download();
     }

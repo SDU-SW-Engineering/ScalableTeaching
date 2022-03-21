@@ -151,11 +151,9 @@ class VSCodeController extends Controller
     public function fileTree(Course $course, Task $task, Project $project)
     {
         $download = $project->latestDownload();
-        if($download === false)
-            return response("Project not available, as student hasn't handed in before deadline.", 404);
 
         if($download === null || $download->isDownloaded == false)
-            return response("This task is not available yet. Try again later.", 404);
+            return response("This task is not available yet. If this persists the student has most likely not handed in within the deadline.", 404);
 
         $file = Storage::disk('local')->path($download->location);
         $zip = new ZipArchive();

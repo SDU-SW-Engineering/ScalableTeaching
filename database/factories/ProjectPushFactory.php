@@ -17,7 +17,10 @@ class ProjectPushFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'before_sha' => $this->faker->sha256,
+            'after_sha' => $this->faker->sha256,
+            'ref' => 'origin/master',
+            'username' => $this->faker->userName
         ];
     }
 }
