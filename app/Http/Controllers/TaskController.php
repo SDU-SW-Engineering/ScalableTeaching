@@ -73,7 +73,7 @@ class TaskController extends Controller
             new BarDataSet("You", $myBuilds, "#7BB026")
         );
 
-        $gradeDelegations = $project->status == ProjectStatus::Finished ? $project->gradeDelegations()->with('user')->get()->map(fn(GradeDelegation $gradeDelegation) => [
+        $gradeDelegations = $project?->status == ProjectStatus::Finished ? $project->gradeDelegations()->with('user')->get()->map(fn(GradeDelegation $gradeDelegation) => [
             'by' => $gradeDelegation->user->name,
             'identifier' => $gradeDelegation->pseudonym
         ]) : null;

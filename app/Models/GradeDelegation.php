@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Badcow\PhraseGenerator\PhraseGenerator;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -10,8 +11,10 @@ use Illuminate\Support\Str;
 
 class GradeDelegation extends Model
 {
+    use HasFactory;
+
     protected $table = 'grade_delegations';
-    protected $fillable = ['project_id'];
+    protected $fillable = ['project_id', 'pseudonym'];
 
     public static function booted()
     {
@@ -29,5 +32,10 @@ class GradeDelegation extends Model
     public function user() : BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function project() : BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 }
