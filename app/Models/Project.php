@@ -122,12 +122,12 @@ class Project extends Model
 
     /**
      * returns a collection of users that own the project
-     * @return Collection<User>
+     * @return Collection<int, User>
      */
     public function owners(): Collection
     {
         if ($this->ownable_type == User::class)
-            return new Collection([$this->ownable]);
+            return Collection::wrap($this->ownable);
         return $this->ownable->users()->get();
     }
 
