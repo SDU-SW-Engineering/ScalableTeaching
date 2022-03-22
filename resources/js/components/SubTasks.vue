@@ -1,6 +1,6 @@
 <template>
     <div class="bg-white p-4 rounded-md shadow-md dark:bg-gray-800 flex">
-        <div class="w-24 mr-4">
+        <div class="w-24 mr-4" v-if="projectStatus !== null">
             <simple-doughnut-chart :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%" :data="[tasks.progress, 100 - tasks.progress]"></simple-doughnut-chart>
         </div>
         <div class="flex-1">
@@ -12,8 +12,10 @@
                     <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'required_tasks'">Specific tasks required</h2>
                     <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'number_of_tasks'"><b>{{ tasksRequired }}</b> tasks required</h2>
                     <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'points_required'"><b>{{ pointsRequired }}</b> points required to complete</h2>
-                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && !graded">Your assignment has <strong class="text-lime-green-500 dark:text-lime-green-400">not</strong> been graded yet.</h2>
-                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && graded">Your assignment has been graded.</h2>
+                    <div v-if="projectStatus != null">
+                        <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && !graded">Your assignment has <strong class="text-lime-green-500 dark:text-lime-green-400">not</strong> been graded yet.</h2>
+                        <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'manual' && graded">Your assignment has been graded.</h2>
+                    </div>
                 </div>
                 <h3 v-if="graded" class="font-thin dark:text-lime-green-400 text-2xl flex-shrink-0">{{ pointSum }} / {{ pointMax }} points</h3>
             </div>
@@ -48,10 +50,10 @@
                         <ul>
                             <li class="flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm" v-for="task in group.tasks">
                                 <div class="flex items-center">
-                                    <svg v-if="ended && !task.completed" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <svg v-if="ended && !task.completed && projectStatus != null" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
-                                    <svg v-else-if="ended && task.completed"  class="h-4 w-4 text-lime-green-600 mr-1 flex-shrink-0"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <svg v-else-if="ended && task.completed && projectStatus != null"  class="h-4 w-4 text-lime-green-600 mr-1 flex-shrink-0"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                     </svg>
                                     <span class="text-xs mr-2 text-black dark:text-gray-300">{{ task.name }}</span>
@@ -60,7 +62,7 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="flex justify-between font-bold text-black dark:text-gray-200">
+                    <div class="flex justify-between font-bold text-black dark:text-gray-200" v-if="projectStatus != null">
                         <span>Total</span>
                         <span>{{ completedPoints(group) }}/{{ maxPoints(group) }}</span>
                     </div>
@@ -85,6 +87,8 @@ export default {
             }, 0)
         },
         graded: function() {
+            if (this.projectStatus === null)
+                return false;
             if (this.correctionType === 'manual')
                 return this.projectStatus === 'finished';
 
