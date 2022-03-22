@@ -126,7 +126,7 @@
                     </div>
                 </div>
                 <div v-if="subTasks != null" v-show="tab === 'tasks'">
-                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended" :tasks="subTasks" :tasks-required="task.correction_tasks_required" :points-required="task.correction_points_required" :correction-type="task.correction_type" :project-status="project.status"></sub-tasks>
+                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended" :tasks="subTasks" :tasks-required="task.correction_tasks_required" :points-required="task.correction_points_required" :correction-type="task.correction_type" :project-status="project == null ? null : project.status"></sub-tasks>
                 </div>
                 <div v-show="tab === 'builds'">
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
