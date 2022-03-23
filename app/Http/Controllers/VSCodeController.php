@@ -61,12 +61,17 @@ class VSCodeController extends Controller
         return auth()->user()->courses()->withCount('members')->get();
     }
 
-    public function gradingScheme()
+    public function gradingScheme(Course $course, Task $task, Project $project)
     {
-        /** @var Task $task */
-        $task = Task::find(14);
-        //$this->createDemoSubTasks($task);
-        return $task->sub_tasks->all()->groupBy('group')->map(fn($tasks, $group) => ['group' => $group, 'tasks' => $tasks])->values();
+        $completed = $project->subTasks()->pluck('sub_task_id');
+
+        return $task->sub_tasks->all()->groupBy('group')->map(fn($tasks, $group) => [
+            'group' => $group,
+            'tasks' => $tasks->map(fn(SubTask $task) => [
+                ...$task->toArray(),
+                'isCompleted' => $completed->contains($task->getId())
+            ])
+        ])->values();
     }
 
     public function createDemoSubTasks(Task $task)
