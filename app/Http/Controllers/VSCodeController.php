@@ -12,14 +12,12 @@ use App\Models\Task;
 use App\Models\User;
 use App\ProjectStatus;
 use Cache;
+use Carbon\Carbon;
 use Domain\Files\Directory;
 use Domain\Files\File;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use PhpParser\Node\Scalar\MagicConst\Dir;
 use Storage;
 use ZipArchive;
 
@@ -215,15 +213,17 @@ class VSCodeController extends Controller
         $userDelegation = $project->gradeDelegations()->firstWhere('user_id', auth()->id());
         abort_if($userDelegation == null, 403, "You can't grade this project.");
         $project->subTasks()->delete();
-        $project->subTasks()->createMany(collect(request()->all())->map(fn($subTaskId) => [
+        $project->subTasks()->createMany(collect(request('tasks'))->map(fn($subTaskId) => [
             'sub_task_id' => $subTaskId,
             'source_type' => GradeDelegation::class,
             'source_id'   => $userDelegation->id
         ]));
 
+        $startedAt = Carbon::parse(\request('startedAt'))->setTimezone(config('app.timezone'));
+        $endedAt =  Carbon::parse(\request('endedAt'))->setTimezone(config('app.timezone'));
         $project->setProjectStatusFor(ProjectStatus::Finished, GradeDelegation::class, $userDelegation->id, [
-            'subtasks' => \request()->all()
-        ]);
+            'subtasks' => \request('tasks')
+        ], $startedAt, $endedAt);
 
         return "OK";
     }

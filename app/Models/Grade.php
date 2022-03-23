@@ -23,13 +23,15 @@ class Grade extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id'];
+    protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id', 'started_at', 'ended_at'];
 
     protected $casts = [
         'value'    => Enums\GradeEnum::class,
         'selected' => 'boolean',
         'value_raw' => 'array'
     ];
+
+    public $dates = ['started_at', 'ended_at'];
 
     // region relationships
     public function user()
