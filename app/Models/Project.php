@@ -221,7 +221,7 @@ class Project extends Model
         return $latestPush->download();
     }
 
-    public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, $gradeMeta = [])
+    public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, $gradeMeta = [], Carbon $startedAt = null, Carbon $endedAt = null)
     {
         $this->update(['status' => $status]);
 
@@ -237,7 +237,9 @@ class Project extends Model
                 ProjectStatus::Finished => 'passed',
                 default => throw new Exception("Passes status must be a final value.")
             },
-            'value_raw' => $gradeMeta
+            'value_raw' => $gradeMeta,
+            'started_at' => $startedAt,
+            'ended_at' => $endedAt
         ]));
     }
 
