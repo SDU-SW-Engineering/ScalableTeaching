@@ -219,8 +219,8 @@ class VSCodeController extends Controller
             'source_id'   => $userDelegation->id
         ]));
 
-        $startedAt = Carbon::parse(\request('startedAt'))->setTimezone(config('app.timezone'));
-        $endedAt =  Carbon::parse(\request('endedAt'))->setTimezone(config('app.timezone'));
+        $startedAt = \request('startedAt') == null ? null : Carbon::parse(\request('startedAt'))->setTimezone(config('app.timezone'));
+        $endedAt = \request('endedAt') == null ? null : Carbon::parse(\request('endedAt'))->setTimezone(config('app.timezone'));
         $project->setProjectStatusFor(ProjectStatus::Finished, GradeDelegation::class, $userDelegation->id, [
             'subtasks' => \request('tasks')
         ], $startedAt, $endedAt);
