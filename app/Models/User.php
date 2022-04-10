@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -37,6 +38,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_admin
  * @property bool $is_sys_admin
  * @property array|null $ad_groups
+ * @property string|null $avatar
  */
 class User extends Authenticatable
 {
@@ -79,7 +81,7 @@ class User extends Authenticatable
 
     protected $dates = ['last_login'];
 
-    public function groups() : BelongsToMany
+    public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)
             ->using(GroupUser::class)
@@ -109,8 +111,31 @@ class User extends Authenticatable
         return $this->hasMany(Grade::class);
     }
 
-    public function gradeDelegations() : HasMany
+    public function gradeDelegations(): HasMany
     {
         return $this->hasMany(GradeDelegation::class);
+    }
+
+    public function avatarHtml(): Attribute
+    {
+        return new Attribute(get: function() {
+            if($this->avatar == null)
+                return '<svg xmlns="http://www.w3.org/2000/svg" class="dark:text-lime-green-400 h-10 w-10" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>';
+            return "<img style='border-width: 2px' class='rounded-full border h-10 w-10 border-lime-green-400' src=\"$this->avatar\" alt=\"avatar\"/>";
+        });
+    }
+
+    public function shortName(): Attribute
+    {
+        return new Attribute(get: function() {
+            $names = collect(explode(' ', $this->name));
+            $firstName = $names->first();
+
+            return $firstName . ' ' . mb_convert_encoding(substr($names->last(), 0, 1), 'UTF-8', 'UTF-8') . '.';
+        });
     }
 }

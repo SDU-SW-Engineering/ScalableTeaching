@@ -19,7 +19,7 @@ class ProjectSubTask extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sub_task_id', 'source_id', 'source_type'];
+    protected $fillable = ['sub_task_id', 'source_id', 'source_type', 'points'];
 
     protected static function booted()
     {

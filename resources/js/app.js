@@ -20,6 +20,7 @@ Vue.component("user-select", require('./components/UserSelect').default)
 Vue.component("date-range", require('./components/Elements/DateRangePicker').default)
 Vue.component("grading", require('./components/Grading').default)
 Vue.component("subtasks", require('./components/Tasks/Subtasks').default)
+Vue.component("subtask-list", require("./components/Tasks/SubTaskList").default)
 
 const settings = {
     't-rich-select': {

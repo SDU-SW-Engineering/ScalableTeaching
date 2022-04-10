@@ -110,6 +110,11 @@ class Project extends Model
         return $this->hasMany(ProjectSubTask::class);
     }
 
+    public function subTaskComments() : HasMany
+    {
+        return $this->hasMany(ProjectSubTaskComment::class);
+    }
+
     public function downloads() : HasMany
     {
         return $this->hasMany(ProjectDownload::class);
@@ -118,6 +123,11 @@ class Project extends Model
     public function gradeDelegations() : HasMany
     {
         return $this->hasMany(GradeDelegation::class);
+    }
+
+    public function scopeEnded(Builder $query)
+    {
+        return $query->whereIn('status', [ProjectStatus::Overdue, ProjectStatus::Finished]);
     }
 
     /**

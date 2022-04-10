@@ -61,13 +61,15 @@ class VSCodeController extends Controller
 
     public function gradingScheme(Course $course, Task $task, Project $project)
     {
-        $completed = $project->subTasks()->pluck('sub_task_id');
+        $pointsGiven = $project->subTasks()->pluck('points', 'sub_task_id');
+        $comments = $project->subTaskComments->groupBy('sub_task_id');
 
         return $task->sub_tasks->all()->groupBy('group')->map(fn($tasks, $group) => [
             'group' => $group,
             'tasks' => $tasks->map(fn(SubTask $task) => [
                 ...$task->toArray(),
-                'isCompleted' => $completed->contains($task->getId())
+                'pointsAcquired'   => $pointsGiven->has($task->getId()) ? $pointsGiven->get($task->getId()) : null,
+                'comments' => $comments->has($task->getId()) ? $comments->get($task->getId()) : []
             ])
         ])->values();
     }
@@ -210,14 +212,47 @@ class VSCodeController extends Controller
      */
     public function submitGrading(Course $course, Task $task, Project $project)
     {
+
+        $validator = Validator::make(\request()->all(), [
+            'tasks'             => ['array', 'required'],
+            'tasks.*.subtaskId' => ['required', 'distinct'],
+            'tasks.*.points'    => ['nullable', 'numeric'],
+            'tasks.*.comment'   => ['nullable', 'string'],
+            'startedAt'         => ['required', 'date'],
+            'endedAt'           => ['required', 'date', 'after:startedAt']
+        ]);
+
+        if($validator->fails())
+            return response("The submitted data is invalid, are you using the latest version of the extension?", 400);
+
         $userDelegation = $project->gradeDelegations()->firstWhere('user_id', auth()->id());
         abort_if($userDelegation == null, 403, "You can't grade this project.");
         $project->subTasks()->delete();
-        $project->subTasks()->createMany(collect(request('tasks'))->map(fn($subTaskId) => [
-            'sub_task_id' => $subTaskId,
-            'source_type' => GradeDelegation::class,
-            'source_id'   => $userDelegation->id
-        ]));
+        $project->subTaskComments()->delete();
+
+        $subTasks = [];
+        $subTaskComments = [];
+
+        collect(request('tasks'))->each(function($task) use ($userDelegation, &$subTasks, &$subTaskComments) {
+            $subTasks[] = [
+                'sub_task_id' => $task['subtaskId'],
+                'points'      => $task['points'] ?? 0,
+                'source_type' => GradeDelegation::class,
+                'source_id'   => $userDelegation->id,
+            ];
+
+            if($task['comment'] == null)
+                return;
+
+            $subTaskComments[] = [
+                'sub_task_id' => $task['subtaskId'],
+                'author_id'   => auth()->id(),
+                'text'        => $task['comment']
+            ];
+        });
+
+        $project->subTasks()->createMany($subTasks);
+        $project->subTaskComments()->createMany($subTaskComments);
 
         $startedAt = \request('startedAt') == null ? null : Carbon::parse(\request('startedAt'))->setTimezone(config('app.timezone'));
         $endedAt = \request('endedAt') == null ? null : Carbon::parse(\request('endedAt'))->setTimezone(config('app.timezone'));

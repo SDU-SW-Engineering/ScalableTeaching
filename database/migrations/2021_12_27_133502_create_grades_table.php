@@ -21,7 +21,7 @@ class CreateGradesTable extends Migration
             $table->unsignedBigInteger('source_id');
             $table->boolean('selected');
             $table->enum('value', ['passed', 'failed']);
-            $table->string('value_raw')->nullable();
+            $table->json('value_raw')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');

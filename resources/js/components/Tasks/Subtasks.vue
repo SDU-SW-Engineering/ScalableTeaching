@@ -11,6 +11,7 @@
                         <option value="number_of_tasks">Number of tasks</option>
                         <option value="required_tasks">Required tasks</option>
                         <option value="points_required">Points</option>
+                        <option value="manual">Manual</option>
                     </select>
                 </div>
                 <p class="text-sm text-gray-400 dark:text-gray-300" v-if="correctionType === 'pipeline_success'">Task will be considered completed when one pipeline succeeds.</p>
@@ -25,6 +26,7 @@
                 <p class="text-sm text-gray-400 dark:text-gray-300" v-if="correctionType === 'points_required'">Students need to reach
                     <b>{{ pointThreshold }}</b> points for the
                     task to be considered complete.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-300" v-if="correctionType === 'manual'">Tasks are manually graded by designated people attached to the course.</p>
                 <div class="mt-4" v-if="correctionType === 'number_of_tasks'">
                     <label
                         class="text-sm font-medium text-gray-900 block dark:text-gray-300 mb-2">Number of tasks</label>
@@ -46,7 +48,7 @@
             </div>
         </div>
         <div class="">
-            <p class="text-sm dark:text-white">We found the following tasks within the <code>.gitlab-ci.yml</code>
+            <p class="text-sm dark:text-white" v-if="correctionType !== 'manual'">We found the following tasks within the <code>.gitlab-ci.yml</code>
                 file. Please pick relevant tasks</p>
             <div class="flex mt-4 flex-col w-full shadow-md"
                  v-for="(task, index) in subTasks">

@@ -9,6 +9,7 @@ use App\Models\Grade;
 use App\Models\GradeDelegation;
 use App\Models\Group;
 use App\Models\Project;
+use App\Models\ProjectSubTaskComment;
 use App\Models\Task;
 use App\Models\User;
 use App\ProjectStatus;
@@ -53,14 +54,20 @@ class TaskController extends Controller
 
         $project?->append('isMissed');
         $completedSubTasks = $project?->subTasks->keyBy('sub_task_id');
+        $completedSubTaskComments = $project?->subTaskComments()->with('author')->get()->map(fn(ProjectSubTaskComment $comment) => [
+            'sub_task_id' => $comment->sub_task_id,
+            'author'      => $comment->author->name,
+            'text'        => $comment->text
+        ])->groupBy('sub_task_id');
         $subTasks = $task->sub_tasks->all()->groupBy('group')->map(fn(\Illuminate\Support\Collection $subTasks, $group) => [
             'group' => $group,
             'tasks' => $subTasks->map(fn(SubTask $subTask) => [
-                'name'      => $subTask->getDisplayName(),
-                'completed' => $completedSubTasks?->has($subTask->getId()),
-                'points'    => $subTask->getPoints(),
-                'required'  => $subTask->isRequired(),
-                'group'     => $subTask->getGroup()
+                'name'           => $subTask->getDisplayName(),
+                'pointsAcquired' => $completedSubTasks?->has($subTask->getId()) ? $completedSubTasks->get($subTask->getId())->points : null,
+                'comments'        => $completedSubTaskComments?->has($subTask->getId()) ? $completedSubTaskComments->get($subTask->getId()) : [],
+                'points'         => $subTask->getPoints(),
+                'required'       => $subTask->isRequired() ?? true,
+                'group'          => $subTask->getGroup()
             ])
         ])->values();
 
@@ -74,7 +81,7 @@ class TaskController extends Controller
         );
 
         $gradeDelegations = $project?->status == ProjectStatus::Finished ? $project->gradeDelegations()->with('user')->get()->map(fn(GradeDelegation $gradeDelegation) => [
-            'by' => $gradeDelegation->user->name,
+            'by'         => $gradeDelegation->user->name,
             'identifier' => $gradeDelegation->pseudonym
         ]) : null;
 
@@ -85,7 +92,7 @@ class TaskController extends Controller
             'bg'              => 'bg-gray-50 dark:bg-gray-600',
             'project'         => $project,
             'subTasks'        => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks, CorrectionType::Manual])
-                ? ['list' => $subTasks, 'progress' => $project?->progress(), 'gradeDelegations' => $gradeDelegations]
+                ? ['list' => $subTasks, 'gradeDelegations' => $gradeDelegations]
                 : null,
             'progress'        => [
                 'startDay' => $startDay,
@@ -104,14 +111,14 @@ class TaskController extends Controller
             'newProjectRoute' => $newProjectRoute,
             'availableGroups' => $myGroups,
             'survey'          => [
-                'details' => $survey,
+                'details'   => $survey,
                 'submitted' => $project != null && ($survey?->isAnswered(auth()->user(), $task) ?? false),
-                'deadline' => [
+                'deadline'  => [
                     'forHumans' => $survey?->pivot->deadline->diffForHumans(),
-                    'date' => $survey?->pivot->deadline->toDateTimeString()
+                    'date'      => $survey?->pivot->deadline->toDateTimeString()
                 ],
-                'can' => [
-                    'view' => $survey == null ? false : auth()->user()->can('view', [$survey, $project]),
+                'can'       => [
+                    'view'   => $survey == null ? false : auth()->user()->can('view', [$survey, $project]),
                     'answer' => $survey == null ? false : auth()->user()->can('answer', [$survey, $project])
                 ]
             ],

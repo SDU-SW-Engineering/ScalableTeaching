@@ -9,7 +9,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "ext-gd": "*",
         "ext-json": "*",
+        "ext-zip": "*",
         "badcow/phrase-generator": "dev-master",
         "barryvdh/laravel-ide-helper": "^2.10",
         "erusev/parsedown": "^1.7",
@@ -17,6 +19,7 @@
         "gmostafa/php-graphql-oqm": "^1.4",
         "graham-campbell/gitlab": "5.6",
         "guzzlehttp/guzzle": "^7.2",
+        "intervention/image": "^2.7",
         "laravel/framework": "^9.0",
         "laravel/horizon": "^5.8",
         "laravel/sanctum": "^2.11",
@@ -25,8 +28,7 @@
         "laravel/ui": "^3.3",
         "league/csv": "^9.7",
         "sentry/sentry-laravel": "^2.9",
-        "symfony/yaml": "^6.0",
-      "ext-zip": "*"
+        "symfony/yaml": "^6.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

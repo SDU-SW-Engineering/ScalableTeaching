@@ -38,9 +38,14 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
             Route::get('{task}/projects/{project}/validate', [ProjectController::class, 'validateProject'])->name('validateProject')->middleware('can:validate,project');
             Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
 
-            Route::group(['prefix' => '{task}/analytics', 'as' => 'analytics.'], function() {
-                Route::get('/', [AnalyticsController::class, 'index'])->name('index')->middleware('can:view,task');
-                Route::get('builds', [AnalyticsController::class, 'builds'])->name('builds')->middleware('can:view,task');
+            Route::prefix('{task}/analytics')->as('analytics.')->controller(AnalyticsController::class)->group(function() {
+                Route::get('/', 'index')->name('index')->middleware('can:view,task');
+                Route::get('builds', 'builds')->name('builds')->middleware('can:view,task');
+                Route::get('students', 'students')->name('students')->middleware('can:view,task');
+                Route::get('pushes', 'pushes')->name('pushes')->middleware('can:view,task');
+                Route::get('task-completion', 'taskCompletion')->name('taskCompletion')->middleware('can:view,task');
+                Route::get('sub-tasks', 'subTasks')->name('subTasks')->middleware('can:view,task');
+                Route::post('sub-tasks', 'saveSubTasks')->name('subTasks')->middleware('can:view,task');
             });
         });
 

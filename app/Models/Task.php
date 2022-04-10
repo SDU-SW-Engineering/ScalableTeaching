@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @throws ModelNotFoundException<Task>
@@ -94,6 +95,10 @@ class Task extends Model
             ->withTimestamps()->first();
     }
 
+    public function pushes() : HasManyThrough
+    {
+        return $this->hasManyThrough(ProjectPush::class, Project::class);
+    }
     // endregion
 
     public function dailyBuilds(bool $withTrash = false, $withToday = false): \Illuminate\Support\Collection

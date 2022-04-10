@@ -9,9 +9,9 @@ use InvalidArgumentException;
 
 class SubTask implements Arrayable
 {
-    private ?int $id = null;
+    public ?int $id = null;
     private ?bool $isRequired = null;
-    private ?int $points = null;
+    public ?int $points = null;
 
     public function __construct(private string $name, private ?string $alias = null, public ?string $group = null)
     {
