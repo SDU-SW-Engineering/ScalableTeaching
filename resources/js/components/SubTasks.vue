@@ -136,7 +136,7 @@ export default {
     computed: {
         pointSum: function () {
             return this.tasks.list.reduce((total, group) => {
-                return total + group.tasks.filter(t => t.pointsAcquired).reduce((total, c) => total + c.points, 0);
+                return total + group.tasks.filter(t => t.pointsAcquired).reduce((total, c) => total + c.pointsAcquired, 0);
             }, 0)
         },
         pointMax: function () {
@@ -158,9 +158,10 @@ export default {
             return group.tasks.map(g => g.points).reduce((a, b) => a + b);
         },
         completedPoints: function (group) {
-            let completed = group.tasks.filter(g => g.pointsAcquired !== null);
+            let completed = group.tasks.filter(g => g.pointsAcquired !== null || g.pointsAcquired === 0);
             if (completed.length === 0)
                 return 0;
+
             return completed.map(g => g.pointsAcquired).reduce((a, b) => a + b);
         }
     }
