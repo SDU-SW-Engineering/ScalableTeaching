@@ -16,6 +16,7 @@ use Domain\Analytics\Graph\Graph;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -86,8 +87,7 @@ class AnalyticsController extends Controller
 
     public function pushes(Course $course, Task $task)
     {
-        $pushes = $task->pushes()->with('project.ownable')->latest()->get();
-
+        $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
         return view('tasks.analytics.pushes', compact('pushes'));
     }
 
