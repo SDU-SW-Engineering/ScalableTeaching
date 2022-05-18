@@ -12,6 +12,22 @@ use Illuminate\Http\Request;
 
 class SurveyController extends Controller
 {
+    public function index()
+    {
+        return view('surveys.index');
+    }
+
+    public function all()
+    {
+        return Survey::withCount('responses')->get();
+    }
+
+    public function details(Survey $survey)
+    {
+        $survey->load(['responses', 'fields.items']);
+        return $survey;
+    }
+
     public function projectSurvey(Request $request, Project $project, Survey $survey)
     {
         abort_unless(auth()->user()->can('answer', [$survey, $project]), 400, "You cannot answer this survey");

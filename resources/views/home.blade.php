@@ -3,16 +3,18 @@
 @section('content')
     <section class="bg-gray-100 dark:bg-gray-800 relative">
         @if(session()->has('error'))
-        <div class="bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700 absolute" style="left: 50%; transform: translateX(-50%);" role="alert">
-            {{ session('error') }}
-        </div>
+            <div class="bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700 absolute"
+                 style="left: 50%; transform: translateX(-50%);" role="alert">
+                {{ session('error') }}
+            </div>
         @endif
         <nav class="container p-6 mx-auto lg:flex lg:justify-between lg:items-center">
             <div class="flex items-center justify-between">
                 <div>
                     <a class=""
                        href="{{ route('home') }}">
-                        <svg width="100%" height="100%" viewBox="0 0 1179 122" version="1.1" class="fill-current text-gray-800   dark:text-white"
+                        <svg width="100%" height="100%" viewBox="0 0 1179 122" version="1.1"
+                             class="fill-current text-gray-800   dark:text-white"
                              xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                              xml:space="preserve"
                              style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;height: 25px;margin-top:4px">

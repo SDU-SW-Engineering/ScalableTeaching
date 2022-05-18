@@ -91,6 +91,13 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
     });
 });
 
+
+Route::prefix('surveys')->as('surveys.')->controller(SurveyController::class)->group(function() {
+    Route::get('/', 'index')->name('index');
+    Route::get('all', 'all')->name('all');
+    Route::get('{survey}', 'details')->name('details');
+});
+
 Route::group(['prefix' => 'projects/{project}', 'as' => 'projects.', 'middleware' => ['auth']], function() {
     Route::get('builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
     Route::get('reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
