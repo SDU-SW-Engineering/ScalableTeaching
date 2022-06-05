@@ -133,7 +133,7 @@
                     <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
                        href="{{ route('courses.index') }}">Courses</a>
                 </div>
-                @if(auth()->user()->surveys()->count() > 0)
+                @if(auth()->check() && auth()->user()->surveys()->count() > 0)
                     <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
                         <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
                            href="{{ route('surveys.index') }}">Surveys</a>
