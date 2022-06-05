@@ -88,8 +88,9 @@ module.exports = {
     },
     variants: {
         extend: {
+            borderRadius: ['first', 'last'],
             borderStyle: ['dark', 'hover'],
-            borderWidth: ['hover'],
+            borderWidth: ['hover', 'last'],
             typography: ['dark'],
             margin: ['last'],
             dropShadow: ['dark'],

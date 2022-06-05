@@ -158,3 +158,5 @@ const app = new Vue({
     el: '#app',
 
 });
+
+require("./components/ReactLoader")

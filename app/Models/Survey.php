@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enums\CorrectionType;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property-read SurveyTask|null $pivot
+ * @property-read int|null $responses_count
+ * @property-read Carbon $created_at
  */
 class Survey extends Model
 {
@@ -39,5 +42,10 @@ class Survey extends Model
         return $this->belongsToMany(Task::class)->using(SurveyTask::class)
             ->withPivot( 'deadline')
             ->withTimestamps();
+    }
+
+    public function owners(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'survey_owners');
     }
 }

@@ -3,16 +3,18 @@
 @section('content')
     <section class="bg-gray-100 dark:bg-gray-800 relative">
         @if(session()->has('error'))
-        <div class="bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700 absolute" style="left: 50%; transform: translateX(-50%);" role="alert">
-            {{ session('error') }}
-        </div>
+            <div class="bg-red-100 rounded-lg p-4 mb-4 text-sm text-red-700 absolute"
+                 style="left: 50%; transform: translateX(-50%);" role="alert">
+                {{ session('error') }}
+            </div>
         @endif
         <nav class="container p-6 mx-auto lg:flex lg:justify-between lg:items-center">
             <div class="flex items-center justify-between">
                 <div>
                     <a class=""
                        href="{{ route('home') }}">
-                        <svg width="100%" height="100%" viewBox="0 0 1179 122" version="1.1" class="fill-current text-gray-800   dark:text-white"
+                        <svg width="100%" height="100%" viewBox="0 0 1179 122" version="1.1"
+                             class="fill-current text-gray-800   dark:text-white"
                              xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                              xml:space="preserve"
                              style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;height: 25px;margin-top:4px">
@@ -126,9 +128,17 @@
             </div>
 
             <!-- Mobile Menu open: "block", Menu closed: "hidden" -->
-            <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
-                <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
-                   href="{{ route('courses.index') }}">Courses</a>
+            <div class="flex gap-12">
+                <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
+                    <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
+                       href="{{ route('courses.index') }}">Courses</a>
+                </div>
+                @if(auth()->user()->surveys()->count() > 0)
+                    <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
+                        <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
+                           href="{{ route('surveys.index') }}">Surveys</a>
+                    </div>
+                @endif
             </div>
             @auth
                 <a class="block px-5 py-2 mt-4 font-medium leading-5 text-center text-white hover:text-white capitalize bg-lime-green-500 rounded-lg lg:mt-0 hover:bg-lime-green-400 lg:w-auto"

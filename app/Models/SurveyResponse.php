@@ -16,6 +16,11 @@ class SurveyResponse extends Model
         'response' => 'array'
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function ownable() : MorphTo
     {
         return $this->morphTo();

@@ -4,7 +4,8 @@
             <div>
                 <a class=""
                    href="{{ route('home') }}">
-                    <svg width="100%" height="100%" viewBox="0 0 1179 122" version="1.1" class="fill-current text-black dark:text-white"
+                    <svg width="100%" height="100%" viewBox="0 0 1179 122" version="1.1"
+                         class="fill-current text-black dark:text-white"
                          xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                          xml:space="preserve"
                          style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;height: 25px;margin-top:4px">
@@ -120,12 +121,16 @@
 
         <div class="items-center md:flex h-full">
             <div class="flex flex-col md:flex-row items-center h-full">
+
                 <a href="{{ route('courses.index') }}"
                    class="py-5 px-2 box-border text-sm border-b-4 border-lime-green-400 font-medium text-gray-700 dark:text-gray-200 md:mx-4 md:my-0">Courses</a>
+                @if(auth()->user()->surveys()->count() > 0)
+                    <a href="{{ route('surveys.index') }}"
+                       class="py-5 px-2 box-border text-sm font-medium text-gray-700 dark:text-gray-200 md:mx-4 md:my-0">Surveys</a>
+                @endif
                 <a class="my-1 text-sm py-1 px-2 font-medium bg-lime-green-500 rounded hover:bg-lime-green-400 text-white hover:text-white md:ml-4 md:my-0"
                    href="#">{{ auth()->user()->name }}</a>
             </div>
-
         </div>
     </div>
 </nav>

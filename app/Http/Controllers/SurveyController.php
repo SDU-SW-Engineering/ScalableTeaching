@@ -2,16 +2,42 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SurveyExport;
 use App\Models\Enums\SurveyFieldType;
 use App\Models\Project;
 use App\Models\Survey;
-use App\Models\SurveyResponse;
 use App\Models\Task;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SurveyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:edit,survey')->except('index', 'all');
+    }
+
+    public function index()
+    {
+        return view('surveys.index');
+    }
+
+    public function all()
+    {
+        return auth()->user()->surveys()->withCount('responses')->get()->map(fn(Survey $survey) => [
+            'id' => $survey->id,
+            'name' => $survey->name,
+            'responses_count' =>  $survey->responses_count,
+            'created_at' => $survey->created_at
+        ]);
+    }
+
+    public function details(Survey $survey)
+    {
+        $survey->load(['responses', 'fields.items']);
+        return $survey;
+    }
+
     public function projectSurvey(Request $request, Project $project, Survey $survey)
     {
         abort_unless(auth()->user()->can('answer', [$survey, $project]), 400, "You cannot answer this survey");
@@ -71,5 +97,10 @@ class SurveyController extends Controller
         ]);
 
         return "OK";
+    }
+
+    public function export(Survey $survey)
+    {
+        return Excel::download(new SurveyExport($survey), $survey->name . '.xlsx');
     }
 }

@@ -16,6 +16,7 @@ use Domain\Analytics\Graph\Graph;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -86,50 +87,54 @@ class AnalyticsController extends Controller
 
     public function pushes(Course $course, Task $task)
     {
-        $pushes = $task->pushes()->with('project.ownable')->latest()->get();
-
+        $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
         return view('tasks.analytics.pushes', compact('pushes'));
     }
 
     public function taskCompletion(Course $course, Task $task)
     {
         $projectIds = $task->projects()->pluck('id');
-        $finishedProjectCount = $task->projects()->ended()->count();
 
-        $subTasksCompleted = ProjectSubTask::whereIn('project_id', $projectIds)
-            ->select(\DB::raw('sub_task_id, count(*) as count'))
+        /** @var Collection $completionPercentages */
+        $completionPercentages = ProjectSubTask::whereIn('project_id', $projectIds)
+            ->select(\DB::raw('sub_task_id, avg(points) as points'))
             ->groupBy('sub_task_id')
-            ->pluck('count', 'sub_task_id');
+            ->pluck('points', 'sub_task_id');
+
+        $maxPointsPerTask = $task->sub_tasks->all()->pluck('points', 'id');
 
         $subtasks = $task->sub_tasks->all()->groupBy('group')->map(fn(Collection $subTasks, $group) => [
             'group'     => $group,
+            'average'   => round($completionPercentages->filter(fn($v, $k) => $subTasks->pluck('id')->contains($k))->sum(), 2),
             'maxPoints' => $subTasks->sum(fn(SubTask $task) => $task->getPoints()),
-            'tasks'     => $subTasks->map(function(SubTask $subTask) use ($finishedProjectCount, $subTasksCompleted) {
-                $completedCount = $subTasksCompleted->has($subTask->getId()) ? $subTasksCompleted[$subTask->getId()] : 0;
+            'tasks'     => $subTasks->map(function(SubTask $subTask) use ($maxPointsPerTask, $completionPercentages) {
+                $taskAverage = $completionPercentages->has($subTask->getId()) ? $completionPercentages[$subTask->getId()] : 0;
+                $maxPoints = $maxPointsPerTask->get($subTask->getId());
+
                 return [
-                    'id'             => $subTask->getId(),
-                    'isRequired'     => $subTask->isRequired(),
-                    'name'           => $subTask->getDisplayName(),
-                    'maxPoints'      => $subTask->getPoints(),
-                    'completedCount' => $completedCount,
-                    'percentage'     => round($completedCount / $finishedProjectCount * 100)
+                    'id'         => $subTask->getId(),
+                    'isRequired' => $subTask->isRequired(),
+                    'name'       => $subTask->getDisplayName(),
+                    'maxPoints'  => $subTask->getPoints(),
+                    'average'    => $taskAverage,
+                    'percentage' => round($taskAverage / $maxPoints * 100)
                 ];
             })
         ]);
 
-        return view('tasks.analytics.taskCompletion', compact('subtasks', 'finishedProjectCount'));
+        return view('tasks.analytics.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
     }
 
     public function subTasks(Course $course, Task $task)
     {
         $subTasks = $task->sub_tasks->all()->groupBy("group")->map(fn($tasks, $group) => [
-            'name' => $group,
+            'name'    => $group,
             'editing' => false,
-            'tasks' => $tasks->map(fn(SubTask $t) => [
-                'id' => $t->id,
-                'name' => $t->getName(),
+            'tasks'   => $tasks->map(fn(SubTask $t) => [
+                'id'      => $t->id,
+                'name'    => $t->getName(),
                 'editing' => false,
-                'points' => $t->points
+                'points'  => $t->points
             ])
         ])->values();
         return view('tasks.analytics.subTasks', [
