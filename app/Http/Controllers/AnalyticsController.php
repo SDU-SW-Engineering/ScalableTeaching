@@ -107,7 +107,7 @@ class AnalyticsController extends Controller
             'group'     => $group,
             'average'   => round($completionPercentages->filter(fn($v, $k) => $subTasks->pluck('id')->contains($k))->sum(), 2),
             'maxPoints' => $subTasks->sum(fn(SubTask $task) => $task->getPoints()),
-            'tasks'     => $subTasks->map(function(SubTask $subTask) use ($subTasks, $maxPointsPerTask, $completionPercentages) {
+            'tasks'     => $subTasks->map(function(SubTask $subTask) use ($maxPointsPerTask, $completionPercentages) {
                 $taskAverage = $completionPercentages->has($subTask->getId()) ? $completionPercentages[$subTask->getId()] : 0;
                 $maxPoints = $maxPointsPerTask->get($subTask->getId());
 

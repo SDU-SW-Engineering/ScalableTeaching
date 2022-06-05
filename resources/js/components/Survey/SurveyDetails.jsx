@@ -24,31 +24,33 @@ export default function SurveyDetails(props) {
                 />
                 <div className={"w-9/12"}>
                     <div className={"flex"}>
-                        <a
-                            onClick={() => setTab(1)}
-                            className={
-                                "px-2 py-1 flex cursor-pointer rounded-md items-center mr-2 " +
-                                (tab === 0
-                                    ? "text-gray-400 hover:bg-gray-600"
-                                    : "text-white bg-gray-800")
-                            }
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5 mr-1"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth="2"
+                        {false && (
+                            <a
+                                onClick={() => setTab(1)}
+                                className={
+                                    "px-2 py-1 flex cursor-pointer rounded-md items-center mr-2 " +
+                                    (tab === 0
+                                        ? "text-gray-400 hover:bg-gray-600"
+                                        : "text-white bg-gray-800")
+                                }
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-                            <span>Questions</span>
-                        </a>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5 mr-1"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                                <span>Questions</span>
+                            </a>
+                        )}
                         <a
                             onClick={() => setTab(0)}
                             className={

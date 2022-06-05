@@ -54,4 +54,9 @@ class SurveyPolicy
 
         return !$survey->responses()->task($project->task_id)->user($user)->exists();
     }
+
+    public function edit(User $user, Survey $survey) : bool
+    {
+        return $survey->owners->pluck('id')->contains($user->id);
+    }
 }

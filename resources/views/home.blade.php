@@ -128,9 +128,17 @@
             </div>
 
             <!-- Mobile Menu open: "block", Menu closed: "hidden" -->
-            <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
-                <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
-                   href="{{ route('courses.index') }}">Courses</a>
+            <div class="flex gap-12">
+                <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
+                    <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
+                       href="{{ route('courses.index') }}">Courses</a>
+                </div>
+                @if(auth()->user()->surveys()->count() > 0)
+                    <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
+                        <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
+                           href="{{ route('surveys.index') }}">Surveys</a>
+                    </div>
+                @endif
             </div>
             @auth
                 <a class="block px-5 py-2 mt-4 font-medium leading-5 text-center text-white hover:text-white capitalize bg-lime-green-500 rounded-lg lg:mt-0 hover:bg-lime-green-400 lg:w-auto"

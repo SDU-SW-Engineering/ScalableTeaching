@@ -111,6 +111,11 @@ class User extends Authenticatable
         return $this->hasMany(Grade::class);
     }
 
+    public function surveys()
+    {
+        return $this->belongsToMany(Survey::class, 'survey_owners');
+    }
+
     public function gradeDelegations(): HasMany
     {
         return $this->hasMany(GradeDelegation::class);

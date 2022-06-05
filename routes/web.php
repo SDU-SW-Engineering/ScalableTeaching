@@ -96,6 +96,7 @@ Route::prefix('surveys')->as('surveys.')->controller(SurveyController::class)->g
     Route::get('/', 'index')->name('index');
     Route::get('all', 'all')->name('all');
     Route::get('{survey}', 'details')->name('details');
+    Route::get('{survey}/export', 'export')->name('export');
 });
 
 Route::group(['prefix' => 'projects/{project}', 'as' => 'projects.', 'middleware' => ['auth']], function() {

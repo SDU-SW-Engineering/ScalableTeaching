@@ -45,6 +45,7 @@ export default function SurveyResponses(props) {
                 </h2>
                 <div className={"flex"}>
                     <a
+                        href={"/surveys/" + props.survey.id + "/export"}
                         className={
                             "mr-8 bg-gray-700 rounded-sm transition-colors hover:bg-gray-600 text-gray-300 px-4 py-1"
                         }
@@ -58,13 +59,15 @@ export default function SurveyResponses(props) {
                     >
                         Aggregated
                     </a>
-                    <a
-                        className={
-                            "border border-gray-600 px-4 py-1 rounded-r-md hover:bg-gray-700 text-white font-light"
-                        }
-                    >
-                        Individual
-                    </a>
+                    {false && (
+                        <a
+                            className={
+                                "border border-gray-600 px-4 py-1 rounded-r-md hover:bg-gray-700 text-white font-light"
+                            }
+                        >
+                            Individual
+                        </a>
+                    )}
                 </div>
             </div>
             {props.survey.fields.map((field) => renderField(field))}
