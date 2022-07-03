@@ -154,4 +154,9 @@ class AnalyticsController extends Controller
 
         return "OK";
     }
+
+    public function gradingOverview(Course $course, Task $task)
+    {
+        return view('tasks.analytics.gradingOverview');
+    }
 }

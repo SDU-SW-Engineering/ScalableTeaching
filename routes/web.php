@@ -43,9 +43,14 @@ Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth']
                 Route::get('builds', 'builds')->name('builds')->middleware('can:view,task');
                 Route::get('students', 'students')->name('students')->middleware('can:view,task');
                 Route::get('pushes', 'pushes')->name('pushes')->middleware('can:view,task');
+                Route::get('downloads', 'downloads')->name('downloads')->middleware('can:view,task');
+                Route::get('log', 'log')->name('log')->middleware('can:view,task');
                 Route::get('task-completion', 'taskCompletion')->name('taskCompletion')->middleware('can:view,task');
                 Route::get('sub-tasks', 'subTasks')->name('subTasks')->middleware('can:view,task');
                 Route::post('sub-tasks', 'saveSubTasks')->name('subTasks')->middleware('can:view,task');
+                Route::get('grading-overview', 'gradingOverview')->name('gradingOverview')->middleware('can:view,task');
+                Route::get('grading-delegate', 'gradingDelegate')->name('gradingDelegate')->middleware('can:view,task');
+                Route::get('preferences', 'preferences')->name('preferences')->middleware('can:view,task');
             });
         });
 
