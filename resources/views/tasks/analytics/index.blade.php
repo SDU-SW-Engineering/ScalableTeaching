@@ -79,7 +79,7 @@
                 <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
                     <div class="overflow-hidden sm:rounded-md shadow-md">
                         <div
-                            class="bg-gray-50 dark:bg-gray-800 min-w-full py-2 pl-6 pr-3 flex justify-between items-center">
+                            class="bg-gray-100 dark:bg-gray-800 min-w-full py-2 pl-6 pr-3 flex justify-between items-center">
                             <h2 class="text-lg  dark:text-gray-200">Projects</h2>
                             <div class="flex items-center">
                                 <!--<form>
