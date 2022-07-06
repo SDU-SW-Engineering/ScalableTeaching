@@ -1,6 +1,6 @@
 <aside class="w-56 shrink flex-shrink-0 mr-4">
 
-    <x-sidebar-item name="Overview" route="courses.tasks.analytics.index" :task="$task">
+    <x-sidebar-item name="Overview" route="courses.tasks.admin.index" :task="$task">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
              viewBox="0 0 24 24"
              stroke="currentColor" stroke-width="2">
@@ -9,7 +9,7 @@
         </svg>
     </x-sidebar-item>
     <x-sidebar-group name="Students">
-        <x-sidebar-item name="Students" route="courses.tasks.analytics.students" :task="$task">
+        <x-sidebar-item name="Students" route="courses.tasks.admin.students" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path d="M12 14l9-5-9-5-9 5 9 5z"/>
@@ -20,7 +20,7 @@
             </svg>
         </x-sidebar-item>
         @if($task->correction_type != \App\Models\Enums\CorrectionType::Manual)
-            <x-sidebar-item name="Builds" route="courses.tasks.analytics.builds" :task="$task">
+            <x-sidebar-item name="Builds" route="courses.tasks.admin.builds" :task="$task">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
                      viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -28,21 +28,21 @@
                 </svg>
             </x-sidebar-item>
         @endif
-        <x-sidebar-item name="Pushes" route="courses.tasks.analytics.pushes" :task="$task">
+        <x-sidebar-item name="Pushes" route="courses.tasks.admin.pushes" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24"
                  stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
             </svg>
         </x-sidebar-item>
-        <x-sidebar-item name="Downloads" route="courses.tasks.analytics.downloads" :task="$task">
+        <x-sidebar-item name="Downloads" route="courses.tasks.admin.downloads" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                       d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
         </x-sidebar-item>
-        <x-sidebar-item name="Log" route="courses.tasks.analytics.log" :task="$task">
+        <x-sidebar-item name="Log" route="courses.tasks.admin.log" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24"
                  stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -51,7 +51,7 @@
         </x-sidebar-item>
     </x-sidebar-group>
     <x-sidebar-group name="Progression">
-        <x-sidebar-item name="Task completion" route="courses.tasks.analytics.taskCompletion" :task="$task">
+        <x-sidebar-item name="Task completion" route="courses.tasks.admin.taskCompletion" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -60,7 +60,7 @@
                       d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
             </svg>
         </x-sidebar-item>
-        <x-sidebar-item name="Subtasks" route="courses.tasks.analytics.subTasks" :task="$task">
+        <x-sidebar-item name="Subtasks" route="courses.tasks.admin.subTasks" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24"
                  stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -69,14 +69,14 @@
         </x-sidebar-item>
     </x-sidebar-group>
     <x-sidebar-group name="Grading">
-        <x-sidebar-item name="Grading overview" route="courses.tasks.analytics.gradingOverview" :task="$task">
+        <x-sidebar-item name="Grading overview" route="courses.tasks.admin.gradingOverview" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
         </x-sidebar-item>
-        <x-sidebar-item name="Delegate tasks" route="courses.tasks.analytics.gradingDelegate" :task="$task">
+        <x-sidebar-item name="Delegate tasks" route="courses.tasks.admin.gradingDelegate" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -85,7 +85,7 @@
         </x-sidebar-item>
     </x-sidebar-group>
     <x-sidebar-group name="Settings">
-        <x-sidebar-item name="Preferences" route="courses.tasks.analytics.preferences" :task="$task">
+        <x-sidebar-item name="Preferences" route="courses.tasks.admin.preferences" :task="$task">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

@@ -1,4 +1,4 @@
-@extends('tasks.analytics.master')
+@extends('tasks.admin.master')
 
 @section('analyticsContent')
     <div class="flex justify-between">
@@ -16,7 +16,8 @@
         <div class="dark:bg-gray-800 px-4 py-3 mb-4 rounded-lg shadow-sm">
             <div class="flex items-end justify-between">
                 <h1 class=" dark:text-white text-2xl">{{ $subtaskGroup['group'] }}</h1>
-                <h2 class="dark:text-lime-green-300 text-xl"><span class="font-thin text-gray-400">{{ $subtaskGroup['average'] }} /</span> {{ $subtaskGroup['maxPoints'] }} pts</h2>
+                <h2 class="dark:text-lime-green-300 text-xl"><span class="font-thin text-gray-400">{{ $subtaskGroup['average'] }} /</span> {{ $subtaskGroup['maxPoints'] }}
+                    pts</h2>
             </div>
             <div>
                 <ul class="ml-4">
@@ -26,7 +27,7 @@
                                 <span class="mr-6">{{ $task['name'] }}</span>
                                 <div class="flex justify-center items-center flex-shrink-0">
                                     <span
-                                        class="flex-shrink-0 mr-2 text-light">0</span>
+                                            class="flex-shrink-0 mr-2 text-light">0</span>
                                     <div class="w-48 bg-gray-200 rounded-full h-4 dark:bg-gray-700 mr-2 text-center">
                                         <div @class(['h-4 rounded-full text-gray-900 text-xs', match(true) {
                                             $task['percentage'] >= 66 => 'bg-lime-green-400',

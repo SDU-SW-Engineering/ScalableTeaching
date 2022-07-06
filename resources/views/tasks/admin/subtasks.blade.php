@@ -1,4 +1,4 @@
-@extends('tasks.analytics.master')
+@extends('tasks.admin.master')
 
 @section('analyticsContent')
     <div class="dark:bg-gray-800 p-4 rounded-lg">
