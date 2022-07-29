@@ -41,14 +41,9 @@ class OverviewController extends Controller
 
         $dailyBuilds = $task->dailyBuilds(true, true);
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B"));
-        $breadcrumbs = [
-            'Courses'     => route('courses.index'),
-            $course->name => route('courses.show', $course->id),
-            $task->name   => route('courses.tasks.show', [$course->id, $task->id]),
-            'Analytics'   => null
-        ];
 
-        return view('tasks.admin.index', compact('course', 'task', 'projectCount', 'breadcrumbs',
+
+        return view('tasks.admin.index', compact('course', 'task', 'projectCount',
             'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday',
             'totalProjectsPerDayGraph', 'dailyBuildsGraph', 'projects'));
     }
