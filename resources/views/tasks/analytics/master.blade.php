@@ -5,7 +5,7 @@
         <div class="flex">
             @include('tasks.analytics.partials.sidebar')
             <div class="flex-grow-1 w-full">
-                @yield('analyticsContent')
+                @yield('adminContent')
             </div>
         </div>
     </div>

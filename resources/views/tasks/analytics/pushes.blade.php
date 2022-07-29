@@ -1,6 +1,6 @@
 @extends('tasks.analytics.master')
 
-@section('analyticsContent')
+@section('adminContent')
     <div class="dark:bg-gray-800 p-4 rounded-lg">
         <h1 class="font-light dark:text-white text-2xl">Pushes</h1>
         <h1 class="font-medium dark:text-gray-400 text-xl -mt-2 mb-4">{{ $pushes->count() }} pushes</h1>

@@ -1,6 +1,6 @@
 @extends('tasks.analytics.master')
 
-@section('analyticsContent')
+@section('adminContent')
     <div class="flex justify-between">
         <div></div>
         <div class="flex items-center mb-4">
