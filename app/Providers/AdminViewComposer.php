@@ -8,13 +8,11 @@ class AdminViewComposer
 {
     public function compose(View $view)
     {
-        $data = collect($view->getData());
-
-        if (!$data->contains(fn($item, $key) => $key == 'course' || $key == 'task'))
+        if (!request()->route()->hasParameter('course') && request()->route()->hasParameter('task'))
             return;
 
-        $course = $data->get('course');
-        $task = $data->get('task');
+        $course = request()->route('course');
+        $task = request()->route('task');
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
             $course->name => route('courses.show', $course->id),
@@ -23,5 +21,7 @@ class AdminViewComposer
         ];
 
         $view->with('breadcrumbs', $breadcrumbs);
+        $view->with('task', $task);
+        $view->with('course', $course);
     }
 }

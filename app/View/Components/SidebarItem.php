@@ -12,7 +12,7 @@ class SidebarItem extends Component
      *
      * @return void
      */
-    public function __construct(public string $name, public string $route, public Task $task)
+    public function __construct(public string $name, public string $route)
     {
     }
 

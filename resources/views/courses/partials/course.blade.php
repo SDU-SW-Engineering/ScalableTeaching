@@ -60,7 +60,7 @@
     @canany(['view-analytics', 'update'], $task['details'])
         <div class="bg-gray-100 dark:bg-gray-500 flex px-8 py-2 gap-2">
             @can('view-analytics', $task['details'])
-                <a href="{{ route('courses.tasks.analytics.index', [$course->id, $task['details']->id]) }}"
+                <a href="{{ route('courses.tasks.admin.index', [$course->id, $task['details']->id]) }}"
                    class="flex items-cente px-2 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-gray-300 dark:bg-gray-600 rounded-md text-gray-700 dark:text-white dark:hover:bg-gray-700 hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-80">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                         <path

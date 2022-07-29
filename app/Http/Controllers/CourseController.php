@@ -137,7 +137,7 @@ class CourseController extends Controller
 
     public function showManage(Course $course)
     {
-        return view('courses.manage.index', [
+        return view('courses.manage.index-new', [
             'course'      => $course,
             'breadcrumbs' => [
                 'Courses'     => route('courses.index'),
