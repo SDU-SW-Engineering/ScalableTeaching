@@ -22,9 +22,6 @@ use Illuminate\Support\Collection;
 
 class AnalyticsController extends Controller
 {
-
-
-
     public function builds(Course $course, Task $task)
     {
         $dailyBuilds = $task->dailyBuilds(true, true);

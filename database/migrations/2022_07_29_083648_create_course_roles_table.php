@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('course_id');
             $table->string('name');
+            $table->boolean('default')->default(false)->comment('The default role people are enrolled into.');
             $table->timestamps();
 
             $table->foreign('course_id')->references('id')->on('courses');

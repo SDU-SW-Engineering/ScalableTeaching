@@ -58,6 +58,10 @@ class Course extends Model
             ->withTimestamps();
     }
 
+    public function roles()
+    {
+        return $this->hasMany(CourseRole::class);
+    }
     // endregion
 
     public static function booted()
