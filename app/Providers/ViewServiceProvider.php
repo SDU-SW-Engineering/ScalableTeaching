@@ -27,6 +27,7 @@ class ViewServiceProvider extends ServiceProvider
     public function boot()
     {
         \View::composer('courses.manage.*', function(View $view) {
+            /** @var Course $course */
             $course = request()->route('course');
 
             $breadcrumbs = [

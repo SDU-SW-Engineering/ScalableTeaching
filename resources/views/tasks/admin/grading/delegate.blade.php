@@ -24,29 +24,34 @@
         <div class="flex flex-col bg-white shadow-md p-4 rounded-md">
             <h3 class="text-xl font-semibold">Delegate amongst roles</h3>
             <p class="text-sm text-gray-600">Delegate tasks amongst a specific course role and specify the amount of
-                tasks each recipient should give feedback on.</p>
+                tasks each recipient should give feedback on. Tasks will be automatically delegated upon deadline
+                end.</p>
             <hr class="my-2">
-            <table class="table-fixed">
-                <thead>
-                <tr>
-                    <th class="w-1/2 text-left text-sm">Role</th>
-                    <th class="w-1/4 text-left text-sm"># of Tasks</th>
-                    <th class="w-1/4 text-left text-sm">Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <form>
+            @if($errors->any())
+                <span class="text-sm text-red-600 pb-2">{{ $errors->first() }}</span>
+            @endif
+            <form method="post" action="{{ route('courses.tasks.admin.addDelegation', [$course, $task]) }}">
+                <table class="table-fixed">
+                    <thead>
                     <tr>
-                        <td>
-                            <select
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-lime-green-500 focus:border-lime-green-500 block w-full p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500">
-                                @foreach($course->roles as $role)
-                                    <option>{{ $role->name }}</option>
+                        <th class="w-1/2 text-left text-sm">Role</th>
+                        <th class="w-1/4 text-left text-sm"># of Tasks</th>
+                        <th class="w-1/4 text-left text-sm">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @csrf
+                    <tr>
+                        <td class="pb-2">
+                            <select name="role"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-lime-green-500 focus:border-lime-green-500 block w-full p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500">
+                                @foreach($eligibleRoles as $role)
+                                    <option value="{{ $role->id }}">{{ $role->name }}</option>
                                 @endforeach
                             </select>
                         </td>
                         <td>
-                            <input value="1"
+                            <input value="1" name="tasks"
                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-lime-green-500 focus:border-lime-green-500 block w-full p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500"
                                    type="number">
                         </td>
@@ -57,11 +62,31 @@
                             </button>
                         </td>
                     </tr>
+                    </tbody>
+                </table>
+            </form>
+            @foreach($task->delegations as $currentlyDelegated)
+                <form action="{{ route('courses.tasks.admin.removeDelegation', [$course, $task]) }}"
+                      method="post">
+                    <table class="table-fixed">
+                        <tbody>
+                        <tr class="text-sm border-t">
+                            <td class="w-1/2 text-left text-sm py-1">{{ $currentlyDelegated->role->name }}</td>
+                            <td class="w-1/4">{{ $currentlyDelegated->number_of_tasks }}</td>
+                            <td>
+
+                                @method('DELETE')
+                                @csrf
+                                <input type="hidden" name="role" value="{{ $currentlyDelegated->id }}">
+                                <button type="submit" class="text-red-800">Remove</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </form>
-                </tbody>
-            </table>
+            @endforeach
         </div>
-        <div class="flex flex-col">
+        {{-- <div class="flex flex-col">
             <div class="shadow-md p-4 rounded-md bg-white">
                 <h3 class="text-xl font-semibold">Gradual delegation</h3>
                 <p class="text-sm text-gray-600">Delegate tasks amongst a specific course role and specify the amount of
@@ -76,6 +101,6 @@
                     Save
                 </button>
             </div>
-        </div>
+        </div> --}}
     </section>
 @endsection

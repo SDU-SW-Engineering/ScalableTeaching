@@ -28,6 +28,8 @@ Route::prefix('{task}')->group(function() {
         Route::controller(GradingController::class)->group(function() {
             Route::get('grading-overview', 'gradingOverview')->name('gradingOverview');
             Route::get('grading-delegate', 'gradingDelegate')->name('gradingDelegate');
+            Route::post('grading-delegate', 'addDelegation')->name('addDelegation');
+            Route::delete('grading-delegate', 'removeDelegation')->name('removeDelegation');
         });
 
         Route::controller(SettingsController::class)->group(function() {

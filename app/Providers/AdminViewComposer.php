@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Course;
+use App\Models\Task;
 use Illuminate\View\View;
 
 class AdminViewComposer
@@ -11,7 +13,9 @@ class AdminViewComposer
         if (!request()->route()->hasParameter('course') && request()->route()->hasParameter('task'))
             return;
 
+        /** @var Course $course */
         $course = request()->route('course');
+        /** @var Task $task */
         $task = request()->route('task');
         $breadcrumbs = [
             'Courses'     => route('courses.index'),

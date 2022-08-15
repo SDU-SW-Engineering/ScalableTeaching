@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property-read CourseTrack|null $track
  * @property-read SurveyTask|null $pivot
  * @property-read bool $hasEnded
+ * @property-read Collection|TaskDelegation[] $delegations
  */
 class Task extends Model
 {
@@ -98,6 +99,11 @@ class Task extends Model
     public function pushes() : HasManyThrough
     {
         return $this->hasManyThrough(ProjectPush::class, Project::class);
+    }
+
+    public function delegations() : HasMany
+    {
+        return $this->hasMany(TaskDelegation::class);
     }
     // endregion
 
