@@ -12,6 +12,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\VSCodeController;
+use App\Models\Course;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,8 @@ Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'
 
 Route::group(['prefix' => 'courses', 'as' => 'courses.', 'middleware' => 'auth'], function() {
     Route::get('/', [CourseController::class, 'index'])->name('index');
+    Route::get('create', [CourseController::class, 'create'])->name('create')->can('create', Course::class);
+    Route::post('/', [CourseController::class, 'store'])->name('store')->can('store', Course::class);
     Route::get('{course}/enroll', [CourseController::class, 'showEnroll'])->name('enroll');
 
     Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function() {

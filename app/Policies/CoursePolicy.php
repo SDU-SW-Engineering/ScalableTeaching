@@ -24,6 +24,11 @@ class CoursePolicy
         return $course->users()->where('user_id', $user->id)->exists();
     }
 
+    public function create(User $user)
+    {
+        return false;
+    }
+
 
     public function createTask(User $user, Course $course)
     {
