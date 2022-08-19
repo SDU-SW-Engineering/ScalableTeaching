@@ -29,15 +29,24 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
-        $this->routes(function () {
+        $stagingMiddleware = app()->environment('staging') ? ['staging'] : [];
+
+        $this->routes(function() use ($stagingMiddleware) {
             Route::prefix('api')
                 ->middleware('api')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/api.php'));
 
-            Route::middleware('web')
+            Route::middleware(['web', ...$stagingMiddleware])
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
+
+            if(app()->environment('staging', 'local')) {
+                Route::prefix('staging')
+                    ->middleware(['web'])
+                    ->name($this->namespace)
+                    ->group(base_path('routes/staging.php'));
+            }
         });
     }
 
@@ -48,7 +57,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting()
     {
-        RateLimiter::for('api', function (Request $request) {
+        RateLimiter::for('api', function(Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
     }
