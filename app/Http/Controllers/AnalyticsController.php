@@ -57,7 +57,7 @@ class AnalyticsController extends Controller
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
             $course->name => route('courses.show', $course->id),
-            $task->name  => route('courses.tasks.show', [$course->id, $task->id]),
+            $task->name   => route('courses.tasks.show', [$course->id, $task->id]),
             'Analytics'   => null,
         ];
 
