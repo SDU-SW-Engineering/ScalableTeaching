@@ -28,7 +28,7 @@ class UserFactory extends Factory
             'gitlab_id'      => $this->faker->unique()->randomNumber(),
             'remember_token' => Str::random(10),
             'username'       => $this->faker->userName,
-            'last_login'     => now()
+            'last_login'     => now(),
         ];
     }
 
@@ -36,7 +36,7 @@ class UserFactory extends Factory
     {
         return $this->state(function(array $attributes) {
             return [
-                'is_admin' => true
+                'is_admin' => true,
             ];
         });
     }

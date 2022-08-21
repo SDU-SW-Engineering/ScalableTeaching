@@ -35,6 +35,7 @@ class TaskController extends Controller
     {
         abort_if(!$task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
+
         return $this->showProject($course, $task, $project);
     }
 
@@ -57,7 +58,7 @@ class TaskController extends Controller
         $completedSubTaskComments = $project?->subTaskComments()->with('author')->get()->map(fn(ProjectSubTaskComment $comment) => [
             'sub_task_id' => $comment->sub_task_id,
             'author'      => $comment->author->name,
-            'text'        => $comment->text
+            'text'        => $comment->text,
         ])->groupBy('sub_task_id');
         $subTasks = $task->sub_tasks->all()->groupBy('group')->map(fn(\Illuminate\Support\Collection $subTasks, $group) => [
             'group' => $group,
@@ -67,25 +68,27 @@ class TaskController extends Controller
                 'comments'        => $completedSubTaskComments?->has($subTask->getId()) ? $completedSubTaskComments->get($subTask->getId()) : [],
                 'points'         => $subTask->getPoints(),
                 'required'       => $subTask->isRequired() ?? true,
-                'group'          => $subTask->getGroup()
-            ])
+                'group'          => $subTask->getGroup(),
+            ]),
         ])->values();
 
         $survey = $task->survey()?->load(['fields' => function(HasMany $query) {
             $query->where('type', '!=', 'environment');
         }, 'fields.items']);
 
-        $dailyBuildsGraph = new Graph($dailyBuilds->keys(),
+        $dailyBuildsGraph = new Graph(
+            $dailyBuilds->keys(),
             new BarDataSet("Total", $dailyBuilds->subtractByKey($myBuilds), "#6B7280"),
             new BarDataSet("You", $myBuilds, "#7BB026")
         );
 
         $gradeDelegations = $project?->status == ProjectStatus::Finished ? $project->gradeDelegations()->with('user')->get()->map(fn(GradeDelegation $gradeDelegation) => [
             'by'         => $gradeDelegation->user->name,
-            'identifier' => $gradeDelegation->pseudonym
+            'identifier' => $gradeDelegation->pseudonym,
         ]) : null;
 
         $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
+
         return view('tasks.show', [
             'course'          => $course,
             'task'            => $task->setHidden(['markdown_description']),
@@ -99,7 +102,7 @@ class TaskController extends Controller
                 'endDay'   => $endDay,
                 'percent'  => $progress,
                 'timeLeft' => $timeLeft,
-                'ended'    => $task->ends_at->isPast()
+                'ended'    => $task->ends_at->isPast(),
             ],
             'pushes'          => $project?->pushes()
                     ->where('created_at', '<=', $task->ends_at)
@@ -115,18 +118,18 @@ class TaskController extends Controller
                 'submitted' => $project != null && ($survey?->isAnswered(auth()->user(), $task) ?? false),
                 'deadline'  => [
                     'forHumans' => $survey?->pivot->deadline->diffForHumans(),
-                    'date'      => $survey?->pivot->deadline->toDateTimeString()
+                    'date'      => $survey?->pivot->deadline->toDateTimeString(),
                 ],
                 'can'       => [
                     'view'   => $survey == null ? false : auth()->user()->can('view', [$survey, $project]),
-                    'answer' => $survey == null ? false : auth()->user()->can('answer', [$survey, $project])
-                ]
+                    'answer' => $survey == null ? false : auth()->user()->can('answer', [$survey, $project]),
+                ],
             ],
             'breadcrumbs'     => [
                 'Courses'     => route('courses.index'),
                 $course->name => route('courses.show', $course->id),
-                $task->name   => null
-            ]
+                $task->name   => null,
+            ],
         ]);
     }
 
@@ -177,11 +180,12 @@ class TaskController extends Controller
             'name'                   => $username,
             'path'                   => $username,
             'namespace_id'           => $groupId,
-            'shared_runners_enabled' => false
+            'shared_runners_enabled' => false,
         ];
 
         $id = rawurlencode((string)$sourceProjectId);
         $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
+
         return json_decode($response->getBody()->getContents(), true);
     }
 
@@ -189,8 +193,9 @@ class TaskController extends Controller
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
-            $course->name => null
+            $course->name => null,
         ];
+
         return view('courses.manage.createTask', compact('course', 'breadcrumbs'));
     }
 
@@ -198,7 +203,7 @@ class TaskController extends Controller
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
-            $course->name => null
+            $course->name => null,
         ];
 
         return view('courses.manage.editTask', compact('course', 'task', 'breadcrumbs'));
@@ -219,9 +224,11 @@ class TaskController extends Controller
             'end-time'    => ['required', 'date_format:H:i'],
         ]);
 
-        try {
+        try
+        {
             $manager->projects()->show($validated['project-id']);
-        } catch(RuntimeException $runtimeException) {
+        } catch(RuntimeException $runtimeException)
+        {
             if($runtimeException->getCode() == 404)
                 return back()
                     ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
@@ -238,11 +245,12 @@ class TaskController extends Controller
             'default_branch_protection' => 0,
             'lfs_enabled'               => false,
             'auto_devops_enabled'       => false,
-            'request_access_enabled'    => false
+            'request_access_enabled'    => false,
         ];
 
         $currentGroup = $manager->groups()->subgroups($course->gitlab_group_id, ['search' => $snakeName]);
-        if(count($currentGroup) == 0) {
+        if(count($currentGroup) == 0)
+        {
             $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
             $groupResponse = json_decode($response->getBody()->getContents(), true);
             if($response->getStatusCode() != 201)
@@ -260,12 +268,14 @@ class TaskController extends Controller
             'short_description' => $validated['description'],
             'starts_at'         => Carbon::parse($validated['from'] . " " . $validated['start-time']),
             'ends_at'           => Carbon::parse($validated['to'] . " " . $validated['end-time']),
-            'gitlab_group_id'   => $groupResponse['id']
+            'gitlab_group_id'   => $groupResponse['id'],
         ]);
 
-        try {
+        try
+        {
             $task->reloadDescriptionFromRepo();
-        } catch(\Exception $ignored) {
+        } catch(\Exception $ignored)
+        {
         }
 
         return redirect()->route('courses.manage.index', $course->id);
@@ -278,7 +288,7 @@ class TaskController extends Controller
             'description' => 'required',
             'from'        => ['required', 'date', 'before:to'],
             'to'          => ['required', 'date', 'after:from'],
-            'start-time'  => ['required', 'date_format:H:i',],
+            'start-time'  => ['required', 'date_format:H:i'],
             'end-time'    => ['required', 'date_format:H:i'],
         ]);
 
@@ -296,14 +306,17 @@ class TaskController extends Controller
     {
         $task->is_visible = !$task->is_visible;
         $task->save();
+
         return redirect()->back()->with('success-task', 'The visibility was updated.');
     }
 
     public function refreshReadme(Course $course, Task $task)
     {
-        try {
+        try
+        {
             $task->reloadDescriptionFromRepo();
-        } catch(\Exception $exception) {
+        } catch(\Exception $exception)
+        {
         }
 
         return redirect()->back()->with('success-task', 'The readme was updated.');
@@ -313,7 +326,7 @@ class TaskController extends Controller
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
-            $course->name => null
+            $course->name => null,
         ];
 
         $ciFile = $task->ciFile();
@@ -326,11 +339,12 @@ class TaskController extends Controller
             'alias'      => '',
             'points'     => 0,
             'isRequired' => false,
-            'isSelected' => false
+            'isSelected' => false,
         ])->toArray();
 
         /** @var SubTask $subTask */
-        foreach($task->sub_tasks->all() as $subTask) {
+        foreach($task->sub_tasks->all() as $subTask)
+        {
             $found = collect($tasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
             if($found === false)
                 continue;

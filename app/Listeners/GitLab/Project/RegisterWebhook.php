@@ -35,15 +35,16 @@ class RegisterWebhook implements ShouldQueue
     {
         $manager = app(GitLabManager::class);
         $currentHooks = collect($manager->projects()->hooks($event->project->project_id));
-        if($currentHooks->isEmpty()) {
+        if($currentHooks->isEmpty())
+        {
             $response = $manager->projects()->addHook($event->project->project_id, 'https://scalableteaching.sdu.dk/api/reporter', [
                 'pipeline_events'         => true,
                 'token'                   => Project::token($event->project),
-                'enable_ssl_verification' => false
+                'enable_ssl_verification' => false,
             ]);
 
             $event->project->update([
-                'hook_id' => $response['id']
+                'hook_id' => $response['id'],
             ]);
         }
     }

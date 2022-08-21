@@ -43,19 +43,23 @@ class SurveyResp implements FromQuery, WithTitle, WithMapping, WithHeadings
 
         return [$row->user->name, ...$response->map(function($response) {
             $values = collect($response['values']);
-            if($values->has('value')) {
+            if($values->has('value'))
+            {
                 $value = $values['value'];
-                $text = match (true) {
+                $text = match (true)
+                {
                     is_int($value) => $this->items[$value],
-                    default => $value
+                    default        => $value
                 };
-            } else {
+            } else
+            {
                 $text = collect($values)->map(function($values) {
                     $partialResponse = $this->items[$values['value']];
                     if (array_key_exists('extras', $values) && $values['extras'] != null)
                     {
                         $partialResponse .= " {$values['extras']}";
                     }
+
                     return $partialResponse;
                 })->implode(";");
             }

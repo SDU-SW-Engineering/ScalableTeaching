@@ -41,7 +41,7 @@ it('fails a user when a project is marked as overdue', function() {
     expect(Grade::firstWhere([
         'user_id'  => $this->user->id,
         'task_id'  => $this->task->id,
-        'selected' => true
+        'selected' => true,
     ])->value)->toBe(GradeEnum::Failed);
 });
 
@@ -52,7 +52,7 @@ it('passes a user when a project is marked as finished', function() {
     expect(Grade::firstWhere([
         'user_id'  => $this->user->id,
         'task_id'  => $this->task->id,
-        'selected' => true
+        'selected' => true,
     ])->value)->toBe(GradeEnum::Passed);
 });
 
@@ -80,7 +80,7 @@ it('disallows students to access grades', function() {
 
     $grade = Grade::factory([
         'source_type' => Task::class,
-        'source_id'   => $this->task->id
+        'source_id'   => $this->task->id,
     ])->for($this->user)->for($this->task)->create();
     post(route('courses.grading.set-selected', [$this->course->id, $grade->id]))->assertStatus(403);
     get(route('courses.grading.task-info', [$this->course->id, $this->task->id]))->assertStatus(403);
@@ -93,24 +93,24 @@ it('allows course responsible to access grades', function() {
 
     $grade = Grade::factory([
         'source_type' => Task::class,
-        'source_id'   => $this->task->id
+        'source_id'   => $this->task->id,
     ])->for($this->user)->for($this->task)->create();
     post(route('courses.grading.set-selected', [$this->course->id, $grade->id]))->assertStatus(200);
     get(route('courses.grading.task-info', [$this->course->id, $this->task->id]))->assertStatus(200);
     put(route('courses.grading.updateGrading', [$this->course->id, $this->user->id]), [
         'grade'  => 'passed',
-        'taskId' => $this->task->id
+        'taskId' => $this->task->id,
     ])->assertStatus(200);
 });
 
 it('selects the new grade as the current one', function() {
     $grade1 = Grade::factory([
         'source_type' => Task::class,
-        'source_id'   => $this->task->id
+        'source_id'   => $this->task->id,
     ])->for($this->user)->for($this->task)->create();
     $grade2 = Grade::factory([
         'source_type' => Task::class,
-        'source_id'   => $this->task->id
+        'source_id'   => $this->task->id,
     ])->for($this->user)->for($this->task)->create();
 
     $grade1->refresh();
@@ -121,11 +121,11 @@ it('selects the new grade as the current one', function() {
 it('does not select a new grade if the current one is created by a user', function() {
     $grade1 = Grade::factory([
         'source_type' => User::class,
-        'source_id'   => $this->courseResponsible->id
+        'source_id'   => $this->courseResponsible->id,
     ])->for($this->user)->for($this->task)->create();
     $grade2 = Grade::factory([
         'source_type' => Task::class,
-        'source_id'   => $this->task->id
+        'source_id'   => $this->task->id,
     ])->for($this->user)->for($this->task)->create();
 
     $grade1->refresh();
@@ -137,11 +137,11 @@ it('changes the selected grade from a history of grades', function() {
     actingAs($this->courseResponsible);
     $grade1 = Grade::factory([
         'source_type' => Task::class,
-        'source_id'   => $this->task->id
+        'source_id'   => $this->task->id,
     ])->for($this->user)->for($this->task)->create();
     $grade2 = Grade::factory([
         'source_type' => Task::class,
-        'source_id'   => $this->task->id
+        'source_id'   => $this->task->id,
     ])->for($this->user)->for($this->task)->create();
 
     post(route('courses.grading.set-selected', [$this->course->id, $grade1->id]))->assertStatus(200);
@@ -157,7 +157,7 @@ it('creates a new grade', function() {
     actingAs($this->courseResponsible);
     put(route('courses.grading.updateGrading', [$this->course->id, $this->user->id]), [
         'grade'  => 'passed',
-        'taskId' => $this->task->id
+        'taskId' => $this->task->id,
     ]);
     expect(Grade::count())->toBe(1);
     $grade = Grade::where('user_id', $this->user->id)->where('task_id', $this->task->id)->first();

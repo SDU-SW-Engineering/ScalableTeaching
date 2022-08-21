@@ -20,7 +20,7 @@ class PipelineFactory extends Factory
                 PipelineStatusEnum::Success,
                 PipelineStatusEnum::Failed,
                 PipelineStatusEnum::Running,
-                PipelineStatusEnum::Pending
+                PipelineStatusEnum::Pending,
             ]),
             'runners'        => [$this->faker->text(30)],
             'user_name'      => $this->faker->bothify('?????##'),
@@ -31,40 +31,36 @@ class PipelineFactory extends Factory
 
     public function succeeding()
     {
-        return $this->state(function (array $attributes)
-        {
+        return $this->state(function (array $attributes) {
             return [
-                'status' => PipelineStatusEnum::Success
+                'status' => PipelineStatusEnum::Success,
             ];
         });
     }
 
     public function failing()
     {
-        return $this->state(function (array $attributes)
-        {
+        return $this->state(function (array $attributes) {
             return [
-                'status' => PipelineStatusEnum::Failed
+                'status' => PipelineStatusEnum::Failed,
             ];
         });
     }
 
     public function running()
     {
-        return $this->state(function (array $attributes)
-        {
+        return $this->state(function (array $attributes) {
             return [
-                'status' => PipelineStatusEnum::Running
+                'status' => PipelineStatusEnum::Running,
             ];
         });
     }
 
     public function pending()
     {
-        return $this->state(function (array $attributes)
-        {
+        return $this->state(function (array $attributes) {
             return [
-                'status' => PipelineStatusEnum::Pending
+                'status' => PipelineStatusEnum::Pending,
             ];
         });
     }

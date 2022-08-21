@@ -15,7 +15,7 @@ beforeEach(function() {
     $this->course = Course::factory()->create();
     $this->task = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->create();
     $this->user = User::factory()->hasAttached($this->course)->create();
     Carbon::setTestNow(Carbon::create(2022, 8, 16));
@@ -117,12 +117,12 @@ test('canStart returns false if the user is not on the same track', function () 
 
     $task1ForTrack1 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track1, 'track')->create();
 
     $task2ForTrack2 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track2, 'track')->create();
 
     Project::factory()->for($this->user, 'ownable')->for($task2ForTrack2)->createQuietly();
@@ -136,12 +136,12 @@ test('canStart returns true if the user is on the correct track', function() {
 
     $task1ForTrack1 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track1, 'track')->create();
 
     $task2ForTrack1 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track1, 'track')->create();
     Project::factory()->for($this->user, 'ownable')->for($task2ForTrack1)->createQuietly();
 
@@ -158,12 +158,12 @@ test('canStart returns false if all group members are not on the same track', fu
 
     $task1ForTrack1 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track1, 'track')->create();
 
     $task2ForTrack2 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track2, 'track')->create();
 
     Project::factory()->for($group, 'ownable')->for($task2ForTrack2)->createQuietly();
@@ -183,12 +183,12 @@ test('canStart returns true if a second group user starts an the task individual
 
     $task1ForTrack1 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track1, 'track')->create();
 
     $task2ForTrack2 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track2, 'track')->create();
 
     Project::factory()->for($this->user, 'ownable')->for($task2ForTrack2)->createQuietly();
@@ -208,12 +208,12 @@ test('canStart returns false if a group tries to start the task an a user has al
 
     $task1ForTrack1 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track1, 'track')->create();
 
     $task2ForTrack2 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track2, 'track')->create();
 
     Project::factory()->for($this->user, 'ownable')->for($task2ForTrack2)->createQuietly();
@@ -233,12 +233,12 @@ test('canStart returns true if a group tries to start the task', function() {
 
     $task1ForTrack1 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track1, 'track')->create();
 
     $task2ForTrack2 = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at' => Carbon::create(2022, 8, 24, 23, 59, 59)
+        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track2, 'track')->create();
 
     expect($task1ForTrack1->canStart($group))->toBeTrue();

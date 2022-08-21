@@ -19,7 +19,7 @@ class TaskFactory extends Factory
             'correction_type'   => CorrectionType::None,
             'starts_at'         => now(),
             'ends_at'           => $this->faker->dateTimeBetween("-11 week", "-6 weeks"),
-            'is_visible'        => true
+            'is_visible'        => true,
         ];
     }
 }

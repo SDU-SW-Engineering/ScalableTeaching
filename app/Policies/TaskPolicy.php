@@ -23,6 +23,7 @@ class TaskPolicy
     {
         if ($task->course->hasTeacher($user))
             return true;
+
         return false;
     }
 
@@ -30,6 +31,7 @@ class TaskPolicy
     {
         if ($task->course->hasTeacher($user))
             return true;
+
         return false;
     }
 }

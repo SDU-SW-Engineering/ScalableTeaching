@@ -15,8 +15,8 @@ class SurveyField extends Model
 
     protected $casts = [
         'has_options' => 'boolean',
-        'type' => SurveyFieldType::class,
-        'required' => 'boolean'
+        'type'        => SurveyFieldType::class,
+        'required'    => 'boolean',
     ];
 
     public function items(): HasMany

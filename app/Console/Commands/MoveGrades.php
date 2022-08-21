@@ -43,10 +43,12 @@ class MoveGrades extends Command
      */
     public function handle()
     {
-        foreach(Project::all() as $project) {
+        foreach(Project::all() as $project)
+        {
             if($project->ownable_type == null)
                 continue;
-            foreach($project->owners() as $owner) {
+            foreach($project->owners() as $owner)
+            {
                 if ($project->status == ProjectStatus::Active)
                     continue;
                 Grade::firstOrCreate([
@@ -54,11 +56,12 @@ class MoveGrades extends Command
                     'user_id'     => $owner->id,
                     'source_type' => Task::class,
                     'source_id'   => $project->task_id,
-                    'value'       => match ($project->status) {
-                        ProjectStatus::Overdue => 'failed',
+                    'value'       => match ($project->status)
+                    {
+                        ProjectStatus::Overdue  => 'failed',
                         ProjectStatus::Finished => 'passed',
-                        default => throw new Exception("Unexpected match value")
-                    }
+                        default                 => throw new Exception("Unexpected match value")
+                    },
                 ]);
             }
         }

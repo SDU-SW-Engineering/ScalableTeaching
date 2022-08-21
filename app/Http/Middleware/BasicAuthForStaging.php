@@ -17,7 +17,8 @@ class BasicAuthForStaging
      */
     public function handle(Request $request, Closure $next)
     {
-        if (session()->has('staging-authed')) {
+        if (session()->has('staging-authed'))
+        {
             return $next($request);
         }
 

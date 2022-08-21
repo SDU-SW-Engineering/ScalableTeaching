@@ -48,7 +48,8 @@ class UpgradeSubtasks extends Command
         $currentProgression = ProjectSubTask::all();
         $pickedFile = null;
 
-        if($currentProgression->count() > 0) {
+        if($currentProgression->count() > 0)
+        {
             $this->info("Saving current progression!");
             $fileName = "subtasks/progress" . date('Y-m-d H:i:s') . '.json';
             Storage::put("subtasks/progress/" . date('Y-m-d H:i:s') . '.json', $currentProgression->toJson(JSON_PRETTY_PRINT));
@@ -64,7 +65,8 @@ class UpgradeSubtasks extends Command
         ProjectSubTask::query()->delete();
         $tasks = collect(json_decode(Storage::get($pickedFile), true))->groupBy('project_id');
 
-        foreach($task->projects as $index => $project) {
+        foreach($task->projects as $index => $project)
+        {
             $completedTasks = $tasks->has($project->id)
                 ? collect($tasks[$project->id])->keyBy('sub_task_id')
                 : collect();
@@ -78,7 +80,7 @@ class UpgradeSubtasks extends Command
                     'sub_task_id' => $subTask->getId(),
                     'points'      => $completedTasks->has($subTask->getId()) ? $subTask->points : 0,
                     'source_type' => GradeDelegation::class,
-                    'source_id'   => $gradeDelegation->id
+                    'source_id'   => $gradeDelegation->id,
                 ];
             })->toArray());
             $this->info("Created subtasks for project " . $project->id);

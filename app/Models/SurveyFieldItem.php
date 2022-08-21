@@ -12,6 +12,6 @@ class SurveyFieldItem extends Model
     protected $hidden = ['created_at', 'updated_at'];
 
     protected $casts = [
-        'allow_input' => 'boolean'
+        'allow_input' => 'boolean',
     ];
 }

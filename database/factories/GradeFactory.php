@@ -14,7 +14,7 @@ class GradeFactory extends Factory
     public function definition()
     {
         return [
-            'value' => 'passed'
+            'value' => 'passed',
         ];
     }
 
@@ -22,7 +22,7 @@ class GradeFactory extends Factory
     {
         return $this->state(function(array $attributes) {
             return [
-                'value' => 'passed'
+                'value' => 'passed',
             ];
         });
     }
@@ -31,7 +31,7 @@ class GradeFactory extends Factory
     {
         return $this->state(function(array $attributes) {
             return [
-                'value' => 'failed'
+                'value' => 'failed',
             ];
         });
     }

@@ -46,7 +46,8 @@ class AnalyticsController extends Controller
 
         $totalProjectsPerDay = $task->totalProjectsPerDay;
         $projectsCompletedPerDay = $task->totalCompletedTasksPerDay;
-        $totalProjectsPerDayGraph = new Graph($totalProjectsPerDay->keys(),
+        $totalProjectsPerDayGraph = new Graph(
+            $totalProjectsPerDay->keys(),
             new LineDataSet("Projects", $totalProjectsPerDay, "#266ab0", true),
             new LineDataSet("Completed", $projectsCompletedPerDay, "#7BB026", true)
         );
@@ -57,12 +58,25 @@ class AnalyticsController extends Controller
             'Courses'     => route('courses.index'),
             $course->name => route('courses.show', $course->id),
             $task->name   => route('courses.tasks.show', [$course->id, $task->id]),
-            'Analytics'   => null
+            'Analytics'   => null,
         ];
 
-        return view('tasks.analytics.index', compact('course', 'task', 'projectCount', 'breadcrumbs',
-            'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday',
-            'totalProjectsPerDayGraph', 'dailyBuildsGraph', 'projects'));
+        return view('tasks.analytics.index', compact(
+            'course',
+            'task',
+            'projectCount',
+            'breadcrumbs',
+            'projectsToday',
+            'finishedCount',
+            'finishedPercent',
+            'failedCount',
+            'failedPercent',
+            'buildCount',
+            'buildsToday',
+            'totalProjectsPerDayGraph',
+            'dailyBuildsGraph',
+            'projects'
+        ));
     }
 
     public function builds(Course $course, Task $task)
@@ -88,6 +102,7 @@ class AnalyticsController extends Controller
     public function pushes(Course $course, Task $task)
     {
         $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
+
         return view('tasks.analytics.pushes', compact('pushes'));
     }
 
@@ -117,9 +132,9 @@ class AnalyticsController extends Controller
                     'name'       => $subTask->getDisplayName(),
                     'maxPoints'  => $subTask->getPoints(),
                     'average'    => $taskAverage,
-                    'percentage' => round($taskAverage / $maxPoints * 100)
+                    'percentage' => round($taskAverage / $maxPoints * 100),
                 ];
-            })
+            }),
         ]);
 
         return view('tasks.analytics.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
@@ -134,11 +149,12 @@ class AnalyticsController extends Controller
                 'id'      => $t->id,
                 'name'    => $t->getName(),
                 'editing' => false,
-                'points'  => $t->points
-            ])
+                'points'  => $t->points,
+            ]),
         ])->values();
+
         return view('tasks.analytics.subTasks', [
-            'subTasks' => $subTasks
+            'subTasks' => $subTasks,
         ]);
     }
 
@@ -146,7 +162,7 @@ class AnalyticsController extends Controller
     {
         $subTaskCollection = new SubTaskCollection();
         collect(\request()->json())->map(fn($group) => [
-            ...collect($group['tasks'])->map(fn($task) => (new SubTask($task['name'], null, $group['name']))->setPoints($task['points']))
+            ...collect($group['tasks'])->map(fn($task) => (new SubTask($task['name'], null, $group['name']))->setPoints($task['points'])),
         ])->flatten()
             ->each(fn(SubTask $subTask) => $subTaskCollection->add($subTask));
         $task->sub_tasks = $subTaskCollection;

@@ -13,6 +13,7 @@ class DefaultController extends Controller
     {
         Artisan::call('migrate:fresh --seed --no-interaction');
         session()->flush();
+
         return "Ok";
     }
 
@@ -21,6 +22,7 @@ class DefaultController extends Controller
         if ($user == -1)
         {
             auth()->logout();
+
             return redirect()->home();
         }
 

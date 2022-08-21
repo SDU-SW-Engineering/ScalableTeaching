@@ -43,19 +43,18 @@ class LoadCurrentProjects extends Command
      */
     public function handle()
     {
-        $groupId     = $this->argument('group');
-        $manager     = app(GitLabManager::class);
+        $groupId = $this->argument('group');
+        $manager = app(GitLabManager::class);
         $resultPager = new ResultPager($manager->connection());
-        $projects    = collect($resultPager->fetchAll($manager->groups(), 'projects', [$groupId]));
+        $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$groupId]));
         $this->info("Discovered {$projects->count()} projects within the group.");
         $task = Task::findOrFail($this->ask('What task does the projects belong to'));
-        $this->withProgressBar($projects, function ($project) use ($task)
-        {
+        $this->withProgressBar($projects, function ($project) use ($task) {
             $task->projects()->updateOrCreate([
-                'project_id' => $project['id']
+                'project_id' => $project['id'],
             ], [
                 'repo_name'  => $project['name'],
-                'created_at' => Carbon::parse($project['created_at'])->setTimezone(config('app.timezone'))
+                'created_at' => Carbon::parse($project['created_at'])->setTimezone(config('app.timezone')),
             ]);
         });
 
