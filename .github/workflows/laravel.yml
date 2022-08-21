@@ -38,11 +38,3 @@ jobs:
         DB_PASSWORD: secret
         DB_DATABASE: scalable
       run: vendor/bin/pest
-  formating:
-    name: PHP-CS-Fixer
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: PHP-CS-Fixer
-        uses: docker://oskarstark/php-cs-fixer-ga
-
