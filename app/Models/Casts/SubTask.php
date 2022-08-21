@@ -62,6 +62,7 @@ class SubTask implements Arrayable
     public function setIsRequired(?bool $isRequired): SubTask
     {
         $this->isRequired = $isRequired;
+
         return $this;
     }
 
@@ -129,7 +130,7 @@ class SubTask implements Arrayable
             'points' => $this->points,
             'group'  => $this->group,
             'name'   => $this->name,
-            'alias'  => $this->alias
+            'alias'  => $this->alias,
         ];
     }
 }

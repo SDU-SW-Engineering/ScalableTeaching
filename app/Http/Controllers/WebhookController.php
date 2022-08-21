@@ -24,14 +24,14 @@ class WebhookController extends Controller
         return match (WebhookTypes::tryFrom(request()->header('X-GitLab-Event')))
         {
             WebhookTypes::Pipeline => $this->pipeline(),
-            WebhookTypes::Push => $this->push(),
+            WebhookTypes::Push     => $this->push(),
             default                => "ignored",
         };
     }
 
     private function pipeline()
     {
-        $project  = Project::firstWhere('project_id', request('project.id'));
+        $project = Project::firstWhere('project_id', request('project.id'));
         $startedAt = Carbon::parse(\request('object_attributes.created_at'))->setTimezone(config('app.timezone'));
         abort_if($startedAt->isAfter($project->task->ends_at) || $startedAt->isBefore($project->task->starts_at), 400, 'Pipeline could not be processed as it is overdue.');
 
@@ -48,13 +48,13 @@ class WebhookController extends Controller
                 'queue_duration' => request('object_attributes.queued_duration') ?? null,
             ]);
 
-        $tracking         = collect($project->task->sub_tasks->all())->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
-        $builds           = collect(request('builds'));
+        $tracking = collect($project->task->sub_tasks->all())->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
+        $builds = collect(request('builds'));
         $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains($build['name']) && $build['status'] == 'success');
         $succeedingBuilds->each(fn($build) => $project->subTasks()->firstOrCreate([
             'sub_task_id' => $tracking->flip()->get($build['name']),
             'source_type' => Pipeline::class,
-            'source_id' => $pipeline->id
+            'source_id' => $pipeline->id,
         ]));
 
         return "OK";
@@ -72,7 +72,7 @@ class WebhookController extends Controller
             'user_name'      => request('user.username'),
             'duration'       => request('object_attributes.duration') ?? null,
             'queue_duration' => request('object_attributes.queued_duration') ?? null,
-            'created_at'     => Carbon::parse(request('object_attributes.created_at'))->setTimezone(config('app.timezone'))
+            'created_at'     => Carbon::parse(request('object_attributes.created_at'))->setTimezone(config('app.timezone')),
         ]);
     }
 
@@ -80,12 +80,12 @@ class WebhookController extends Controller
     {
         /** @var Project $project */
         $project = Project::firstWhere('project_id', request('project.id'));
-        abort_if($project == null,404);
+        abort_if($project == null, 404);
         $project->pushes()->create([
             'before_sha' => request('before'),
-            'after_sha' => request('after'),
-            'ref' => request('ref'),
-            'username' => request('user_username')
+            'after_sha'  => request('after'),
+            'ref'        => request('ref'),
+            'username'   => request('user_username'),
             // todo: use the created at from the push request and not application timestamp
         ]);
 

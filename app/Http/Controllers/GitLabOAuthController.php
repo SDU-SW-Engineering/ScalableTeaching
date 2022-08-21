@@ -28,7 +28,8 @@ class GitLabOAuthController extends Controller
         $dbUser->access_token = $user->token;
         $dbUser->last_login = now();
 
-        try {
+        try
+        {
             $avatarResponse = Http::withHeaders(['Authorization' => 'Bearer ' . $user->token])->get($user->avatar);
             $avatar = Image::make($avatarResponse->body());
 
@@ -37,7 +38,8 @@ class GitLabOAuthController extends Controller
             if(md5($image) != md5($dbUser->avatar))
                 $dbUser->avatar = $image;
 
-        } catch(\Exception $exception) {
+        } catch(\Exception $exception)
+        {
 
         }
         $dbUser->save();

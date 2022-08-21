@@ -19,7 +19,7 @@ class GroupController extends Controller
             ->where('recipient_user_id', auth()->id())->get()->map(fn(GroupInvitation $invite) => [
                 'acceptRoute'  => route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'accept']),
                 'declineRoute' => route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'decline']),
-                'canAccept'    => \Gate::inspect('canAcceptInvite', [$invite->group, $invite])->toArray()
+                'canAccept'    => \Gate::inspect('canAcceptInvite', [$invite->group, $invite])->toArray(),
             ]);
 
         return view('groups.index', [
@@ -27,10 +27,10 @@ class GroupController extends Controller
             'course'         => $course,
             'breadcrumbs'    => [
                 'Courses'     => route('courses.index'),
-                $course->name => null
+                $course->name => null,
             ],
             'groups'         => GroupInformation::collection($course->userGroups(auth()->user())),
-            'invitations'    => $invitations
+            'invitations'    => $invitations,
         ]);
     }
 
@@ -40,7 +40,7 @@ class GroupController extends Controller
     public function create(Course $course)
     {
         $groupRequest = request()->validate([
-            'name' => ['required', 'alpha_hyphen']
+            'name' => ['required', 'alpha_hyphen'],
         ]);
 
         throw_if($course->groups()->where($groupRequest)->exists(), ValidationException::withMessages(['A group with this name already exists']));
@@ -50,7 +50,7 @@ class GroupController extends Controller
 
         return response([
             'groups'          => GroupInformation::collection($course->userGroups(auth()->user())),
-            'canCreateGroups' => auth()->user()->can('createGroup', $course)
+            'canCreateGroups' => auth()->user()->can('createGroup', $course),
         ], 201);
     }
 
@@ -69,7 +69,7 @@ class GroupController extends Controller
     public function inviteUser(Course $course, Group $group)
     {
         $validated = \request()->validate([
-            'email' => ['email']
+            'email' => ['email'],
         ]);
         $foundUser = User::where('email', $validated['email'])->firstOrFail();
         throw_unless($course->hasUser($foundUser), ValidationException::withMessages(['email' => 'This user is not a member of this course.']));
@@ -79,14 +79,14 @@ class GroupController extends Controller
 
         $invitation = $group->invitations()->create([
             'recipient_user_id'  => $foundUser->id,
-            'invited_by_user_id' => auth()->id()
+            'invited_by_user_id' => auth()->id(),
         ]);
 
         $invitation->load('recipient');
 
         return response([
             'invitation'  => $invitation,
-            'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id])
+            'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
         ], 201);
     }
 
@@ -125,7 +125,7 @@ class GroupController extends Controller
 
         return [
             'group_id'  => $group->id,
-            'canDelete' => \Gate::inspect('delete', $group)->toArray()
+            'canDelete' => \Gate::inspect('delete', $group)->toArray(),
         ];
     }
 }

@@ -72,7 +72,8 @@ class CourseTrack extends Model
     {
         $path = [];
         $pointer = $this;
-        do {
+        do
+        {
             $path[] = $pointer;
             $pointer = $pointer->parent;
         } while($pointer != null);

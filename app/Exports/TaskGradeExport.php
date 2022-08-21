@@ -41,10 +41,11 @@ class TaskGradeExport implements WithTitle, FromQuery, WithMapping, WithHeadings
         $points = $row->subTasks->sum('points');
 
         $name = $row->owners()->pluck('name')->implode(', ');
+
         return [
             $name,
             (string)$points,
-            $gradedBy->pluck('user.name')->implode(", ")
+            $gradedBy->pluck('user.name')->implode(", "),
         ];
     }
 
@@ -53,14 +54,14 @@ class TaskGradeExport implements WithTitle, FromQuery, WithMapping, WithHeadings
         return [
             'Name',
             'Points',
-            'Graded by'
+            'Graded by',
         ];
     }
 
     public function columnFormats(): array
     {
         return [
-            'B' => NumberFormat::FORMAT_NUMBER
+            'B' => NumberFormat::FORMAT_NUMBER,
         ];
     }
 }

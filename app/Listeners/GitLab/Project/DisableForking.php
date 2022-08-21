@@ -41,7 +41,7 @@ class DisableForking implements ShouldQueue
             throw new Exception("Import not fully done yet.");
 
         $gitLabManager->projects()->update($event->project->project_id, [
-            'forking_access_level' => 'disabled'
+            'forking_access_level' => 'disabled',
         ]);
     }
 }

@@ -36,15 +36,15 @@ class DownloadProject implements ShouldQueue
         $gitLabManager = app(GitLabManager::class);
 
         $archiveContent = $gitLabManager->repositories()->archive($this->download->project->project_id, [
-            'id' => $this->download->ref
+            'id' => $this->download->ref,
         ], 'zip');
 
         $fileLocation = "tasks/{$this->download->project->task_id}/projects/{$this->download->project_id}_{$this->download->ref}.zip";
         Storage::disk('local')->put($fileLocation, $archiveContent);
 
         $this->download->update([
-            'location' => $fileLocation,
-            'downloaded_at' => now()
+            'location'      => $fileLocation,
+            'downloaded_at' => now(),
         ]);
     }
 }

@@ -23,16 +23,15 @@ class ProjectSubTask extends Model
 
     protected static function booted()
     {
-        static::created(function (ProjectSubTask $projectSubTask)
-        {
-            $project   = $projectSubTask->project;
+        static::created(function (ProjectSubTask $projectSubTask) {
+            $project = $projectSubTask->project;
             $isFinished = static::isFinished($project);
 
             if ($isFinished == false)
                 return;
 
             $project->update([
-                'status' => ProjectStatus::Finished
+                'status' => ProjectStatus::Finished,
             ]);
         });
     }
@@ -45,14 +44,15 @@ class ProjectSubTask extends Model
     protected static function isFinished(Project $project) : bool
     {
         $completedSubTasks = $project->subTasks->pluck('sub_task_id');
-        $task              = $project->task;
+        $task = $project->task;
+
         return match ($task->correction_type)
         {
             CorrectionType::AllTasks                              => ! $task->sub_tasks->isMissingAny($completedSubTasks),
             CorrectionType::RequiredTasks                         => ! $task->sub_tasks->isMissingAnyRequired($completedSubTasks),
             CorrectionType::NumberOfTasks                         => $completedSubTasks->count() >= $task->correction_tasks_required,
             CorrectionType::PointsRequired                        => $task->sub_tasks->points($completedSubTasks) >= $task->correction_points_required,
-            default => false
+            default                                               => false
         };
     }
 

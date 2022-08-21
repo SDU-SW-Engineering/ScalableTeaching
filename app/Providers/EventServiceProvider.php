@@ -26,8 +26,8 @@ class EventServiceProvider extends ServiceProvider
         ProjectCreated::class => [
             RefreshMemberAccess::class,
             DisableForking::class,
-            RegisterWebhook::class
-        ]
+            RegisterWebhook::class,
+        ],
     ];
 
     /**

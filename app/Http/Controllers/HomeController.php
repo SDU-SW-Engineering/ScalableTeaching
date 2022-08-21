@@ -20,30 +20,25 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $averageQueueTime = Cache::remember('queue1MonthAvg', 3600, function ()
-        {
+        $averageQueueTime = Cache::remember('queue1MonthAvg', 3600, function () {
             return Pipeline::where('created_at', '>=', now()->subMonth()->toDateString())
                 ->average('queue_duration');
         });
 
-        $builds = Cache::remember('build1MonthCount', 3600, function ()
-        {
+        $builds = Cache::remember('build1MonthCount', 3600, function () {
             return Pipeline::where('created_at', '>=', now()->subMonth()->toDateString())->count();
         });
 
-        $buildAverageTime = Cache::remember('build1MonthAvg', 3600, function ()
-        {
+        $buildAverageTime = Cache::remember('build1MonthAvg', 3600, function () {
             return Pipeline::where('created_at', '>=', now()->subMonth()->toDateString())
                 ->average('duration');
         });
 
-        $projectCount = Cache::remember('projectCount', 3600, function ()
-        {
+        $projectCount = Cache::remember('projectCount', 3600, function () {
             return Project::count();
         });
 
-        $assignmentCount = Cache::remember('assignmentCount', 3600, function ()
-        {
+        $assignmentCount = Cache::remember('assignmentCount', 3600, function () {
             return Task::count();
         });
 
@@ -53,7 +48,7 @@ class HomeController extends Controller
             'buildCount'      => $builds,
             'buildAvg'        => $buildAverageTime,
             'projectCount'    => $projectCount,
-            'assignmentCount' => $assignmentCount
+            'assignmentCount' => $assignmentCount,
         ]);
     }
 }

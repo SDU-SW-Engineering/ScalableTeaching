@@ -26,9 +26,9 @@ class Grade extends Model
     protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id', 'started_at', 'ended_at'];
 
     protected $casts = [
-        'value'    => Enums\GradeEnum::class,
-        'selected' => 'boolean',
-        'value_raw' => 'array'
+        'value'     => Enums\GradeEnum::class,
+        'selected'  => 'boolean',
+        'value_raw' => 'array',
     ];
 
     public $dates = ['started_at', 'ended_at'];
@@ -53,10 +53,12 @@ class Grade extends Model
     public static function booted()
     {
         static::creating(function(Grade $grade) {
-            if($grade->selected == true) {
+            if($grade->selected == true)
+            {
                 Grade::where('user_id', $grade->user_id)
                     ->where('task_id', $grade->task_id)
                     ->update(['selected' => false]);
+
                 return;
             }
             $userOverridden = Grade::where('user_id', $grade->user_id)

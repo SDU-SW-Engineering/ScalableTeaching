@@ -66,8 +66,8 @@ class DownloadProjects extends Command
             }
 
             $projectDownload = $project->downloads()->create([
-                'ref' => $latestPush->after_sha,
-                'expire_at' => now()->addYears(2)
+                'ref'       => $latestPush->after_sha,
+                'expire_at' => now()->addYears(2),
             ]);
             $queuedCount++;
 

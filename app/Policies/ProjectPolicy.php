@@ -29,6 +29,7 @@ class ProjectPolicy
         $currentProject = $project->task->currentProjectForUser($user);
         if ($currentProject == null)
             return false;
+
         return $currentProject->id == $project->id;
     }
 

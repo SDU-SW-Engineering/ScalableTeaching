@@ -13,8 +13,7 @@ class AddBuildNameColumns extends Migration
      */
     public function up()
     {
-        Schema::table('tasks', function (Blueprint $table)
-        {
+        Schema::table('tasks', function (Blueprint $table) {
             $table->json('sub_tasks')->after('name')->nullable();
             $table
                 ->enum('correction_type', ['none', 'pipeline_success', 'all_tasks', 'required_tasks', 'number_of_tasks', 'points_required'])
@@ -32,8 +31,7 @@ class AddBuildNameColumns extends Migration
      */
     public function down()
     {
-        Schema::table('tasks', function (Blueprint $table)
-        {
+        Schema::table('tasks', function (Blueprint $table) {
             $table->dropColumn(['sub_tasks', 'correction_type', 'correction_value']);
         });
     }

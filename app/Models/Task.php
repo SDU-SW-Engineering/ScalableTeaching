@@ -41,7 +41,7 @@ class Task extends Model
 
     protected $fillable = [
         'description', 'markdown_description', 'source_project_id', 'name', 'sub_tasks',
-        'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required'
+        'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required',
     ];
 
     protected $dates = ['ends_at', 'starts_at'];
@@ -49,7 +49,7 @@ class Task extends Model
     protected $casts = [
         'is_visible'      => 'bool',
         'sub_tasks'       => SubTaskCollection::class,
-        'correction_type' => CorrectionType::class
+        'correction_type' => CorrectionType::class,
     ];
 
     public function reloadDescriptionFromRepo()
@@ -63,7 +63,7 @@ class Task extends Model
 
         $this->update([
             'description'          => $htmlReadme,
-            'markdown_description' => $readme
+            'markdown_description' => $readme,
         ]);
     }
 
@@ -106,6 +106,7 @@ class Task extends Model
         $query = $this->jobs();
         if($withTrash)
             $query->withTrashedParents();
+
         return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 
@@ -215,7 +216,7 @@ class Task extends Model
                 return;
             $fileName = "/" . trim("$dir/$repoFile->name", " /");
             $file = $this->protectedFiles()->firstOrNew([
-                'path' => $fileName
+                'path' => $fileName,
             ]);
             $shaValues = is_array($file->sha_values) ? $file->sha_values : [];
             $shaValues[] = $repoFile->sha;
@@ -230,7 +231,7 @@ class Task extends Model
             return $project->ownable_type == null;
         })->map(function(Project $project) {
             return $project->owners()->map(fn(User $user) => [
-                'project_status' => $project->status
+                'project_status' => $project->status,
             ]);
         })->flatten();
     }
@@ -270,8 +271,10 @@ class Task extends Model
 
     public function canStart(Group | User $entity, &$message = null): bool
     {
-        if(!now()->isBetween($this->starts_at, $this->ends_at)) {
+        if(!now()->isBetween($this->starts_at, $this->ends_at))
+        {
             $message = 'The task cannot be started outside of the task time frame';
+
             return false;
         }
 
@@ -280,19 +283,25 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
-        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
+        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0)
+        {
             $message = "You have already started this task";
+
             return false;
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
+        {
             $message = 'Another user in your group have already started this task';
+
             return false;
         }
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
+        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
+        {
             $message = "Your group have already started this task";
+
             return false;
         }
 
@@ -306,10 +315,13 @@ class Task extends Model
             $groups->pluck('id')
         );
 
-        if($otherTrackHaveBeenPicked) {
+        if($otherTrackHaveBeenPicked)
+        {
             $message = "A conflicting track have already been started, and thus this task cannot be started.";
+
             return false;
         }
+
         return true;
     }
 

@@ -15,24 +15,23 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = auth()->user()->courses->map(function ($course)
-        {
+        $courses = auth()->user()->courses->map(function ($course) {
 
             $tasks = $course->tasks->map(function (Task $task) {
                 $project = $task->currentProjectForUser(auth()->user());
+
                 return [
-                    'task' => $task,
+                    'task'         => $task,
                     'project'      => $project,
-                    'status' => $project?->status
+                    'status'       => $project?->status,
                 ];
             });
 
-            $deadline = $tasks->sort(function ($a, $b)
-            {
+            $deadline = $tasks->sort(function ($a, $b) {
                 $startsAtA = Carbon::parse($a['task']->starts_at);
-                $endsAtA   = Carbon::parse($a['task']->ends_at);
+                $endsAtA = Carbon::parse($a['task']->ends_at);
                 $startsAtB = Carbon::parse($b['task']->starts_at);
-                $endsAtB   = Carbon::parse($b['task']->ends_at);
+                $endsAtB = Carbon::parse($b['task']->ends_at);
 
                 if (now()->between($startsAtA, $endsAtA))
                     return -1;
@@ -50,7 +49,7 @@ class CourseController extends Controller
                 'name'          => $course->name,
                 'taskCount'     => $tasks->count(),
                 'completed'     => $tasks->where('status', 'finished')->count(),
-                'next_deadline' => $deadline != null ? $deadline['task']->ends_at : null
+                'next_deadline' => $deadline != null ? $deadline['task']->ends_at : null,
             ];
         });
 
@@ -58,8 +57,8 @@ class CourseController extends Controller
             'courses'     => $courses,
             'bg'          => 'bg-gray-100 dark:bg-gray-700',
             'breadcrumbs' => [
-                'Courses' => null
-            ]
+                'Courses' => null,
+            ],
         ]);
     }
 
@@ -67,30 +66,27 @@ class CourseController extends Controller
     {
         $tasks = $course->tasks()->whereNull('track_id')->where('is_visible', true)->get()->map(fn (Task $task) => [
             'details' => $task,
-            'project' => $task->currentProjectForUser(auth()->user())
+            'project' => $task->currentProjectForUser(auth()->user()),
         ]);
 
-        $inProgress = $tasks->filter(function ($task)
-        {
+        $inProgress = $tasks->filter(function ($task) {
             return now()->isBetween($task['details']->starts_at, $task['details']->ends_at);
         });
-        $past       = $tasks->filter(function ($task)
-        {
+        $past = $tasks->filter(function ($task) {
             return now()->isAfter($task['details']->ends_at);
         });
-        $upcoming   = $tasks->filter(function ($task)
-        {
+        $upcoming = $tasks->filter(function ($task) {
             return now()->isBefore($task['details']->starts_at);
         });
 
         $taskCount = $tasks->count();
-        $failed    = $tasks->filter(function ($task)
-        {
+        $failed = $tasks->filter(function ($task) {
             if ($task['project'] == null && $task['details']->ends_at->isPast())
                 return true;
+
             return $task['project']?->status == 'overdue';
         })->count();
-        $approved  = $tasks->filter(fn ($task) => $task['project']?->status == 'finished')->count();
+        $approved = $tasks->filter(fn ($task) => $task['project']?->status == 'finished')->count();
 
         return view('courses.show', [
             'course'             => $course,
@@ -104,9 +100,9 @@ class CourseController extends Controller
             'approvedCount'      => $approved,
             'breadcrumbs'        => [
                 'Courses'     => route('courses.index'),
-                $course->name => null
+                $course->name => null,
             ],
-            'tasks'              => $tasks
+            'tasks'              => $tasks,
         ]);
     }
 
@@ -126,12 +122,12 @@ class CourseController extends Controller
             $select->add('tasks.short_description');
             $select->add('tasks.name');
         }
+
         return Course::with([
-            'tasks' => function (HasMany $query) use ($select, $statuses)
-            {
+            'tasks' => function (HasMany $query) use ($select, $statuses) {
                 return $query->select($select->toArray())
                     ->leftJoinSub($statuses, 'projects', 'tasks.id', '=', 'projects.task_id');
-            }
+            },
         ]);
     }
 
@@ -141,15 +137,15 @@ class CourseController extends Controller
             'course'      => $course,
             'breadcrumbs' => [
                 'Courses'     => route('courses.index'),
-                $course->name => null
-            ]
+                $course->name => null,
+            ],
         ]);
     }
 
     public function addTeacher(Course $course)
     {
         $validated = \Validator::make(\request()->all(), [
-            'teacher' => ['required', 'exists:users,id']
+            'teacher' => ['required', 'exists:users,id'],
         ])->validateWithBag('teachers');
 
         $user = User::find($validated['teacher']);

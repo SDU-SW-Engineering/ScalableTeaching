@@ -13,7 +13,7 @@ class CourseFactory extends Factory
         return [
             'name'            => $this->faker->sentence(3),
             'gitlab_group_id' => $this->faker->numberBetween(10, 2000),
-            'enroll_token'    => Str::random(32)
+            'enroll_token'    => Str::random(32),
         ];
     }
 }

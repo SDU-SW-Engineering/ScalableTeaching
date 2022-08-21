@@ -50,7 +50,7 @@ class GroupPolicy
     public function leave(User $user, Group $group)
     {
         $members = $group->users;
-        $member  = $members->firstWhere('id', $user->id);
+        $member = $members->firstWhere('id', $user->id);
         if ($member == null)
             return Response::deny('Not a member of the group.');
 
