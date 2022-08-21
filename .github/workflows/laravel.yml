@@ -34,4 +34,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: application
-          path: ./
+          path: |
+            ./
+            !./vendor
+
