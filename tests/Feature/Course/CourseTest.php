@@ -14,15 +14,21 @@ it('allows admins to create courses', function () {
     $admin = User::factory()->admin()->create();
     actingAs($admin);
     //$this->get('/courses')->assertDontSee('WebTechnologies');
+
     $this->followingRedirects()->post('/courses', [
-        'course-name' => 'WebTechnologies'
+        'course-name' => 'WebTechnologies',
     ])->assertStatus(200)->assertSee('WebTechnologies');
+
+    $this->assertDatabaseHas('courses', [
+        'name' => 'WebTechnologies',
+    ]);
 });
 
-it('tests validation of name', function () {
+it('verifies that the name field is filled during course creation', function () {
     $admin = User::factory()->admin()->create();
     actingAs($admin);
-    $this->assertionSessionHasErrors([
-       'name' => 'The name field is required'
-    ]);
+
+    $response = $this->post('/courses');
+
+    $response->assertSessionHasErrors(['course-name']);
 });
