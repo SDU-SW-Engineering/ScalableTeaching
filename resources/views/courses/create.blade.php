@@ -1,7 +1,6 @@
 @extends('master')
 
 @section('content')
-
     <div class="px-6 pt-6 container mx-auto">
         <form action="{{ route('courses.store') }}" method="post">
             @csrf
