@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use function Ramsey\Uuid\v1;
 
 class CourseController extends Controller
 {
@@ -66,8 +67,12 @@ class CourseController extends Controller
         return view('courses.create');
     }
 
-    public function store()
+    public function store(Request $request)
     {
+        $validated = $request->validate([
+            'name' => 'required|max:255'
+        ]);
+
         $course = Course::create([
             'name'            => \request('course-name'),
             'gitlab_group_id' => 1

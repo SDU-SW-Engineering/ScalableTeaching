@@ -1,6 +1,16 @@
 @extends('master')
 
 @section('content')
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+
+    @endif
     <nav class="bg-gray-200 dark:bg-gray-600 relative z-10 dark:border-gray-700 shadow dark:shadow-lg">
         <div class="container px-6 mx-auto py-2">
             <div>

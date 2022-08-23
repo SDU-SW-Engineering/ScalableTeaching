@@ -18,3 +18,11 @@ it('allows admins to create courses', function () {
         'course-name' => 'WebTechnologies'
     ])->assertStatus(200)->assertSee('WebTechnologies');
 });
+
+it('tests validation of name', function () {
+    $admin = User::factory()->admin()->create();
+    actingAs($admin);
+    $this->assertionSessionHasErrors([
+       'name' => 'The name field is required'
+    ]);
+});
