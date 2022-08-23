@@ -30,8 +30,7 @@ class ProjectFactory extends Factory
      */
     public function active()
     {
-        return $this->state(function (array $attributes)
-        {
+        return $this->state(function (array $attributes) {
             return [
                 'status' => ProjectStatus::Active,
             ];
@@ -45,8 +44,7 @@ class ProjectFactory extends Factory
      */
     public function finished()
     {
-        return $this->state(function (array $attributes)
-        {
+        return $this->state(function (array $attributes) {
             return [
                 'status' => ProjectStatus::Finished,
             ];

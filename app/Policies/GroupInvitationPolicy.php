@@ -23,6 +23,7 @@ class GroupInvitationPolicy
     {
         /** @var Collection $groupMembers */
         $groupMembers = $groupInvitation->group->users;
+
         return $groupMembers->contains('id', $user->id);
     }
 }

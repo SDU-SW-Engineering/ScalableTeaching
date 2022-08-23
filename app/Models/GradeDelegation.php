@@ -18,8 +18,7 @@ class GradeDelegation extends Model
 
     public static function booted()
     {
-        static::creating(function (GradeDelegation $gradeDelegation)
-        {
+        static::creating(function (GradeDelegation $gradeDelegation) {
             do
             {
                 $pseudonym = PhraseGenerator::generate(2);

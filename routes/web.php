@@ -121,9 +121,11 @@ Route::get('random-name', function() {
     return PhraseGenerator::generate();
 })->middleware('auth');
 
-if(app()->environment('local')) {
+if(app()->environment('local'))
+{
     Route::get('impersonate/{user}', function($user) {
         auth()->login(User::findOrFail($user));
+
         return "authed";
     });
 }
@@ -136,5 +138,6 @@ Route::controller(GitLabOAuthController::class)->prefix('login')->middleware('gu
 
 Route::get('logout', function() {
     auth()->logout();
+
     return redirect()->home();
 });

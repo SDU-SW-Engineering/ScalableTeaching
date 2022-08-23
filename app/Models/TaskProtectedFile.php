@@ -23,6 +23,7 @@ class TaskProtectedFile extends Model
         $directory = pathinfo($this->path)['dirname'];
         if ($directory == "\\")
             $directory = "/";
+
         return $directory;
     }
 }

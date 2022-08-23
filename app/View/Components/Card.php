@@ -16,7 +16,7 @@ class Card extends Component
      */
     public function __construct(string $name, string $header)
     {
-        $this->name   = $name;
+        $this->name = $name;
         $this->header = $header;
     }
 

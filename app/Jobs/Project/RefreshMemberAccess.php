@@ -39,10 +39,11 @@ class RefreshMemberAccess implements ShouldQueue
         $gitLabManager = app(GitLabManager::class);
         $supposedMembers = $this->project->owners()->map(function(User $user) use ($gitLabManager) {
             $users = $gitLabManager->users()->all([
-                'username' => $user->username
+                'username' => $user->username,
             ]);
             if(count($users) == 1)
                 return $users[0]['id'];
+
             return null;
         })->reject(function($gitlabId) {
             return $gitlabId == null;
@@ -52,9 +53,11 @@ class RefreshMemberAccess implements ShouldQueue
         $remove = $currentMembers->diff($supposedMembers);
         $this->addUsersToGitlab($this->project, $add);
         $remove->each(function($gitlabUserId) use ($gitLabManager) {
-            try {
+            try
+            {
                 $gitLabManager->projects()->removeMember($this->project->project_id, $gitlabUserId);
-            } catch(\Exception $ignored) {
+            } catch(\Exception $ignored)
+            {
 
             }
         });
@@ -62,11 +65,14 @@ class RefreshMemberAccess implements ShouldQueue
 
     public function addUsersToGitlab(Project $project, $gitlabIds, &$errors = [])
     {
-        foreach($gitlabIds as $user => $gitlabId) {
+        foreach($gitlabIds as $user => $gitlabId)
+        {
             $gitLabManager = app(GitLabManager::class);
-            try {
+            try
+            {
                 $gitLabManager->projects()->addMember($project->project_id, $gitlabId, 30);
-            } catch(\Exception $e) {
+            } catch(\Exception $e)
+            {
                 $message = strtolower($e->getMessage());
                 if(\Str::contains($message, 'should be greater than or equal to'))
                     continue;

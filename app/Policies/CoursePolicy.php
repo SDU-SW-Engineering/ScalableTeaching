@@ -39,6 +39,7 @@ class CoursePolicy
     {
         if ($course->hasMaxGroups($user))
             return Response::deny('Maximum number of groups reached.');
+
         return true;
     }
 

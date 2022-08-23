@@ -48,6 +48,7 @@ class DelegateTasks extends Command
         if ($users->count() == 0)
         {
             $this->error('No users specified.');
+
             return self::FAILURE;
         }
 
@@ -61,6 +62,7 @@ class DelegateTasks extends Command
         if ($confirmed == false)
         {
             $this->info("Operation canceled.");
+
             return self::SUCCESS;
         }
 
@@ -69,7 +71,7 @@ class DelegateTasks extends Command
         foreach($users as $index => $user)
         {
             $user->gradeDelegations()->createMany($splits[$index]->map(fn(Project $project) => [
-                'project_id' => $project->id
+                'project_id' => $project->id,
             ]));
         }
         $this->info("Tasks delegated!");

@@ -22,8 +22,8 @@ class GroupInformation extends JsonResource
     public function toArray($request)
     {
         /** @var Group $group */
-        $group    = $this->resource;
-        $course   = $group->course;
+        $group = $this->resource;
+        $course = $group->course;
         $projects = $group->projects;
 
         return [
@@ -31,7 +31,7 @@ class GroupInformation extends JsonResource
             'name'        => $group->name,
             'memberCap'   => $course->max_group_size,
             'invitations' => $group->invitations->map(fn(GroupInvitation $invitation) => [
-                'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id])
+                'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
             ]),
             'projects'    => $projects,
             'users'       => $group->users->each(fn(User $member) => [
@@ -43,7 +43,7 @@ class GroupInformation extends JsonResource
             'leaveRoute'  => route('courses.groups.leave', [$group->course_id, $group->id]),
             'canDelete'   => Gate::inspect('delete', $group)->toArray(),
             'canLeave'    => Gate::inspect('leave', $group)->toArray(),
-            'isOwner'     => $group->users()->where('user_id', auth()->id())->wherePivot('is_owner', true)->exists()
+            'isOwner'     => $group->users()->where('user_id', auth()->id())->wherePivot('is_owner', true)->exists(),
         ];
     }
 }
