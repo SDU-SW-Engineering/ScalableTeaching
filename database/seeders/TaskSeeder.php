@@ -17,7 +17,8 @@ class TaskSeeder extends Seeder
     public function run()
     {
         Course::all()->each(function(Course $course) {
-            Task::factory(rand(1, 4))->for($course)->create();
+            Task::factory(2)->current()->for($course)->create();
+            Task::factory(2)->future()->for($course)->create();
         });
     }
 }
