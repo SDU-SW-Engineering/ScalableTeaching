@@ -43,7 +43,7 @@
                             <h2 class="text-black dark:text-white font-semibold text-lg mb-2">Assignments</h2>
                             <div class="flex flex-col">
                                 @foreach($assignments as $assignment)
-                                    @include('courses.partials.course', ['task' => $assignment])
+                                    @include('courses.partials.task', ['task' => $assignment])
                                 @endforeach
                             </div>
                         </section>

@@ -64,6 +64,11 @@ class Course extends Model
     {
         return $this->hasMany(CourseRole::class);
     }
+
+    public function projects()
+    {
+         return $this->hasManyThrough(Project::class, Task::class);
+    }
     // endregion
 
     public static function booted()
