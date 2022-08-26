@@ -137,7 +137,8 @@ class Project extends Model
     public function owners(): Collection
     {
         if ($this->ownable_type == User::class)
-            return Collection::wrap($this->ownable);
+            // @phpstan-ignore-next-line
+            return Collection::wrap([$this->ownable]);
 
         return $this->ownable->users()->get();
     }
@@ -172,7 +173,7 @@ class Project extends Model
 
     public static function token(Project|int $project) : string
     {
-        return md5(strtolower($project instanceof Project ? $project->project_id : $project) . config('scalable.webhook_secret'));
+        return md5(strtolower($project instanceof Project ? "$project->project_id" : $project) . config('scalable.webhook_secret'));
     }
 
     public function progress() : int

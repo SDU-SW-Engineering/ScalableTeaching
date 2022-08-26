@@ -61,7 +61,7 @@ class AnalyticsController extends Controller
             'Analytics'   => null,
         ];
 
-        return view('tasks.analytics.index', compact(
+        return view('tasks.admin.index', compact(
             'course',
             'task',
             'projectCount',
@@ -96,14 +96,14 @@ class AnalyticsController extends Controller
         $builds = $buildQuery->paginate(10)->withQueryString();
 
 
-        return view('tasks.analytics.builds', compact('dailyBuildsGraph', 'builds'));
+        return view('tasks.admin.builds', compact('dailyBuildsGraph', 'builds'));
     }
 
     public function pushes(Course $course, Task $task)
     {
         $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
 
-        return view('tasks.analytics.pushes', compact('pushes'));
+        return view('tasks.admin.pushes', compact('pushes'));
     }
 
     public function taskCompletion(Course $course, Task $task)
@@ -137,7 +137,7 @@ class AnalyticsController extends Controller
             }),
         ]);
 
-        return view('tasks.analytics.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
+        return view('tasks.admin.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
     }
 
     public function subTasks(Course $course, Task $task)
@@ -153,7 +153,7 @@ class AnalyticsController extends Controller
             ]),
         ])->values();
 
-        return view('tasks.analytics.subTasks', [
+        return view('tasks.admin.subTasks', [
             'subTasks' => $subTasks,
         ]);
     }
@@ -173,6 +173,6 @@ class AnalyticsController extends Controller
 
     public function gradingOverview(Course $course, Task $task)
     {
-        return view('tasks.analytics.gradingOverview');
+        return view('tasks.admin.gradingOverview');
     }
 }

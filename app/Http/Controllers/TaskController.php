@@ -139,9 +139,8 @@ class TaskController extends Controller
         $isSolo = request('as', 'solo') == 'solo';
         $group = $isSolo ? null : Group::findOrFail(request('as'));
 
-        abort_if( ! $isSolo && ! auth()->user()->can('canStartProject', $group), "You don't have access to this project.");
+        abort_if( ! $isSolo && ! auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
         abort_if( ! $task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
-
 
         $owner = $isSolo ? auth()->user() : $group;
         $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
@@ -198,7 +197,6 @@ class TaskController extends Controller
         ];
 
         $rootObject = new RootQueryObject();
-        dd($rootObject);
 
         return view('courses.manage.new-task', compact('course', 'breadcrumbs'));
     }

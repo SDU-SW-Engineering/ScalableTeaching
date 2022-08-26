@@ -196,6 +196,10 @@ class Task extends Model
         });
     }
 
+    /**
+     * @param Collection $users
+     * @return Collection<int, Project>
+     */
     public function projectsForUsers(Collection $users): Collection
     {
         $projects = Collection::empty();
