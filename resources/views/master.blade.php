@@ -10,6 +10,10 @@
 </head>
 <body class="bg-gray-50 dark:bg-gray-700 h-screen" style="min-width: 480px">
 <div id="app">
+    @env(['staging', 'local'])
+        @include('staging.banner')
+        @include('staging.modal')
+    @endenv
     @includeUnless(isset($hideHeader), 'partials.navbar')
     @yield('content')
 </div>

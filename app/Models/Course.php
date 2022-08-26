@@ -68,8 +68,7 @@ class Course extends Model
 
     public static function booted()
     {
-        static::creating(function (Course $course)
-        {
+        static::creating(function (Course $course) {
             $course->enroll_token = Str::random(32);
         });
     }

@@ -41,6 +41,7 @@ class ExportGradings extends Command
     public function handle()
     {
         Excel::store(new GradeExport(Task::whereIn('id', [14, 15])->get()), 'points.xlsx');
+
         return 0;
     }
 }

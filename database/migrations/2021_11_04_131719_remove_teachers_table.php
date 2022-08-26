@@ -23,8 +23,7 @@ class RemoveTeachersTable extends Migration
      */
     public function down()
     {
-        Schema::create('teachers', function (Blueprint $table)
-        {
+        Schema::create('teachers', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('course_id');
             $table->unsignedBigInteger('user_id');

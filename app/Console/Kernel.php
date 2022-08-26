@@ -21,7 +21,7 @@ class Kernel extends ConsoleKernel
         LoadCurrentProjects::class,
         MarkExpiredProjects::class,
         TaskStatus::class,
-        MoveGrades::class
+        MoveGrades::class,
     ];
 
     /**

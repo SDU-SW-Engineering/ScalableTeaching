@@ -48,7 +48,7 @@ class TaskStatus extends Command
                     $task->name,
                     $project->ownable_type == Group::class ? $project->ownable->name : '',
                     $project->status->value,
-                    implode($project->validation_errors ?? [])
+                    implode($project->validation_errors ?? []),
                 ]);
             });
         });

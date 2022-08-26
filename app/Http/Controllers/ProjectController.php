@@ -33,7 +33,7 @@ class ProjectController extends Controller
             'ran'        => $job->updated_at->diffForHumans(),
             'ran_date'   => $job->updated_at->toDateTimeString(),
             'sub_tasks'  => $job->prettySubTasks,
-            'user_name'  => $job->user_name
+            'user_name'  => $job->user_name,
         ]);
     }
 
@@ -45,9 +45,11 @@ class ProjectController extends Controller
         abort_unless($project->status == 'active', 400);
         \DB::transaction(function() use ($gitLabManager, $project) {
             $found = true;
-            try {
+            try
+            {
                 $gitLabManager->projects()->show($project->project_id);
-            } catch(RuntimeException $runtimeException) {
+            } catch(RuntimeException $runtimeException)
+            {
                 $found = $runtimeException->getCode() != 404;
             }
 
@@ -74,12 +76,14 @@ class ProjectController extends Controller
         $project->ownable()->associate($group)->save();
 
         \App\Jobs\Project\RefreshMemberAccess::dispatch($project);
+
         return "ok";
     }
 
     public function refreshAccess(Project $project)
     {
         \App\Jobs\Project\RefreshMemberAccess::dispatch($project);
+
         return "ok";
     }
 
@@ -87,9 +91,10 @@ class ProjectController extends Controller
     {
         $sha = $project->final_commit_sha;
         abort_if($sha == null, 404);
+
         return response()->streamDownload(function() use ($sha, $project, $gitLabManager) {
             echo $gitLabManager->repositories()->archive($project->project_id, [
-                'sha' => $sha
+                'sha' => $sha,
             ], 'zip');
         }, "$project->repo_name.zip");
     }
@@ -105,7 +110,8 @@ class ProjectController extends Controller
         $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
         $errors = [];
-        foreach($directories as $directory => $files) {
+        foreach($directories as $directory => $files)
+        {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
                 ->setIds(["gid://gitlab/Project/$project->project_id"])
@@ -124,10 +130,12 @@ class ProjectController extends Controller
                 throw new \Exception("Project with id $project->id wasn't found.");
 
             $repoFiles = collect($projects[0]->repository->tree->blobs->nodes);
-            foreach($files as $file) {
+            foreach($files as $file)
+            {
                 $lookFor = $file->baseName;
                 $found = $repoFiles->firstWhere('name', $lookFor);
-                if($found == null) {
+                if($found == null)
+                {
                     $errors[] = "The file \"{$file->path}\" is missing.";
                     continue;
                 }
@@ -141,7 +149,7 @@ class ProjectController extends Controller
 
         $project->update([
             'validated_at'      => now(),
-            'validation_errors' => $errors
+            'validation_errors' => $errors,
         ]);
 
         return redirect()->back();

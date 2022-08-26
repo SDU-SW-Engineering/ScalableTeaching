@@ -43,7 +43,7 @@ class Pipeline extends Model
 
     protected $casts = [
         'status'  => PipelineStatusEnum::class,
-        'runners' => 'json'
+        'runners' => 'json',
     ];
 
     public static $upgradable = [
@@ -61,7 +61,7 @@ class Pipeline extends Model
                 return;
 
             $pipeline->project->update([
-                'status' => ProjectStatus::Finished
+                'status' => ProjectStatus::Finished,
             ]);
         });
     }
@@ -70,6 +70,7 @@ class Pipeline extends Model
     {
         if(!array_key_exists($this->status->value, static::$upgradable))
             return false;
+
         return in_array($to, static::$upgradable[$this->status->value]);
     }
 
@@ -95,7 +96,7 @@ class Pipeline extends Model
 
         return $availableSubTasks->all()->map(fn(SubTask $subTask) => [
             'name'      => $subTask->getDisplayName(),
-            'completed' => $completedSubTasks->contains($subTask->getId())
+            'completed' => $completedSubTasks->contains($subTask->getId()),
         ]);
     }
 

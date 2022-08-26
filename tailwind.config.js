@@ -20,6 +20,9 @@ module.exports = {
                     800: '#42600C',
                     900: '#2B4005'
                 },
+                'gray': {
+                    750: '#2B3544'
+                }
             },
             typography: (theme) => ({
                 light: {

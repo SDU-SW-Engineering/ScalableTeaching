@@ -22,7 +22,7 @@ beforeEach(function() {
 test('creating a child track automatically populates the course_id from parent track', function() {
     $track = $this->base->immediateChildren()->create([
         'name'        => 'test',
-        'description' => 'testing'
+        'description' => 'testing',
     ]);
 
     expect($track->course_id)->toBe($this->base->course_id);
@@ -53,7 +53,7 @@ it('has children', function() {
     expect($this->base->immediateChildren->pluck('id'))->not()->toContain($track3->id);
 });
 
-it('belongs to a course', function(){
+it('belongs to a course', function() {
     expect($this->base->course->id)->toBe($this->course->id);
 });
 
@@ -61,7 +61,7 @@ it('has a root', function() {
 
     /** @var CourseTrack $track2 */
     $track2 = $this->track1->immediateChildren()->create([
-        'name' => 'track 2'
+        'name' => 'track 2',
     ]);
 
     expect($track2->root()->id)->toBe($this->base->id);
@@ -81,18 +81,18 @@ it('has children that can be traversed', function() {
         $track4->id,
         $track5->id,
         $track6->id,
-        $track7->id
+        $track7->id,
     ]);
 
    expect($this->track1->children()->pluck('id')->toArray())->toEqualCanonicalizing([
         $track3->id,
-        $track4->id
+        $track4->id,
     ]);
 
     expect($this->track2->children()->pluck('id')->toArray())->toEqualCanonicalizing([
         $track5->id,
         $track6->id,
-        $track7->id
+        $track7->id,
     ]);
 });
 
@@ -116,7 +116,7 @@ it('traverses nodes that are part of the tree but not part of the path', functio
         $track3->id,
         $track5->id,
         $track6->id,
-        $track7->id
+        $track7->id,
     ]);
 
     expect($this->track2->rootChildrenNotInPath()->pluck('id')->toArray())->toEqualCanonicalizing([
@@ -125,13 +125,13 @@ it('traverses nodes that are part of the tree but not part of the path', functio
         $track4->id,
         $track5->id,
         $track6->id,
-        $track7->id
+        $track7->id,
     ]);
 
     expect($this->track2->rootChildrenNotInPath(false)->pluck('id')->toArray())->toEqualCanonicalizing([
         $this->track1->id,
         $track3->id,
-        $track4->id
+        $track4->id,
     ]);
 });
 

@@ -71,18 +71,18 @@ class Project extends Model
 
     protected $casts = [
         'validation_errors' => 'array',
-        'status'            => ProjectStatus::class
+        'status'            => ProjectStatus::class,
     ];
 
     protected $hidden = ['final_commit_sha', 'validation_errors', 'validated_at'];
 
     protected $fillable = [
         'project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
-        'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at', 'hook_id'
+        'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at', 'hook_id',
     ];
 
     protected $dispatchesEvents = [
-        'created' => ProjectCreated::class
+        'created' => ProjectCreated::class,
     ];
 
     public function ownable() : MorphTo
@@ -138,6 +138,7 @@ class Project extends Model
     {
         if ($this->ownable_type == User::class)
             return Collection::wrap($this->ownable);
+
         return $this->ownable->users()->get();
     }
 
@@ -160,6 +161,7 @@ class Project extends Model
             return "pending";
         if (count($this->validation_errors) > 0)
             return "failed";
+
         return "success";
     }
 
@@ -242,14 +244,15 @@ class Project extends Model
             'source_type' => $ownableType,
             'source_id'   => $ownableId,
             'user_id'     => $user->id,
-            'value'       => match ($status) {
+            'value'       => match ($status)
+            {
                 ProjectStatus::Overdue => 'failed',
                 ProjectStatus::Finished => 'passed',
                 default => throw new Exception("Passes status must be a final value.")
             },
             'value_raw' => $gradeMeta,
             'started_at' => $startedAt,
-            'ended_at' => $endedAt
+            'ended_at' => $endedAt,
         ]));
     }
 

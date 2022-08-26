@@ -13,7 +13,7 @@ class CourseTrackController extends Controller
     {
         $tasks = $course->tasks()->where('track_id', $track->id)->where('is_visible', true)->get()->map(fn(Task $task) => [
             'details' => $task,
-            'project' => $task->currentProjectForUser(auth()->user())
+            'project' => $task->currentProjectForUser(auth()->user()),
         ]);
 
         $trackBreadCrumbs = $track->path()
@@ -27,7 +27,7 @@ class CourseTrackController extends Controller
             'breadcrumbs' => [
                 'Courses'                => route('courses.index'),
                 $course->name            => route('courses.show', $course),
-                ...$trackBreadCrumbs
+                ...$trackBreadCrumbs,
             ],
         ]);
     }

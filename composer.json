@@ -15,6 +15,7 @@
         "badcow/phrase-generator": "dev-master",
         "barryvdh/laravel-ide-helper": "^2.10",
         "erusev/parsedown": "^1.7",
+        "friendsofphp/php-cs-fixer": "^3.10",
         "fruitcake/laravel-cors": "^2.0",
         "gmostafa/php-graphql-oqm": "^1.4",
         "graham-campbell/gitlab": "5.6",

@@ -114,13 +114,13 @@ class SubTaskCollection implements Castable
                 if ($value == null)
                     return new SubTaskCollection();
 
-                return new SubTaskCollection(collect(json_decode($value, true))->map(function ($v)
-                {
+                return new SubTaskCollection(collect(json_decode($value, true))->map(function ($v) {
                     $task = new SubTask($v['name'], $v['alias']);
                     $task->setId($v['id']);
                     $task->setIsRequired($v['required'] ?? null);
                     $task->setPoints($v['points'] ?? null);
                     $task->setGroup($v['group'] ?? null);
+
                     return $task;
                 }));
             }
@@ -131,15 +131,14 @@ class SubTaskCollection implements Castable
                 throw_unless($values->every(fn($v) => $v instanceof SubTask), InvalidArgumentException::class, "Every item must be a SubTask instance.");
                 $id = $values->max(fn(SubTask $task) => $task->getId()) ?? 0;
 
-                return $values->map(function (SubTask $subTask) use (&$id)
-                {
+                return $values->map(function (SubTask $subTask) use (&$id) {
                     return [
                         'id'       => $subTask->hasId() ? $subTask->getId() : ++$id,
                         'name'     => $subTask->getName(),
                         'alias'    => $subTask->getAlias(),
                         'points'   => $subTask->getPoints(),
                         'required' => $subTask->isRequired(),
-                        'group'    => $subTask->getGroup()
+                        'group'    => $subTask->getGroup(),
                     ];
                 })->toJson();
             }

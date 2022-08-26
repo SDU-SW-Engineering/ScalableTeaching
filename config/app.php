@@ -182,7 +182,7 @@ return [
         /*
          * Domain Service Providers
          */
-        \Domain\Analytics\AnalyticsServiceProvider::class
+        \Domain\Analytics\AnalyticsServiceProvider::class,
 
     ],
 

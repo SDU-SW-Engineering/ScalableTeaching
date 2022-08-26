@@ -50,7 +50,7 @@ class VSCodeController extends Controller
         return [
             'type'  => 'success',
             'token' => $userToken->plainTextToken,
-            'name'  => $user->name
+            'name'  => $user->name,
         ];
     }
 
@@ -69,8 +69,8 @@ class VSCodeController extends Controller
             'tasks' => $tasks->map(fn(SubTask $task) => [
                 ...$task->toArray(),
                 'pointsAcquired'   => $pointsGiven->has($task->getId()) ? $pointsGiven->get($task->getId()) : null,
-                'comments' => $comments->has($task->getId()) ? $comments->get($task->getId()) : []
-            ])
+                'comments' => $comments->has($task->getId()) ? $comments->get($task->getId()) : [],
+            ]),
         ])->values();
     }
 
@@ -124,7 +124,7 @@ class VSCodeController extends Controller
                 (new SubTask("On clicking \"Read File\" button, the file Whiskey.txt is read and file content 4 appears in the TextArea", null, '2B: public class PrimaryController'))->setPoints(3),
                 (new SubTask("On clicking \"Clear\" button, the TextArea is cleared", null, '2B: public class PrimaryController'))->setPoints(3),
                 (new SubTask("On clicking \"Sort\" button, the sort() method in the WhiskeyStatistic class is 5 called and the sorted content is displayed in the TextArea.", null, '2B: public class PrimaryController'))->setPoints(6),
-            ]))
+            ])),
         ]);
     }
 
@@ -144,7 +144,7 @@ class VSCodeController extends Controller
                 'repo_name' => $delegatedProjectIds[$project->id],
                 'task_id'   => $project->task_id,
                 'status'    => $project->status,
-                'id'        => $project->id
+                'id'        => $project->id,
             ]);
 
 
@@ -164,13 +164,16 @@ class VSCodeController extends Controller
         $zip = new ZipArchive();
         $zip->open($file, ZipArchive::RDONLY);
         $root = new Directory(".");
-        for($i = 0; $i < $zip->numFiles; $i++) {
+        for($i = 0; $i < $zip->numFiles; $i++)
+        {
             $fileName = $zip->getNameIndex($i);
             $path = explode('/', $fileName);
             $currentDir = $root;
-            for($j = 0; $j < count($path); $j++) {
+            for($j = 0; $j < count($path); $j++)
+            {
                 $file = $path[$j];
-                if($j + 1 < count($path)) {
+                if($j + 1 < count($path))
+                {
                     $nextDirectory = $currentDir->getDirectory($file) ?? $currentDir->addDirectory(new Directory($file));
                     $currentDir = $nextDirectory;
                     continue;
@@ -197,13 +200,14 @@ class VSCodeController extends Controller
         $zip->open($fileOnDisk);
         $fp = $zip->getStream($file);
         $contents = null;
-        while(!feof($fp)) {
+        while(!feof($fp))
+        {
             $contents .= fread($fp, 2);
         }
         fclose($fp);
 
         return [
-            'file' => $contents
+            'file' => $contents,
         ];
     }
 
@@ -219,7 +223,7 @@ class VSCodeController extends Controller
             'tasks.*.points'    => ['nullable', 'numeric'],
             'tasks.*.comment'   => ['nullable', 'string'],
             'startedAt'         => ['required', 'date'],
-            'endedAt'           => ['required', 'date', 'after:startedAt']
+            'endedAt'           => ['required', 'date', 'after:startedAt'],
         ]);
 
         if($validator->fails())
@@ -247,7 +251,7 @@ class VSCodeController extends Controller
             $subTaskComments[] = [
                 'sub_task_id' => $task['subtaskId'],
                 'author_id'   => auth()->id(),
-                'text'        => $task['comment']
+                'text'        => $task['comment'],
             ];
         });
 
@@ -257,7 +261,7 @@ class VSCodeController extends Controller
         $startedAt = \request('startedAt') == null ? null : Carbon::parse(\request('startedAt'))->setTimezone(config('app.timezone'));
         $endedAt = \request('endedAt') == null ? null : Carbon::parse(\request('endedAt'))->setTimezone(config('app.timezone'));
         $project->setProjectStatusFor(ProjectStatus::Finished, GradeDelegation::class, $userDelegation->id, [
-            'subtasks' => \request('tasks')
+            'subtasks' => \request('tasks'),
         ], $startedAt, $endedAt);
 
         return "OK";

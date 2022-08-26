@@ -17,7 +17,7 @@ it('marks projects overdue that is active past the deadline', function() {
         ->for(User::factory(), 'ownable')
         ->for(Task::factory()->for(Course::factory())->create([
             'correction_type' => CorrectionType::PipelineSuccess,
-            'ends_at' => Carbon::create(2022, 1, 22)
+            'ends_at'         => Carbon::create(2022, 1, 22),
         ]))->createQuietly();
 
     Carbon::setTestNow(Carbon::create(2022, 1, 23));
@@ -33,7 +33,7 @@ it('ignores projects that are not past the deadline', function() {
         ->for(User::factory(), 'ownable')
         ->for(Task::factory()->for(Course::factory())->create([
             'correction_type' => CorrectionType::PipelineSuccess,
-            'ends_at' => Carbon::create(2022, 1, 22)
+            'ends_at'         => Carbon::create(2022, 1, 22),
         ]))->createQuietly();
 
     Carbon::setTestNow(Carbon::create(2022, 1, 21));
@@ -49,7 +49,7 @@ it('ignores projects that are active past the deadline when the task correction 
         ->for(User::factory(), 'ownable')
         ->for(Task::factory()->for(Course::factory())->create([
             'correction_type' => CorrectionType::None,
-            'ends_at' => Carbon::create(2022, 1, 22)
+            'ends_at'         => Carbon::create(2022, 1, 22),
         ]))->createQuietly();
 
     Carbon::setTestNow(Carbon::create(2022, 1, 23));

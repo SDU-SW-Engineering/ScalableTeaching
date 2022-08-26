@@ -18,9 +18,9 @@ class ProjectPushFactory extends Factory
     {
         return [
             'before_sha' => $this->faker->sha256,
-            'after_sha' => $this->faker->sha256,
-            'ref' => 'origin/master',
-            'username' => $this->faker->userName
+            'after_sha'  => $this->faker->sha256,
+            'ref'        => 'origin/master',
+            'username'   => $this->faker->userName,
         ];
     }
 }

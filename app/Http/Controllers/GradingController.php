@@ -18,7 +18,7 @@ class GradingController extends Controller
             return [
                 'student' => [
                     'id'   => $student->id,
-                    'name' => $student->name
+                    'name' => $student->name,
                 ],
                 'tasks'   => $course->tasks->map(fn(Task $task) => [
                     'history'        => false,
@@ -27,9 +27,9 @@ class GradingController extends Controller
                     'saving'         => false,
                     'task'           => [
                         'id'   => $task->id,
-                        'name' => $task->name
+                        'name' => $task->name,
                     ],
-                    'grade'          => $taskGrades[$task->id]->grades->where('user_id', $student->id)->firstWhere('selected', true)?->toArray()
+                    'grade'          => $taskGrades[$task->id]->grades->where('user_id', $student->id)->firstWhere('selected', true)?->toArray(),
                 ]),
             ];
         })->sortBy('student.name');
@@ -46,14 +46,14 @@ class GradingController extends Controller
             'value'       => GradeEnum::from(request('grade')),
             'source_type' => User::class,
             'source_id'   => auth()->id(),
-            'selected'    => true
+            'selected'    => true,
         ]);
     }
 
     public function taskInfo(Course $course, Task $task)
     {
         return $task->grades()->where([
-            'user_id' => \request('user')
+            'user_id' => \request('user'),
         ])->orderByDesc('created_at')->get();
     }
 

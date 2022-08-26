@@ -28,7 +28,7 @@ class RenameJobStatusTableToPipelines extends Migration
      */
     public function down()
     {
-        Schema::table('pipelines', function(Blueprint $table){
+        Schema::table('pipelines', function(Blueprint $table) {
             $table->dropColumn('runners');
             $table->renameColumn('build_id', 'pipeline_id');
             $table->string('repo_name');

@@ -13,7 +13,7 @@ class SurveyResponse extends Model
     protected $fillable = ['ownable_id', 'ownable_type', 'response', 'user_id'];
 
     protected $casts = [
-        'response' => 'array'
+        'response' => 'array',
     ];
 
     public function user()
@@ -35,6 +35,7 @@ class SurveyResponse extends Model
     {
         if ($project instanceof Project)
             $project = $project->id;
+
         return $query->where('ownable_type', Project::class)->where('ownable_id', $project);
     }
 
@@ -47,6 +48,7 @@ class SurveyResponse extends Model
     {
         if ($task instanceof Task)
             $task = $task->id;
+
         return $query->where('ownable_type', Task::class)->where('ownable_id', $task);
     }
 
@@ -54,6 +56,7 @@ class SurveyResponse extends Model
     {
         if ($user instanceof User)
             $user = $user->id;
+
         return $query->where('user_id', $user);
     }
 }
