@@ -99,16 +99,6 @@ class Task extends Model
     {
         return $this->hasManyThrough(ProjectPush::class, Project::class);
     }
-    // endregion
-
-    public function dailyBuilds(bool $withTrash = false, $withToday = false): \Illuminate\Support\Collection
-    {
-        $query = $this->jobs();
-        if($withTrash)
-            $query->withTrashedParents();
-
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
-    }
 
     public function projects(): HasMany
     {
@@ -118,6 +108,16 @@ class Task extends Model
     public function protectedFiles(): HasMany
     {
         return $this->hasMany(TaskProtectedFile::class);
+    }
+    // endregion
+
+    public function dailyBuilds(bool $withTrash = false, $withToday = false): \Illuminate\Support\Collection
+    {
+        $query = $this->jobs();
+        if($withTrash)
+            $query->withTrashedParents();
+
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 
     public function getProjectsPerDayAttribute()

@@ -22,4 +22,22 @@ class TaskFactory extends Factory
             'is_visible'        => true,
         ];
     }
+
+    public function group($group)
+    {
+        return $this->state(function(array $attributes) use ($group) {
+            return [
+                'grouped_by' => $group,
+            ];
+        });
+    }
+
+    public function exercise()
+    {
+        return $this->state(function(array $attributes) {
+           return [
+                'type' => 'exercise',
+           ];
+        });
+    }
 }
