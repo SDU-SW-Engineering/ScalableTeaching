@@ -12,7 +12,7 @@ class GradingController extends Controller
 {
     public function index(Course $course)
     {
-        $taskGrades = $course->tasks()->with('grades')->get()->keyBy('id');
+        $taskGrades = $course->tasks()->assignments()->with('grades')->get()->keyBy('id');
 
         $grades = $course->students->map(function(User $student) use ($taskGrades, $course) {
             return [
@@ -20,7 +20,7 @@ class GradingController extends Controller
                     'id'   => $student->id,
                     'name' => $student->name,
                 ],
-                'tasks'   => $course->tasks->map(fn(Task $task) => [
+                'tasks'   => $course->tasks()->assignments()->get()->map(fn(Task $task) => [
                     'history'        => false,
                     'historyEntries' => null,
                     'adding'         => false,
@@ -34,7 +34,7 @@ class GradingController extends Controller
             ];
         })->sortBy('student.name');
 
-        return view('courses.grading.index', ['grades' => $grades, 'course' => $course]);
+        return view('courses.manage.grading', ['grades' => $grades, 'course' => $course]);
     }
 
     public function updateGrading(Course $course, User $user)

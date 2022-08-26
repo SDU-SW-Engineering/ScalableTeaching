@@ -46,13 +46,6 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             ->middleware('can:removeMember,group,user');
     });
 
-    Route::group(['prefix' => 'grading', 'as' => 'grading.', 'middleware' => 'can:grade,course'], function() {
-        Route::get('/', [GradingController::class, 'index'])->name('index');
-        Route::put('users/{user}', [GradingController::class, 'updateGrading'])->name('updateGrading');
-        Route::get('tasks/{task}', [GradingController::class, 'taskInfo'])->name('task-info');
-        Route::post('{grade}/set-selected', [GradingController::class, 'setSelected'])->name('set-selected');
-    });
-
     Route::group(['prefix' => 'manage', 'as' => 'manage.'], function() {
         Route::get('/', [CourseController::class, 'showManage'])->name('index')->middleware('can:manage,course');
         Route::get('roles', [UserManagementController::class, 'roles'])->name('roles');
@@ -66,5 +59,13 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
         Route::post('tasks', [TaskController::class, 'store'])->name('storeTask')->middleware('can:manage,course');
         Route::post('add-teacher', [CourseController::class, 'addTeacher'])->name('addTeacher')->middleware('can:manage,course');
         Route::get('teachers/{teacher}/remove', [CourseController::class, 'removeTeacher'])->name('removeTeacher')->middleware('can:manage,course');
+
+        Route::group(['prefix' => 'grading', 'as' => 'grading.', 'middleware' => 'can:grade,course'], function() {
+            Route::get('/', [GradingController::class, 'index'])->name('index');
+            Route::put('users/{user}', [GradingController::class, 'updateGrading'])->name('updateGrading');
+            Route::get('tasks/{task}', [GradingController::class, 'taskInfo'])->name('task-info');
+            Route::post('{grade}/set-selected', [GradingController::class, 'setSelected'])->name('set-selected');
+        });
+
     });
 });

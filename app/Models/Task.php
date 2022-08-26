@@ -107,6 +107,16 @@ class Task extends Model
     }
     // endregion
 
+    public function scopeAssignments(Builder $query): Builder
+    {
+        return $query->where('type', 'assignment');
+    }
+
+    public function scopeExercises(Builder $query): Builder
+    {
+        return $query->where('type', 'exercise');
+    }
+
     public function dailyBuilds(bool $withTrash = false, $withToday = false): \Illuminate\Support\Collection
     {
         $query = $this->jobs();
