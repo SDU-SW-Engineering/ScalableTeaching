@@ -64,7 +64,7 @@ class Grade extends Model
             $userOverridden = Grade::where('user_id', $grade->user_id)
                 ->where('task_id', $grade->task_id)
                 ->where('source_type', User::class)->exists();
-            $grade->selected = !$userOverridden;
+            $grade->selected = ! $userOverridden;
             if($userOverridden)
                 return;
             Grade::where('user_id', $grade->user_id)

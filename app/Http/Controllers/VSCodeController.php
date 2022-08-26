@@ -39,7 +39,7 @@ class VSCodeController extends Controller
         if($validated->fails())
             return response("Token missing", 400);
         $token = $request->get('token');
-        if(!Cache::has("vs-code-auth:$token"))
+        if( ! Cache::has("vs-code-auth:$token"))
             return response(['type' => 'error', 'message' => 'Not found'], 404);
 
         $userId = Cache::get("vs-code-auth:$token");
@@ -200,7 +200,7 @@ class VSCodeController extends Controller
         $zip->open($fileOnDisk);
         $fp = $zip->getStream($file);
         $contents = null;
-        while(!feof($fp))
+        while( ! feof($fp))
         {
             $contents .= fread($fp, 2);
         }

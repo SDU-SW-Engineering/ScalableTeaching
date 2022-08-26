@@ -68,7 +68,7 @@ class Pipeline extends Model
 
     public function isUpgradable(PipelineStatusEnum $to): bool
     {
-        if(!array_key_exists($this->status->value, static::$upgradable))
+        if( ! array_key_exists($this->status->value, static::$upgradable))
             return false;
 
         return in_array($to, static::$upgradable[$this->status->value]);

@@ -10,7 +10,7 @@ class AdminViewComposer
 {
     public function compose(View $view)
     {
-        if (!request()->route()->hasParameter('course') && request()->route()->hasParameter('task'))
+        if ( ! request()->route()->hasParameter('course') && request()->route()->hasParameter('task'))
             return;
 
         /** @var Course $course */

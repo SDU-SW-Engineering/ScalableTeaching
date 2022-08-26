@@ -152,7 +152,7 @@ class Project extends Model
 
     public function dailyBuilds($withToday = false) : \Illuminate\Support\Collection
     {
-        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(! $withToday))->get();
+        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate( ! $withToday))->get();
     }
 
     public function getValidationStatusAttribute()
@@ -198,7 +198,7 @@ class Project extends Model
 
     private function plainProgress() : int
     {
-        if ($this->status == ProjectStatus::Finished && !in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
+        if ($this->status == ProjectStatus::Finished && ! in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
             return 100;
 
         $subTasks = $this->task->sub_tasks;
@@ -212,7 +212,7 @@ class Project extends Model
 
     public function getIsMissedAttribute() : bool
     {
-        if(!$this->task->hasEnded)
+        if( ! $this->task->hasEnded)
             return false;
         if(in_array($this->task->correction_type, [CorrectionType::None, CorrectionType::Manual]))
             return $this->pushes()->where('created_at', '<', $this->task->ends_at)->count() == 0;

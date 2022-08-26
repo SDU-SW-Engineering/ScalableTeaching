@@ -123,7 +123,7 @@ class Task extends Model
         if($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
     }
 
     public function projects(): HasMany
@@ -287,7 +287,7 @@ class Task extends Model
 
     public function canStart(Group | User $entity, &$message = null): bool
     {
-        if(!now()->isBetween($this->starts_at, $this->ends_at))
+        if( ! now()->isBetween($this->starts_at, $this->ends_at))
         {
             $message = 'The task cannot be started outside of the task time frame';
 

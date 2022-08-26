@@ -106,7 +106,6 @@ class ProjectController extends Controller
     public function validateProject(Course $course, Task $task, Project $project)
     {
         if ($project->final_commit_sha == null)
-
             return redirect()->back()->withErrors('Can\'t validate this project as it isn\' finished yet');
 
 
@@ -148,7 +147,7 @@ class ProjectController extends Controller
 
                 $shaValues = collect($file->sha_values);
                 $shaIntact = $shaValues->contains($found->sha);
-                if (!$shaIntact)
+                if ( ! $shaIntact)
                 {
                     $errors[] = "The file \"{$file->path}\" has been altered! Expected one of [{$shaValues->join(', ')}] but got $found->sha.";
                 }

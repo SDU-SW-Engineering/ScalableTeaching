@@ -13,9 +13,17 @@ $rules = [
     'curly_braces_position'                 => [
         'control_structures_opening_brace' => 'next_line_unless_newline_at_signature_end'
     ],
+    'trim_array_spaces'                     => true,
+    'no_trailing_comma_in_list_call'        => true,
     'no_useless_else'                       => true,
     'no_trailing_comma_in_singleline_array' => true,
-    'blank_line_before_statement' => [
+    'no_superfluous_elseif'                 => true,
+    'no_unneeded_curly_braces'              => true,
+    'no_useless_nullsafe_operator'          => true,
+    'not_operator_with_space'               => true,
+    'ternary_operator_spaces'               => true,
+    'ternary_to_null_coalescing'            => true,
+    'blank_line_before_statement'           => [
         'statements' => [
             'return'
         ]

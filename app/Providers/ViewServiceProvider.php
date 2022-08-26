@@ -44,7 +44,7 @@ class ViewServiceProvider extends ServiceProvider
             $course = request()->route('course');
             $task = request()->route('task');
 
-            if(!($course instanceof Course && $task instanceof Task))
+            if( ! ($course instanceof Course && $task instanceof Task))
                 return;
 
             $view->with('course', $course);

@@ -34,7 +34,7 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task)
     {
-        abort_if(!$task->is_visible && auth()->user()->cannot('manage', $course), 401);
+        abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
 
         return $this->showProject($course, $task, $project);
@@ -139,8 +139,8 @@ class TaskController extends Controller
         $isSolo = request('as', 'solo') == 'solo';
         $group = $isSolo ? null : Group::findOrFail(request('as'));
 
-        abort_if(!$isSolo && !auth()->user()->can('canStartProject', $group), "You don't have access to this project.");
-        abort_if(!$task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
+        abort_if( ! $isSolo && ! auth()->user()->can('canStartProject', $group), "You don't have access to this project.");
+        abort_if( ! $task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
 
 
         $owner = $isSolo ? auth()->user() : $group;
@@ -308,7 +308,7 @@ class TaskController extends Controller
 
     public function toggleVisibility(Course $course, Task $task)
     {
-        $task->is_visible = !$task->is_visible;
+        $task->is_visible = ! $task->is_visible;
         $task->save();
 
         return redirect()->back()->with('success-task', 'The visibility was updated.');

@@ -153,7 +153,7 @@ class CourseController extends Controller
         if($course->users()->where(['user_id' => auth()->id()])->exists())
             return redirect()->route('courses.show', [$course->id]);
 
-        if(!request()->has('confirm'))
+        if( ! request()->has('confirm'))
             return view('courses.enroll-dialog', compact('course'));
 
         $course->users()->attach(auth()->id(), ['role' => 'student']);

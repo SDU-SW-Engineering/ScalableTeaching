@@ -71,7 +71,7 @@ class SurveyController extends Controller
                 $temp = [];
                 foreach($value as $item)
                 {
-                    abort_if(!$validItemIds->contains($item), 400, 'Invalid option supplied.');
+                    abort_if( ! $validItemIds->contains($item), 400, 'Invalid option supplied.');
                     $temp[] = [
                         'value'  => $item,
                         'extras' => $request->json('extras.v' . $item),
@@ -83,7 +83,7 @@ class SurveyController extends Controller
                 ];
                 continue;
             }
-            abort_if(!$validItemIds->contains($value), 400, 'Invalid option supplied.');
+            abort_if( ! $validItemIds->contains($value), 400, 'Invalid option supplied.');
 
             $fields[] = [
                 'field'  => $field->id,

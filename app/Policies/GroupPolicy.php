@@ -83,7 +83,7 @@ class GroupPolicy
             return Response::deny("Maximum number of groups reached.");
 
         $userIsEligible = $group->projects->every(fn (Project $project) => $project->task->currentProjectForUser($user) == null);
-        if (!$userIsEligible)
+        if ( ! $userIsEligible)
             return Response::deny("This group is already working on a project that you have also started.");
 
         return true;
