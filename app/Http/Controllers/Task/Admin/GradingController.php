@@ -25,12 +25,12 @@ class GradingController extends Controller
     {
         $request->validate([
             'role'  => ['required', Rule::in($course->roles->pluck('id')), Rule::notIn($task->delegations->pluck('course_role_id'))],
-            'tasks' => ['required', 'numeric']
+            'tasks' => ['required', 'numeric'],
         ]);
 
         $task->delegations()->create([
             'course_role_id'  => $request->get('role'),
-            'number_of_tasks' => $request->get('tasks')
+            'number_of_tasks' => $request->get('tasks'),
         ]);
 
         return redirect()->back();
@@ -39,7 +39,7 @@ class GradingController extends Controller
     public function removeDelegation(Request $request, Course $course, Task $task)
     {
         $request->validate([
-            'role'  => ['required', Rule::in($task->delegations->pluck('id'))]
+            'role'  => ['required', Rule::in($task->delegations->pluck('id'))],
         ]);
 
         $task->delegations()->where('id', $request->get('role'))->delete();

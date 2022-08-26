@@ -122,6 +122,7 @@ class Task extends Model
         $query = $this->jobs();
         if($withTrash)
             $query->withTrashedParents();
+
         return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 

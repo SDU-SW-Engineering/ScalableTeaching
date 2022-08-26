@@ -21,7 +21,7 @@ class AdminViewComposer
             'Courses'     => route('courses.index'),
             $course->name => route('courses.show', $course->id),
             $task->name   => route('courses.tasks.show', [$course->id, $task->id]),
-            'Analytics'   => null
+            'Analytics'   => null,
         ];
 
         $view->with('breadcrumbs', $breadcrumbs);

@@ -33,7 +33,7 @@ class ViewServiceProvider extends ServiceProvider
             $breadcrumbs = [
                 'Courses'     => route('courses.index'),
                 $course->name => route('courses.show', $course->id),
-                'Management'  => null
+                'Management'  => null,
             ];
             $view->with('breadcrumbs', $breadcrumbs);
 

@@ -19,14 +19,14 @@ class CourseRoleSeeder extends Seeder
             $course->roles()->createMany([
                 [
                     'name'    => 'Student',
-                    'default' => true
+                    'default' => true,
                 ],
                 [
-                    'name' => 'Teaching Assistant'
+                    'name' => 'Teaching Assistant',
                 ],
                 [
-                    'name' => 'Professor'
-                ]
+                    'name' => 'Professor',
+                ],
             ]);
         });
     }

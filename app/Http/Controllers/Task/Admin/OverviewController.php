@@ -34,7 +34,8 @@ class OverviewController extends Controller
 
         $totalProjectsPerDay = $task->totalProjectsPerDay;
         $projectsCompletedPerDay = $task->totalCompletedTasksPerDay;
-        $totalProjectsPerDayGraph = new Graph($totalProjectsPerDay->keys(),
+        $totalProjectsPerDayGraph = new Graph(
+            $totalProjectsPerDay->keys(),
             new LineDataSet("Projects", $totalProjectsPerDay, "#266ab0", true),
             new LineDataSet("Completed", $projectsCompletedPerDay, "#7BB026", true)
         );
@@ -43,8 +44,20 @@ class OverviewController extends Controller
         $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B"));
 
 
-        return view('tasks.admin.index', compact('course', 'task', 'projectCount',
-            'projectsToday', 'finishedCount', 'finishedPercent', 'failedCount', 'failedPercent', 'buildCount', 'buildsToday',
-            'totalProjectsPerDayGraph', 'dailyBuildsGraph', 'projects'));
+        return view('tasks.admin.index', compact(
+            'course',
+            'task',
+            'projectCount',
+            'projectsToday',
+            'finishedCount',
+            'finishedPercent',
+            'failedCount',
+            'failedPercent',
+            'buildCount',
+            'buildsToday',
+            'totalProjectsPerDayGraph',
+            'dailyBuildsGraph',
+            'projects'
+        ));
     }
 }

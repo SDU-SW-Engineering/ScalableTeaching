@@ -23,6 +23,7 @@ use Domain\GitLab\CITask;
 use Gitlab\Exception\RuntimeException;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
+use GraphQL\SchemaObject\RootQueryObject;
 use Http\Client\Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -196,7 +197,10 @@ class TaskController extends Controller
             $course->name => null,
         ];
 
-        return view('courses.manage.createTask', compact('course', 'breadcrumbs'));
+        $rootObject = new RootQueryObject();
+        dd($rootObject);
+
+        return view('courses.manage.new-task', compact('course', 'breadcrumbs'));
     }
 
     public function edit(Course $course, Task $task)
