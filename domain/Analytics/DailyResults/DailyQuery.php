@@ -8,27 +8,34 @@ use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
+/**
+ * @template TModel of \Illuminate\Database\Eloquent\Model
+ */
 class DailyQuery
 {
     /**
-     * @var Builder
+     * @var Builder<TModel>
      */
-    private $query;
+    private Builder $query;
     /**
      * @var string
      */
-    private $column;
+    private string $column;
 
+    /**
+     * @param Builder<TModel> $query
+     * @param string $column
+     */
     public function __construct(Builder $query, string $column = "created_at")
     {
-        $this->query  = $query;
+        $this->query = $query;
         $this->column = $column;
     }
 
     public function daily(Carbon $start, Carbon $end) : DailyResults
     {
-        $start             = $start->startOfDay();
-        $end               = $end->endOfDay();
+        $start = $start->startOfDay();
+        $end = $end->endOfDay();
         $occurrencesPerDay = $this->query
             ->select($this->selection())
             ->whereBetween("{$this->query->getQuery()->from}.$this->column", [$start, $end])
@@ -43,10 +50,16 @@ class DailyQuery
     {
         return [
             DB::raw('count(*) as count'),
-            DB::raw("date(`{$this->query->getQuery()->from}`.`{$this->column}`) as date")
+            DB::raw("date(`{$this->query->getQuery()->from}`.`{$this->column}`) as date"),
         ];
     }
 
+    /**
+     * @param Collection<int|string, int> $occurrencesPerDay
+     * @param Carbon $start
+     * @param Carbon $end
+     * @return Collection<int|string, int>
+     */
     private function fillGaps(Collection $occurrencesPerDay, Carbon $start, Carbon $end) : Collection
     {
         $dates = CarbonPeriod::create($start, $end)->toArray();
@@ -57,7 +70,6 @@ class DailyQuery
                 continue;
             $occurrencesPerDay[$dateString] = 0;
         }
-
 
         return $occurrencesPerDay->sortKeys();
     }

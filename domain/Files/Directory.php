@@ -39,12 +39,12 @@ class Directory implements \JsonSerializable
         return $directory;
     }
 
-    public function addFile(File $file)
+    public function addFile(File $file) : void
     {
         $this->files[] = $file;
     }
 
-    public function getDirectory(string $name)
+    public function getDirectory(string $name) : ?Directory
     {
         foreach($this->directories as $directory)
         {
