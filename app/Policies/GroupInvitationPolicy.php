@@ -17,11 +17,11 @@ class GroupInvitationPolicy
      *
      * @param User $user
      * @param GroupInvitation $groupInvitation
-     * @return Response|bool
+     * @return bool
      */
-    public function delete(User $user, GroupInvitation $groupInvitation)
+    public function delete(User $user, GroupInvitation $groupInvitation) : bool
     {
-        /** @var Collection $groupMembers */
+        /** @var Collection<int, User> $groupMembers */
         $groupMembers = $groupInvitation->group->users;
 
         return $groupMembers->contains('id', $user->id);

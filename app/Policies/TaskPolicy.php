@@ -17,7 +17,7 @@ class TaskPolicy
      *
      * @param User $user
      * @param Task $task
-     * @return Response|bool
+     * @return bool
      */
     public function view(User $user, Task $task)
     {
@@ -27,7 +27,7 @@ class TaskPolicy
         return false;
     }
 
-    public function viewAnalytics(User $user, Task $task)
+    public function viewAnalytics(User $user, Task $task) : bool
     {
         if ($task->course->hasTeacher($user))
             return true;

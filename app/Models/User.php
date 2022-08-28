@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -81,6 +82,9 @@ class User extends Authenticatable
 
     protected $dates = ['last_login'];
 
+    /**
+     * @return BelongsToMany<Group>
+     */
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)
@@ -89,33 +93,48 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function projects()
+    /**
+     * @return MorphMany<Project>
+     */
+    public function projects(): MorphMany
     {
         return $this->morphMany(Project::class, 'ownable');
     }
 
-    public function getProjectNameAttribute()
+    public function getProjectNameAttribute() : string
     {
         return \Str::kebab($this->username);
     }
 
-    public function courses()
+    /**
+     * @return BelongsToMany<Course>
+     */
+    public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class)
             ->as(CourseUser::class)
             ->withTimestamps();
     }
 
-    public function grades()
+    /**
+     * @return HasMany<Grade>
+     */
+    public function grades(): HasMany
     {
         return $this->hasMany(Grade::class);
     }
 
-    public function surveys()
+    /**
+     * @return BelongsToMany<Survey>
+     */
+    public function surveys(): BelongsToMany
     {
         return $this->belongsToMany(Survey::class, 'survey_owners');
     }
 
+    /**
+     * @return HasMany<GradeDelegation>
+     */
     public function gradeDelegations(): HasMany
     {
         return $this->hasMany(GradeDelegation::class);

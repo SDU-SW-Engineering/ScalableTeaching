@@ -8,7 +8,7 @@ use Illuminate\View\View;
 
 class AdminViewComposer
 {
-    public function compose(View $view)
+    public function compose(View $view) : void
     {
         if ( ! request()->route()->hasParameter('course') && request()->route()->hasParameter('task'))
             return;

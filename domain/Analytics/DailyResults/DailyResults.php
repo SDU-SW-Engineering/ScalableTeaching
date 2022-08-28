@@ -13,7 +13,7 @@ class DailyResults
     private Collection $results;
 
     /**
-     * @param Collection<int|string, int> $data
+     * @param Collection<int|string,int> $data
      */
     public function __construct(Collection $data)
     {
@@ -21,7 +21,7 @@ class DailyResults
     }
 
     /**
-     * @return Collection<int|string, int>
+     * @return Collection<int|string,int>
      */
     public function get() : Collection
     {

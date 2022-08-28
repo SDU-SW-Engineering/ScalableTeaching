@@ -5,6 +5,10 @@ namespace App\Models;
 use App\Models\Casts\SubTask;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
+use App\ProjectStatus;
+use Carbon\Carbon;
+use Domain\Analytics\DailyResults\DailyQuery;
+use Domain\Analytics\DailyResults\DailyResults;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
@@ -22,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @throws ModelNotFoundException<Task>
@@ -53,7 +58,7 @@ class Task extends Model
         'correction_type' => CorrectionType::class,
     ];
 
-    public function reloadDescriptionFromRepo()
+    public function reloadDescriptionFromRepo() : void
     {
         $gitlabManager = app(GitLabManager::class);
         $project = $gitlabManager->projects()->show($this->source_project_id);
@@ -69,21 +74,34 @@ class Task extends Model
     }
 
     // region relationships
+
+    /**
+     * @return BelongsTo<Course, Task>
+     */
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
-    public function jobs()
+    /**
+     * @return HasManyThrough<Pipeline>
+     */
+    public function jobs(): HasManyThrough
     {
         return $this->hasManyThrough(Pipeline::class, Project::class)->withTrashedParents();
     }
 
+    /**
+     * @return HasMany<Grade>
+     */
     public function grades(): HasMany
     {
         return $this->hasMany(Grade::class);
     }
 
+    /**
+     * @return BelongsTo<CourseTrack,Task>|null
+     */
     public function track(): ?BelongsTo
     {
         return $this->belongsTo(CourseTrack::class);
@@ -96,28 +114,48 @@ class Task extends Model
             ->withTimestamps()->first();
     }
 
+    /**
+     * @return HasManyThrough<ProjectPush>
+     */
     public function pushes() : HasManyThrough
     {
         return $this->hasManyThrough(ProjectPush::class, Project::class);
     }
 
+    /**
+     * @return HasMany<TaskDelegation>
+     */
     public function delegations() : HasMany
     {
         return $this->hasMany(TaskDelegation::class);
     }
     // endregion
 
+    /**
+     * @param Builder<Task> $query
+     * @return Builder<Task>
+     */
     public function scopeAssignments(Builder $query): Builder
     {
         return $query->where('type', 'assignment');
     }
 
+    /**
+     * @param Builder<Task> $query
+     * @return Builder<Task>
+     */
     public function scopeExercises(Builder $query): Builder
     {
         return $query->where('type', 'exercise');
     }
 
-    public function dailyBuilds(bool $withTrash = false, $withToday = false): \Illuminate\Support\Collection
+
+    /**
+     * @param bool $withTrash
+     * @param bool $withToday
+     * @return \Illuminate\Support\Collection<int|string,int>
+     */
+    public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection
     {
         $query = $this->jobs();
         if($withTrash)
@@ -126,22 +164,31 @@ class Task extends Model
         return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
     }
 
+    /**
+     * @return HasMany<Project>
+     */
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
     }
 
+    /**
+     * @return HasMany<TaskProtectedFile>
+     */
     public function protectedFiles(): HasMany
     {
         return $this->hasMany(TaskProtectedFile::class);
     }
 
-    public function getProjectsPerDayAttribute()
+    public function getProjectsPerDayAttribute() : DailyResults
     {
         return $this->projects()->daily($this->starts_at, $this->earliestEndDate())->get();
     }
 
-    public function getTotalProjectsPerDayAttribute()
+    /**
+     * @return DailyQuery<Project>
+     */
+    public function getTotalProjectsPerDayAttribute() : DailyQuery
     {
         return $this->projects()->daily($this->starts_at, $this->earliestEndDate())->total();
     }
@@ -153,7 +200,7 @@ class Task extends Model
         );
     }
 
-    public function getTotalCompletedTasksPerDayAttribute()
+    public function getTotalCompletedTasksPerDayAttribute() : int
     {
         return $this->projects()
             ->withTrashed()
@@ -162,7 +209,7 @@ class Task extends Model
             ->total();
     }
 
-    public function earliestEndDate($excludeToday = false)
+    public function earliestEndDate(bool $excludeToday = false) : Carbon
     {
         return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
     }
@@ -186,8 +233,8 @@ class Task extends Model
     }
 
     /**
-     * @param Collection $users
-     * @return Collection
+     * @param Collection<int,User> $users
+     * @return Collection<int,User>
      */
     public function progressStatus(Collection $users): Collection
     {
@@ -197,12 +244,13 @@ class Task extends Model
     }
 
     /**
-     * @param Collection $users
-     * @return Collection<int, Project>
+     * @param Collection<int,User> $users
+     * @return Collection<int,Project>
      */
     public function projectsForUsers(Collection $users): Collection
     {
-        $projects = Collection::empty();
+        /** @var Collection<int, Project> $projects */
+        $projects = new Collection();
         $users->each(function(User $user) use ($projects) {
             $project = $this->currentProjectForUser($user);
             if($project == null)
@@ -213,7 +261,7 @@ class Task extends Model
         return $projects;
     }
 
-    public function loadShaValuesFromDirectory(string $dir = "", ?string $selectFile = null)
+    public function loadShaValuesFromDirectory(string $dir = "", ?string $selectFile = null) : void
     {
         $rootObject = new RootQueryObject();
         $rootObject->selectProjects((new RootProjectsArgumentsObject())
@@ -231,6 +279,7 @@ class Task extends Model
         if(count($projects) == 0)
             return;
 
+        // @phpstan-ignore-next-line
         collect($projects[0]->repository->tree->blobs->nodes)->each(function($repoFile) use ($selectFile, $dir) {
             if($selectFile != null && $repoFile->name != $selectFile)
                 return;
@@ -245,6 +294,10 @@ class Task extends Model
         });
     }
 
+
+    /**
+     * @return \Illuminate\Support\Collection<int, ProjectStatus>
+     */
     public function participants(): \Illuminate\Support\Collection
     {
         return $this->projects->reject(function(Project $project) {
@@ -256,20 +309,28 @@ class Task extends Model
         })->flatten();
     }
 
+    /**
+     * @param User|null $user
+     * @return Grade|null
+     */
     public function grade(User $user = null)
     {
         if($user == null)
             $user = auth()->user();
         if($this->grades()->where('user_id', $user->id)->first() != null)
             return $this->grades()->where('user_id', $user->id)->first();
+        return null;
     }
 
-    public function sourcedGrades()
+    /**
+     * @return MorphMany<Grade>
+     */
+    public function sourcedGrades(): MorphMany
     {
         return $this->morphMany(Grade::class, 'source');
     }
 
-    public function ciFile()
+    public function ciFile() : ?string
     {
         $rootObject = new RootQueryObject();
         $rootObject->selectProjects((new RootProjectsArgumentsObject())
@@ -289,7 +350,7 @@ class Task extends Model
         return $files[0]->rawBlob;
     }
 
-    public function canStart(Group | User $entity, &$message = null): bool
+    public function canStart(Group|User $entity, string &$message = null): bool
     {
         if( ! now()->isBetween($this->starts_at, $this->ends_at))
         {
@@ -345,7 +406,12 @@ class Task extends Model
         return true;
     }
 
-    private function otherTrackHasBeenPicked($users, $groups): bool
+    /**
+     * @param array|int|Arrayable<int, int> $users
+     * @param array|int|Arrayable<int, int> $groups
+     * @return bool
+     */
+    private function otherTrackHasBeenPicked(array|int|Arrayable $users, array|int|Arrayable $groups): bool
     {
         $siblings = $this->track->rootChildrenNotInPath(false)->pluck('id');
         $siblingTasks = Task::whereIn('track_id', $siblings)->get();
@@ -359,6 +425,11 @@ class Task extends Model
         return $startedUserTasks->count() > 0 || $startedGroupTasks->count() > 0;
     }
 
+    /**
+     * @param array|int|Arrayable<int, int> $userIds
+     * @param array|int|Arrayable<int, int> $taskIds
+     * @return Collection<int, Project>
+     */
     private static function usersHaveBegunTasks(array|int|Arrayable $userIds, array|int|Arrayable $taskIds): Collection
     {
         $userIds = Collection::wrap($userIds);
@@ -371,6 +442,11 @@ class Task extends Model
         )->get();
     }
 
+    /**
+     * @param array|int|Arrayable<int, int> $groupIds
+     * @param array|int|Arrayable<int, int> $taskIds
+     * @return Collection<int, Project>
+     */
     private static function groupsHaveBegunTasks(array|int|Arrayable $groupIds, array|int|Arrayable $taskIds): Collection
     {
         $groupIds = Collection::wrap($groupIds);

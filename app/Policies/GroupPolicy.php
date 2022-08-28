@@ -47,7 +47,7 @@ class GroupPolicy
         return true;
     }
 
-    public function leave(User $user, Group $group)
+    public function leave(User $user, Group $group) : Response|bool
     {
         $members = $group->users;
         $member = $members->firstWhere('id', $user->id);
@@ -60,22 +60,22 @@ class GroupPolicy
         return true;
     }
 
-    public function canStartProject(User $user, Group $group)
+    public function canStartProject(User $user, Group $group) : bool
     {
         return $this->view($user, $group);
     }
 
-    public function invite(User $user, Group $group)
+    public function invite(User $user, Group $group) : bool
     {
         return $this->view($user, $group);
     }
 
-    public function respondInvite(User $user, Group $group, GroupInvitation $groupInvitation)
+    public function respondInvite(User $user, Group $group, GroupInvitation $groupInvitation) : bool
     {
         return $groupInvitation->recipient_user_id == $user->id;
     }
 
-    public function canAcceptInvite(User $user, Group $group, GroupInvitation $groupInvitation)
+    public function canAcceptInvite(User $user, Group $group, GroupInvitation $groupInvitation) : Response|bool
     {
         if ($group->users()->count() >= $group->course->max_group_size)
             return Response::deny("Group is full.");
@@ -89,7 +89,7 @@ class GroupPolicy
         return true;
     }
 
-    public function removeMember(User $user, Group $group, User $userToRemove)
+    public function removeMember(User $user, Group $group, User $userToRemove) : bool
     {
         if ($user->id == $userToRemove->id)
             return false;
