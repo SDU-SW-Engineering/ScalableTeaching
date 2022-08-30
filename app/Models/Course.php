@@ -24,7 +24,6 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereUpdatedAt($value)
- * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Task[] $tasks
  * @property-read Collection|CourseRole[] $roles
  * @property-read int|null $tasks_count
@@ -43,31 +42,85 @@ class Course extends Model
     protected $hidden = ['enroll_token'];
 
     // region Relationships
+
+    /**
+     * @return HasMany<Task>
+     */
     public function tasks() : HasMany
     {
         return $this->hasMany(Task::class);
     }
 
+    /**
+     * @return HasMany<Group>
+     */
     public function groups() : HasMany
     {
         return $this->hasMany(Group::class);
     }
 
-    public function members()
+    /**
+     * @return BelongsToMany<User>
+     */
+    public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->as(CourseUser::class)
             ->withTimestamps();
     }
 
-    public function roles()
+    /**
+     * @return HasMany<CourseRole>
+     */
+    public function roles(): HasMany
     {
         return $this->hasMany(CourseRole::class);
     }
 
-    public function projects()
+    /**
+     * @return HasManyThrough<Project>
+     */
+    public function projects(): HasManyThrough
     {
          return $this->hasManyThrough(Project::class, Task::class);
+    }
+
+    /**
+     * @return HasManyThrough<GroupInvitation>
+     */
+    public function groupInvitations() : HasManyThrough
+    {
+        return $this->hasManyThrough(GroupInvitation::class, Group::class);
+    }
+
+    /**
+     * @return BelongsToMany<User>
+     */
+    public function teachers() : BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->as(CourseUser::class)
+            ->wherePivot('role', 'teacher')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<User>
+     */
+    public function students() : BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->as(CourseUser::class)
+            ->wherePivot('role', 'student')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<CourseTrack>
+     */
+    public function tracks() : HasMany
+    {
+        return $this->hasMany(CourseTrack::class);
     }
     // endregion
 
@@ -78,18 +131,17 @@ class Course extends Model
         });
     }
 
-    public function userGroups(User $user)
+    /**
+     * @param User $user
+     * @return Collection<int,Group>
+     */
+    public function userGroups(User $user): Collection
     {
         return $this->groups()
             ->with(['users', 'invitations.recipient', 'projects'])
             ->whereRelation('users', 'user_id', $user->id)
             ->latest()
             ->get();
-    }
-
-    public function groupInvitations() : HasManyThrough
-    {
-        return $this->hasManyThrough(GroupInvitation::class, Group::class);
     }
 
     public function hasMaxGroups(User $user) : bool
@@ -106,41 +158,13 @@ class Course extends Model
         return $currentCount >= $upperLimit;
     }
 
-    public function teachers() : BelongsToMany
-    {
-        return $this->belongsToMany(User::class)
-            ->as(CourseUser::class)
-            ->wherePivot('role', 'teacher')
-            ->withTimestamps();
-    }
-
-    public function students() : BelongsToMany
-    {
-        return $this->belongsToMany(User::class)
-            ->as(CourseUser::class)
-            ->wherePivot('role', 'student')
-            ->withTimestamps();
-    }
-
-    public function users() : BelongsToMany
-    {
-        return $this->belongsToMany(User::class)
-            ->as(CourseUser::class)
-            ->withTimestamps();
-    }
-
-    public function tracks() : HasMany
-    {
-        return $this->hasMany(CourseTrack::class);
-    }
-
     public function hasTeacher(User $user) : bool
     {
         return $this->teachers()->where('user_id', $user->id)->exists();
     }
 
-    public function hasUser(User $user) : bool
+    public function hasMember(User $user) : bool
     {
-        return $this->users()->where('user_id', $user->id)->exists();
+        return $this->members()->where('user_id', $user->id)->exists();
     }
 }

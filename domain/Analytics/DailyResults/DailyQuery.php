@@ -36,6 +36,7 @@ class DailyQuery
     {
         $start = $start->startOfDay();
         $end = $end->endOfDay();
+        /** @phpstan-ignore-next-line  */
         $occurrencesPerDay = $this->query
             ->select($this->selection())
             ->whereBetween("{$this->query->getQuery()->from}.$this->column", [$start, $end])
@@ -55,10 +56,10 @@ class DailyQuery
     }
 
     /**
-     * @param Collection<int|string, int> $occurrencesPerDay
+     * @param Collection<string, int> $occurrencesPerDay
      * @param Carbon $start
      * @param Carbon $end
-     * @return Collection<int|string, int>
+     * @return Collection<string, int>
      */
     private function fillGaps(Collection $occurrencesPerDay, Carbon $start, Carbon $end) : Collection
     {

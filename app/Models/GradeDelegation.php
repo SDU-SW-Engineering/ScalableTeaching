@@ -6,8 +6,6 @@ use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Support\Str;
 
 class GradeDelegation extends Model
 {
@@ -28,11 +26,17 @@ class GradeDelegation extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<User,GradeDelegation>
+     */
     public function user() : BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Project,GradeDelegation>
+     */
     public function project() : BelongsTo
     {
         return $this->belongsTo(Project::class);

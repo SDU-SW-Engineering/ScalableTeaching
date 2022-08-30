@@ -21,7 +21,7 @@ class CoursePolicy
      */
     public function view(User $user, Course $course) : bool
     {
-        return $course->users()->where('user_id', $user->id)->exists();
+        return $course->members()->where('user_id', $user->id)->exists();
     }
 
 

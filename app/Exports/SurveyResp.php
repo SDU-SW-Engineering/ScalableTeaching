@@ -27,7 +27,10 @@ class SurveyResp implements FromQuery, WithTitle, WithMapping, WithHeadings
         $this->items = $this->survey->fields()->with('items')->get()->pluck('items', 'id')->flatten()->pluck('name', 'id')->toArray();
     }
 
-    public function query()
+    /**
+     * @return EloquentBuilder<SurveyResponse>
+     */
+    public function query(): EloquentBuilder
     {
         return SurveyResponse::query()->where('survey_id', $this->survey->id)->orderBy('created_at');
     }
@@ -39,23 +42,23 @@ class SurveyResp implements FromQuery, WithTitle, WithMapping, WithHeadings
 
     public function map($row): array
     {
-        $response = collect($row->response);
+        $response = new Collection($row->response);
 
         return [$row->user->name, ...$response->map(function($response) {
-            $values = collect($response['values']);
+            $values = new Collection($response['values']);
             if($values->has('value'))
             {
                 $value = $values['value'];
                 $text = match (true)
                 {
-                    is_int($value) => $this->items[$value],
+                    is_int($value) => $this->items[$value], //@phpstan-ignore-line
                     default        => $value
                 };
             } else
             {
                 $text = collect($values)->map(function($values) {
                     $partialResponse = $this->items[$values['value']];
-                    if (array_key_exists('extras', $values) && $values['extras'] != null)
+                    if (array_key_exists('extras', $values) && $values['extras'] != null) //@phpstan-ignore-line
                     {
                         $partialResponse .= " {$values['extras']}";
                     }

@@ -28,11 +28,13 @@ use Http\Client\Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class TaskController extends Controller
 {
-    public function show(Course $course, Task $task)
+    public function show(Course $course, Task $task) : View
     {
         abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
@@ -40,7 +42,7 @@ class TaskController extends Controller
         return $this->showProject($course, $task, $project);
     }
 
-    public function showProject(Course $course, Task $task, ?Project $project)
+    public function showProject(Course $course, Task $task, ?Project $project) : View
     {
         $myGroups = $course->groups()
             ->whereRelation('users', 'user_id', auth()->id())
@@ -51,10 +53,10 @@ class TaskController extends Controller
         $percent = number_format(now()->diffInSeconds($task->starts_at) / $task->starts_at->diffInSeconds($task->ends_at) * 100, 2);
         $progress = min($percent, 100);
         $timeLeft = $task->ends_at->isPast() ? '' : $task->ends_at->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 2) . ' left';
-        $myBuilds = $project == null ? collect() : $project->dailyBuilds(false);
-        $dailyBuilds = $task->dailyBuilds(true, false);
+        $myBuilds = $project == null ? new Collection() : $project->dailyBuilds();
+        $dailyBuilds = $task->dailyBuilds(true);
 
-        $project?->append('isMissed');
+        $project?->append('is_missed');
         $completedSubTasks = $project?->subTasks->keyBy('sub_task_id');
         $completedSubTaskComments = $project?->subTaskComments()->with('author')->get()->map(fn(ProjectSubTaskComment $comment) => [
             'sub_task_id' => $comment->sub_task_id,
@@ -80,7 +82,7 @@ class TaskController extends Controller
         $dailyBuildsGraph = new Graph(
             $dailyBuilds->keys(),
             new BarDataSet("Total", $dailyBuilds->subtractByKey($myBuilds), "#6B7280"),
-            new BarDataSet("You", $myBuilds, "#7BB026")
+            new BarDataSet("You", $myBuilds->values(), "#7BB026")
         );
 
         $gradeDelegations = $project?->status == ProjectStatus::Finished ? $project->gradeDelegations()->with('user')->get()->map(fn(GradeDelegation $gradeDelegation) => [
@@ -134,7 +136,7 @@ class TaskController extends Controller
         ]);
     }
 
-    public function doCreateProject(Course $course, Task $task, GitLabManager $gitLabManager)
+    public function doCreateProject(Course $course, Task $task, GitLabManager $gitLabManager) : string
     {
         $isSolo = request('as', 'solo') == 'solo';
         $group = $isSolo ? null : Group::findOrFail(request('as'));
@@ -174,7 +176,15 @@ class TaskController extends Controller
         return $dbProject;
     }
 
-    private function forkProject(GitLabManager $manager, $username, int $sourceProjectId, $groupId)
+    /**
+     * @param GitLabManager $manager
+     * @param string $username
+     * @param int $sourceProjectId
+     * @param int $groupId
+     * @return array<string,string>
+     * @throws Exception
+     */
+    private function forkProject(GitLabManager $manager, string $username, int $sourceProjectId, int $groupId) : array
     {
         $params = [
             'name'                   => $username,
@@ -189,19 +199,17 @@ class TaskController extends Controller
         return json_decode($response->getBody()->getContents(), true);
     }
 
-    public function showCreate(Course $course)
+    public function showCreate(Course $course) : View
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
             $course->name => null,
         ];
 
-        $rootObject = new RootQueryObject();
-
         return view('courses.manage.new-task', compact('course', 'breadcrumbs'));
     }
 
-    public function edit(Course $course, Task $task)
+    public function edit(Course $course, Task $task) : View
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
@@ -214,7 +222,7 @@ class TaskController extends Controller
     /**
      * @throws \Throwable
      */
-    public function store(Course $course, GitLabManager $manager)
+    public function store(Course $course, GitLabManager $manager) : RedirectResponse
     {
         $validated = request()->validateWithBag('new', [
             'name'        => 'required',
@@ -283,7 +291,7 @@ class TaskController extends Controller
         return redirect()->route('courses.manage.index', $course->id);
     }
 
-    public function update(Course $course, Task $task)
+    public function update(Course $course, Task $task) : RedirectResponse
     {
         $validated = request()->validateWithBag('task', [
             'name'        => 'required',
@@ -304,7 +312,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The changes were saved.');
     }
 
-    public function toggleVisibility(Course $course, Task $task)
+    public function toggleVisibility(Course $course, Task $task) : RedirectResponse
     {
         $task->is_visible = ! $task->is_visible;
         $task->save();
@@ -312,7 +320,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The visibility was updated.');
     }
 
-    public function refreshReadme(Course $course, Task $task)
+    public function refreshReadme(Course $course, Task $task) : RedirectResponse
     {
         try
         {
@@ -324,7 +332,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The readme was updated.');
     }
 
-    public function subtasks(Course $course, Task $task)
+    public function subtasks(Course $course, Task $task) : View|RedirectResponse
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
@@ -361,9 +369,9 @@ class TaskController extends Controller
         return view('courses.manage.taskSubtasks', compact('course', 'task', 'breadcrumbs', 'tasks'));
     }
 
-    public function updateSubtasks(Course $course, Task $task)
+    public function updateSubtasks(Course $course, Task $task) : string
     {
-        $tasks = collect(request('tasks'));
+        $tasks = new Collection(request('tasks'));
         $correctionType = CorrectionType::from(request('correctionType'));
 
         $selected = $tasks->filter(fn($task) => $task['isSelected']);

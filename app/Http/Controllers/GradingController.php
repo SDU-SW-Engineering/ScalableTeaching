@@ -7,10 +7,12 @@ use App\Models\Enums\GradeEnum;
 use App\Models\Grade;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\View\View;
 
 class GradingController extends Controller
 {
-    public function index(Course $course)
+    public function index(Course $course) : View
     {
         $taskGrades = $course->tasks()->assignments()->with('grades')->get()->keyBy('id');
 
@@ -37,7 +39,7 @@ class GradingController extends Controller
         return view('courses.manage.grading', ['grades' => $grades, 'course' => $course]);
     }
 
-    public function updateGrading(Course $course, User $user)
+    public function updateGrading(Course $course, User $user) : void
     {
         abort_unless($course->students->contains('id', $user->id), 400);
 
@@ -50,14 +52,19 @@ class GradingController extends Controller
         ]);
     }
 
-    public function taskInfo(Course $course, Task $task)
+    /**
+     * @param Course $course
+     * @param Task $task
+     * @return Collection<int,Grade>
+     */
+    public function taskInfo(Course $course, Task $task) : Collection
     {
         return $task->grades()->where([
             'user_id' => \request('user'),
         ])->orderByDesc('created_at')->get();
     }
 
-    public function setSelected(Course $course, Grade $grade)
+    public function setSelected(Course $course, Grade $grade) : string
     {
         $grade->select();
 

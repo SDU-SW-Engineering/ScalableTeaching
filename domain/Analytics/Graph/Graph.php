@@ -13,11 +13,11 @@ class Graph implements Arrayable
 {
     /** @var Collection<int|string, DataSet>  */
     private Collection $dataSets;
-    /** @var Collection<int|string, string> */
+    /** @var Collection<int, string> */
     private Collection $labels;
 
     /**
-     * @param Collection<int|string, string> $labels
+     * @param Collection<int, string> $labels
      * @param DataSet ...$dataSets
      */
     public function __construct(Collection $labels, DataSet ...$dataSets)
@@ -32,7 +32,7 @@ class Graph implements Arrayable
     }
 
     /**
-     * @param Collection<int|string, string> $labels
+     * @param Collection<int, string> $labels
      * @return void
      */
     public function setLabels(Collection $labels) : void
@@ -51,7 +51,7 @@ class Graph implements Arrayable
     }
 
     /**
-     * @return Collection<int|string, string>
+     * @return Collection<int, string>
      */
     public function labels() : Collection
     {

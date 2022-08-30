@@ -23,7 +23,7 @@ class GroupPolicy
      */
     public function view(User $user, Group $group)
     {
-        return $group->users()->where('user_id', $user->id)->exists();
+        return $group->members()->where('user_id', $user->id)->exists();
     }
 
     /**
@@ -38,7 +38,7 @@ class GroupPolicy
         if ( ! $this->isGroupOwner($group, $user))
             return Response::deny('Only the group owner can delete the group.');
 
-        if ($group->users()->where('user_id', '!=', $user->id)->count())
+        if ($group->members()->where('user_id', '!=', $user->id)->count())
             return Response::deny('Group needs to be empty before it can be deleted (excluding owner).');
 
         if ($group->projects()->count() > 0)
@@ -49,7 +49,7 @@ class GroupPolicy
 
     public function leave(User $user, Group $group) : Response|bool
     {
-        $members = $group->users;
+        $members = $group->members;
         $member = $members->firstWhere('id', $user->id);
         if ($member == null)
             return Response::deny('Not a member of the group.');
@@ -77,7 +77,7 @@ class GroupPolicy
 
     public function canAcceptInvite(User $user, Group $group, GroupInvitation $groupInvitation) : Response|bool
     {
-        if ($group->users()->count() >= $group->course->max_group_size)
+        if ($group->members()->count() >= $group->course->max_group_size)
             return Response::deny("Group is full.");
         if ($group->course->hasMaxGroups($user))
             return Response::deny("Maximum number of groups reached.");
@@ -106,6 +106,6 @@ class GroupPolicy
      */
     private function isGroupOwner(Group $group, User $user) : bool
     {
-        return $group->users()->where('user_id', $user->id)->wherePivot('is_owner', true)->exists();
+        return $group->members()->where('user_id', $user->id)->wherePivot('is_owner', true)->exists();
     }
 }

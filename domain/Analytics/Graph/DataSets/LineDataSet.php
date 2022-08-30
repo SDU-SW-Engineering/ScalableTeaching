@@ -9,7 +9,7 @@ class LineDataSet extends DataSet
 {
     /**
      * @param string $label
-     * @param Collection<int, Project> $data
+     * @param Collection<int,int> $data
      * @param string $color
      * @param bool $transparent
      */

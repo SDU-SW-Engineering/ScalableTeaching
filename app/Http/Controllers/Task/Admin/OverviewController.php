@@ -8,10 +8,12 @@ use App\Models\Task;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
+use Illuminate\Support\Collection;
+use Illuminate\View\View;
 
 class OverviewController extends Controller
 {
-    public function index(Course $course, Task $task)
+    public function index(Course $course, Task $task) : View
     {
         $projectCount = $task->projects()->count();
         $projectsToday = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
@@ -32,16 +34,19 @@ class OverviewController extends Controller
 
         $projects = $projectQuery->paginate(10)->withQueryString();
 
+        /** @var Collection<string,int> $totalProjectsPerDay */
         $totalProjectsPerDay = $task->totalProjectsPerDay;
+        /** @var Collection<string,int> $projectsCompletedPerDay */
         $projectsCompletedPerDay = $task->totalCompletedTasksPerDay;
         $totalProjectsPerDayGraph = new Graph(
             $totalProjectsPerDay->keys(),
-            new LineDataSet("Projects", $totalProjectsPerDay, "#266ab0", true),
-            new LineDataSet("Completed", $projectsCompletedPerDay, "#7BB026", true)
+            new LineDataSet("Projects", $totalProjectsPerDay->values(), "#266ab0", true),
+            new LineDataSet("Completed", $projectsCompletedPerDay->values(), "#7BB026", true)
         );
 
+        /** @var Collection<string,int> $dailyBuilds */
         $dailyBuilds = $task->dailyBuilds(true, true);
-        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B"));
+        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
 
 
         return view('tasks.admin.index', compact(

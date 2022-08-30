@@ -60,7 +60,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array
+     * @var array<int,string>
      */
     protected $hidden = [
         'remember_token',
@@ -72,7 +72,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be cast.
      *
-     * @var array
+     * @var array<string,string>
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -140,9 +140,12 @@ class User extends Authenticatable
         return $this->hasMany(GradeDelegation::class);
     }
 
+    /**
+     * @return Attribute<string,null>
+     */
     public function avatarHtml(): Attribute
     {
-        return new Attribute(get: function() {
+        return Attribute::make(get: function() {
             if($this->avatar == null)
                 return '<svg xmlns="http://www.w3.org/2000/svg" class="dark:text-lime-green-400 h-10 w-10" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -154,9 +157,12 @@ class User extends Authenticatable
         });
     }
 
+    /**
+     * @return Attribute<string,null>
+     */
     public function shortName(): Attribute
     {
-        return new Attribute(get: function() {
+        return Attribute::make(get: function() {
             $names = collect(explode(' ', $this->name));
             $firstName = $names->first();
 

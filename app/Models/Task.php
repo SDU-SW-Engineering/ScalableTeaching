@@ -40,6 +40,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read SurveyTask|null $pivot
  * @property-read bool $hasEnded
  * @property-read Collection|TaskDelegation[] $delegations
+ * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
+ * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
+ * @property-read Collection<TaskProtectedFile> $protectedFiles
  */
 class Task extends Model
 {
@@ -58,7 +61,7 @@ class Task extends Model
         'correction_type' => CorrectionType::class,
     ];
 
-    public function reloadDescriptionFromRepo() : void
+    public function reloadDescriptionFromRepo(): void
     {
         $gitlabManager = app(GitLabManager::class);
         $project = $gitlabManager->projects()->show($this->source_project_id);
@@ -117,7 +120,7 @@ class Task extends Model
     /**
      * @return HasManyThrough<ProjectPush>
      */
-    public function pushes() : HasManyThrough
+    public function pushes(): HasManyThrough
     {
         return $this->hasManyThrough(ProjectPush::class, Project::class);
     }
@@ -125,7 +128,7 @@ class Task extends Model
     /**
      * @return HasMany<TaskDelegation>
      */
-    public function delegations() : HasMany
+    public function delegations(): HasMany
     {
         return $this->hasMany(TaskDelegation::class);
     }
@@ -153,7 +156,7 @@ class Task extends Model
     /**
      * @param bool $withTrash
      * @param bool $withToday
-     * @return \Illuminate\Support\Collection<int|string,int>
+     * @return \Illuminate\Support\Collection<string,int>
      */
     public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection
     {
@@ -161,7 +164,7 @@ class Task extends Model
         if($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 
     /**
@@ -180,36 +183,46 @@ class Task extends Model
         return $this->hasMany(TaskProtectedFile::class);
     }
 
-    public function getProjectsPerDayAttribute() : DailyResults
+    /**
+     * @return Attribute<\Illuminate\Support\Collection<int|string,int>,null>
+     */
+    public function projectsPerDay(): Attribute
     {
-        return $this->projects()->daily($this->starts_at, $this->earliestEndDate())->get();
+        return Attribute::make(get: fn($value, $attributes) => $this->projects()->daily($this->starts_at, $this->earliestEndDate())->get());
     }
 
     /**
-     * @return DailyQuery<Project>
+     * @return Attribute<\Illuminate\Support\Collection<int|string, int>,null>
      */
-    public function getTotalProjectsPerDayAttribute() : DailyQuery
+    public function totalProjectsPerDay(): Attribute
     {
-        return $this->projects()->daily($this->starts_at, $this->earliestEndDate())->total();
+        return Attribute::make(get: fn($value, $attributes) => $this->projects()->daily($this->starts_at, $this->earliestEndDate())->total());
     }
 
-    public function hasEnded() : Attribute
+    /**
+     * @return Attribute<bool, null>
+     */
+    public function hasEnded(): Attribute
     {
         return Attribute::make(
             get: fn($value, $attributes) => now()->isAfter($attributes['ends_at'])
         );
     }
 
-    public function getTotalCompletedTasksPerDayAttribute() : int
+    /**
+     * @return Attribute<\Illuminate\Support\Collection<string, int>,null>
+     */
+    public function totalCompletedTasksPerDay(): Attribute
     {
-        return $this->projects()
+        return Attribute::make(get: fn($value, $attributes) => $this->projects()
             ->withTrashed()
             ->where('status', 'finished')
             ->daily($this->starts_at, $this->earliestEndDate(), 'finished_at')
-            ->total();
+            ->total()
+        );
     }
 
-    public function earliestEndDate(bool $excludeToday = false) : Carbon
+    public function earliestEndDate(bool $excludeToday = false): Carbon
     {
         return now()->isAfter($this->ends_at) ? $this->ends_at : ($excludeToday ? now()->subDay() : now());
     }
@@ -261,7 +274,7 @@ class Task extends Model
         return $projects;
     }
 
-    public function loadShaValuesFromDirectory(string $dir = "", ?string $selectFile = null) : void
+    public function loadShaValuesFromDirectory(string $dir = "", ?string $selectFile = null): void
     {
         $rootObject = new RootQueryObject();
         $rootObject->selectProjects((new RootProjectsArgumentsObject())
@@ -330,7 +343,7 @@ class Task extends Model
         return $this->morphMany(Grade::class, 'source');
     }
 
-    public function ciFile() : ?string
+    public function ciFile(): ?string
     {
         $rootObject = new RootQueryObject();
         $rootObject->selectProjects((new RootProjectsArgumentsObject())
@@ -352,8 +365,7 @@ class Task extends Model
 
     public function canStart(Group|User $entity, string &$message = null): bool
     {
-        if( ! now()->isBetween($this->starts_at, $this->ends_at))
-        {
+        if(!now()->isBetween($this->starts_at, $this->ends_at)) {
             $message = 'The task cannot be started outside of the task time frame';
 
             return false;
@@ -364,23 +376,20 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
-        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0)
-        {
+        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
             $message = "You have already started this task";
 
             return false;
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
-        {
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
             $message = 'Another user in your group have already started this task';
 
             return false;
         }
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
-        {
+        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
             $message = "Your group have already started this task";
 
             return false;
@@ -396,8 +405,7 @@ class Task extends Model
             $groups->pluck('id')
         );
 
-        if($otherTrackHaveBeenPicked)
-        {
+        if($otherTrackHaveBeenPicked) {
             $message = "A conflicting track have already been started, and thus this task cannot be started.";
 
             return false;

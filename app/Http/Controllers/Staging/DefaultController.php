@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class DefaultController extends Controller
 {
-    public function resetEnvironment()
+    public function resetEnvironment() : string
     {
         Artisan::call('migrate:fresh --seed --no-interaction');
         session()->flush();
@@ -17,17 +17,17 @@ class DefaultController extends Controller
         return "Ok";
     }
 
-    public function impersonate($user)
+    public function impersonate(int $userId) : string
     {
-        if ($user == -1)
+        if ($userId == -1)
         {
             auth()->logout();
 
             return redirect()->home();
         }
 
-        auth()->loginUsingId($user);
+        auth()->loginUsingId($userId);
 
-        return redirect()->home();
+        return redirect('/');
     }
 }

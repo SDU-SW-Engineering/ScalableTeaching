@@ -2,7 +2,6 @@
 
 namespace Domain\Analytics\Graph\DataSets;
 
-use App\Models\Project;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
 
@@ -17,12 +16,12 @@ class DataSet implements Arrayable
 
     protected string $label;
 
-    /** @var Collection<int, Project> */
+    /** @var Collection<int,int> */
     protected Collection $data;
 
     /**
      * @param string $label
-     * @param Collection<int, Project> $data
+     * @param Collection<int,int> $data
      * @param string $color
      * @param bool $transparent
      */

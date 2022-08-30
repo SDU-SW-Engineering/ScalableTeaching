@@ -7,13 +7,16 @@ use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index() : View
     {
         $courses = auth()->user()->courses->map(function($course) {
 
@@ -62,7 +65,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function show(Course $course)
+    public function show(Course $course) : View
     {
         $tasks = $course->tasks()->whereNull('track_id')->where('is_visible', true)->get()->map(fn(Task $task) => [
             'details' => $task,
@@ -87,32 +90,7 @@ class CourseController extends Controller
         ]);
     }
 
-    private function retrieveCourses(bool $withDescription = false, bool $finishedOnly = true)
-    {
-        $statuses = \DB::table('projects')
-            ->select('task_id', 'status')
-            ->where('ownable_id', auth()->id())
-            ->whereNull('deleted_at')
-            ->groupBy('task_id', 'status');
-        if($finishedOnly)
-            $statuses->where('status', 'finished');
-
-        $select = collect(['projects.status', 'tasks.starts_at', 'tasks.ends_at', 'tasks.course_id', 'tasks.id']);
-        if($withDescription)
-        {
-            $select->add('tasks.short_description');
-            $select->add('tasks.name');
-        }
-
-        return Course::with([
-            'tasks' => function(HasMany $query) use ($select, $statuses) {
-                return $query->select($select->toArray())
-                    ->leftJoinSub($statuses, 'projects', 'tasks.id', '=', 'projects.task_id');
-            },
-        ]);
-    }
-
-    public function showManage(Course $course)
+    public function showManage(Course $course) : View
     {
         return view('courses.manage.index', [
             'course'      => $course,
@@ -123,7 +101,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function addTeacher(Course $course)
+    public function addTeacher(Course $course) : RedirectResponse
     {
         $validated = \Validator::make(\request()->all(), [
             'teacher' => ['required', 'exists:users,id'],
@@ -135,7 +113,7 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function removeTeacher(Course $course, User $teacher)
+    public function removeTeacher(Course $course, User $teacher) : RedirectResponse
     {
         if($teacher->id == auth()->id())
             return redirect()->back()->withErrors('You can\'t remove yourself.', 'teachers');
@@ -145,18 +123,18 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function showEnroll(Course $course)
+    public function showEnroll(Course $course) : RedirectResponse | View
     {
         if($course->enroll_token != request('token'))
             return redirect()->route('home')->withError('Invalid course token');
 
-        if($course->users()->where(['user_id' => auth()->id()])->exists())
+        if($course->members()->where(['user_id' => auth()->id()])->exists())
             return redirect()->route('courses.show', [$course->id]);
 
         if( ! request()->has('confirm'))
             return view('courses.enroll-dialog', compact('course'));
 
-        $course->users()->attach(auth()->id(), ['role' => 'student']);
+        $course->members()->attach(auth()->id(), ['role' => 'student']);
 
         return redirect()->route('courses.show', [$course->id]);
     }

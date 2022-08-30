@@ -8,12 +8,12 @@ use Illuminate\Support\Collection;
 class DailyResults
 {
     /**
-     * @var Collection<int|string, int>
+     * @var Collection<string, int>
      */
     private Collection $results;
 
     /**
-     * @param Collection<int|string,int> $data
+     * @param Collection<string,int> $data
      */
     public function __construct(Collection $data)
     {
@@ -21,7 +21,7 @@ class DailyResults
     }
 
     /**
-     * @return Collection<int|string,int>
+     * @return Collection<string,int>
      */
     public function get() : Collection
     {
@@ -29,7 +29,7 @@ class DailyResults
     }
 
     /**
-     * @return Collection<int|string, int>
+     * @return Collection<string, int>
      */
     public function total() : Collection
     {

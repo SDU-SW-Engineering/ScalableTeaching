@@ -12,6 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
 class RefreshMemberAccess implements ShouldQueue
 {
@@ -19,9 +20,12 @@ class RefreshMemberAccess implements ShouldQueue
 
     protected Project $project;
 
-    public $tries = 5;
+    public int $tries = 5;
 
-    public $backoff = [10, 30];
+    /**
+     * @var int[]
+     */
+    public array $backoff = [10, 30];
 
     /**
      * Create a new job instance.
@@ -34,7 +38,7 @@ class RefreshMemberAccess implements ShouldQueue
     }
 
 
-    public function handle()
+    public function handle() : void
     {
         $gitLabManager = app(GitLabManager::class);
         $supposedMembers = $this->project->owners()->map(function(User $user) use ($gitLabManager) {
@@ -48,7 +52,7 @@ class RefreshMemberAccess implements ShouldQueue
         })->reject(function($gitlabId) {
             return $gitlabId == null;
         });
-        $currentMembers = collect($gitLabManager->projects()->members($this->project->project_id))->pluck('id');
+        $currentMembers = (new Collection($gitLabManager->projects()->members($this->project->project_id)))->pluck('id');
         $add = $supposedMembers->diff($currentMembers);
         $remove = $currentMembers->diff($supposedMembers);
         $this->addUsersToGitlab($this->project, $add);
@@ -63,7 +67,13 @@ class RefreshMemberAccess implements ShouldQueue
         });
     }
 
-    public function addUsersToGitlab(Project $project, $gitlabIds, &$errors = [])
+    /**
+     * @param Project $project
+     * @param Collection<int,int> $gitlabIds
+     * @param string[] $errors
+     * @return void
+     */
+    public function addUsersToGitlab(Project $project, Collection $gitlabIds, array &$errors = []) : void
     {
         foreach($gitlabIds as $user => $gitlabId)
         {

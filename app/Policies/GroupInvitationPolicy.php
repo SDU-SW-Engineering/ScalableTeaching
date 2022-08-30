@@ -21,8 +21,7 @@ class GroupInvitationPolicy
      */
     public function delete(User $user, GroupInvitation $groupInvitation) : bool
     {
-        /** @var Collection<int, User> $groupMembers */
-        $groupMembers = $groupInvitation->group->users;
+        $groupMembers = $groupInvitation->group->members;
 
         return $groupMembers->contains('id', $user->id);
     }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Events\ProjectCreated;
 use App\Listeners\GitLab\Project\RefreshMemberAccess;
+use App\Models\Casts\SubTask;
 use App\Models\Course;
+use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
@@ -18,13 +20,20 @@ use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use function Pest\Laravel\get;
 
 class ProjectController extends Controller
 {
-    public function builds(Project $project)
+    /**
+     * @param Project $project
+     * @return Collection<int, array{status:PipelineStatusEnum,run_time:string,queued_for:string,ran:string,ran_date:string,sub_tasks:Collection<int,array{name:string,completed:bool}>,user_name:string}>
+     */
+    public function builds(Project $project) : Collection
     {
         return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(fn (Pipeline $job) => [
             'status'     => $job->status,
@@ -32,7 +41,7 @@ class ProjectController extends Controller
             'queued_for' => CarbonInterval::seconds($job->queue_duration)->forHumans(),
             'ran'        => $job->updated_at->diffForHumans(),
             'ran_date'   => $job->updated_at->toDateTimeString(),
-            'sub_tasks'  => $job->prettySubTasks,
+            'sub_tasks'  => $job->pretty_sub_tasks,
             'user_name'  => $job->user_name,
         ]);
     }
@@ -40,7 +49,7 @@ class ProjectController extends Controller
     /**
      * @throws \Throwable
      */
-    public function reset(GitLabManager $gitLabManager, Project $project)
+    public function reset(GitLabManager $gitLabManager, Project $project) : string
     {
         abort_unless($project->status == 'active', 400);
         \DB::transaction(function () use ($gitLabManager, $project) {
@@ -63,9 +72,9 @@ class ProjectController extends Controller
         return "OK";
     }
 
-    public function migrate(Project $project, Group $group)
+    public function migrate(Project $project, Group $group) : string
     {
-        $activeUsers = $project->task->projectsForUsers($group->users)->reject(function (Project $currentProject) use ($project) {
+        $activeUsers = $project->task->projectsForUsers($group->members)->reject(function (Project $currentProject) use ($project) {
             return $currentProject->id == $project->id;
         })->map(function (Project $project) {
             return $project->owners()->pluck('name');
@@ -81,14 +90,14 @@ class ProjectController extends Controller
         return "ok";
     }
 
-    public function refreshAccess(Project $project)
+    public function refreshAccess(Project $project) : string
     {
         \App\Jobs\Project\RefreshMemberAccess::dispatch($project);
 
         return "ok";
     }
 
-    public function download(Course $course, Task $task, Project $project, GitLabManager $gitLabManager)
+    public function download(Course $course, Task $task, Project $project, GitLabManager $gitLabManager) : StreamedResponse
     {
         $sha = $project->final_commit_sha;
         abort_if($sha == null, 404);
@@ -103,13 +112,11 @@ class ProjectController extends Controller
     /**
      * @throws \Exception
      */
-    public function validateProject(Course $course, Task $task, Project $project)
+    public function validateProject(Course $course, Task $task, Project $project) : RedirectResponse
     {
         if ($project->final_commit_sha == null)
             return redirect()->back()->withErrors('Can\'t validate this project as it isn\' finished yet');
 
-
-        /** @var Collection $files */
         $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
         $errors = [];
@@ -126,7 +133,7 @@ class ProjectController extends Controller
                 ->selectNodes()
                 ->selectName()
                 ->selectSha();
-            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . getenv('GITLAB_ACCESS_TOKEN')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
             if (count($projects) == 0)
@@ -134,7 +141,7 @@ class ProjectController extends Controller
                 throw new \Exception("Project with id $project->id wasn't found.");
             }
 
-            $repoFiles = collect($projects[0]->repository->tree->blobs->nodes);
+            $repoFiles = collect($projects[0]->repository->tree->blobs->nodes); //@phpstan-ignore-line
             foreach ($files as $file)
             {
                 $lookFor = $file->baseName;
@@ -145,7 +152,7 @@ class ProjectController extends Controller
                     continue;
                 }
 
-                $shaValues = collect($file->sha_values);
+                $shaValues = new Collection($file->sha_values);
                 $shaIntact = $shaValues->contains($found->sha);
                 if ( ! $shaIntact)
                 {
