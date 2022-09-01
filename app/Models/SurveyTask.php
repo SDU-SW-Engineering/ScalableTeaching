@@ -12,6 +12,9 @@ class SurveyTask extends Pivot
 {
     protected $dates = ['deadline'];
 
+    /**
+     * @return Attribute<bool, null>
+     */
     public function isPastDeadline() : Attribute
     {
         return Attribute::make(

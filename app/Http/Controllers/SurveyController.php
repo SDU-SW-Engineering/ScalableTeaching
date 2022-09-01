@@ -7,8 +7,12 @@ use App\Models\Enums\SurveyFieldType;
 use App\Models\Project;
 use App\Models\Survey;
 use App\Models\Task;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SurveyController extends Controller
 {
@@ -17,12 +21,15 @@ class SurveyController extends Controller
         $this->middleware('can:edit,survey')->except('index', 'all');
     }
 
-    public function index()
+    public function index() : View
     {
         return view('surveys.index');
     }
 
-    public function all()
+    /**
+     * @return Collection<int, array{id:int,name:string,responses_count:int|null,created_at:Carbon}>
+     */
+    public function all() : Collection
     {
         return auth()->user()->surveys()->withCount('responses')->get()->map(fn(Survey $survey) => [
             'id' => $survey->id,
@@ -32,14 +39,14 @@ class SurveyController extends Controller
         ]);
     }
 
-    public function details(Survey $survey)
+    public function details(Survey $survey) : Survey
     {
         $survey->load(['responses', 'fields.items']);
 
         return $survey;
     }
 
-    public function projectSurvey(Request $request, Project $project, Survey $survey)
+    public function projectSurvey(Request $request, Project $project, Survey $survey) : string
     {
         abort_unless(auth()->user()->can('answer', [$survey, $project]), 400, "You cannot answer this survey");
         $fields = [];
@@ -71,7 +78,7 @@ class SurveyController extends Controller
                 $temp = [];
                 foreach($value as $item)
                 {
-                    abort_if(!$validItemIds->contains($item), 400, 'Invalid option supplied.');
+                    abort_if( ! $validItemIds->contains($item), 400, 'Invalid option supplied.');
                     $temp[] = [
                         'value'  => $item,
                         'extras' => $request->json('extras.v' . $item),
@@ -83,7 +90,7 @@ class SurveyController extends Controller
                 ];
                 continue;
             }
-            abort_if(!$validItemIds->contains($value), 400, 'Invalid option supplied.');
+            abort_if( ! $validItemIds->contains($value), 400, 'Invalid option supplied.');
 
             $fields[] = [
                 'field'  => $field->id,
@@ -104,7 +111,7 @@ class SurveyController extends Controller
         return "OK";
     }
 
-    public function export(Survey $survey)
+    public function export(Survey $survey) : BinaryFileResponse
     {
         return Excel::download(new SurveyExport($survey), $survey->name . '.xlsx');
     }

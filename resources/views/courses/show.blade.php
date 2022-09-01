@@ -22,17 +22,48 @@
                                             </div>
                                         @endif
                                         @foreach($group as $exercise)
-                                            <a @class(['rounded-t' => $groupName == null, 'flex bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 w-full py-4 px-4 last:rounded-b last:border-0 items-center gap-4 border-b border-gray-400 dark:border-gray-600'])
+                                            <a @class(['rounded-t' => $groupName == null,
+                                            'cursor-not-allowed' => $exercise['details']->starts_at->isFuture(),
+                                            'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-750' =>  !$exercise['details']->starts_at->isFuture(),
+                                            'flex bg-white dark:bg-gray-800 w-full py-4 px-4 last:rounded-b last:border-0 items-center gap-4 border-b border-gray-400 dark:border-gray-600'])
                                                href="{{ route('courses.tasks.show', [$exercise['details']->course, $exercise['details']->id]) }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                     stroke-width="1.5" stroke="currentColor"
-                                                     class="w-5 h-5 text-lime-green-500">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          d="M14.563 9.75a12.014 12.014 0 00-3.427 5.136L9 12.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                                <span class="w-1/2 text-sm text-gray-600 dark:text-white">Exercise
-                                                    1</span>
-                                                <span></span>
+                                                @if($exercise['details']->grade() == null)
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                         class="w-6 h-6 dark:text-gray-400">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                @else
+                                                    @if($exercise['details']->grade()->value == \App\Models\Enums\GradeEnum::Passed)
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                             viewBox="0 0 24 24"
+                                                             stroke-width="1.5" stroke="currentColor"
+                                                             class="w-6 h-6 text-lime-green-500 dark:text-lime-green-400">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  d="M14.563 9.75a12.014 12.014 0 00-3.427 5.136L9 12.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                        </svg>
+                                                    @else
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                             viewBox="0 0 24 24" stroke-width="1.5"
+                                                             stroke="currentColor" class="w-6 h-6 text-lime-green-500 dark:text-red-400">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                        </svg>
+                                                    @endif
+                                                @endif
+                                                <span
+                                                    class="w-3/6 text-sm text-gray-600 dark:text-white">{{ $exercise['details']->name }}</span>
+                                                <div class="w-2/6 flex flex-col">
+                                                    <span class="text-xs dark:text-gray-400">Opens</span>
+                                                    <span
+                                                        class="text-sm dark:text-gray-200">{{ $exercise['details']->starts_at->diffForHumans() }}</span>
+                                                </div>
+                                                <div class="w-2/6 flex flex-col">
+                                                    <span class="text-xs dark:text-gray-400">Closes</span>
+                                                    <span
+                                                        class="text-sm dark:text-gray-200">{{ $exercise['details']->ends_at->diffForHumans() }}</span>
+                                                </div>
                                             </a>
                                         @endforeach
                                     </div>
@@ -43,7 +74,7 @@
                             <h2 class="text-black dark:text-white font-semibold text-lg mb-2">Assignments</h2>
                             <div class="flex flex-col">
                                 @foreach($assignments as $assignment)
-                                    @include('courses.partials.course', ['task' => $assignment])
+                                    @include('courses.partials.task', ['task' => $assignment])
                                 @endforeach
                             </div>
                         </section>

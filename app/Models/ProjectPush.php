@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use function Pest\Laravel\get;
 
 class ProjectPush extends Model
@@ -13,7 +14,10 @@ class ProjectPush extends Model
 
     protected $fillable = ['before_sha', 'after_sha', 'ref', 'username'];
 
-    public function project()
+    /**
+     * @return BelongsTo<Project,ProjectPush>
+     */
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }

@@ -128,7 +128,7 @@ it('allows students to decline invites', function () {
 });
 
 it('allows students to leave groups', function () {
-    $this->group->users()->attach($this->user2);
+    $this->group->members()->attach($this->user2);
     actingAs($this->user2);
 
     postJson(route('courses.groups.leave', [$this->course, $this->group]))->assertStatus(200);
@@ -143,7 +143,7 @@ it('prohibits students from leaving groups they are not member of', function () 
 });
 
 it('allows the group owner to delete groups', function () {
-    $this->group->users()->updateExistingPivot($this->user->id, [
+    $this->group->members()->updateExistingPivot($this->user->id, [
         'is_owner' => true,
     ]);
     actingAs($this->user);
@@ -152,7 +152,7 @@ it('allows the group owner to delete groups', function () {
 });
 
 it('prohibits deletion of a group by non-owners', function () {
-    $this->group->users()->attach($this->user2);
+    $this->group->members()->attach($this->user2);
     actingAs($this->user2);
 
     deleteJson(route('courses.groups.destroy', [$this->course, $this->group]))->assertStatus(403);
@@ -160,7 +160,7 @@ it('prohibits deletion of a group by non-owners', function () {
 });
 
 it('only allows members of the same course to be invited', function () {
-    $this->group->users()->attach($this->user2);
+    $this->group->members()->attach($this->user2);
     actingAs($this->user2);
     $newUser = User::factory()->create();
 

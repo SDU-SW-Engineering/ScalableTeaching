@@ -13,7 +13,10 @@ class DisableForking implements ShouldQueue
 
     public int $tries = 5;
 
-    public $backoff = [10, 30];
+    /**
+     * @var int[]
+     */
+    public array $backoff = [10, 30];
 
     /**
      * Create the event listener.

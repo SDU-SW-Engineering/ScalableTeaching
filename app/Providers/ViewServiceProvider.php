@@ -26,11 +26,25 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        \View::composer('courses.manage.*', function(View $view) {
+            /** @var Course $course */
+            $course = request()->route('course');
+
+            $breadcrumbs = [
+                'Courses'     => route('courses.index'),
+                $course->name => route('courses.show', $course->id),
+                'Management'  => null,
+            ];
+            $view->with('breadcrumbs', $breadcrumbs);
+
+            $view->with('course', $course);
+        });
+
         \View::composer('tasks.analytics.*', function(View $view) {
             $course = request()->route('course');
             $task = request()->route('task');
 
-            if (!($course instanceof Course && $task instanceof Task))
+            if( ! ($course instanceof Course && $task instanceof Task))
                 return;
 
             $view->with('course', $course);
@@ -44,5 +58,7 @@ class ViewServiceProvider extends ServiceProvider
             ];
             $view->with('breadcrumbs', $breadcrumbs);
         });
+
+        \View::composer('tasks.admin.*', AdminViewComposer::class);
     }
 }

@@ -7,6 +7,9 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Support\Arrayable;
 use InvalidArgumentException;
 
+/**
+ * @implements Arrayable<int,int|string>
+ */
 class SubTask implements Arrayable
 {
     public ?int $id = null;
@@ -86,7 +89,7 @@ class SubTask implements Arrayable
     }
 
 
-    public function setId($id)
+    public function setId(int $id) : void
     {
         $this->id = $id;
     }

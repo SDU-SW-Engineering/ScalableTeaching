@@ -38,21 +38,21 @@ class SurveyPolicy
         if ($task == null)
             return false;
 
-        if ($task->correction_type == CorrectionType::None && !$task->hasEnded)
+        if ($task->correction_type == CorrectionType::None && ! $task->hasEnded)
             return false;
 
         if ($task->correction_type != CorrectionType::None && $project->status == 'active')
             return false;
 
-        return !$task->pivot->isPastDeadline;
+        return ! $task->pivot->isPastDeadline;
     }
 
     public function answer(User $user, Survey $survey, ?Project $project) : bool
     {
-        if (!$this->view($user, $survey, $project))
+        if ( ! $this->view($user, $survey, $project))
             return false;
 
-        return !$survey->responses()->task($project->task_id)->user($user)->exists();
+        return ! $survey->responses()->task($project->task_id)->user($user)->exists();
     }
 
     public function edit(User $user, Survey $survey) : bool

@@ -19,11 +19,12 @@ use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\View\View;
 
 class AnalyticsController extends Controller
 {
 
-    public function index(Course $course, Task $task)
+    public function index(Course $course, Task $task) : View
     {
         $projectCount = $task->projects()->count();
         $projectsToday = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
@@ -48,12 +49,12 @@ class AnalyticsController extends Controller
         $projectsCompletedPerDay = $task->totalCompletedTasksPerDay;
         $totalProjectsPerDayGraph = new Graph(
             $totalProjectsPerDay->keys(),
-            new LineDataSet("Projects", $totalProjectsPerDay, "#266ab0", true),
-            new LineDataSet("Completed", $projectsCompletedPerDay, "#7BB026", true)
+            new LineDataSet("Projects", $totalProjectsPerDay->values(), "#266ab0", true),
+            new LineDataSet("Completed", $projectsCompletedPerDay->values(), "#7BB026", true)
         );
 
         $dailyBuilds = $task->dailyBuilds(true, true);
-        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B"));
+        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
             $course->name => route('courses.show', $course->id),
@@ -61,7 +62,7 @@ class AnalyticsController extends Controller
             'Analytics'   => null,
         ];
 
-        return view('tasks.analytics.index', compact(
+        return view('tasks.admin.index', compact(
             'course',
             'task',
             'projectCount',
@@ -79,11 +80,11 @@ class AnalyticsController extends Controller
         ));
     }
 
-    public function builds(Course $course, Task $task)
+    public function builds(Course $course, Task $task) : View
     {
         $dailyBuilds = $task->dailyBuilds(true, true);
         $activeIndex = $dailyBuilds->keys()->search(\request('q'));
-        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds, "#4F535B", $activeIndex === false ? null : $activeIndex));
+        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B", $activeIndex === false ? null : $activeIndex));
         $buildQuery = $task->jobs();
 
         if(\request('q') != null)
@@ -96,21 +97,20 @@ class AnalyticsController extends Controller
         $builds = $buildQuery->paginate(10)->withQueryString();
 
 
-        return view('tasks.analytics.builds', compact('dailyBuildsGraph', 'builds'));
+        return view('tasks.admin.builds', compact('dailyBuildsGraph', 'builds'));
     }
 
-    public function pushes(Course $course, Task $task)
+    public function pushes(Course $course, Task $task) : View
     {
         $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
 
-        return view('tasks.analytics.pushes', compact('pushes'));
+        return view('tasks.admin.pushes', compact('pushes'));
     }
 
-    public function taskCompletion(Course $course, Task $task)
+    public function taskCompletion(Course $course, Task $task) : View
     {
         $projectIds = $task->projects()->pluck('id');
 
-        /** @var Collection $completionPercentages */
         $completionPercentages = ProjectSubTask::whereIn('project_id', $projectIds)
             ->select(\DB::raw('sub_task_id, avg(points) as points'))
             ->groupBy('sub_task_id')
@@ -137,10 +137,10 @@ class AnalyticsController extends Controller
             }),
         ]);
 
-        return view('tasks.analytics.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
+        return view('tasks.admin.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
     }
 
-    public function subTasks(Course $course, Task $task)
+    public function subTasks(Course $course, Task $task) : View
     {
         $subTasks = $task->sub_tasks->all()->groupBy("group")->map(fn($tasks, $group) => [
             'name'    => $group,
@@ -153,21 +153,26 @@ class AnalyticsController extends Controller
             ]),
         ])->values();
 
-        return view('tasks.analytics.subTasks', [
+        return view('tasks.admin.subTasks', [
             'subTasks' => $subTasks,
         ]);
     }
 
-    public function saveSubTasks(Course $course, Task $task)
+    public function saveSubTasks(Course $course, Task $task) : string
     {
         $subTaskCollection = new SubTaskCollection();
-        collect(\request()->json())->map(fn($group) => [
-            ...collect($group['tasks'])->map(fn($task) => (new SubTask($task['name'], null, $group['name']))->setPoints($task['points'])),
+        (new Collection(request()->json()))->map(fn($group) => [
+            ...(new Collection($group['tasks']))->map(fn($task) => (new SubTask($task['name'], null, $group['name']))->setPoints($task['points'])),
         ])->flatten()
             ->each(fn(SubTask $subTask) => $subTaskCollection->add($subTask));
         $task->sub_tasks = $subTaskCollection;
         $task->save();
 
         return "OK";
+    }
+
+    public function gradingOverview(Course $course, Task $task) : View
+    {
+        return view('tasks.admin.gradingOverview');
     }
 }

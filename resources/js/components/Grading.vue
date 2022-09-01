@@ -254,7 +254,7 @@ export default {
             if (task.saveAs == null)
                 return;
             task.saving = true;
-            let response = await axios.put(`/courses/${this.courseId}/grading/users/${this.selectedStudent.student.id}`, {
+            let response = await axios.put(`/courses/${this.courseId}/manage/grading/users/${this.selectedStudent.student.id}`, {
                 grade: task.saveAs,
                 taskId: task.task.id
             });
@@ -271,7 +271,7 @@ export default {
            await this.loadTaskHistory(task);
         },
         loadTaskHistory: async function(task){
-            let resp = await axios.get(`/courses/${this.courseId}/grading/tasks/${task.task.id}`, {
+            let resp = await axios.get(`/courses/${this.courseId}/manage/grading/tasks/${task.task.id}`, {
                 params: {
                     user: this.selectedStudent.student.id
                 }
@@ -285,7 +285,7 @@ export default {
         setSelectedGrade: async function (grade, task) {
             if (grade.selected)
                 return;
-            await axios.post(`/courses/${this.courseId}/grading/${grade.id}/set-selected`);
+            await axios.post(`/courses/${this.courseId}/manage/grading/${grade.id}/set-selected`);
             task.historyEntries.forEach(entry => entry.selected = entry.id === grade.id);
             task.grade = grade;
         }

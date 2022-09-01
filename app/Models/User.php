@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -59,7 +60,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array
+     * @var array<int,string>
      */
     protected $hidden = [
         'remember_token',
@@ -71,7 +72,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be cast.
      *
-     * @var array
+     * @var array<string,string>
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -81,6 +82,9 @@ class User extends Authenticatable
 
     protected $dates = ['last_login'];
 
+    /**
+     * @return BelongsToMany<Group>
+     */
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)
@@ -89,41 +93,59 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function projects()
+    /**
+     * @return MorphMany<Project>
+     */
+    public function projects(): MorphMany
     {
         return $this->morphMany(Project::class, 'ownable');
     }
 
-    public function getProjectNameAttribute()
+    public function getProjectNameAttribute() : string
     {
         return \Str::kebab($this->username);
     }
 
-    public function courses()
+    /**
+     * @return BelongsToMany<Course>
+     */
+    public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class)
             ->as(CourseUser::class)
             ->withTimestamps();
     }
 
-    public function grades()
+    /**
+     * @return HasMany<Grade>
+     */
+    public function grades(): HasMany
     {
         return $this->hasMany(Grade::class);
     }
 
-    public function surveys()
+    /**
+     * @return BelongsToMany<Survey>
+     */
+    public function surveys(): BelongsToMany
     {
         return $this->belongsToMany(Survey::class, 'survey_owners');
     }
 
+    /**
+     * @return HasMany<GradeDelegation>
+     */
     public function gradeDelegations(): HasMany
     {
         return $this->hasMany(GradeDelegation::class);
     }
 
+    /**
+     * @return Attribute<string,null>
+     */
     public function avatarHtml(): Attribute
     {
-        return new Attribute(get: function() {
+        return Attribute::make(get: function() {
             if($this->avatar == null)
                 return '<svg xmlns="http://www.w3.org/2000/svg" class="dark:text-lime-green-400 h-10 w-10" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -135,9 +157,12 @@ class User extends Authenticatable
         });
     }
 
+    /**
+     * @return Attribute<string,null>
+     */
     public function shortName(): Attribute
     {
-        return new Attribute(get: function() {
+        return Attribute::make(get: function() {
             $names = collect(explode(' ', $this->name));
             $firstName = $names->first();
 

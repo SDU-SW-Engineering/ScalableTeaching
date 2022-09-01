@@ -16,3 +16,9 @@ yarn-error.log
 .DS_STORE
 *.csv
 .php-cs-fixer.caches
+/public/css/app.css
+/public/css/app.css.map
+/public/js/app.js
+/public/js/app.js.map
+/public/js/app.js.LICENSE.txt
+/public/mix-manifest.json

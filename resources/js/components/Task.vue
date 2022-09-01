@@ -3,11 +3,13 @@
         <div class="flex gap-6 flex-wrap-reverse">
             <div class="flex-1 w-full lg:w-2/3">
                 <div class="flex gap-5 mb-3">
-                    <button v-if="showSurvey"  @click="tab = 'survey'"
+                    <button v-if="showSurvey" @click="tab = 'survey'"
                             :class="[tab === 'survey' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
                             class="py-2 px-3 rounded-md font-semibold flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                         </svg>
                         <span>
                             Survey
@@ -28,8 +30,10 @@
                     <button v-if="subTasks != null" @click="tab = 'tasks'"
                             :class="[tab === 'tasks' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
                             class="py-2 px-3 rounded-md font-semibold flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span>
                             Tasks
@@ -126,7 +130,11 @@
                     </div>
                 </div>
                 <div v-if="subTasks != null" v-show="tab === 'tasks'">
-                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended" :tasks="subTasks" :tasks-required="task.correction_tasks_required" :points-required="task.correction_points_required" :correction-type="task.correction_type" :project-status="project == null ? null : project.status"></sub-tasks>
+                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended"
+                               :tasks="subTasks" :tasks-required="task.correction_tasks_required"
+                               :points-required="task.correction_points_required"
+                               :correction-type="task.correction_type"
+                               :project-status="project == null ? null : project.status"></sub-tasks>
                 </div>
                 <div v-show="tab === 'builds'">
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
@@ -136,23 +144,30 @@
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
-                <div v-if="project != null && project.ownable_type === 'App\\Models\\Group'" class="bg-white shadow-lg px-4 py-4 rounded-md mt-8 dark:bg-gray-800">
+                <div v-if="project != null && project.ownable_type === 'App\\Models\\Group'"
+                     class="bg-white shadow-lg px-4 py-4 rounded-md mt-8 dark:bg-gray-800">
                     <div class="flex items-center justify-center">
                         <h3 class="font-bold text-xl dark:text-white text-center">Group Project</h3>
                     </div>
                 </div>
-                <warning :message="warning" v-if="warning.length > 0"></warning>
-                <part-of-track v-if="task.track != null" :track="task.track" :is-started="project != null"></part-of-track>
+                <div v-if="task.source_project_id !== null">
+                    <warning :message="warning" v-if="warning.length > 0"></warning>
+                    <part-of-track v-if="task.track != null" :track="task.track"
+                                   :is-started="project != null"></part-of-track>
 
-                <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
-                             :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
-                             v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null && !progress.ended"></not-started>
-                <started :project="project" :progress="progress"
-                         v-else-if="project != null && project.status === 'active' && !progress.ended"></started>
-                <waiting v-else-if="project != null && project.status === 'active' && progress.ended && pushes.length > 0"></waiting>
-                <completed v-else-if="project != null && project.status === 'finished'" :validation="project.validationStatus"></completed>
-                <overdue v-else-if="project != null && project.isMissed"></overdue>
-                <div v-if="showBuilds" class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
+                    <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
+                                 :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
+                                 v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null && !progress.ended"></not-started>
+                    <started :project="project" :progress="progress"
+                             v-else-if="project != null && project.status === 'active' && !progress.ended"></started>
+                    <waiting
+                        v-else-if="project != null && project.status === 'active' && progress.ended && pushes.length > 0"></waiting>
+                    <completed v-else-if="project != null && project.status === 'finished'"
+                               :validation="project.validationStatus"></completed>
+                    <overdue v-else-if="project != null && project.isMissed"></overdue>
+                </div>
+                <mark-completed v-if="task.source_project_id === null && task.correction_type === 'self'" :csrf="this.csrf" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
+                <div v-if="false" class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>
                         <bar-chart :height="200" :data="datasets" :labels="labels"></bar-chart>
@@ -183,14 +198,17 @@ import SubTasks from "./SubTasks";
 import PartOfTrack from "./Widgets/PartOfTrack";
 import Waiting from "./Widgets/Waiting";
 import Survey from "./Task/Tabs/Survey";
+import MarkCompleted from "./Widgets/MarkCompleted";
 
 export default {
     components: {
+        MarkCompleted,
         Survey,
         PartOfTrack,
         SubTasks,
-        Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert, Waiting},
-    props: ['task', 'survey', 'pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks'],
+        Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert, Waiting
+    },
+    props: ['task', 'grade', 'survey', 'pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks'],
     methods: {
         startAssignment: async function (startAs) {
             let createAs = startAs == null ? this.startAs : startAs;
@@ -212,20 +230,11 @@ export default {
             }
         },
     },
-    computed: {
-        taskCount: function()
-        {
-            return this.subTasks.list.reduce((total, group) => total + group.tasks.length, 0);
-        },
-        completedTaskCount: function() {
-            return this.subTasks.list.reduce((total, group) => total + group.tasks.filter(x => x.completed).length, 0);
-        }
-    },
     data: function () {
         return {
-            tab:  'description',
+            tab: 'description',
             errorMessage: '',
-            hideMissingAssignmentWarning: false,
+            hideMissingAssignmentWarning: this.task.source_project_id === null,
             startingAssignment: false,
             labels: this.buildGraph.labels,
             datasets: this.buildGraph.datasets,
@@ -233,12 +242,18 @@ export default {
         }
     },
     computed: {
-        showSurvey: function() {
+        showSurvey: function () {
             return this.project != null && this.survey.details != null && this.survey.can.view;
         },
-        showBuilds: function() {
+        showBuilds: function () {
             return this.task.correction_type !== 'none';
-        }
+        },
+        /*taskCount: function () {
+            return this.subTasks.list.reduce((total, group) => total + group.tasks.length, 0);
+        },
+        completedTaskCount: function () {
+            return this.subTasks.list.reduce((total, group) => total + group.tasks.filter(x => x.completed).length, 0);
+        }*/
     },
     mounted() {
         if (this.task.track != null)

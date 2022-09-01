@@ -7,15 +7,17 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\GroupInvitation;
 use App\Models\User;
+use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class GroupController extends Controller
 {
-    public function index(Request $request, Course $course)
+    public function index(Request $request, Course $course) : View
     {
         $invitations = $course->groupInvitations()
-            ->with(['invitedBy', 'group.users'])
+            ->with(['invitedBy', 'group.members'])
             ->where('recipient_user_id', auth()->id())->get()->map(fn(GroupInvitation $invite) => [
                 'acceptRoute'  => route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'accept']),
                 'declineRoute' => route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'decline']),
@@ -37,7 +39,7 @@ class GroupController extends Controller
     /**
      * @throws \Throwable
      */
-    public function create(Course $course)
+    public function create(Course $course) : Response
     {
         $groupRequest = request()->validate([
             'name' => ['required', 'alpha_hyphen'],
@@ -46,7 +48,7 @@ class GroupController extends Controller
         throw_if($course->groups()->where($groupRequest)->exists(), ValidationException::withMessages(['A group with this name already exists']));
 
         $group = $course->groups()->create($groupRequest);
-        $group->users()->attach(auth()->id(), ['is_owner' => true]);
+        $group->members()->attach(auth()->id(), ['is_owner' => true]);
 
         return response([
             'groups'          => GroupInformation::collection($course->userGroups(auth()->user())),
@@ -54,9 +56,9 @@ class GroupController extends Controller
         ], 201);
     }
 
-    public function destroy(Course $course, Group $group)
+    public function destroy(Course $course, Group $group) : string
     {
-        $group->users()->detach();
+        $group->members()->detach();
         $group->invitations()->delete();
         $group->delete();
 
@@ -66,15 +68,15 @@ class GroupController extends Controller
     /**
      * @throws \Throwable
      */
-    public function inviteUser(Course $course, Group $group)
+    public function inviteUser(Course $course, Group $group) : Response
     {
         $validated = \request()->validate([
             'email' => ['email'],
         ]);
         $foundUser = User::where('email', $validated['email'])->firstOrFail();
-        throw_unless($course->hasUser($foundUser), ValidationException::withMessages(['email' => 'This user is not a member of this course.']));
-        throw_if($group->users->contains('id', $foundUser->id), ValidationException::withMessages(['email' => 'This user is already a member of this group.']));
-        throw_if($group->invitations()->count() >= $group->course->max_group_size - $group->users()->count(), ValidationException::withMessages(['email' => "There is no more room in your group."]));
+        throw_unless($course->hasMember($foundUser), ValidationException::withMessages(['email' => 'This user is not a member of this course.']));
+        throw_if($group->members->contains('id', $foundUser->id), ValidationException::withMessages(['email' => 'This user is already a member of this group.']));
+        throw_if($group->invitations()->count() >= $group->course->max_group_size - $group->members()->count(), ValidationException::withMessages(['email' => "There is no more room in your group."]));
         throw_if($group->invitations()->where('recipient_user_id', $foundUser->id)->exists(), ValidationException::withMessages(['email' => 'This user has already been invited to your group.']));
 
         $invitation = $group->invitations()->create([
@@ -90,38 +92,44 @@ class GroupController extends Controller
         ], 201);
     }
 
-    public function respondToInvite(Course $course, Group $group, GroupInvitation $groupInvitation, $mode)
+    public function respondToInvite(Course $course, Group $group, GroupInvitation $groupInvitation, string $mode) : string | Response
     {
         $accepting = $mode == 'accept';
         if ($accepting)
         {
-            if (auth()->user()->cannot('canAcceptInvite', [$group, $groupInvitation]))
+            if (auth()->user()->cannot('acceptInvite', [$group, $groupInvitation]))
                 return response("failed", 422);
 
-            $group->users()->attach(auth()->id());
+            $group->members()->attach(auth()->id());
         }
         $groupInvitation->delete();
 
         return "ok";
     }
 
-    public function leave(Course $course, Group $group)
+    public function leave(Course $course, Group $group) : string
     {
-        $group->users()->detach(auth()->id());
+        $group->members()->detach(auth()->id());
 
         return "ok";
     }
 
-    public function deleteInvite(Course $course, Group $group, GroupInvitation $groupInvitation)
+    public function deleteInvite(Course $course, Group $group, GroupInvitation $groupInvitation) : string
     {
         $groupInvitation->delete();
 
         return "ok";
     }
 
-    public function removeMember(Course $course, Group $group, User $user)
+    /**
+     * @param Course $course
+     * @param Group $group
+     * @param User $user
+     * @return array{group_id:int,canDelete:array}
+     */
+    public function removeMember(Course $course, Group $group, User $user) : array
     {
-        $group->users()->detach($user);
+        $group->members()->detach($user);
 
         return [
             'group_id'  => $group->id,

@@ -12,6 +12,9 @@ class GradeExport implements WithMultipleSheets
 {
     use Exportable;
 
+    /**
+     * @param Collection<int,Task> $tasks
+     */
     public function __construct(private readonly Collection $tasks)
     {
 
