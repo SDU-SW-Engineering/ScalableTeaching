@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Casts\SubTask;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
+use App\Models\Enums\TaskTypeEnum;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Domain\Analytics\DailyResults\DailyQuery;
@@ -43,6 +44,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
  * @property-read Collection<TaskProtectedFile> $protectedFiles
+ * @property-read TaskTypeEnum $type
+ * @property-read int|null source_project_id
  */
 class Task extends Model
 {
@@ -59,6 +62,7 @@ class Task extends Model
         'is_visible'      => 'bool',
         'sub_tasks'       => SubTaskCollection::class,
         'correction_type' => CorrectionType::class,
+        'type'            => TaskTypeEnum::class,
     ];
 
     public function reloadDescriptionFromRepo(): void
@@ -164,7 +168,7 @@ class Task extends Model
         if($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
     }
 
     /**
@@ -214,7 +218,8 @@ class Task extends Model
      */
     public function totalCompletedTasksPerDay(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => $this->projects()
+        return Attribute::make(
+            get: fn($value, $attributes) => $this->projects()
             ->withTrashed()
             ->where('status', 'finished')
             ->daily($this->starts_at, $this->earliestEndDate(), 'finished_at')
@@ -332,6 +337,7 @@ class Task extends Model
             $user = auth()->user();
         if($this->grades()->where('user_id', $user->id)->first() != null)
             return $this->grades()->where('user_id', $user->id)->first();
+
         return null;
     }
 
@@ -365,7 +371,8 @@ class Task extends Model
 
     public function canStart(Group|User $entity, string &$message = null): bool
     {
-        if(!now()->isBetween($this->starts_at, $this->ends_at)) {
+        if( ! now()->isBetween($this->starts_at, $this->ends_at))
+        {
             $message = 'The task cannot be started outside of the task time frame';
 
             return false;
@@ -376,20 +383,23 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
-        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
+        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0)
+        {
             $message = "You have already started this task";
 
             return false;
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
+        {
             $message = 'Another user in your group have already started this task';
 
             return false;
         }
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
+        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
+        {
             $message = "Your group have already started this task";
 
             return false;
@@ -405,7 +415,8 @@ class Task extends Model
             $groups->pluck('id')
         );
 
-        if($otherTrackHaveBeenPicked) {
+        if($otherTrackHaveBeenPicked)
+        {
             $message = "A conflicting track have already been started, and thus this task cannot be started.";
 
             return false;

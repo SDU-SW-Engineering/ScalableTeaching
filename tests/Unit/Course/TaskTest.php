@@ -241,6 +241,6 @@ test('canStart returns true if a group tries to start the task', function() {
         'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->for($track2, 'track')->create();
 
-    expect($task1ForTrack1->canStart($group))->toBeTrue();
-    expect($task2ForTrack2->canStart($group))->toBeTrue();
+    expect($task1ForTrack1->canStart($group))->toBeTrue()
+        ->and($task2ForTrack2->canStart($group))->toBeTrue();
 });

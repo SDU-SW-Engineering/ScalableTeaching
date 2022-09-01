@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Enums\CorrectionType;
+use App\Models\Enums\TaskTypeEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TaskFactory extends Factory
@@ -35,9 +36,18 @@ class TaskFactory extends Factory
     public function exercise()
     {
         return $this->state(function(array $attributes) {
-           return [
-                'type' => 'exercise',
-           ];
+            return [
+                'type' => TaskTypeEnum::Exercise,
+            ];
+        });
+    }
+
+    public function selfCorrection()
+    {
+        return $this->state(function(array $attributes) {
+            return [
+                'correction_type' => CorrectionType::Self,
+            ];
         });
     }
 }

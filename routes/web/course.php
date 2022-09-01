@@ -17,14 +17,11 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
 
     Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function() {
         Route::get('{task}', [TaskController::class, 'show'])->name('show');
+        Route::post('{task}/mark-complete', [TaskController::class, 'markComplete'])->name('mark-complete');
         Route::get('{task}/projects/{project}', [TaskController::class, 'showProject'])->name('showProject')->middleware('can:view,project');
         Route::get('{task}/projects/{project}/download', [ProjectController::class, 'download'])->name('downloadProject')->middleware('can:download,project');
         Route::get('{task}/projects/{project}/validate', [ProjectController::class, 'validateProject'])->name('validateProject')->middleware('can:validate,project');
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
-
-        Route::prefix('{task}/analytics')->as('analytics.')->controller(AnalyticsController::class)->group(function() {
-
-        });
     });
 
     Route::prefix('tracks')->as('tracks.')->controller(CourseTrackController::class)->group(function() {

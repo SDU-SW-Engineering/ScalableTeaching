@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\CorrectionType;
+use App\Models\Enums\TaskTypeEnum;
 use App\Models\Grade;
 use App\Models\GradeDelegation;
 use App\Models\Group;
@@ -29,12 +30,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class TaskController extends Controller
 {
-    public function show(Course $course, Task $task) : View
+    public function show(Course $course, Task $task): View
     {
         abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
@@ -42,7 +44,7 @@ class TaskController extends Controller
         return $this->showProject($course, $task, $project);
     }
 
-    public function showProject(Course $course, Task $task, ?Project $project) : View
+    public function showProject(Course $course, Task $task, ?Project $project): View
     {
         $myGroups = $course->groups()
             ->whereRelation('members', 'user_id', auth()->id())
@@ -68,7 +70,7 @@ class TaskController extends Controller
             'tasks' => $subTasks->map(fn(SubTask $subTask) => [
                 'name'           => $subTask->getDisplayName(),
                 'pointsAcquired' => $completedSubTasks?->has($subTask->getId()) ? $completedSubTasks->get($subTask->getId())->points : null,
-                'comments'        => $completedSubTaskComments?->has($subTask->getId()) ? $completedSubTaskComments->get($subTask->getId()) : [],
+                'comments'       => $completedSubTaskComments?->has($subTask->getId()) ? $completedSubTaskComments->get($subTask->getId()) : [],
                 'points'         => $subTask->getPoints(),
                 'required'       => $subTask->isRequired() ?? true,
                 'group'          => $subTask->getGroup(),
@@ -136,7 +138,7 @@ class TaskController extends Controller
         ]);
     }
 
-    public function doCreateProject(Course $course, Task $task, GitLabManager $gitLabManager) : string
+    public function doCreateProject(Course $course, Task $task, GitLabManager $gitLabManager): string
     {
         $isSolo = request('as', 'solo') == 'solo';
         $group = $isSolo ? null : Group::findOrFail(request('as'));
@@ -184,7 +186,7 @@ class TaskController extends Controller
      * @return array<string,string>
      * @throws Exception
      */
-    private function forkProject(GitLabManager $manager, string $username, int $sourceProjectId, int $groupId) : array
+    private function forkProject(GitLabManager $manager, string $username, int $sourceProjectId, int $groupId): array
     {
         $params = [
             'name'                   => $username,
@@ -199,7 +201,7 @@ class TaskController extends Controller
         return json_decode($response->getBody()->getContents(), true);
     }
 
-    public function showCreate(Course $course) : View
+    public function showCreate(Course $course): View
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
@@ -209,7 +211,7 @@ class TaskController extends Controller
         return view('courses.manage.new-task', compact('course', 'breadcrumbs'));
     }
 
-    public function edit(Course $course, Task $task) : View
+    public function edit(Course $course, Task $task): View
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
@@ -222,7 +224,7 @@ class TaskController extends Controller
     /**
      * @throws \Throwable
      */
-    public function store(Course $course, GitLabManager $manager) : RedirectResponse
+    public function store(Course $course, GitLabManager $manager): RedirectResponse
     {
         $validated = request()->validateWithBag('new', [
             'name'        => 'required',
@@ -291,7 +293,7 @@ class TaskController extends Controller
         return redirect()->route('courses.manage.index', $course->id);
     }
 
-    public function update(Course $course, Task $task) : RedirectResponse
+    public function update(Course $course, Task $task): RedirectResponse
     {
         $validated = request()->validateWithBag('task', [
             'name'        => 'required',
@@ -312,7 +314,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The changes were saved.');
     }
 
-    public function toggleVisibility(Course $course, Task $task) : RedirectResponse
+    public function toggleVisibility(Course $course, Task $task): RedirectResponse
     {
         $task->is_visible = ! $task->is_visible;
         $task->save();
@@ -320,7 +322,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The visibility was updated.');
     }
 
-    public function refreshReadme(Course $course, Task $task) : RedirectResponse
+    public function refreshReadme(Course $course, Task $task): RedirectResponse
     {
         try
         {
@@ -332,7 +334,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The readme was updated.');
     }
 
-    public function subtasks(Course $course, Task $task) : View|RedirectResponse
+    public function subtasks(Course $course, Task $task): View|RedirectResponse
     {
         $breadcrumbs = [
             'Courses'     => route('courses.index'),
@@ -369,7 +371,7 @@ class TaskController extends Controller
         return view('courses.manage.taskSubtasks', compact('course', 'task', 'breadcrumbs', 'tasks'));
     }
 
-    public function updateSubtasks(Course $course, Task $task) : string
+    public function updateSubtasks(Course $course, Task $task): string
     {
         $tasks = new Collection(request('tasks'));
         $correctionType = CorrectionType::from(request('correctionType'));
@@ -392,6 +394,22 @@ class TaskController extends Controller
         $task->correction_points_required = request('requiredPoints');
         $task->correction_tasks_required = request('requiredTasks');
         $task->save();
+
+        return "OK";
+    }
+
+    public function markComplete(Course $course, Task $task): string | Response
+    {
+        if($task->correction_type != CorrectionType::Self)
+            return response('Bad request', 400);
+        if(Grade::where(['task_id' => $task->id, 'user_id' => auth()->id()])->exists())
+            return response('Bad request', 400);
+
+        auth()->user()->grades()->create([
+            'task_id'     => $task->id,
+            'source_id'   => auth()->id(),
+            'source_type' => User::class,
+        ]);
 
         return "OK";
     }

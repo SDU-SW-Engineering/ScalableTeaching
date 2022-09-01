@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Enums\TaskTypeEnum;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
@@ -72,8 +73,8 @@ class CourseController extends Controller
             'project' => $task->currentProjectForUser(auth()->user()),
         ]);
 
-        $exerciseGroups = $tasks->filter(fn($task) => $task['details']->type == 'exercise')->groupBy(fn($task) => $task['details']->grouped_by);
-        $assignments = $tasks->filter(fn($task) => $task['details']->type == 'assignment');
+        $exerciseGroups = $tasks->filter(fn($task) => $task['details']->type == TaskTypeEnum::Exercise)->groupBy(fn($task) => $task['details']->grouped_by);
+        $assignments = $tasks->filter(fn($task) => $task['details']->type == TaskTypeEnum::Assignment);
 
         $taskCount = $course->tasks()->count();
 
