@@ -45,7 +45,7 @@ class TaskController extends Controller
     public function showProject(Course $course, Task $task, ?Project $project) : View
     {
         $myGroups = $course->groups()
-            ->whereRelation('users', 'user_id', auth()->id())
+            ->whereRelation('members', 'user_id', auth()->id())
             ->latest()
             ->pluck('name', 'id');
         $startDay = $task->starts_at->format("j/n");
