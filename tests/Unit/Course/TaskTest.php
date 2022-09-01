@@ -40,7 +40,7 @@ test('canStart returns true if now is after the start time and before the end ti
 
 test('canStart returns false if a group has already begun the task', function () {
     $group = Group::factory()->for($this->course)
-        ->hasAttached($this->user)
+        ->hasAttached($this->user, [], 'members')
         ->create();
     Project::factory()->for($group, 'ownable')->for($this->task)->createQuietly();
 
@@ -50,7 +50,7 @@ test('canStart returns false if a group has already begun the task', function ()
 
 test('canStart is unaffected if another user starts the project', function() {
     Group::factory()->for($this->course)
-        ->hasAttached($this->user)
+        ->hasAttached($this->user, [], 'members')
         ->create();
 
     Project::factory()->for($this->user, 'ownable')->for($this->task)->createQuietly();
@@ -61,7 +61,7 @@ test('canStart is unaffected if another user starts the project', function() {
 
 test('canStart is unaffected if another group starts the project', function() {
     $group = Group::factory()->for($this->course)
-        ->hasAttached($this->user)
+        ->hasAttached($this->user, [], 'members')
         ->create();
 
     Project::factory()->for($group, 'ownable')->for($this->task)->createQuietly();
@@ -82,7 +82,7 @@ test('canStart returns true if the task has not been started', function() {
 
 test('canStart returns true if the group has not started the task', function() {
     $group = Group::factory()->for($this->course)
-        ->hasAttached($this->user)
+        ->hasAttached($this->user, [], 'members')
         ->create();
 
     expect($this->task->canStart($group))->toBeTrue();
@@ -90,7 +90,7 @@ test('canStart returns true if the group has not started the task', function() {
 
 test('canStart returns false if the group tries to start the project but a member has already started', function() {
     $group = Group::factory()->for($this->course)
-        ->hasAttached($this->user)
+        ->hasAttached($this->user, [], 'members')
         ->create();
 
     Project::factory()->for($this->user, 'ownable')->for($this->task)->createQuietly();
@@ -101,8 +101,8 @@ test('canStart returns false if the group tries to start the project but a membe
 test('canStart returns true a second user tries to start an invidivual project', function() {
     $user2 = User::factory()->hasAttached($this->course)->create();
     Group::factory()->for($this->course)
-        ->hasAttached($this->user)
-        ->hasAttached($user2)
+        ->hasAttached($this->user, [], 'members')
+        ->hasAttached($user2, [], 'members')
         ->create();
 
     Project::factory()->for($this->user, 'ownable')->for($this->task)->createQuietly();
@@ -153,7 +153,7 @@ test('canStart returns false if all group members are not on the same track', fu
     $track1 = CourseTrack::factory()->for($root, 'parent')->create();
     $track2 = CourseTrack::factory()->for($root, 'parent')->create();
     $group = Group::factory()->for($this->course)
-        ->hasAttached($this->user)
+        ->hasAttached($this->user, [], 'members')
         ->create();
 
     $task1ForTrack1 = Task::factory([
@@ -177,8 +177,8 @@ test('canStart returns true if a second group user starts an the task individual
     $track2 = CourseTrack::factory()->for($root, 'parent')->create();
     $user2 = User::factory()->hasAttached($this->course)->create();
     Group::factory()->for($this->course)
-        ->hasAttached($this->user)
-        ->hasAttached($user2)
+        ->hasAttached($this->user, [], 'members')
+        ->hasAttached($user2, [], 'members')
         ->create();
 
     $task1ForTrack1 = Task::factory([
@@ -202,8 +202,8 @@ test('canStart returns false if a group tries to start the task an a user has al
     $track2 = CourseTrack::factory()->for($root, 'parent')->create();
     $user2 = User::factory()->hasAttached($this->course)->create();
     $group = Group::factory()->for($this->course)
-        ->hasAttached($this->user)
-        ->hasAttached($user2)
+        ->hasAttached($this->user, [], 'members')
+        ->hasAttached($user2, [], 'members')
         ->create();
 
     $task1ForTrack1 = Task::factory([
@@ -227,8 +227,8 @@ test('canStart returns true if a group tries to start the task', function() {
     $track2 = CourseTrack::factory()->for($root, 'parent')->create();
     $user2 = User::factory()->hasAttached($this->course)->create();
     $group = Group::factory()->for($this->course)
-        ->hasAttached($this->user)
-        ->hasAttached($user2)
+        ->hasAttached($this->user, [], 'members')
+        ->hasAttached($user2, [], 'members')
         ->create();
 
     $task1ForTrack1 = Task::factory([

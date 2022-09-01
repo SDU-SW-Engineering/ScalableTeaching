@@ -19,9 +19,9 @@ class GroupPolicy
      *
      * @param User $user
      * @param Group $group
-     * @return Response|bool
+     * @return bool
      */
-    public function view(User $user, Group $group)
+    public function view(User $user, Group $group) : bool
     {
         return $group->members()->where('user_id', $user->id)->exists();
     }
@@ -75,7 +75,7 @@ class GroupPolicy
         return $groupInvitation->recipient_user_id == $user->id;
     }
 
-    public function canAcceptInvite(User $user, Group $group, GroupInvitation $groupInvitation) : Response|bool
+    public function acceptInvite(User $user, Group $group, GroupInvitation $groupInvitation) : Response|bool
     {
         if ($group->members()->count() >= $group->course->max_group_size)
             return Response::deny("Group is full.");

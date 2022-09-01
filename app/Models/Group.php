@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 
 /**
  * @property-read Collection<int,User> $members
+ * @property-read Course $course
  */
 class Group extends Model
 {

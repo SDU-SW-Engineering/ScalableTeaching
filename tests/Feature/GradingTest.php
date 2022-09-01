@@ -21,7 +21,7 @@ beforeEach(function() {
     $this->task = Task::factory()->for($this->course)->create();
     $this->user = User::factory()->hasAttached($this->course)->create();
     $this->group = Group::factory()->for($this->course)
-        ->has(User::factory()->count(2)->hasAttached($this->course))->create();
+        ->has(User::factory()->count(2)->hasAttached($this->course), 'members')->create();
     $this->courseResponsible = User::factory()->hasAttached($this->course, ['role' => 'teacher'])->create();
 
     $this->project = Project::factory()
@@ -59,7 +59,7 @@ it('passes a user when a project is marked as finished', function() {
 it('passes both users when a group project is finished', function() {
     $this->groupProject->setProjectStatus(ProjectStatus::Finished);
 
-    expect(Grade::whereIn('user_id', $this->group->users->pluck('id'))
+    expect(Grade::whereIn('user_id', $this->group->members->pluck('id'))
         ->where('task_id', $this->task->id)
         ->where('selected', true)
         ->pluck('value')->toArray())->toBe([GradeEnum::Passed, GradeEnum::Passed]);
@@ -68,7 +68,7 @@ it('passes both users when a group project is finished', function() {
 it('fails both users when a group project is overdue', function() {
     $this->groupProject->setProjectStatus(ProjectStatus::Overdue);
 
-    expect(Grade::whereIn('user_id', $this->group->users->pluck('id'))
+    expect(Grade::whereIn('user_id', $this->group->members->pluck('id'))
         ->where('task_id', $this->task->id)
         ->where('selected', true)
         ->pluck('value')->toArray())->toBe([GradeEnum::Failed, GradeEnum::Failed]);

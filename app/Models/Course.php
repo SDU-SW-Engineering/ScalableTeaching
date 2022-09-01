@@ -138,8 +138,8 @@ class Course extends Model
     public function userGroups(User $user): Collection
     {
         return $this->groups()
-            ->with(['users', 'invitations.recipient', 'projects'])
-            ->whereRelation('users', 'user_id', $user->id)
+            ->with(['members', 'invitations.recipient', 'projects'])
+            ->whereRelation('members', 'user_id', $user->id)
             ->latest()
             ->get();
     }

@@ -230,7 +230,7 @@ class Task extends Model
     public function currentProjectForUser(User $user): ?Project
     {
         $myGroups = $this->course->groups()
-            ->whereRelation('users', 'user_id', $user->id)
+            ->whereRelation('members', 'user_id', $user->id)
             ->latest()
             ->pluck('name', 'id');
         $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function(Builder $query) use ($myGroups) {
@@ -372,7 +372,7 @@ class Task extends Model
         }
 
         $groups = $entity instanceof Group ? Collection::wrap([$entity]) : $entity->groups()->where('course_id', $this->course_id)->get();
-        $usersInGroups = $groups->pluck('users')
+        $usersInGroups = $groups->pluck('members')
             ->flatten()
             ->unique('id');
 

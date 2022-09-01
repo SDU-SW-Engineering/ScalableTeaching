@@ -39,7 +39,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
         Route::post('{group}/leave', [GroupController::class, 'leave'])->name('leave')->middleware(['can:leave,group']);
 
         Route::get('{group}/invitation/{groupInvitation}/{action}', [GroupController::class, 'respondToInvite'])->name('respondInvite')
-            ->middleware('can:respondInvite,group,groupInvitation')->where('action', 'accept|decline');
+            ->can('respondInvite,group,groupInvitation')->where('action', 'accept|decline');
         Route::delete('{group}/invitation/{groupInvitation}', [GroupController::class, 'deleteInvite'])->name('invitations.delete')
             ->middleware('can:delete,groupInvitation');
         Route::delete('{group}/members/{user}', [GroupController::class, 'removeMember'])->name('removeMember')

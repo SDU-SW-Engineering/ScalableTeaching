@@ -92,12 +92,12 @@ class GroupController extends Controller
         ], 201);
     }
 
-    public function respondToInvite(Course $course, Group $group, GroupInvitation $groupInvitation, string $mode) : string
+    public function respondToInvite(Course $course, Group $group, GroupInvitation $groupInvitation, string $mode) : string | Response
     {
         $accepting = $mode == 'accept';
         if ($accepting)
         {
-            if (auth()->user()->cannot('canAcceptInvite', [$group, $groupInvitation]))
+            if (auth()->user()->cannot('acceptInvite', [$group, $groupInvitation]))
                 return response("failed", 422);
 
             $group->members()->attach(auth()->id());
