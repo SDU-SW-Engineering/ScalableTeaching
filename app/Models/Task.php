@@ -45,7 +45,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
  * @property-read Collection<TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
- * @property-read int|null source_project_id
+ * @property-read int|null $source_project_id
  */
 class Task extends Model
 {
