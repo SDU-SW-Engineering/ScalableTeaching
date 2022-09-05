@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class SurveyResponse extends Model
@@ -16,22 +18,37 @@ class SurveyResponse extends Model
         'response' => 'array',
     ];
 
-    public function user()
+    /**
+     * @return BelongsTo<User, SurveyResponse>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function ownable() : MorphTo
+    /**
+     * @return MorphTo<Model,SurveyResponse>
+     */
+    public function ownable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function scopeProjects($query)
+    /**
+     * @param Builder<SurveyResponse> $query
+     * @return Builder<SurveyResponse>
+     */
+    public function scopeProjects(Builder $query) : Builder
     {
         return $query->where('ownable_type', Project::class);
     }
 
-    public function scopeProject($query, Project|int $project)
+    /**
+     * @param Builder<SurveyResponse> $query
+     * @param Project|int $project
+     * @return Builder<SurveyResponse>
+     */
+    public function scopeProject(Builder $query, Project|int $project) : Builder
     {
         if ($project instanceof Project)
             $project = $project->id;
@@ -39,12 +56,21 @@ class SurveyResponse extends Model
         return $query->where('ownable_type', Project::class)->where('ownable_id', $project);
     }
 
-    public function scopeTasks($query)
+    /**
+     * @param Builder<SurveyResponse> $query
+     * @return Builder<SurveyResponse>
+     */
+    public function scopeTasks(Builder $query) : Builder
     {
         return $query->where('ownable_type', Task::class);
     }
 
-    public function scopeTask($query, Task|int $task)
+    /**
+     * @param Builder<SurveyResponse> $query
+     * @param Task|int $task
+     * @return Builder<SurveyResponse>
+     */
+    public function scopeTask(Builder $query, Task|int $task) : Builder
     {
         if ($task instanceof Task)
             $task = $task->id;
@@ -52,7 +78,12 @@ class SurveyResponse extends Model
         return $query->where('ownable_type', Task::class)->where('ownable_id', $task);
     }
 
-    public function scopeUser($query, User|int $user)
+    /**
+     * @param Builder<SurveyResponse> $query
+     * @param User|int $user
+     * @return Builder<SurveyResponse>
+     */
+    public function scopeUser(Builder $query, User|int $user) : Builder
     {
         if ($user instanceof User)
             $user = $user->id;

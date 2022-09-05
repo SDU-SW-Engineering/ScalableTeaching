@@ -19,11 +19,11 @@ class GroupPolicy
      *
      * @param User $user
      * @param Group $group
-     * @return Response|bool
+     * @return bool
      */
-    public function view(User $user, Group $group)
+    public function view(User $user, Group $group) : bool
     {
-        return $group->users()->where('user_id', $user->id)->exists();
+        return $group->members()->where('user_id', $user->id)->exists();
     }
 
     /**
@@ -38,7 +38,7 @@ class GroupPolicy
         if ( ! $this->isGroupOwner($group, $user))
             return Response::deny('Only the group owner can delete the group.');
 
-        if ($group->users()->where('user_id', '!=', $user->id)->count())
+        if ($group->members()->where('user_id', '!=', $user->id)->count())
             return Response::deny('Group needs to be empty before it can be deleted (excluding owner).');
 
         if ($group->projects()->count() > 0)
@@ -47,9 +47,9 @@ class GroupPolicy
         return true;
     }
 
-    public function leave(User $user, Group $group)
+    public function leave(User $user, Group $group) : Response|bool
     {
-        $members = $group->users;
+        $members = $group->members;
         $member = $members->firstWhere('id', $user->id);
         if ($member == null)
             return Response::deny('Not a member of the group.');
@@ -60,36 +60,36 @@ class GroupPolicy
         return true;
     }
 
-    public function canStartProject(User $user, Group $group)
+    public function canStartProject(User $user, Group $group) : bool
     {
         return $this->view($user, $group);
     }
 
-    public function invite(User $user, Group $group)
+    public function invite(User $user, Group $group) : bool
     {
         return $this->view($user, $group);
     }
 
-    public function respondInvite(User $user, Group $group, GroupInvitation $groupInvitation)
+    public function respondInvite(User $user, Group $group, GroupInvitation $groupInvitation) : bool
     {
         return $groupInvitation->recipient_user_id == $user->id;
     }
 
-    public function canAcceptInvite(User $user, Group $group, GroupInvitation $groupInvitation)
+    public function acceptInvite(User $user, Group $group, GroupInvitation $groupInvitation) : Response|bool
     {
-        if ($group->users()->count() >= $group->course->max_group_size)
+        if ($group->members()->count() >= $group->course->max_group_size)
             return Response::deny("Group is full.");
         if ($group->course->hasMaxGroups($user))
             return Response::deny("Maximum number of groups reached.");
 
         $userIsEligible = $group->projects->every(fn (Project $project) => $project->task->currentProjectForUser($user) == null);
-        if (!$userIsEligible)
+        if ( ! $userIsEligible)
             return Response::deny("This group is already working on a project that you have also started.");
 
         return true;
     }
 
-    public function removeMember(User $user, Group $group, User $userToRemove)
+    public function removeMember(User $user, Group $group, User $userToRemove) : bool
     {
         if ($user->id == $userToRemove->id)
             return false;
@@ -106,6 +106,6 @@ class GroupPolicy
      */
     private function isGroupOwner(Group $group, User $user) : bool
     {
-        return $group->users()->where('user_id', $user->id)->wherePivot('is_owner', true)->exists();
+        return $group->members()->where('user_id', $user->id)->wherePivot('is_owner', true)->exists();
     }
 }

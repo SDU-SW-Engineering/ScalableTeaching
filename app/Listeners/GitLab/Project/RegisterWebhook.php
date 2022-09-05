@@ -6,6 +6,7 @@ use App\Events\ProjectCreated;
 use App\Models\Project;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Collection;
 
 class RegisterWebhook implements ShouldQueue
 {
@@ -13,7 +14,10 @@ class RegisterWebhook implements ShouldQueue
 
     public int $tries = 3;
 
-    public $backoff = [10, 30];
+    /**
+     * @var int[]
+     */
+    public array $backoff = [10, 30];
 
     /**
      * Create the event listener.
@@ -34,7 +38,7 @@ class RegisterWebhook implements ShouldQueue
     public function handle(ProjectCreated $event)
     {
         $manager = app(GitLabManager::class);
-        $currentHooks = collect($manager->projects()->hooks($event->project->project_id));
+        $currentHooks = new Collection($manager->projects()->hooks($event->project->project_id));
         if($currentHooks->isEmpty())
         {
             $response = $manager->projects()->addHook($event->project->project_id, 'https://scalableteaching.sdu.dk/api/reporter', [

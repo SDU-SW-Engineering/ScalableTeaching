@@ -6,10 +6,11 @@ use App\Models\Course;
 use App\Models\CourseTrack;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class CourseTrackController extends Controller
 {
-    public function show(Course $course, CourseTrack $track)
+    public function show(Course $course, CourseTrack $track) : View
     {
         $tasks = $course->tasks()->where('track_id', $track->id)->where('is_visible', true)->get()->map(fn(Task $task) => [
             'details' => $task,

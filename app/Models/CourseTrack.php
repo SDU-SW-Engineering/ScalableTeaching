@@ -28,27 +28,36 @@ class CourseTrack extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<Course,CourseTrack>
+     */
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
+    /**
+     * @return BelongsTo<CourseTrack,CourseTrack>|null
+     */
     public function parent(): ?BelongsTo
     {
         return $this->belongsTo(CourseTrack::class);
     }
 
+    /**
+     * @return HasMany<CourseTrack>
+     */
     public function immediateChildren(): HasMany
     {
         return $this->hasMany(CourseTrack::class, 'parent_id');
     }
 
     /**
-     * @return Collection<CourseTrack>
+     * @return Collection<int,CourseTrack>
      */
     public function children(): Collection
     {
-        $found = CourseTrack::hydrate(DB::select("with recursive cte (id, name, parent_id) as (
+        return CourseTrack::hydrate(DB::select("with recursive cte (id, name, parent_id) as (
 	        select id, name, parent_id from course_tracks where parent_id = ?
             union all
 	        select t.id, t.name, t.parent_id
@@ -56,8 +65,6 @@ class CourseTrack extends Model
 	        inner join cte on t.parent_id = cte.id
         )
         select * from cte", [$this->id]));
-
-        return $found;
     }
 
     public function root(): CourseTrack
@@ -68,7 +75,10 @@ class CourseTrack extends Model
         return $this->parent->root();
     }
 
-    public function path()
+    /**
+     * @return \Illuminate\Support\Collection<int,CourseTrack>
+     */
+    public function path(): \Illuminate\Support\Collection
     {
         $path = [];
         $pointer = $this;
@@ -81,18 +91,21 @@ class CourseTrack extends Model
         return collect($path);
     }
 
-    public function tasks()
+    /**
+     * @return HasMany<Task>
+     */
+    public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'track_id');
     }
 
     /**
-     * @return \Illuminate\Support\Collection<CourseTrack>
+     * @return \Illuminate\Support\Collection<int,CourseTrack>
      */
     public function siblings(): \Illuminate\Support\Collection
     {
         if($this->parent_id == null)
-            return collect();
+            return new \Illuminate\Support\Collection();
 
         return $this->parent->immediateChildren->reject(fn(CourseTrack $track) => $track->id == $this->id);
     }
@@ -113,7 +126,11 @@ class CourseTrack extends Model
         return $userIds->contains($user->id);
     }
 
-    public function rootChildrenNotInPath($withChildren = true): Collection
+    /**
+     * @param bool $withChildren
+     * @return Collection<int,CourseTrack>
+     */
+    public function rootChildrenNotInPath(bool $withChildren = true): Collection
     {
         $ignore = $this->path()->pluck('id');
         $remaining = $this->root()->children()->whereNotIn('id', $ignore);

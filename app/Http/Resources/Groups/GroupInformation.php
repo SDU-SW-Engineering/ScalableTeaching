@@ -9,6 +9,7 @@ use Gate;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 use JsonSerializable;
 
 class GroupInformation extends JsonResource
@@ -17,7 +18,7 @@ class GroupInformation extends JsonResource
      * Transform the resource into an array.
      *
      * @param Request $request
-     * @return array|Arrayable|JsonSerializable
+     * @return array|Arrayable<int,int|string|Collection<string,string|bool>>|JsonSerializable
      */
     public function toArray($request)
     {
@@ -34,7 +35,7 @@ class GroupInformation extends JsonResource
                 'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
             ]),
             'projects'    => $projects,
-            'users'       => $group->users->each(fn(User $member) => [
+            'users'       => $group->members->each(fn(User $member) => [
                 'isYou'           => $member->id == auth()->id(),
                 'removeUserRoute' => route('courses.groups.removeMember', [$group->course_id, $group->id, $member->id]),
             ]),
@@ -43,7 +44,7 @@ class GroupInformation extends JsonResource
             'leaveRoute'  => route('courses.groups.leave', [$group->course_id, $group->id]),
             'canDelete'   => Gate::inspect('delete', $group)->toArray(),
             'canLeave'    => Gate::inspect('leave', $group)->toArray(),
-            'isOwner'     => $group->users()->where('user_id', auth()->id())->wherePivot('is_owner', true)->exists(),
+            'isOwner'     => $group->members()->where('user_id', auth()->id())->wherePivot('is_owner', true)->exists(),
         ];
     }
 }

@@ -16,9 +16,12 @@ class DownloadProject implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $tries = 5;
+    public int $tries = 5;
 
-    public $backoff = [60, 120, 300, 600];
+    /**
+     * @var int[]
+     */
+    public array $backoff = [60, 120, 300, 600];
 
     /**
      * Create a new job instance.
@@ -29,7 +32,7 @@ class DownloadProject implements ShouldQueue
     {
     }
 
-    public function handle()
+    public function handle() : void
     {
         if ($this->download->downloaded_at != null)
             return;

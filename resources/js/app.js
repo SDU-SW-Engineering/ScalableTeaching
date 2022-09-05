@@ -21,6 +21,7 @@ Vue.component("date-range", require('./components/Elements/DateRangePicker').def
 Vue.component("grading", require('./components/Grading').default)
 Vue.component("subtasks", require('./components/Tasks/Subtasks').default)
 Vue.component("subtask-list", require("./components/Tasks/SubTaskList").default)
+Vue.component("new-task-wizard", require("./components/Course/NewTaskWizard").default)
 
 const settings = {
     't-rich-select': {

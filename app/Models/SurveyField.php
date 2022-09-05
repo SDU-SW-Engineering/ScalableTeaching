@@ -19,6 +19,9 @@ class SurveyField extends Model
         'required'    => 'boolean',
     ];
 
+    /**
+     * @return HasMany<SurveyFieldItem>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(SurveyFieldItem::class);

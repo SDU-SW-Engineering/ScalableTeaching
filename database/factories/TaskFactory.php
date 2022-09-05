@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Enums\CorrectionType;
+use App\Models\Enums\TaskTypeEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TaskFactory extends Factory
@@ -11,34 +12,41 @@ class TaskFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->sentence(3),
+            'name'              => $this->faker->sentence(3),
             'source_project_id' => $this->faker->randomNumber(1, 2000),
-            'gitlab_group_id' => $this->faker->randomNumber(1, 2000),
+            'gitlab_group_id'   => $this->faker->randomNumber(1, 2000),
             'short_description' => $this->faker->paragraph(),
-            'description' => $this->faker->paragraph(rand(10, 20)),
-            'correction_type' => CorrectionType::None,
-            'starts_at' => now(),
-            'ends_at' => $this->faker->dateTimeBetween("-11 week", "-6 weeks"),
-            'is_visible' => true
+            'description'       => $this->faker->paragraph(rand(10, 20)),
+            'correction_type'   => CorrectionType::None,
+            'starts_at'         => now(),
+            'ends_at'           => $this->faker->dateTimeBetween("-11 week", "-6 weeks"),
+            'is_visible'        => true,
         ];
     }
 
-    public function current()
+    public function group($group)
     {
-        return $this->state(function (array $attributes) {
-           return [
-               'starts_at' => $this->faker->dateTimeBetween("-2 week","-1 week"),
-               'ends_at' => $this->faker->dateTimeBetween('3 week', "4 week")
-           ];
+        return $this->state(function(array $attributes) use ($group) {
+            return [
+                'grouped_by' => $group,
+            ];
         });
     }
 
-    public function future()
+    public function exercise()
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function(array $attributes) {
             return [
-                'starts_at' => $this->faker->dateTimeBetween("2 week", "3 week"),
-                'ends_at' => $this->faker->dateTimeBetween("4 week", "8 week")
+                'type' => TaskTypeEnum::Exercise,
+            ];
+        });
+    }
+
+    public function selfCorrection()
+    {
+        return $this->state(function(array $attributes) {
+            return [
+                'correction_type' => CorrectionType::Self,
             ];
         });
     }

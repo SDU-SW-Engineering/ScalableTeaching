@@ -3,12 +3,14 @@
 namespace App\Exports;
 
 use App\Models\GradeDelegation;
+use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -28,7 +30,10 @@ class TaskGradeExport implements WithTitle, FromQuery, WithMapping, WithHeadings
         return $this->task->name;
     }
 
-    public function query()
+    /**
+     * @return HasMany<Project>
+     */
+    public function query(): HasMany
     {
         return $this->task->projects()->where('status', 'finished');
     }

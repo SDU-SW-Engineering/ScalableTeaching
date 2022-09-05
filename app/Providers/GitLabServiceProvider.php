@@ -28,7 +28,7 @@ class GitLabServiceProvider extends ServiceProvider
         $this->createGitlabDriver();
     }
 
-    protected function createGitlabDriver()
+    protected function createGitlabDriver() : void
     {
         $config = config('services.gitlab');
 

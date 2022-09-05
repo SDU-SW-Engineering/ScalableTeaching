@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\Enums\CorrectionType;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property-read SurveyTask|null $pivot
@@ -22,11 +19,17 @@ class Survey extends Model
 
     protected $hidden = ['created_at', 'updated_at'];
 
+    /**
+     * @return HasMany<SurveyField>
+     */
     public function fields(): HasMany
     {
         return $this->hasMany(SurveyField::class);
     }
 
+    /**
+     * @return HasMany<SurveyResponse>
+     */
     public function responses() : HasMany
     {
         return $this->hasMany(SurveyResponse::class);
@@ -37,6 +40,9 @@ class Survey extends Model
         return $this->responses()->task($task)->user($user)->exists();
     }
 
+    /**
+     * @return BelongsToMany<Task>
+     */
     public function tasks(): BelongsToMany
     {
         return $this->belongsToMany(Task::class)->using(SurveyTask::class)
@@ -44,6 +50,9 @@ class Survey extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<User>
+     */
     public function owners(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'survey_owners');

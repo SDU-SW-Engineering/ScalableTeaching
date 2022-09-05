@@ -17,13 +17,15 @@ use Domain\Files\Directory;
 use Domain\Files\File;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Storage;
 use ZipArchive;
 
 class VSCodeController extends Controller
 {
-    public function authenticate(Request $request)
+    public function authenticate(Request $request) : string
     {
         $validated = Validator::make($request->all(), ['token' => 'required']);
         if($validated->fails())
@@ -33,13 +35,17 @@ class VSCodeController extends Controller
         return "Successfully logged in, you may now close this window.";
     }
 
-    public function retrieveAuthentication(Request $request)
+    /**
+     * @param Request $request
+     * @return array<string,string>|Response
+     */
+    public function retrieveAuthentication(Request $request) : array|Response
     {
         $validated = Validator::make($request->all(), ['token' => 'required']);
         if($validated->fails())
             return response("Token missing", 400);
         $token = $request->get('token');
-        if(!Cache::has("vs-code-auth:$token"))
+        if( ! Cache::has("vs-code-auth:$token"))
             return response(['type' => 'error', 'message' => 'Not found'], 404);
 
         $userId = Cache::get("vs-code-auth:$token");
@@ -54,12 +60,21 @@ class VSCodeController extends Controller
         ];
     }
 
-    public function courses()
+    /**
+     * @return Collection<int,Course>
+     */
+    public function courses() : Collection
     {
         return auth()->user()->courses()->withCount('members')->get();
     }
 
-    public function gradingScheme(Course $course, Task $task, Project $project)
+    /**
+     * @param Course $course
+     * @param Task $task
+     * @param Project $project
+     * @return Collection<int, array{group: mixed, tasks: mixed}>
+     */
+    public function gradingScheme(Course $course, Task $task, Project $project) : Collection
     {
         $pointsGiven = $project->subTasks()->pluck('points', 'sub_task_id');
         $comments = $project->subTaskComments->groupBy('sub_task_id');
@@ -74,61 +89,11 @@ class VSCodeController extends Controller
         ])->values();
     }
 
-    public function createDemoSubTasks(Task $task)
-    {
-        $task->update([
-            'sub_tasks' => new SubTaskCollection(collect([
-                // 15 points
-                (new SubTask("Declared 2 variables with right types", null, '1A: public class Brewery'))->setPoints(3),
-                (new SubTask("Appropriate access modifiers on the variables", null, '1A: public class Brewery'))->setPoints(3),
-                (new SubTask("Constructor with relevant parameters and variables instantiation in 2 constructor", null, '1A: public class Brewery'))->setPoints(3),
-                (new SubTask("Getter methods for the 2 variables", null, '1A: public class Brewery'))->setPoints(2),
-                (new SubTask("CompareTo() method implemented correctly", null, '1A: public class Brewery'))->setPoints(4),
-
-                // 30
-                (new SubTask("createMaps(): Created Map instance correctly", null, '1B: public class BreweriesAndBeers'))->setPoints(2),
-                (new SubTask("createMaps(): Declare a scanner outside a try/catch or as a parameter to the try clause of 2 autoclosable", null, '1B: public class BreweriesAndBeers'))->setPoints(3), // 5
-                (new SubTask("createMaps(): Catch clause catch relevant exceptions", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 7
-                (new SubTask("createMaps(): Scanner is closed (either directly or with autocloseable)", null, '1B: public class BreweriesAndBeers'))->setPoints(4), // 11
-
-                (new SubTask("createMaps(): Relevant parameters are extracted from each line in the file using a right 4 splitter parameter (“\\t”)", null, '1B: public class BreweriesAndBeers'))->setPoints(4), // 15
-                (new SubTask("createMaps(): trim() method used on the name and id read from the file to remove 1 unwanted stuff from the string.", null, '1B: public class BreweriesAndBeers'))->setPoints(1), // 16
-                (new SubTask("createMaps(): Name and id are added to the map using put().", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 18
-                (new SubTask("createMaps(): Map instance is returned.", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 20
-                (new SubTask("write2File(): Writer object is declared outside a try/catch or as a parameter to the try 2 clause of autoclosable.", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 22
-                (new SubTask("write2File(): Writer object is created in a correct way using “append mode”.", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 24
-                (new SubTask("write2File(): Iterated over brewerySet correctly and used toString() method 4 Brewery.java to write in the file", null, '1B: public class BreweriesAndBeers'))->setPoints(4), // 28
-                (new SubTask("write2File(): Catch clause to catch relevant exceptions", null, '1B: public class BreweriesAndBeers'))->setPoints(2), // 30
-
-                // 5
-                (new SubTask("Compare() method implemented correctly?", null, '1C: public class BreweryComparator'))->setPoints(5),
-
-                // 10
-                (new SubTask("Sorted Set of type Brewery is created correctly (using TreeSet and 3 Brewerycomparator as an argument)", null, '1C: public class BreweriesAndBeers'))->setPoints(4),
-                (new SubTask("brewerySet elements are added to the sorted set correctly", null, '1C: public class BreweriesAndBeers'))->setPoints(3),
-                (new SubTask("Sorted Set is assigned to brewerySet", null, '1C: public class BreweriesAndBeers'))->setPoints(3),
-
-                // 20
-                (new SubTask("countryList is initialized correctly in the constructor", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
-                (new SubTask("readFile(): Declare a scanner outside a try/catch or as a parameter to the try clause of 2 autoclosable", null, '2A: public class WhiskeyStatistics'))->setPoints(3),
-                (new SubTask("readFile(): Catch clause catch relevant exceptions", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
-                (new SubTask("readFile(): Scanner is closed (either directly or with autocloseable)", null, '2A: public class WhiskeyStatistics'))->setPoints(4),
-                (new SubTask("readFile(): Relevant parameters are extracted from each line in the file using a right 5 splitter parameter (“\\t”)", null, '2A: public class WhiskeyStatistics'))->setPoints(5),
-                (new SubTask("readFile(): Extracted parameters are used to instantiate a Country object", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
-                (new SubTask("readFile(): Country object is added to the countryList", null, '2A: public class WhiskeyStatistics'))->setPoints(2),
-
-                // 20
-                (new SubTask("Declared an instance of WhiskeyStatistics", null, '2B: public class PrimaryController'))->setPoints(2),
-                (new SubTask("Initialized the declared instance of WhiskeyStatistics in the initialize() 2 method", null, '2B: public class PrimaryController'))->setPoints(3),
-                (new SubTask("There is a check for selected Buttons", null, '2B: public class PrimaryController'))->setPoints(3),
-                (new SubTask("On clicking \"Read File\" button, the file Whiskey.txt is read and file content 4 appears in the TextArea", null, '2B: public class PrimaryController'))->setPoints(3),
-                (new SubTask("On clicking \"Clear\" button, the TextArea is cleared", null, '2B: public class PrimaryController'))->setPoints(3),
-                (new SubTask("On clicking \"Sort\" button, the sort() method in the WhiskeyStatistic class is 5 called and the sorted content is displayed in the TextArea.", null, '2B: public class PrimaryController'))->setPoints(6),
-            ])),
-        ]);
-    }
-
-    public function courseTasks(Course $course)
+    /**
+     * @param Course $course
+     * @return Collection<int, array{id: mixed, name: string, projects: mixed}>
+     */
+    public function courseTasks(Course $course) : Collection
     {
         $tasks = $course->tasks()->with('projects')->get()->keyBy('id');
         $tasks->makeHidden('description');
@@ -153,11 +118,11 @@ class VSCodeController extends Controller
             ->values();
     }
 
-    public function fileTree(Course $course, Task $task, Project $project)
+    public function fileTree(Course $course, Task $task, Project $project) : Response|Directory
     {
         $download = $project->latestDownload();
 
-        if($download === null || $download->isDownloaded == false)
+        if($download === null || ! $download->isDownloaded)
             return response("This task is not available yet. If this persists the student has most likely not handed in within the deadline.", 404);
 
         $file = Storage::disk('local')->path($download->location);
@@ -187,12 +152,18 @@ class VSCodeController extends Controller
         return $root->nextDirectoryWithFiles();
     }
 
-    public function file(Course $course, Task $task, Project $project)
+    /**
+     * @param Course $course
+     * @param Task $task
+     * @param Project $project
+     * @return array{file: string}|Response
+     */
+    public function file(Course $course, Task $task, Project $project) : array|Response
     {
         $file = \request('file');
 
         $download = $project->latestDownload();
-        if($download == null || $download->isDownloaded == false)
+        if($download == null || ! $download->isDownloaded)
             return response("This task is not available yet. Try again later.", 404);
 
         $fileOnDisk = Storage::disk('local')->path($download->location);
@@ -200,7 +171,7 @@ class VSCodeController extends Controller
         $zip->open($fileOnDisk);
         $fp = $zip->getStream($file);
         $contents = null;
-        while(!feof($fp))
+        while( ! feof($fp))
         {
             $contents .= fread($fp, 2);
         }
@@ -214,9 +185,8 @@ class VSCodeController extends Controller
     /**
      * @throws \Exception
      */
-    public function submitGrading(Course $course, Task $task, Project $project)
+    public function submitGrading(Course $course, Task $task, Project $project) : string|Response
     {
-
         $validator = Validator::make(\request()->all(), [
             'tasks'             => ['array', 'required'],
             'tasks.*.subtaskId' => ['required', 'distinct'],
@@ -237,7 +207,7 @@ class VSCodeController extends Controller
         $subTasks = [];
         $subTaskComments = [];
 
-        collect(request('tasks'))->each(function($task) use ($userDelegation, &$subTasks, &$subTaskComments) {
+        (new Collection(request('tasks')))->each(function($task) use ($userDelegation, &$subTasks, &$subTaskComments) {
             $subTasks[] = [
                 'sub_task_id' => $task['subtaskId'],
                 'points'      => $task['points'] ?? 0,
