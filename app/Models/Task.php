@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * }
  *
  * @property CorrectionType $correction_type
+ * @property int $id
  * @property string $name
  * @method Task findOrFail($id, $columns = []) {
  * @property SubTaskCollection $sub_tasks
