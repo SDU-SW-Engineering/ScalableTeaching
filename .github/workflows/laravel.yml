@@ -33,6 +33,10 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Install NPM Dependencies
+        run: yarn
+      - name: Generate static files
+        run: yarn prod
       - name: Generate key
         run: php artisan key:generate
       - name: Set directory permissions
