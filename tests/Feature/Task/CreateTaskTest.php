@@ -23,7 +23,7 @@ it('creates an exercise task', closure: function() {
     postJson(route('courses.manage.storeTask', [$this->course]), [
         'name' => 'Test Assignment',
         'type' => 'exercise',
-    ])->dump()->assertStatus(200);
+    ])->assertStatus(200);
 
     assertDatabaseHas('tasks', [
         'type' => 'exercise',
@@ -36,7 +36,7 @@ it('creates a repo-backed exercise task', closure: function() {
         'name'    => 'Test Assignment',
         'type'    => 'exercise',
         'repo-id' => '123',
-    ])->dump()->assertStatus(200);
+    ])->assertStatus(200);
 
     assertDatabaseHas('tasks', [
         'type'              => 'exercise',
