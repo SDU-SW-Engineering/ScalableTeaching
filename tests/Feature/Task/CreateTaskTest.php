@@ -22,12 +22,12 @@ beforeEach(function() {
 it('creates an exercise task', closure: function() {
     postJson(route('courses.manage.storeTask', [$this->course]), [
         'name' => 'Test Assignment',
-        'type' => 'exercise'
+        'type' => 'exercise',
     ])->dump()->assertStatus(200);
 
     assertDatabaseHas('tasks', [
         'type' => 'exercise',
-        'name' => 'Test Assignment'
+        'name' => 'Test Assignment',
     ]);
 });
 
@@ -35,13 +35,13 @@ it('creates a repo-backed exercise task', closure: function() {
     postJson(route('courses.manage.storeTask', [$this->course]), [
         'name'    => 'Test Assignment',
         'type'    => 'exercise',
-        'repo-id' => '123'
+        'repo-id' => '123',
     ])->dump()->assertStatus(200);
 
     assertDatabaseHas('tasks', [
-        'type'             => 'exercise',
-        'name'             => 'Test Assignment',
-        'source_project_id' => '123'
+        'type'              => 'exercise',
+        'name'              => 'Test Assignment',
+        'source_project_id' => '123',
     ]);
 });
 
@@ -50,13 +50,13 @@ it('creates an assignment task', closure: function() {
     postJson(route('courses.manage.storeTask', [$this->course]), [
         'name'    => 'Test Assignment',
         'type'    => 'assignment',
-        'repo-id' => '123'
+        'repo-id' => '123',
     ])->assertStatus(200);
 
     assertDatabaseHas('tasks', [
         'type'              => 'assignment',
         'name'              => 'Test Assignment',
-        'source_project_id' => '123'
+        'source_project_id' => '123',
     ]);
 });
 
