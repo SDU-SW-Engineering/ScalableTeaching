@@ -228,8 +228,8 @@ class TaskController extends Controller
     {
         $validated = request()->validateWithBag('new', [
             'name'        => 'required',
-            'type' => 'required',
-            'repo-id'  => ['required_if:type,repo', 'numeric', 'nullable']
+            'type'        => 'required',
+            'repo-id'     => ['required_if:type,repo', 'numeric', 'nullable'],
         ]);
 
         /*try
@@ -283,8 +283,8 @@ class TaskController extends Controller
         }*/
 
         return [
-            'id' => $task->id,
-            'route' => route('courses.tasks.admin.index', [$course->id, $task->id])
+            'id'    => $task->id,
+            'route' => route('courses.tasks.admin.index', [$course->id, $task->id]),
         ];
     }
 

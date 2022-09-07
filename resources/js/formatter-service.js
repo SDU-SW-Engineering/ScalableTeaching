@@ -11,34 +11,44 @@ async function codeToHtml(code) {
         themes: ["github-dark"],
     });
 
-    const md = markdown({
-        html: true,
-        highlight: (code, lang) => {
-            const lightTokens = highlighterLight.codeToThemedTokens(code, lang);
-            const lightHtml = shiki.renderToHtml(lightTokens, {
-                fg: highlighterLight.getForegroundColor("github-light"),
-                bg: highlighterLight.getBackgroundColor("github-light"),
-                elements: {
-                    pre({ className, style, children }) {
-                        return `<pre class="${className} code-light" style="${style}">${children}</pre>`;
+    try {
+        const md = markdown({
+            html: true,
+            highlight: (code, lang) => {
+                const lightTokens = highlighterLight.codeToThemedTokens(
+                    code,
+                    lang
+                );
+                const lightHtml = shiki.renderToHtml(lightTokens, {
+                    fg: highlighterLight.getForegroundColor("github-light"),
+                    bg: "#F3F4F6",
+                    elements: {
+                        pre({ className, style, children }) {
+                            return `<pre class="${className} code-light" style="${style}">${children}</pre>`;
+                        },
                     },
-                },
-            });
-            const darkTokens = highlighterDark.codeToThemedTokens(code, lang);
-            const darkHtml = shiki.renderToHtml(darkTokens, {
-                fg: highlighterDark.getForegroundColor("github-dark"),
-                bg: highlighterDark.getBackgroundColor("github-dark"),
-                elements: {
-                    pre({ className, style, children }) {
-                        return `<pre class="${className} code-dark" style="${style}">${children}</pre>`;
+                });
+                const darkTokens = highlighterDark.codeToThemedTokens(
+                    code,
+                    lang
+                );
+                const darkHtml = shiki.renderToHtml(darkTokens, {
+                    fg: highlighterDark.getForegroundColor("github-dark"),
+                    bg: highlighterDark.getBackgroundColor("github-dark"),
+                    elements: {
+                        pre({ className, style, children }) {
+                            return `<pre class="${className} code-dark" style="${style}">${children}</pre>`;
+                        },
                     },
-                },
-            });
-            return lightHtml + darkHtml;
-        },
-    });
+                });
+                return lightHtml + darkHtml;
+            },
+        });
 
-    return md.render(code);
+        return md.render(code);
+    } catch (exception) {
+        console.log(exception);
+    }
 }
 
 app.use(express.json());

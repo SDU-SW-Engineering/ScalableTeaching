@@ -46,7 +46,7 @@ class OverviewController extends Controller
 
         /** @var Collection<string,int> $dailyBuilds */
         $dailyBuilds = $task->dailyBuilds(true, true);
-        $dailyBuildsGraph = $dailyBuilds == null ? null :  new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
+        $dailyBuildsGraph = $dailyBuilds == null ? null : new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
 
 
         return view('tasks.admin.index', compact(

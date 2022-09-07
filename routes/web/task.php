@@ -34,7 +34,7 @@ Route::prefix('{task}')->group(function() {
 
         Route::controller(SettingsController::class)->group(function() {
             Route::get('preferences', 'preferences')->name('preferences');
-            Route::get('save-description', 'saveDescription')->name('save-description');
+            Route::post('save-description', 'saveDescription')->name('save-description');
         });
     });
 });
