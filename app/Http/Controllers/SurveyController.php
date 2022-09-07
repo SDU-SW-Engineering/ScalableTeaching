@@ -32,10 +32,10 @@ class SurveyController extends Controller
     public function all() : Collection
     {
         return auth()->user()->surveys()->withCount('responses')->get()->map(fn(Survey $survey) => [
-            'id' => $survey->id,
-            'name' => $survey->name,
-            'responses_count' =>  $survey->responses_count,
-            'created_at' => $survey->created_at,
+            'id'              => $survey->id,
+            'name'            => $survey->name,
+            'responses_count' => $survey->responses_count,
+            'created_at'      => $survey->created_at,
         ]);
     }
 

@@ -153,7 +153,7 @@ class AnalyticsController extends Controller
             ]),
         ])->values();
 
-        return view('tasks.admin.subTasks', [
+        return view('tasks.admin.subtasks', [
             'subTasks' => $subTasks,
         ]);
     }

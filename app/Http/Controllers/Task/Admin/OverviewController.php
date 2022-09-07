@@ -38,7 +38,7 @@ class OverviewController extends Controller
         $totalProjectsPerDay = $task->totalProjectsPerDay;
         /** @var Collection<string,int> $projectsCompletedPerDay */
         $projectsCompletedPerDay = $task->totalCompletedTasksPerDay;
-        $totalProjectsPerDayGraph = new Graph(
+        $totalProjectsPerDayGraph = $totalProjectsPerDay == null ? null : new Graph(
             $totalProjectsPerDay->keys(),
             new LineDataSet("Projects", $totalProjectsPerDay->values(), "#266ab0", true),
             new LineDataSet("Completed", $projectsCompletedPerDay->values(), "#7BB026", true)
@@ -46,7 +46,7 @@ class OverviewController extends Controller
 
         /** @var Collection<string,int> $dailyBuilds */
         $dailyBuilds = $task->dailyBuilds(true, true);
-        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
+        $dailyBuildsGraph = $dailyBuilds == null ? null : new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
 
 
         return view('tasks.admin.index', compact(

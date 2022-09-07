@@ -84,7 +84,7 @@ class VSCodeController extends Controller
             'tasks' => $tasks->map(fn(SubTask $task) => [
                 ...$task->toArray(),
                 'pointsAcquired'   => $pointsGiven->has($task->getId()) ? $pointsGiven->get($task->getId()) : null,
-                'comments' => $comments->has($task->getId()) ? $comments->get($task->getId()) : [],
+                'comments'         => $comments->has($task->getId()) ? $comments->get($task->getId()) : [],
             ]),
         ])->values();
     }

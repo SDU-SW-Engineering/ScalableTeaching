@@ -34,6 +34,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * }
  *
  * @property CorrectionType $correction_type
+ * @property int $id
+ * @property string $description
+ * @property string $markdown_description
  * @property string $name
  * @method Task findOrFail($id, $columns = []) {
  * @property SubTaskCollection $sub_tasks
@@ -46,6 +49,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Collection<TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
  * @property-read int|null $source_project_id
+ * @property Carbon $starts_at
+ * @property Carbon $ends_at
+ * @property-read bool $is_publishable
  */
 class Task extends Model
 {
@@ -160,10 +166,12 @@ class Task extends Model
     /**
      * @param bool $withTrash
      * @param bool $withToday
-     * @return \Illuminate\Support\Collection<string,int>
+     * @return \Illuminate\Support\Collection<string,int>|null
      */
-    public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection
+    public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection|null
     {
+        if ( ! $this->is_publishable)
+            return null;
         $query = $this->jobs();
         if($withTrash)
             $query->withTrashedParents();
@@ -196,11 +204,13 @@ class Task extends Model
     }
 
     /**
-     * @return Attribute<\Illuminate\Support\Collection<int|string, int>,null>
+     * @return Attribute<\Illuminate\Support\Collection<int|string, int>|null,null>
      */
     public function totalProjectsPerDay(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => $this->projects()->daily($this->starts_at, $this->earliestEndDate())->total());
+        return Attribute::make(get: fn($value, $attributes) => $this->is_publishable ?
+            $this->projects()->daily($this->starts_at, $this->earliestEndDate())->total()
+            : null);
     }
 
     /**
@@ -214,17 +224,26 @@ class Task extends Model
     }
 
     /**
-     * @return Attribute<\Illuminate\Support\Collection<string, int>,null>
+     * @return Attribute<\Illuminate\Support\Collection<string, int>|null,null>
      */
     public function totalCompletedTasksPerDay(): Attribute
     {
         return Attribute::make(
-            get: fn($value, $attributes) => $this->projects()
-            ->withTrashed()
-            ->where('status', 'finished')
-            ->daily($this->starts_at, $this->earliestEndDate(), 'finished_at')
-            ->total()
+            get: fn($value, $attributes) => $this->is_publishable ? $this->projects()
+                ->withTrashed()
+                ->where('status', 'finished')
+                ->daily($this->starts_at, $this->earliestEndDate(), 'finished_at')
+                ->total()
+                : null
         );
+    }
+
+    /**
+     * @return Attribute<bool,null>
+     */
+    public function isPublishable(): Attribute
+    {
+        return Attribute::make(get: fn($value, $attributes) => filled($this->starts_at) && filled($this->ends_at));
     }
 
     public function earliestEndDate(bool $excludeToday = false): Carbon
@@ -476,5 +495,23 @@ class Task extends Model
             Group::class,
             fn(Builder $query) => $query->whereIn('id', $groupIds)
         )->get();
+    }
+
+    /**
+     * @return Attribute<array<int,string>,null>
+     */
+    public function missingFields() : Attribute
+    {
+        return Attribute::make(get: function($value, $attributes) {
+            $missing = [];
+            if ( ! filled($attributes['description']))
+                $missing[] = 'description';
+            if ( ! filled($attributes['starts_at']))
+                $missing[] = 'starts at date';
+            if ( ! filled($attributes['ends_at']))
+                $missing[] = 'ends at date';
+
+            return $missing;
+        });
     }
 }

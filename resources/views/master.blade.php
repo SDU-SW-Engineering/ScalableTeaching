@@ -7,6 +7,8 @@
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
     <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1f2937" media="(prefers-color-scheme: dark)">
+    @yield('styles')
+
 </head>
 <body class="bg-gray-50 dark:bg-gray-700 h-screen" style="min-width: 480px">
 <div id="app">
