@@ -153,6 +153,7 @@ class AnalyticsController extends Controller
             ]),
         ])->values();
 
+        // @phpstan-ignore-next-line
         return view('tasks.admin.subTasks', [
             'subTasks' => $subTasks,
         ]);
