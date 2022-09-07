@@ -52,3 +52,21 @@
 .prose-sm a {
     text-decoration: underline;
 }
+
+.prose-sm ol {
+    padding: 20px;
+    list-style-type: decimal;
+}
+
+.prose-sm ul {
+    padding: 20px;
+    list-style-type: disc;
+}
+
+.prose-sm ul > li {
+    padding-left: 0;
+}
+
+.prose-sm ol > li {
+    padding-left: 0;
+}
