@@ -226,10 +226,10 @@ class TaskController extends Controller
      */
     public function store(Course $course, GitLabManager $manager): array
     {
-        $validated = request()->validateWithBag('new', [
-            'name'        => 'required',
-            'type'        => 'required',
-            'repo-id'     => ['required_if:type,repo', 'numeric', 'nullable'],
+        $validated = request()->validate([
+            'name'    => 'required',
+            'type'    => 'required',
+            'repo-id' => ['required_if:type,assignment', 'numeric', 'nullable'],
         ]);
 
         /*try
@@ -272,15 +272,16 @@ class TaskController extends Controller
         $task = $course->tasks()->create([
             //'source_project_id' => $validated['project-id'],
             'name'              => $validated['name'],
+            'type'              => $validated['type'],
+            'source_project_id' => key_exists('repo-id', $validated) ? $validated['repo-id'] : null,
             //'gitlab_group_id'   => null//$groupResponse['id'],
         ]);
-
-       /** try
-        {
-            $task->reloadDescriptionFromRepo();
-        } catch(\Exception $ignored)
-        {
-        }*/
+        /** try
+         * {
+         * $task->reloadDescriptionFromRepo();
+         * } catch(\Exception $ignored)
+         * {
+         * }*/
 
         return [
             'id'    => $task->id,
@@ -393,7 +394,7 @@ class TaskController extends Controller
         return "OK";
     }
 
-    public function markComplete(Course $course, Task $task): string | Response
+    public function markComplete(Course $course, Task $task): string|Response
     {
         if($task->correction_type != CorrectionType::Self)
             return response('Bad request', 400);
