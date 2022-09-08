@@ -6,10 +6,12 @@ use App\Models\Course;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
+use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use function Ramsey\Uuid\v1;
 
 class CourseController extends Controller
@@ -73,15 +75,35 @@ class CourseController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, GitLabManager $manager)
     {
         $validated = $request->validate([
             'course-name' => 'required|max:255',
         ]);
 
+        $snakeName = Str::snake($validated['course-name']);
+
+        $currentGroup = $manager->groups()->subgroups(getenv('GITLAB_GROUP'), ['search' => $snakeName]);
+        if (count($currentGroup) > 0)
+            return redirect()->back()->withErrors(['course-name' => 'A course with that name already exists in GitLab.'])->withInput();
+
+        $gitlabGroup = [
+            'name' => $validated['course-name'],
+            'path' => $snakeName,
+            'visibility' => 'private',
+            'parent_id' => getenv('GITLAB_GROUP')
+        ];
+
+        $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($gitlabGroup));
+        $groupResponse = json_decode($response->getBody()->getContents(), true);
+        if($response->getStatusCode() != 201)
+            return back()
+                ->withErrors(['course-name' => 'Couldn\'t create associated GitLab group, try again later.'])
+                ->withInput();
+
         $course = Course::create([
             'name'            => $validated['course-name'],
-            'gitlab_group_id' => 1,
+            'gitlab_group_id' => $groupResponse['id'],
         ]);
 
         $course->members()->attach(auth()->id(), ['role' => 'teacher']);
