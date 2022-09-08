@@ -65,7 +65,7 @@ class SettingsController extends Controller
 
     public function toggleVisibility(Course $course, Task $task)
     {
-        $task->is_visible = !$task->is_visible;
+        $task->is_visible = ! $task->is_visible;
         $task->save();
 
         return "ok";
