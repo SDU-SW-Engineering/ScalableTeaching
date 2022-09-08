@@ -39,15 +39,27 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware(['web', ...$stagingMiddleware])
                 ->namespace($this->namespace)
-                ->group(base_path('routes/web.php'));
+                ->group(base_path('routes/web/web.php'));
 
             if(app()->environment('staging', 'local'))
             {
                 Route::prefix('staging')
                     ->middleware(['web'])
                     ->name($this->namespace)
-                    ->group(base_path('routes/staging.php'));
+                    ->group(base_path('routes/web/staging.php'));
             }
+
+            Route::middleware(['web', 'auth'])
+                ->as('courses.')
+                ->prefix('courses')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/web/course.php'));
+
+            Route::middleware(['web', 'auth'])
+                ->as('courses.tasks.')
+                ->prefix('courses/{course}/tasks')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/web/task.php'));
         });
     }
 

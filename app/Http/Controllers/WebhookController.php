@@ -8,13 +8,14 @@ use App\Models\Pipeline;
 use App\Models\Project;
 use App\WebhookTypes;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class WebhookController extends Controller
 {
     /**
      * @throws \Throwable
      */
-    public function reporter()
+    public function reporter() : WebhookTypes|string
     {
         abort_unless(request()->hasHeader('X-Gitlab-Token'), 400, 'No GitLab token supplied');
         abort_unless(request()->hasHeader('X-GitLab-Event'), 400, 'GitLab event missing');
@@ -29,7 +30,7 @@ class WebhookController extends Controller
         };
     }
 
-    private function pipeline()
+    private function pipeline() : string
     {
         $project = Project::firstWhere('project_id', request('project.id'));
         $startedAt = Carbon::parse(\request('object_attributes.created_at'))->setTimezone(config('app.timezone'));
@@ -48,13 +49,13 @@ class WebhookController extends Controller
                 'queue_duration' => request('object_attributes.queued_duration') ?? null,
             ]);
 
-        $tracking = collect($project->task->sub_tasks->all())->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
-        $builds = collect(request('builds'));
+        $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
+        $builds = new Collection(request('builds'));
         $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains($build['name']) && $build['status'] == 'success');
         $succeedingBuilds->each(fn($build) => $project->subTasks()->firstOrCreate([
             'sub_task_id' => $tracking->flip()->get($build['name']),
             'source_type' => Pipeline::class,
-            'source_id' => $pipeline->id,
+            'source_id'   => $pipeline->id,
         ]));
 
         return "OK";
@@ -76,7 +77,7 @@ class WebhookController extends Controller
         ]);
     }
 
-    private function push()
+    private function push() : string
     {
         /** @var Project $project */
         $project = Project::firstWhere('project_id', request('project.id'));

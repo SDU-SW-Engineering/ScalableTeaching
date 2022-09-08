@@ -11,7 +11,13 @@ class ProjectPolicy
 {
     use HandlesAuthorization;
 
-    public function before(User $user, $ability, ?Project $project)
+    /**
+     * @param User $user
+     * @param string $ability
+     * @param Project|null $project
+     * @return bool|void
+     */
+    public function before(User $user, string $ability, ?Project $project)
     {
         if ($project != null && $project->task->course->hasTeacher($user))
             return true;
@@ -22,7 +28,7 @@ class ProjectPolicy
      *
      * @param User $user
      * @param \App\Models\Project $project
-     * @return \Illuminate\Auth\Access\Response|bool
+     * @return bool
      */
     public function view(User $user, Project $project)
     {
@@ -33,7 +39,7 @@ class ProjectPolicy
         return $currentProject->id == $project->id;
     }
 
-    public function migrate(User $user, Project $project, Group $group)
+    public function migrate(User $user, Project $project, Group $group) : bool
     {
         if ($project->ownable_type == Group::class)
             return false;
@@ -45,17 +51,17 @@ class ProjectPolicy
         return true;
     }
 
-    public function refreshAccess(User $user, Project $project)
+    public function refreshAccess(User $user, Project $project) : bool
     {
         return $project->owners()->contains('id', $user->id);
     }
 
-    public function download(User $user, Project $project)
+    public function download(User $user, Project $project) : bool
     {
         return false;
     }
 
-    public function validate(User $user, Project $project)
+    public function validate(User $user, Project $project) : bool
     {
         return false;
     }

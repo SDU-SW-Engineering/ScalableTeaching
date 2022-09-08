@@ -1,0 +1,1 @@
+@extends('courses.manage.master')

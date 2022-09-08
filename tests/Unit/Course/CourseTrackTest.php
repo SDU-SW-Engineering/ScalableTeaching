@@ -163,7 +163,7 @@ test('isOn returns false if the user has not started a project on the current tr
 
 test('isOn returns true if the user belongs to a group that has started a project on the current track', function() {
     $user = User::factory()->hasAttached($this->course)->create();
-    $group = Group::factory()->hasAttached($user)->for($this->course);
+    $group = Group::factory()->hasAttached($user, [], 'members')->for($this->course);
     Project::factory()->for($this->task)->for($group, 'ownable')->createQuietly();
 
     expect($this->track1->isOn($user))->toBeTrue();

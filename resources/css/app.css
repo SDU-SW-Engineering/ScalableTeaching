@@ -10,6 +10,15 @@
     .bg-blob {
         background-image: url('/svgs/blob-dark.svg')
     }
+    .code-light {
+        display:none;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .code-dark {
+        display:none;
+    }
 }
 
 .hero-waves {
@@ -38,4 +47,26 @@
 
 .max-vh80 {
     max-height: 80vh;
+}
+
+.prose-sm a {
+    text-decoration: underline;
+}
+
+.prose-sm ol {
+    padding: 20px;
+    list-style-type: decimal;
+}
+
+.prose-sm ul {
+    padding: 20px;
+    list-style-type: disc;
+}
+
+.prose-sm ul > li {
+    padding-left: 0;
+}
+
+.prose-sm ol > li {
+    padding-left: 0;
 }

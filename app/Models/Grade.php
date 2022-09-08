@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 
@@ -18,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $value_raw
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @mixin Eloquent
  */
 class Grade extends Model
 {
@@ -34,19 +38,29 @@ class Grade extends Model
     public $dates = ['started_at', 'ended_at'];
 
     // region relationships
-    public function user()
+
+    /**
+     * @return BelongsTo<User,Grade>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function task()
+    /**
+     * @return BelongsTo<Task,Grade>
+     */
+    public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);
     }
 
-    public function source()
+    /**
+     * @return MorphTo<Model,Grade>
+     */
+    public function source(): MorphTo
     {
-        $this->morphTo("source");
+        return $this->morphTo("source");
     }
     // endregion
 
@@ -64,7 +78,7 @@ class Grade extends Model
             $userOverridden = Grade::where('user_id', $grade->user_id)
                 ->where('task_id', $grade->task_id)
                 ->where('source_type', User::class)->exists();
-            $grade->selected = !$userOverridden;
+            $grade->selected = ! $userOverridden;
             if($userOverridden)
                 return;
             Grade::where('user_id', $grade->user_id)
@@ -73,7 +87,7 @@ class Grade extends Model
         });
     }
 
-    public function select()
+    public function select() : void
     {
         Grade::where('user_id', $this->user_id)
             ->where('task_id', $this->task_id)

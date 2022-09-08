@@ -5,20 +5,30 @@ namespace Domain\Analytics\Graph\DataSets;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
 
+/**
+ * @implements Arrayable<string, Collection|string>
+ */
 class DataSet implements Arrayable
 {
-    protected $borderColor;
+    protected string $borderColor;
 
-    protected $backgroundColor;
+    protected string $backgroundColor;
 
-    protected $label;
+    protected string $label;
 
-    protected $data;
+    /** @var Collection<int,int> */
+    protected Collection $data;
 
-    public function __construct($label, Collection $data, $color, $transparent = false)
+    /**
+     * @param string $label
+     * @param Collection<int,int> $data
+     * @param string $color
+     * @param bool $transparent
+     */
+    public function __construct(string $label, Collection $data, string $color, bool $transparent = false)
     {
         $this->label = $label;
-        $this->data  = $data->values();
+        $this->data = $data->values();
         $this->borderColor = $color;
         $this->backgroundColor = $color . ($transparent ? "44" : "");
     }
@@ -29,7 +39,7 @@ class DataSet implements Arrayable
             'borderColor'     => $this->borderColor,
             'backgroundColor' => $this->backgroundColor,
             'label'           => $this->label,
-            'data'            => $this->data
+            'data'            => $this->data,
         ];
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Enums\PipelineStatusEnum;
 use App\ProjectStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -56,6 +57,9 @@ class ProjectSubTask extends Model
         };
     }
 
+    /**
+     * @return BelongsTo<Project,ProjectSubTask>
+     */
     public function project()
     {
         return $this->belongsTo(Project::class);

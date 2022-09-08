@@ -66,7 +66,7 @@ test('owners returns all the group members when project is group ownable', funct
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory())->create();
 
-    $group = Group::factory(['course_id' => $task->course_id])->hasAttached($user1)->hasAttached($user2)->create();
+    $group = Group::factory(['course_id' => $task->course_id])->hasAttached($user1, [], 'members')->hasAttached($user2, [], 'members')->create();
     $project = Project::factory()
         ->for($task)
         ->for($group, 'ownable')

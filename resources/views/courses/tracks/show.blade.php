@@ -17,7 +17,7 @@
                                      class="fill-current text-white h-20 w-20 -ml-2 -mr-4" viewBox="0 0 24 24"
                                      style="transform: ;msFilter:;">
                                     <path
-                                        d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z"></path>
+                                            d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z"></path>
                                 </svg>
                             </div>
                         </div>
@@ -27,18 +27,22 @@
                                     <div class="flex flex-col">
                                         <span class="text-white text-lg font-light">Track</span>
                                         <span
-                                            class="text-white text-3xl font-semibold -mt-2 ">{{ $subTrack->name ?? $index + 1 }}</span>
+                                                class="text-white text-3xl font-semibold -mt-2 ">{{ $subTrack->name ?? $index + 1 }}</span>
                                     </div>
                                     <div>
                                         @if($subTrack->isOn(auth()->user()))
                                             <div class="flex text-lime-green-800 items-center mb-2">
-                                        <span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="fill-current h-5 w-5 mr-1"
-                                                 viewBox="0 0 24 24"
-                                                 style="transform: ;msFilter:;"><path
-                                                    d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path
-                                                    d="M9.999 13.587 7.7 11.292l-1.412 1.416 3.713 3.705 6.706-6.706-1.414-1.414z"></path></svg>
-                                        </span>
+                                                <span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                         class="fill-current h-5 w-5 mr-1"
+                                                         viewBox="0 0 24 24"
+                                                         style="transform: ;msFilter:;">
+                                                        <path
+                                                                d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path>
+                                                        <path
+                                                                d="M9.999 13.587 7.7 11.292l-1.412 1.416 3.713 3.705 6.706-6.706-1.414-1.414z"></path>
+                                                    </svg>
+                                                </span>
                                                 <span>You are on this track</span>
                                             </div>
                                         @endif
@@ -56,7 +60,7 @@
                         later.</h1>
                 @endif
                 @foreach($tasks as $task)
-                    @include('courses.partials.course', ['task' => $task])
+                    @include('courses.partials.task', ['task' => $task])
                 @endforeach
             </div>
             <div>
@@ -65,9 +69,12 @@
                         <span class="mr-1">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-current dark:text-white"
                                  viewBox="0 0 24 24"
-                                 style="transform: ;msFilter:;"><path
-                                    d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path
-                                    d="M11 11h2v6h-2zm0-4h2v2h-2z"></path></svg>
+                                 style="transform: ;msFilter:;">
+                                <path
+                                        d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path>
+                                <path
+                                        d="M11 11h2v6h-2zm0-4h2v2h-2z"></path>
+                            </svg>
                         </span>
                         <span class="font-semibold dark:text-white">What are tracks?</span>
                     </div>

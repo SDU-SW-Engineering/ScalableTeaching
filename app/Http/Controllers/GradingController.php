@@ -7,12 +7,14 @@ use App\Models\Enums\GradeEnum;
 use App\Models\Grade;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\View\View;
 
 class GradingController extends Controller
 {
-    public function index(Course $course)
+    public function index(Course $course) : View
     {
-        $taskGrades = $course->tasks()->with('grades')->get()->keyBy('id');
+        $taskGrades = $course->tasks()->assignments()->with('grades')->get()->keyBy('id');
 
         $grades = $course->students->map(function(User $student) use ($taskGrades, $course) {
             return [
@@ -20,7 +22,7 @@ class GradingController extends Controller
                     'id'   => $student->id,
                     'name' => $student->name,
                 ],
-                'tasks'   => $course->tasks->map(fn(Task $task) => [
+                'tasks'   => $course->tasks()->assignments()->get()->map(fn(Task $task) => [
                     'history'        => false,
                     'historyEntries' => null,
                     'adding'         => false,
@@ -34,10 +36,10 @@ class GradingController extends Controller
             ];
         })->sortBy('student.name');
 
-        return view('courses.grading.index', ['grades' => $grades, 'course' => $course]);
+        return view('courses.manage.grading', ['grades' => $grades, 'course' => $course]);
     }
 
-    public function updateGrading(Course $course, User $user)
+    public function updateGrading(Course $course, User $user) : void
     {
         abort_unless($course->students->contains('id', $user->id), 400);
 
@@ -50,14 +52,19 @@ class GradingController extends Controller
         ]);
     }
 
-    public function taskInfo(Course $course, Task $task)
+    /**
+     * @param Course $course
+     * @param Task $task
+     * @return Collection<int,Grade>
+     */
+    public function taskInfo(Course $course, Task $task) : Collection
     {
         return $task->grades()->where([
             'user_id' => \request('user'),
         ])->orderByDesc('created_at')->get();
     }
 
-    public function setSelected(Course $course, Grade $grade)
+    public function setSelected(Course $course, Grade $grade) : string
     {
         $grade->select();
 

@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -85,97 +86,135 @@ class Project extends Model
         'created' => ProjectCreated::class,
     ];
 
-    public function ownable() : MorphTo
+    /**
+     * @return MorphTo<Model,Project>
+     */
+    public function ownable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function pipelines()
+    /**
+     * @return HasMany<Pipeline>
+     */
+    public function pipelines(): HasMany
     {
         return $this->hasMany(Pipeline::class);
     }
 
-    public function pushes()
+    /**
+     * @return HasMany<ProjectPush>
+     */
+    public function pushes(): HasMany
     {
         return $this->hasMany(ProjectPush::class);
     }
 
-    public function task()
+    /**
+     * @return BelongsTo<Task,Project>
+     */
+    public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);
     }
 
-    public function subTasks() : HasMany
+    /**
+     * @return HasMany<ProjectSubTask>
+     */
+    public function subTasks(): HasMany
     {
         return $this->hasMany(ProjectSubTask::class);
     }
 
-    public function subTaskComments() : HasMany
+    /**
+     * @return HasMany<ProjectSubTaskComment>
+     */
+    public function subTaskComments(): HasMany
     {
         return $this->hasMany(ProjectSubTaskComment::class);
     }
 
-    public function downloads() : HasMany
+    /**
+     * @return HasMany<ProjectDownload>
+     */
+    public function downloads(): HasMany
     {
         return $this->hasMany(ProjectDownload::class);
     }
 
-    public function gradeDelegations() : HasMany
+    /**
+     * @return HasMany<GradeDelegation>
+     */
+    public function gradeDelegations(): HasMany
     {
         return $this->hasMany(GradeDelegation::class);
     }
 
-    public function scopeEnded(Builder $query)
+    /**
+     * @param Builder<Project> $query
+     * @return Builder<Project>
+     */
+    public function scopeEnded(Builder $query) : Builder
     {
         return $query->whereIn('status', [ProjectStatus::Overdue, ProjectStatus::Finished]);
     }
 
     /**
      * returns a collection of users that own the project
-     * @return Collection<int, User>
+     * @return Collection<int,User>
      */
     public function owners(): Collection
     {
-        if ($this->ownable_type == User::class)
-            return Collection::wrap($this->ownable);
+        if($this->ownable_type == User::class)
+            // @phpstan-ignore-next-line
+            return Collection::wrap([$this->ownable]);
 
-        return $this->ownable->users()->get();
+        return $this->ownable->members;
     }
 
-    public function getDurationAttribute()
+    /**
+     * @return Attribute<null|string,null>
+     */
+    public function duration(): Attribute
     {
-        if ($this->finished_at == null)
-            return null;
-
-        return number_format($this->created_at->diffInHours($this->finished_at) / 24, 2);
+        return Attribute::make(fn($value, $attributes) => $this->finished_at == null ? null : number_format($this->created_at->diffInHours($this->finished_at) / 24, 2));
     }
 
-    public function dailyBuilds($withToday = false) : \Illuminate\Support\Collection
+    /**
+     * @param bool $withToday
+     * @return \Illuminate\Support\Collection<int|string,int>
+     */
+    public function dailyBuilds(bool $withToday = false): \Illuminate\Support\Collection
     {
-        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(! $withToday))->get();
+        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate( ! $withToday))->get();
     }
 
-    public function getValidationStatusAttribute()
+    /**
+     * @return Attribute<string,null>
+     */
+    public function validationStatus(): Attribute
     {
-        if ($this->validated_at == null)
-            return "pending";
-        if (count($this->validation_errors) > 0)
-            return "failed";
+        return Attribute::make(get: function($value, $attributes) {
+            if($this->validated_at == null)
+                return "pending";
+            if(count($this->validation_errors) > 0)
+                return "failed";
 
-        return "success";
+            return "success";
+        });
     }
 
-    public static function isCorrectToken(Project|int $project, string $token) : bool
+    public static function isCorrectToken(Project|int $project, string $token): bool
     {
         return self::token($project) === $token;
     }
 
-    public static function token(Project|int $project) : string
+    public static function token(Project|int $project): string
     {
-        return md5(strtolower($project instanceof Project ? $project->project_id : $project) . config('scalable.webhook_secret'));
+        return md5(strtolower($project instanceof Project ? "$project->project_id" : $project) . config('scalable.webhook_secret'));
     }
 
-    public function progress() : int
+    public function progress(): int
     {
         return match ($this->task->correction_type)
         {
@@ -184,10 +223,10 @@ class Project extends Model
         };
     }
 
-    private function pointProgress() : int
+    private function pointProgress(): int
     {
         $completed = $this->subTasks->pluck('sub_task_id');
-        if ($completed->isEmpty())
+        if($completed->isEmpty())
             return 0;
 
         $maxPoints = $this->task->sub_tasks->maxPoints();
@@ -196,13 +235,13 @@ class Project extends Model
         return (int)(round($points / $maxPoints * 100));
     }
 
-    private function plainProgress() : int
+    private function plainProgress(): int
     {
-        if ($this->status == ProjectStatus::Finished && !in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
+        if($this->status == ProjectStatus::Finished && ! in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
             return 100;
 
         $subTasks = $this->task->sub_tasks;
-        if ($subTasks->isEmpty())
+        if($subTasks->isEmpty())
             return 0;
 
         $completed = $this->subTasks()->count();
@@ -210,30 +249,33 @@ class Project extends Model
         return (int)(round($completed / $subTasks->count() * 100));
     }
 
-    public function getIsMissedAttribute() : bool
+    /**
+     * @return Attribute<bool,null>
+     */
+    public function isMissed(): Attribute
     {
-        if(!$this->task->hasEnded)
-            return false;
-        if(in_array($this->task->correction_type, [CorrectionType::None, CorrectionType::Manual]))
-            return $this->pushes()->where('created_at', '<', $this->task->ends_at)->count() == 0;
+        return Attribute::make(get: function($value, $attributes) {
+            if( ! $this->task->hasEnded)
+                return false;
+            if(in_array($this->task->correction_type, [CorrectionType::None, CorrectionType::Manual]))
+                return $this->pushes()->where('created_at', '<', $this->task->ends_at)->count() == 0;
 
-        return $this->status == ProjectStatus::Overdue;
+            return $this->status == ProjectStatus::Overdue;
+        });
     }
 
-    /**
-     */
-    public function latestDownload() : null|ProjectDownload
+    public function latestDownload(): null|ProjectDownload
     {
         /** @var ProjectPush | null $latestPush */
         $latestPush = $this->pushes()
             ->where('created_at', '<=', $this->task->ends_at)->latest()->first();
-        if ($latestPush == null)
+        if($latestPush == null)
             return null;
 
         return $latestPush->download();
     }
 
-    public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, $gradeMeta = [], Carbon $startedAt = null, Carbon $endedAt = null)
+    public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, ?array $gradeMeta = [], Carbon $startedAt = null, Carbon $endedAt = null): void
     {
         $this->update(['status' => $status]);
 
@@ -246,20 +288,20 @@ class Project extends Model
             'user_id'     => $user->id,
             'value'       => match ($status)
             {
-                ProjectStatus::Overdue => 'failed',
+                ProjectStatus::Overdue  => 'failed',
                 ProjectStatus::Finished => 'passed',
-                default => throw new Exception("Passes status must be a final value.")
+                default                 => throw new Exception("Passes status must be a final value.")
             },
-            'value_raw' => $gradeMeta,
-            'started_at' => $startedAt,
-            'ended_at' => $endedAt,
+            'value_raw'   => $gradeMeta,
+            'started_at'  => $startedAt,
+            'ended_at'    => $endedAt,
         ]));
     }
 
     /**
      * @throws Exception
      */
-    public function setProjectStatus(ProjectStatus $status) : void
+    public function setProjectStatus(ProjectStatus $status): void
     {
         $this->setProjectStatusFor($status, Project::class, $this->id, null);
     }

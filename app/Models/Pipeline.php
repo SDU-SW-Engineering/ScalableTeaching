@@ -9,9 +9,12 @@ use App\ProjectStatus;
 use Carbon\CarbonInterval;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * App\Models\JobStatus
@@ -32,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @mixin \Eloquent
  * @property string $user_name
+ * @property-read Collection<int,array{name:string,completed:bool}> $pretty_sub_tasks
  * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereUserEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereUserName($value)
  */
@@ -46,7 +50,10 @@ class Pipeline extends Model
         'runners' => 'json',
     ];
 
-    public static $upgradable = [
+    /**
+     * @var array<string,array<int,PipelineStatusEnum>>
+     */
+    public static array $upgradable = [
         'pending' => [PipelineStatusEnum::Running, PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
         'running' => [PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
     ];
@@ -68,45 +75,66 @@ class Pipeline extends Model
 
     public function isUpgradable(PipelineStatusEnum $to): bool
     {
-        if(!array_key_exists($this->status->value, static::$upgradable))
+        if( ! array_key_exists($this->status->value, static::$upgradable))
             return false;
 
         return in_array($to, static::$upgradable[$this->status->value]);
     }
 
-    public function scopeFinished(Builder $query)
+    /**
+     * @param Builder<Pipeline> $query
+     * @return Builder<Pipeline>
+     */
+    public function scopeFinished(Builder $query) : Builder
     {
-        $query->where('status', 'finished');
+        return $query->where('status', 'finished');
     }
 
-    public function project()
+    /**
+     * @return BelongsTo<Project,Pipeline>
+     */
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
 
+    /**
+     * @return HasMany<ProjectSubTask>
+     */
     public function subTasks() : HasMany
     {
         return $this->hasMany(ProjectSubTask::class);
     }
 
-    public function getPrettySubTasksAttribute()
+    /**
+     * @return Attribute<Collection<int,array{name:string,completed:bool}>,null>
+     */
+    public function prettySubTasks() : Attribute
     {
-        $availableSubTasks = $this->project->task->sub_tasks;
-        $completedSubTasks = $this->subTasks->pluck('sub_task_id');
+        return Attribute::make(get: function($value, $attributes) {
+            $availableSubTasks = $this->project->task->sub_tasks;
+            $completedSubTasks = $this->subTasks->pluck('sub_task_id');
 
-        return $availableSubTasks->all()->map(fn(SubTask $subTask) => [
-            'name'      => $subTask->getDisplayName(),
-            'completed' => $completedSubTasks->contains($subTask->getId()),
-        ]);
+            return $availableSubTasks->all()->map(fn(SubTask $subTask) => [
+                'name'      => $subTask->getDisplayName(),
+                'completed' => $completedSubTasks->contains($subTask->getId()),
+            ]);
+        });
     }
 
-    public function getRunTimeAttribute()
+    /**
+     * @return Attribute<string,null>
+     */
+    public function runTime() : Attribute
     {
-        return CarbonInterval::seconds($this->duration)->forHumans();
+        return Attribute::make(get: fn($value, $attributes) => CarbonInterval::seconds($attributes['duration'])->forHumans());
     }
 
-    public function getQueuedForAttribute()
+    /**
+     * @return Attribute<string,null>
+     */
+    public function queuedFor() : Attribute
     {
-        return CarbonInterval::seconds($this->queue_duration)->forHumans();
+        return Attribute::make(get: fn($value, $attributes) => CarbonInterval::seconds($attributes['queue_duration'])->forHumans());
     }
 }

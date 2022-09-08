@@ -14,11 +14,12 @@ use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Jobs\Job;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use function Clue\StreamFilter\remove;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index() : View
     {
         $averageQueueTime = Cache::remember('queue1MonthAvg', 3600, function () {
             return Pipeline::where('created_at', '>=', now()->subMonth()->toDateString())
