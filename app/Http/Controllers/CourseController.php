@@ -92,10 +92,10 @@ class CourseController extends Controller
             return redirect()->back()->withErrors(['course-name' => 'A course with that name already exists in GitLab.'])->withInput();
 
         $gitlabGroup = [
-            'name' => $validated['course-name'],
-            'path' => $snakeName,
+            'name'       => $validated['course-name'],
+            'path'       => $snakeName,
             'visibility' => 'private',
-            'parent_id' => getenv('GITLAB_GROUP')
+            'parent_id'  => getenv('GITLAB_GROUP'),
         ];
 
         $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($gitlabGroup));
