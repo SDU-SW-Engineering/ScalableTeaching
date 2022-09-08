@@ -69,7 +69,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function create()
+    public function create() : View
     {
         return view('courses.create', [
             'breadcrumbs' => [
@@ -79,7 +79,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function store(Request $request, GitLabManager $manager)
+    public function store(Request $request, GitLabManager $manager) : RedirectResponse
     {
         $validated = $request->validate([
             'course-name' => 'required|max:255',
