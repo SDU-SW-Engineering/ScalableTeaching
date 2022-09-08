@@ -51,6 +51,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read int|null $source_project_id
  * @property Carbon $starts_at
  * @property Carbon $ends_at
+ * @property bool $is_visible
  * @property-read bool $is_publishable
  */
 class Task extends Model
@@ -58,14 +59,13 @@ class Task extends Model
     use HasFactory;
 
     protected $fillable = [
-        'description', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'source_project_id',
+        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'source_project_id',
         'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required',
     ];
 
     protected $dates = ['ends_at', 'starts_at'];
 
     protected $casts = [
-        'is_visible'      => 'bool',
         'sub_tasks'       => SubTaskCollection::class,
         'correction_type' => CorrectionType::class,
         'type'            => TaskTypeEnum::class,
@@ -170,7 +170,7 @@ class Task extends Model
      */
     public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection|null
     {
-        if ( ! $this->is_publishable)
+        if( ! $this->is_publishable)
             return null;
         $query = $this->jobs();
         if($withTrash)
@@ -500,18 +500,34 @@ class Task extends Model
     /**
      * @return Attribute<array<int,string>,null>
      */
-    public function missingFields() : Attribute
+    public function missingFields(): Attribute
     {
         return Attribute::make(get: function($value, $attributes) {
             $missing = [];
-            if ( ! filled($attributes['description']))
+            if( ! filled($attributes['description']))
                 $missing[] = 'description';
-            if ( ! filled($attributes['starts_at']))
+            if( ! filled($attributes['starts_at']))
                 $missing[] = 'starts at date';
-            if ( ! filled($attributes['ends_at']))
+            if( ! filled($attributes['ends_at']))
                 $missing[] = 'ends at date';
 
             return $missing;
         });
+    }
+
+    /**
+     * @return Attribute<bool,void>
+     */
+    public function isVisible() : Attribute
+    {
+        return Attribute::make(
+            get: fn($value, $attributes) => (bool)$value,
+            set: function($value, $attributes) {
+                if ( ! $this->is_publishable)
+                    throw new \Exception("Task is not publishable.");
+
+                return $value;
+            }
+        );
     }
 }

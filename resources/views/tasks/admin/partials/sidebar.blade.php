@@ -2,13 +2,13 @@
     @unless($task->is_publishable)
         <div class="bg-red-400 text-white flex p-1 rounded mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                 stroke="currentColor" class="w-8 h-8 text-red-100 mr-1">
+                 stroke="currentColor" class="w-8 h-8 text-white mr-1">
                 <path stroke-linecap="round" stroke-linejoin="round"
                       d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
             </svg>
             <div class="flex flex-col">
-                <span class="font-bold text-red-100">Task not publishable</span>
-                <span>It is missing:</span>
+                <span class="font-bold text-white">Task not publishable</span>
+                <span class="text-sm font-semibold">It is missing:</span>
                 <ul>
                 @foreach($task->missingFields as $missingField)
                     <li class="text-sm">- {{ $missingField }}</li>

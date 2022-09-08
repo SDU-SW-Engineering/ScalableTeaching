@@ -285,7 +285,7 @@ class TaskController extends Controller
 
         return [
             'id'    => $task->id,
-            'route' => route('courses.tasks.admin.index', [$course->id, $task->id]),
+            'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
         ];
     }
 

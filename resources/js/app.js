@@ -35,6 +35,10 @@ Vue.component(
     "markdown-editor",
     require("./components/Tasks/Preferences/MarkdownEditor").default
 );
+Vue.component(
+    "visibility-dropdown",
+    require("./components/Tasks/VisibilityDropdown").default
+);
 
 const settings = {
     "t-rich-select": {
