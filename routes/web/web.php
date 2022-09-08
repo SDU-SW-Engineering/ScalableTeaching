@@ -24,7 +24,6 @@ Route::get('status', [HomeController::class, 'status'])->middleware('auth')->nam
 
 Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 
-
 Route::prefix('surveys')->as('surveys.')->controller(SurveyController::class)->group(function() {
     Route::get('/', 'index')->name('index');
     Route::get('all', 'all')->name('all');

@@ -88,8 +88,8 @@ export default {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
             this.darkMode = event.matches;
         });
-        /*if (this.task.markdown_description === null || this.task.markdown_description === "")
-            this.displayEditor();*/
+        if (this.task.markdown_description === null || this.task.markdown_description === "")
+            this.displayEditor();
     }
 };
 

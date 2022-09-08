@@ -35,6 +35,9 @@ Route::prefix('{task}')->group(function() {
         Route::controller(SettingsController::class)->group(function() {
             Route::get('preferences', 'preferences')->name('preferences');
             Route::post('save-description', 'saveDescription')->name('save-description');
+            Route::post('update-title', 'updateTitle')->name('update-title');
+            Route::post('update-duration', 'updateDuration')->name('update-duration');
+            Route::post('toggle-visibility', 'toggleVisibility')->name('toggle-visibility');
         });
     });
 });
