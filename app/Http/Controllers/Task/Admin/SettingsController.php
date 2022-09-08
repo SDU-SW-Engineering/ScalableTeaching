@@ -63,7 +63,7 @@ class SettingsController extends Controller
         return back()->with('duration-success', 'Changes saved');
     }
 
-    public function toggleVisibility(Course $course, Task $task)
+    public function toggleVisibility(Course $course, Task $task) : string
     {
         $task->is_visible = ! $task->is_visible;
         $task->save();
