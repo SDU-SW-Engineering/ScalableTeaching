@@ -32,9 +32,9 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::before(function($user, $ability) {
+       /* Gate::before(function($user, $ability) {
             if($user->is_admin && $ability != 'viewHorizon')
                 return true;
-        });
+        });*/
     }
 }

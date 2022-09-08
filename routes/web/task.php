@@ -7,7 +7,7 @@ use App\Http\Controllers\Task\Admin\SettingsController;
 use App\Http\Controllers\Task\Admin\StudentController;
 
 Route::prefix('{task}')->group(function() {
-    Route::prefix('admin')->as('admin.')->middleware('can:viewTask')->group(function() {
+    Route::prefix('admin')->as('admin.')->middleware('can:viewDashboard,task')->group(function() {
 
         Route::get('/', [OverviewController::class, 'index'])->name('index');
 

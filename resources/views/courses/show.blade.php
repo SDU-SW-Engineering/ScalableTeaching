@@ -26,7 +26,7 @@
                                             'cursor-not-allowed' => $exercise['details']->starts_at->isFuture(),
                                             'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-750' =>  !$exercise['details']->starts_at->isFuture(),
                                             'flex bg-white dark:bg-gray-800 w-full py-4 px-4 last:rounded-b last:border-0 items-center gap-4 border-b border-gray-400 dark:border-gray-600'])
-                                               href="{{ route('courses.tasks.show', [$exercise['details']->course, $exercise['details']->id]) }}">
+                                               href="{{ route(auth()->user()->can('viewDashboard', $exercise['details']) ? 'courses.tasks.admin.index' : 'courses.tasks.show', [$exercise['details']->course->id, $exercise['details']->id]) }}">
                                                 @if($exercise['details']->grade() == null)
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                          viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"

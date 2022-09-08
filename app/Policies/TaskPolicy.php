@@ -35,4 +35,12 @@ class TaskPolicy
 
         return false;
     }
+
+    public function viewDashboard(User $user, Task $task)
+    {
+        if ($task->course->hasTeacher($user))
+            return true;
+
+        return false;
+    }
 }
