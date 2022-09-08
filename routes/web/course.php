@@ -8,9 +8,12 @@ use App\Http\Controllers\GradingController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Models\Course;
 
 Route::get('/', [CourseController::class, 'index'])->name('index');
 Route::get('{course}/enroll', [CourseController::class, 'showEnroll'])->name('enroll');
+Route::get('create', [CourseController::class, 'create'])->name('create')->can('create', Course::class);
+Route::post('/', [CourseController::class, 'store'])->name('store')->can('store', Course::class);
 
 Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function() {
     Route::get('/', [CourseController::class, 'show'])->name('show');
