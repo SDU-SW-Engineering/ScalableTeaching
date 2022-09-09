@@ -88,7 +88,7 @@ class GroupController extends Controller
         $invitation->load('recipient');
 
         return response([
-            'recipient'  => $invitation->recipient,
+            'recipient'   => $invitation->recipient,
             'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
         ], 201);
     }
@@ -96,7 +96,8 @@ class GroupController extends Controller
     public function respondToInvite(Course $course, Group $group, GroupInvitation $groupInvitation, string $mode): string|Response
     {
         $accepting = $mode == 'accept';
-        if($accepting) {
+        if($accepting)
+        {
             if(auth()->user()->cannot('acceptInvite', [$group, $groupInvitation]))
                 return response("failed", 422);
 
