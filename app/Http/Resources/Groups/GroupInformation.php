@@ -33,10 +33,14 @@ class GroupInformation extends JsonResource
             'memberCap'   => $course->max_group_size,
             'invitations' => $group->invitations->map(fn(GroupInvitation $invitation) => [
                 'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
+                'recipient'   => $invitation->recipient,
             ]),
             'projects'    => $projects,
-            'users'       => $group->members->each(fn(User $member) => [
+            'users'       => $group->members->map(fn(User $member) => [
+                'name'            => $member->name,
                 'isYou'           => $member->id == auth()->id(),
+                'is_owner'        => $member->is_admin,
+                'avatar'          => $member->avatar,
                 'removeUserRoute' => route('courses.groups.removeMember', [$group->course_id, $group->id, $member->id]),
             ]),
             'deleteRoute' => route('courses.groups.destroy', [$group->course_id, $group->id]),

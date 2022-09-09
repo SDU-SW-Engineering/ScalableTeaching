@@ -64,7 +64,7 @@
                         }})</span></h2>
                     <div class="mt-2">
                         <member @remove="removeUserFromGroup(user)" :key="user.id" :is-you="user.isYou"
-                                :is-owner="user.pivot.is_owner"
+                                :is-owner="user.is_owner"
                                 :can-remove="group.isOwner" v-for="user in group.users" :name="user.name"></member>
                         <member @remove="removeInvitation(invitation)" :key="invitation.id" :can-remove="group.isOwner"
                                 v-for="invitation in group.invitations" :name="invitation.recipient.name"
@@ -152,7 +152,7 @@ export default {
                     csrf: this.csrf,
                     email: this.userEmail
                 })
-                this.$emit('invitedUser', invitation.data)
+                this.$emit('invitedUser', invitation.data, this.group.id)
                 this.userEmail = "";
 
             } catch (error) {
@@ -167,13 +167,15 @@ export default {
             }
         },
         removeInvitation: async function (invitation) {
+            console.log("removeInvitation", invitation);
             await axios.post(invitation.deleteRoute, {
                 csrf: this.csrf,
                 _method: 'DELETE'
             })
-            this.$emit('removeInvitation', invitation)
+            this.$emit('removeInvitation', invitation, this.group.id)
         },
         removeUserFromGroup: async function (user) {
+            console.log(user);
             let response = await axios.post(user.removeUserRoute, {
                     csrf: this.csrf,
                     _method: 'DELETE'

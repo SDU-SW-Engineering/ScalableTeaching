@@ -75,7 +75,7 @@ class GroupPolicy
         return $groupInvitation->recipient_user_id == $user->id;
     }
 
-    public function acceptInvite(User $user, Group $group, GroupInvitation $groupInvitation) : Response|bool
+    public function acceptInvite(User $user, Group $group, GroupInvitation $groupInvitation) : Response
     {
         if ($group->members()->count() >= $group->course->max_group_size)
             return Response::deny("Group is full.");
@@ -86,7 +86,7 @@ class GroupPolicy
         if ( ! $userIsEligible)
             return Response::deny("This group is already working on a project that you have also started.");
 
-        return true;
+        return Response::allow();
     }
 
     public function removeMember(User $user, Group $group, User $userToRemove) : bool
