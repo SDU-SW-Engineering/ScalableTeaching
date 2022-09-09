@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Course;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -29,7 +30,6 @@ class CoursePolicy
         return false;
     }
 
-
     public function createTask(User $user, Course $course) : bool
     {
         return $course->hasTeacher($user);
@@ -51,5 +51,10 @@ class CoursePolicy
     public function grade(User $user, Course $course) : bool
     {
         return $this->manage($user, $course);
+    }
+
+    public function viewInvisible(User $user, Course $course): bool
+    {
+        return $course->hasTeacher($user);
     }
 }

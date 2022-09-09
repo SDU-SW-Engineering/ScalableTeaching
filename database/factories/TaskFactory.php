@@ -23,6 +23,15 @@ class TaskFactory extends Factory
         ];
     }
 
+    public function invisible()
+    {
+        return $this->state(function(array $attributes) {
+           return [
+               'is_visible' => false,
+           ];
+        });
+    }
+
     public function group($group)
     {
         return $this->state(function(array $attributes) use ($group) {
