@@ -117,12 +117,17 @@ class CourseController extends Controller
 
     public function show(Course $course) : View
     {
-        $tasks = $course->tasks()->whereNull('track_id')->where('is_visible', true)->get()->map(fn(Task $task) => [
+        $tasksQuery = $course->tasks()->whereNull('track_id');
+        if (auth()->user()->cannot('viewInvisible', $course))
+            $tasksQuery->where('is_visible', true);
+
+        $tasks = $tasksQuery->orderBy('created_at', 'desc')->get()->map(fn(Task $task) => [
             'details' => $task,
             'project' => $task->currentProjectForUser(auth()->user()),
         ]);
 
-        $exerciseGroups = $tasks->filter(fn($task) => $task['details']->type == TaskTypeEnum::Exercise)->groupBy(fn($task) => $task['details']->grouped_by);
+        $exerciseGroups = $tasks->filter(fn($task) => $task['details']->type == TaskTypeEnum::Exercise)
+            ->groupBy(fn($task) => $task['details']->grouped_by);
         $assignments = $tasks->filter(fn($task) => $task['details']->type == TaskTypeEnum::Assignment);
 
         $taskCount = $course->tasks()->count();

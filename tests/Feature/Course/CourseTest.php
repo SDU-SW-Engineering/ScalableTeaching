@@ -4,9 +4,7 @@ namespace Tests\Feature\Course;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use function Pest\Laravel\actingAs;
-use function Tests\Feature\factory;
 
 uses(RefreshDatabase::class);
 

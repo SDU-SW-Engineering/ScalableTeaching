@@ -22,6 +22,7 @@ class TaskSeeder extends Seeder
             foreach(["Group A", "Group B", "Group C"] as $group)
             {
                 Task::factory(rand(3, 6))->group($group)->exercise()->for($course)->create();
+                Task::factory(1)->group($group)->invisible()->exercise()->for($course)->create();
             }
 
             Task::factory(rand(3, 6))->exercise()->for($course)->create();
