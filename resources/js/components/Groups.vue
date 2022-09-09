@@ -47,21 +47,24 @@ export default {
         loadGroups: function (groups) {
             this.groups = groups;
         },
-        removeInvitation: function(invitation) {
-            let currentGroup = _.find(this.groups, x => x.id === invitation.group_id);
+        removeInvitation: function(invitation, groupId) {
+            console.log("removeInvitation", invitation);
+            let currentGroup = _.find(this.groups, x => x.id === groupId);
             if (currentGroup == null)
                 return;
 
             this.$delete(currentGroup.invitations, _.findIndex(currentGroup.invitations, x => x.id === invitation.id))
         },
-        addInvitation: function(invitation) {
-            let currentGroup = _.find(this.groups, x => x.id === invitation.group_id);
+        addInvitation: function(response, group_id) {
+            console.log("addInvitiation", group_id, response)
+            let currentGroup = _.find(this.groups, x => x.id === group_id);
             if (currentGroup == null)
                 return;
 
-            currentGroup.invitations.push(invitation);
+            currentGroup.invitations.push(response);
         },
         removeUserFromGroup: function(response, user) {
+            console.log("removeUserFromGroup")
             let currentGroup = _.find(this.groups, x => x.id === response.group_id);
             if (currentGroup == null)
                 return;

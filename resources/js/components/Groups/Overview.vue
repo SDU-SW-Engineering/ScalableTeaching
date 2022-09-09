@@ -79,7 +79,8 @@
                             <div class="col-start-2 row-start-1 row-end-3">
                                 <dt class="sr-only">Users</dt>
                                 <dd class="flex justify-end sm:justify-start lg:justify-end xl:justify-start -space-x-2">
-                                    <svg v-for="i in group.users.length" xmlns="http://www.w3.org/2000/svg"
+                                    <img v-if="user.avatar !== null" class="w-7 h-7 rounded-full border-2 border-white" :src="user.avatar" v-for="user in group.users"/>
+                                    <svg v-if="user.avatar === null" v-for="user in group.users" xmlns="http://www.w3.org/2000/svg"
                                          class="w-7 h-7 rounded-full bg-gray-100 border-2 border-white"
                                          height="48" width="48" fill="none" viewBox="0 0 24 24"
                                          stroke="currentColor">
