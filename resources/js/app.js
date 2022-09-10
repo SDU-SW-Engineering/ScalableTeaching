@@ -39,6 +39,10 @@ Vue.component(
     "visibility-dropdown",
     require("./components/Tasks/VisibilityDropdown").default
 );
+Vue.component(
+    "enrolled",
+    require("./components/Course/Management/Enrolled").default
+);
 
 const settings = {
     "t-rich-select": {

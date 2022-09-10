@@ -40,6 +40,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_sys_admin
  * @property array|null $ad_groups
  * @property string|null $avatar
+ * @property string $avatar_html
+ * @property-read CourseUser $courseMembership
  */
 class User extends Authenticatable
 {

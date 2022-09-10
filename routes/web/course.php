@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Course\Management\EnrolmentController;
 use App\Http\Controllers\Course\Management\OverviewController;
 use App\Http\Controllers\Course\Management\UserManagementController;
 use App\Http\Controllers\CourseController;
@@ -49,7 +50,16 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
     Route::group(['prefix' => 'manage', 'as' => 'manage.'], function() {
         Route::get('/', [OverviewController::class, 'index'])->name('index')->can('manage,course');
         Route::post('tasks', [TaskController::class, 'store'])->name('storeTask')->middleware('can:manage,course');
-        Route::get('roles', [UserManagementController::class, 'roles'])->name('roles');
+
+        Route::controller(UserManagementController::class)->middleware('can:manage,course')->group(function() {
+            Route::get('enrolment', 'enrolment')->name('enrolment.index');
+            Route::put('update-role', 'updateRole')->name('update-role');
+            Route::delete('kick-user', 'kickUser')->name('kick-user');
+            Route::get('activity', 'activity')->name('activity.index');
+            //Route::get('roles', [UserManagementController::class, 'roles'])->name('roles');
+        });
+
+
         Route::get('tasks/create', [TaskController::class, 'showCreate'])->name('createTask')->can('manage,course');
         Route::get('tasks/{task}/edit', [TaskController::class, 'edit'])->name('editTask')->middleware('can:manage,course');
         Route::patch('tasks/{task}/edit', [TaskController::class, 'update'])->name('updateTask')->middleware('can:manage,course');
