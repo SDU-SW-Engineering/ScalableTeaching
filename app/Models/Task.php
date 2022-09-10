@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\Casts\SubTask;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
 use App\ProjectStatus;
 use Carbon\Carbon;
-use Domain\Analytics\DailyResults\DailyQuery;
-use Domain\Analytics\DailyResults\DailyResults;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
@@ -24,14 +21,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @throws ModelNotFoundException<Task>
- * }
+ *
  *
  * @property CorrectionType $correction_type
  * @property int $id

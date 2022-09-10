@@ -169,6 +169,7 @@ class TaskController extends Controller
         if($project == null)
             $project = $this->forkProject($manager, $name, $task->source_project_id, $task->gitlab_group_id);
 
+        /** @var Project $dbProject */
         $dbProject = $owner->projects()->updateOrCreate([
             'project_id' => $project['id'],
             'task_id'    => $task->id,

@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\Course\Management\OverviewController;
+use App\Http\Controllers\Course\Management\UserManagementController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\CourseManagement\UserManagementController;
 use App\Http\Controllers\CourseTrackController;
 use App\Http\Controllers\GradingController;
 use App\Http\Controllers\GroupController;
@@ -47,7 +47,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
     });
 
     Route::group(['prefix' => 'manage', 'as' => 'manage.'], function() {
-        Route::get('/', [CourseController::class, 'showManage'])->name('index')->middleware('can:manage,course');
+        Route::get('/', [OverviewController::class, 'index'])->name('index')->can('manage,course');
         Route::post('tasks', [TaskController::class, 'store'])->name('storeTask')->middleware('can:manage,course');
         Route::get('roles', [UserManagementController::class, 'roles'])->name('roles');
         Route::get('tasks/create', [TaskController::class, 'showCreate'])->name('createTask')->can('manage,course');
@@ -66,6 +66,5 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             Route::get('tasks/{task}', [GradingController::class, 'taskInfo'])->name('task-info');
             Route::post('{grade}/set-selected', [GradingController::class, 'setSelected'])->name('set-selected');
         });
-
     });
 });

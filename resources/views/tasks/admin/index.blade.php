@@ -57,7 +57,6 @@
             <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Total Projects Per
                 Day</h3>
             <div>
-
                     <line-chart :height="300" :labels="{{ $totalProjectsPerDayGraph->labels()  }}"
                                 :data="{{ $totalProjectsPerDayGraph->datasets()  }}"></line-chart>
 

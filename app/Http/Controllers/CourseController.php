@@ -145,17 +145,6 @@ class CourseController extends Controller
         ]);
     }
 
-    public function showManage(Course $course) : View
-    {
-        return view('courses.manage.index', [
-            'course'      => $course,
-            'breadcrumbs' => [
-                'Courses'     => route('courses.index'),
-                $course->name => null,
-            ],
-        ]);
-    }
-
     public function addTeacher(Course $course) : RedirectResponse
     {
         $validated = \Validator::make(\request()->all(), [

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -33,6 +35,8 @@ use Illuminate\Support\Str;
  * @property-read int|null $groups_count
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroupSize($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroups($value)
+ * @property-read \Illuminate\Support\Collection<int|string,int>|null $exercise_engagement
+ * @property-read \Illuminate\Support\Collection<int|string,int>|null $enrolment_per_day
  */
 class Course extends Model
 {
@@ -46,7 +50,7 @@ class Course extends Model
     /**
      * @return HasMany<Task>
      */
-    public function tasks() : HasMany
+    public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
@@ -54,7 +58,7 @@ class Course extends Model
     /**
      * @return HasMany<Group>
      */
-    public function groups() : HasMany
+    public function groups(): HasMany
     {
         return $this->hasMany(Group::class);
     }
@@ -82,13 +86,13 @@ class Course extends Model
      */
     public function projects(): HasManyThrough
     {
-         return $this->hasManyThrough(Project::class, Task::class);
+        return $this->hasManyThrough(Project::class, Task::class);
     }
 
     /**
      * @return HasManyThrough<GroupInvitation>
      */
-    public function groupInvitations() : HasManyThrough
+    public function groupInvitations(): HasManyThrough
     {
         return $this->hasManyThrough(GroupInvitation::class, Group::class);
     }
@@ -96,7 +100,7 @@ class Course extends Model
     /**
      * @return BelongsToMany<User>
      */
-    public function teachers() : BelongsToMany
+    public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->as(CourseUser::class)
@@ -107,7 +111,7 @@ class Course extends Model
     /**
      * @return BelongsToMany<User>
      */
-    public function students() : BelongsToMany
+    public function students(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->as(CourseUser::class)
@@ -118,15 +122,16 @@ class Course extends Model
     /**
      * @return HasMany<CourseTrack>
      */
-    public function tracks() : HasMany
+    public function tracks(): HasMany
     {
         return $this->hasMany(CourseTrack::class);
     }
+
     // endregion
 
     public static function booted()
     {
-        static::creating(function (Course $course) {
+        static::creating(function(Course $course) {
             $course->enroll_token = Str::random(32);
         });
     }
@@ -144,7 +149,7 @@ class Course extends Model
             ->get();
     }
 
-    public function hasMaxGroups(User $user) : bool
+    public function hasMaxGroups(User $user): bool
     {
         $currentCount = $this->userGroups($user)->count();
 
@@ -158,13 +163,54 @@ class Course extends Model
         return $currentCount >= $upperLimit;
     }
 
-    public function hasTeacher(User $user) : bool
+    public function hasTeacher(User $user): bool
     {
         return $this->teachers()->where('user_id', $user->id)->exists();
     }
 
-    public function hasMember(User $user) : bool
+    public function hasMember(User $user): bool
     {
         return $this->members()->where('user_id', $user->id)->exists();
     }
+
+    // region Analytics
+
+    /**
+     * @return Attribute<\Illuminate\Support\Collection<int|string,int>|null,null>
+     */
+    public function exerciseEngagement(): Attribute
+    {
+        return Attribute::make(get: function($value, $attributes) {
+            $exerciseIds = $this->tasks()->exercises()->orderBy('starts_at')->pluck('id');
+
+            if($exerciseIds->count() == 0)
+                return null;
+
+            $enrolledCount = $this->students()->count();
+            $teachers = $this->teachers()->pluck('users.id');
+
+            return Grade::whereIn('task_id', $exerciseIds)
+                ->whereNotIn('user_id', $teachers)
+                ->leftJoin('tasks', 'grades.task_id', '=', 'tasks.id')
+                ->select([DB::raw("count(tasks.id)/$enrolledCount as grade_count"), 'tasks.id', 'tasks.grouped_by', 'tasks.starts_at', 'tasks.name'])
+                ->groupBy('task_id')
+                ->orderBy('tasks.starts_at')
+                ->get()
+                ->mapWithKeys(fn($result) => [$result->name . ";" . $result->grouped_by  => round($result->grade_count, 2)]); // @phpstan-ignore-line
+        });
+    }
+
+    /**
+     * @return Attribute<\Illuminate\Support\Collection<int|string,int>|null,null>
+     */
+    public function enrolmentPerDay(): Attribute
+    {
+        return Attribute::make(get: function($value, $attributes) {
+            /** @var CourseUser|null $lastEnrolment */
+            $lastEnrolment = CourseUser::where('course_id', $this->id)->orderBy('created_at', 'desc')->first();
+
+            return CourseUser::where('course_id', $this->id)->daily($this->created_at, $lastEnrolment->created_at->addDays(3))->total();
+        });
+    }
+    // endregion
 }
