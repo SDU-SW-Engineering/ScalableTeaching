@@ -43,6 +43,7 @@ export default {
                     yAxes: [
                         {
                             ticks: {
+                                beginAtZero: true,
                                 fontColor: this.darkMode ? "#ffffff" : '#6A6A6A'
                             },
                             gridLines: {

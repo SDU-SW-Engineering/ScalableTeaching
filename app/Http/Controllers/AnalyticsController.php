@@ -23,63 +23,6 @@ use Illuminate\View\View;
 
 class AnalyticsController extends Controller
 {
-
-    public function index(Course $course, Task $task) : View
-    {
-        $projectCount = $task->projects()->count();
-        $projectsToday = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
-        $finishedCount = $task->projects()->where('status', 'finished')->count();
-        $finishedPercent = $projectCount == 0 ? 0 : $finishedCount / $projectCount * 100;
-        $failedCount = $task->projects()->where('status', 'failed')->count();
-        $failedPercent = $projectCount == 0 ? 0 : $failedCount / $projectCount * 100;
-        $buildCount = $task->jobs()->count();
-        $buildsToday = $task->jobs()->whereRaw("date(pipelines.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
-
-        $projectQuery = $task->projects()
-            ->select('*', \DB::raw('TIMESTAMPDIFF(second,created_at, finished_at) as duration'))
-            ->withCount('pipelines')
-            ->orderBy(request('sort', 'created_at'), request('direction', 'desc'));
-
-        if(request('status', 'all') != 'all')
-            $projectQuery->where('status', request('status', 'active'));
-
-        $projects = $projectQuery->paginate(10)->withQueryString();
-
-        $totalProjectsPerDay = $task->totalProjectsPerDay;
-        $projectsCompletedPerDay = $task->totalCompletedTasksPerDay;
-        $totalProjectsPerDayGraph = new Graph(
-            $totalProjectsPerDay->keys(),
-            new LineDataSet("Projects", $totalProjectsPerDay->values(), "#266ab0", true),
-            new LineDataSet("Completed", $projectsCompletedPerDay->values(), "#7BB026", true)
-        );
-
-        $dailyBuilds = $task->dailyBuilds(true, true);
-        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
-        $breadcrumbs = [
-            'Courses'     => route('courses.index'),
-            $course->name => route('courses.show', $course->id),
-            $task->name   => route('courses.tasks.show', [$course->id, $task->id]),
-            'Analytics'   => null,
-        ];
-
-        return view('tasks.admin.index', compact(
-            'course',
-            'task',
-            'projectCount',
-            'breadcrumbs',
-            'projectsToday',
-            'finishedCount',
-            'finishedPercent',
-            'failedCount',
-            'failedPercent',
-            'buildCount',
-            'buildsToday',
-            'totalProjectsPerDayGraph',
-            'dailyBuildsGraph',
-            'projects'
-        ));
-    }
-
     public function builds(Course $course, Task $task) : View
     {
         $dailyBuilds = $task->dailyBuilds(true, true);
@@ -95,7 +38,6 @@ class AnalyticsController extends Controller
 
         $buildQuery->latest();
         $builds = $buildQuery->paginate(10)->withQueryString();
-
 
         return view('tasks.admin.builds', compact('dailyBuildsGraph', 'builds'));
     }
