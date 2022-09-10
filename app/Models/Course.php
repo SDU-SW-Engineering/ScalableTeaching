@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -17,8 +18,8 @@ use Illuminate\Support\Str;
  *
  * @property int $id
  * @property string $name
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|Course newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Course newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Course query()
@@ -26,12 +27,12 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereUpdatedAt($value)
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Task[] $tasks
+ * @property-read Collection|Task[] $tasks
  * @property-read Collection|CourseRole[] $roles
  * @property-read int|null $tasks_count
  * @property string $max_groups
  * @property int $max_group_size
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Group[] $groups
+ * @property-read Collection|Group[] $groups
  * @property-read int|null $groups_count
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroupSize($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroups($value)
@@ -69,7 +70,9 @@ class Course extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->as(CourseUser::class)
+            ->using(CourseUser::class)
+            ->withPivot('role')
+            ->as('courseMembership')
             ->withTimestamps();
     }
 
@@ -103,8 +106,9 @@ class Course extends Model
     public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->as(CourseUser::class)
+            ->using(CourseUser::class)
             ->wherePivot('role', 'teacher')
+            ->as('courseMembership')
             ->withTimestamps();
     }
 
@@ -114,8 +118,9 @@ class Course extends Model
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->as(CourseUser::class)
+            ->using(CourseUser::class)
             ->wherePivot('role', 'student')
+            ->as('courseMembership')
             ->withTimestamps();
     }
 

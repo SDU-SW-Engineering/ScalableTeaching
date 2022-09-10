@@ -96,7 +96,7 @@ module.exports = {
             borderStyle: ["dark", "hover"],
             borderWidth: ["hover", "last"],
             typography: ["dark"],
-            margin: ["last"],
+            margin: ["first", "last"],
             dropShadow: ["dark"],
             opacity: ["disabled"],
             cursor: ["disabled"],
