@@ -17,12 +17,12 @@ class UserManagementController extends Controller
             'enrolled_at' => $user->courseMembership->created_at->diffForHumans(),
             'avatar'      => $user->avatar,
             'updatable'   => $user->id != auth()->id(),
-            'role'        => $user->courseMembership->role
+            'role'        => $user->courseMembership->role,
         ]);
 
         $roles = [
             'student' => 'Student',
-            'teacher' => 'Teacher'
+            'teacher' => 'Teacher',
         ];
 
         $roleRoute = route('courses.manage.update-role', $course);
@@ -36,7 +36,7 @@ class UserManagementController extends Controller
     {
         $validated = request()->validate([
             'role' => ['required', 'string'],
-            'user' => ['required', 'numeric']
+            'user' => ['required', 'numeric'],
         ]);
 
         $course->members()->updateExistingPivot($validated['user'], ['role' => $validated['role']]);
@@ -47,10 +47,11 @@ class UserManagementController extends Controller
     public function kickUser(Course $course)
     {
         $validated = request()->validate([
-            'user' => ['required', 'numeric']
+            'user' => ['required', 'numeric'],
         ]);
 
         $course->members()->detach($validated['user']);
+
         return "OK";
     }
 
