@@ -9,7 +9,7 @@ use Illuminate\View\View;
 
 class UserManagementController extends Controller
 {
-    public function enrolment(Course $course)
+    public function enrolment(Course $course) : View
     {
         $members = $course->members()->orderBy('name')->get()->map(fn(User $user) => [
             'id'          => $user->id,
@@ -32,7 +32,7 @@ class UserManagementController extends Controller
         return view('courses.manage.enrolled', compact('members', 'roles', 'roleRoute', 'kickRoute', 'activityRoute'));
     }
 
-    public function updateRole(Course $course)
+    public function updateRole(Course $course) : string
     {
         $validated = request()->validate([
             'role' => ['required', 'string'],
@@ -44,7 +44,7 @@ class UserManagementController extends Controller
         return "ok";
     }
 
-    public function kickUser(Course $course)
+    public function kickUser(Course $course) : string
     {
         $validated = request()->validate([
             'user' => ['required', 'numeric'],
@@ -52,7 +52,7 @@ class UserManagementController extends Controller
 
         $course->members()->detach($validated['user']);
 
-        return "OK";
+        return "ok";
     }
 
     public function roles(Course $course): View
