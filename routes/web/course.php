@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Course\Management\EnrolmentController;
 use App\Http\Controllers\Course\Management\OverviewController;
 use App\Http\Controllers\Course\Management\UserManagementController;
 use App\Http\Controllers\CourseController;
@@ -9,6 +8,7 @@ use App\Http\Controllers\GradingController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\Course\Management\TaskController as TaskManagementController;
 use App\Models\Course;
 
 Route::get('/', [CourseController::class, 'index'])->name('index');
@@ -57,6 +57,11 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             Route::delete('kick-user', 'kickUser')->name('kick-user');
             Route::get('activity', 'activity')->name('activity.index');
             //Route::get('roles', [UserManagementController::class, 'roles'])->name('roles');
+        });
+
+        Route::controller(TaskManagementController::class)->middleware('can:manage,course')->group(function() {
+            Route::get('exercises', 'exercises')->name('exercises.index');
+            Route::put('exercises/reorganize', 'reorganizeExercises')->name('exercises.reorganize');
         });
 
 

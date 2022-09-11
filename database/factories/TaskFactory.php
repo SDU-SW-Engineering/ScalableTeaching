@@ -50,6 +50,15 @@ class TaskFactory extends Factory
         });
     }
 
+    public function assignment()
+    {
+        return $this->state(function(array $attributes) {
+            return [
+                'type' => TaskTypeEnum::Assignment,
+            ];
+        });
+    }
+
     public function selfCorrection()
     {
         return $this->state(function(array $attributes) {

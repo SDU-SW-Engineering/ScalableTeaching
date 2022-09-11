@@ -121,7 +121,7 @@ class CourseController extends Controller
         if (auth()->user()->cannot('viewInvisible', $course))
             $tasksQuery->where('is_visible', true);
 
-        $tasks = $tasksQuery->orderBy('order', 'desc')->get()->map(fn(Task $task) => [
+        $tasks = $tasksQuery->orderBy('order')->get()->map(fn(Task $task) => [
             'details' => $task,
             'project' => $task->currentProjectForUser(auth()->user()),
         ]);
