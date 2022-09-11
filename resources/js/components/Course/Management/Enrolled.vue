@@ -15,7 +15,7 @@
         <div class="flex items-center justify-center text-gray-300 text-xl font-thin mt-4" v-if="filteredUsers.length === 0">
             <span>No results</span>
         </div>
-        <div class="max-h-screen overflow-y-auto mt-4" v-else>
+        <div class="max-vh60 overflow-y-auto mt-4" v-else>
             <enrolled-member :activity-route="activityRoute" :key="member.id" :member="member" :kick-route="kickRoute" :role-route="roleRoute" v-for="member in filteredUsers"
                              :available-roles="roles"></enrolled-member>
         </div>

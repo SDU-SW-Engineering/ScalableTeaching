@@ -7,6 +7,7 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
 use App\ProjectStatus;
 use Carbon\Carbon;
+use Eloquent;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
@@ -49,13 +50,14 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property Carbon $ends_at
  * @property bool $is_visible
  * @property-read bool $is_publishable
+ * @mixin Eloquent
  */
 class Task extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'source_project_id',
+        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order', 'source_project_id',
         'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required',
     ];
 
@@ -514,12 +516,12 @@ class Task extends Model
     /**
      * @return Attribute<bool,void>
      */
-    public function isVisible() : Attribute
+    public function isVisible(): Attribute
     {
         return Attribute::make(
             get: fn($value, $attributes) => (bool)$value,
             set: function($value, $attributes) {
-                if ( ! $this->is_publishable)
+                if( ! $this->is_publishable)
                     throw new \Exception("Task is not publishable.");
 
                 return $value;

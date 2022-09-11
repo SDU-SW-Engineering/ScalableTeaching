@@ -43,6 +43,10 @@ Vue.component(
     "enrolled",
     require("./components/Course/Management/Enrolled").default
 );
+Vue.component(
+    "exercises",
+    require("./components/Course/Management/Exercises").default
+);
 
 const settings = {
     "t-rich-select": {
