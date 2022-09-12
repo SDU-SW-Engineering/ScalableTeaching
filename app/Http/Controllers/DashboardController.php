@@ -18,12 +18,10 @@ class DashboardController extends Controller
     {
         $courses = auth()->user()->courses()->get();
         $tasks = Task::whereIn('course_id', $courses->pluck('id'))->assignments()->orderBy('ends_at', 'asc')->get();
-        $oldTasks = Task::whereIn('course_id', $courses->pluck('id'))->assignments()->orderBy('ends_at', 'desc')->get();
 
         return view('dashboard', [
             'courses'     => $courses,
             'tasks'       => $tasks,
-            'oldTasks'    => $oldTasks,
             'bg'          => 'bg-gray-100 dark:bg-gray-700',
             'breadcrumbs' => [
                 'Dashboard' => null,

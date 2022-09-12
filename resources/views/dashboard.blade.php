@@ -5,29 +5,26 @@
         <div class="flex gap-6 flex-wrap-reverse">
             <div class="flex-1 w-full">
                 <div class="flex w-full">
-                    <section class="w-1/4 ">
-                        <div
-                            class="w-64 absolute sm:relative bg-gray-800 shadow md:h-full flex-col justify-between hidden sm:flex">
-                            <aside class="w-64" aria-label="Sidebar">
-                                <a href="http://localhost:8080/courses" class="flex items-center pl-2.5 mb-2">
+                    <section class="w-1/4 py-5">
+                        <aside class="w-64 dark:bg-gray-800 rounded shadow" aria-label="Sidebar">
+                            <a href="http://localhost:8080/courses" class="flex items-center pl-2.5 mb-2">
                         <span
                             class="self-center text-xl font-semibold whitespace-nowrap text-lime-green-500">Courses</span>
-                                </a>
-                                @foreach($courses as $course)
-                                    <ul class="space-y-1">
-                                        <li>
-                                            <a href="{{ route('courses.show', $course) }}"
-                                               class="flex text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <span class="ml-3">{{ $course->name }}</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                @endforeach
-                            </aside>
-                        </div>
+                            </a>
+                            @foreach($courses as $course)
+                                <ul class="space-y-1">
+                                    <li>
+                                        <a href="{{ route('courses.show', $course) }}"
+                                           class="flex text-base font-normal text-gray-900 dark:text-white hover:text-lime-green-600 dark:hover:text-lime-green-600">
+                                            <span class="ml-3">{{ $course->name }}</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            @endforeach
+                        </aside>
                     </section>
-                    <section class="w-3/4">
-                        <div class="container grid place-items-center mx-auto py-10 h-64 md:w-4/5 w-11/12 px-6">
+                    <section class="w-3/4 py-5">
+                        <div class="container grid place-items-center mx-auto h-64 md:w-4/5 w-11/12 px-6">
                             @foreach($tasks as $task)
                                 @if($task->ends_at->isFuture())
                                     <ol class="relative border-l border-gray-200 dark:border-lime-green-700 dark:bg-gray-800 rounded-r">
@@ -43,7 +40,7 @@
                                                     clip-rule="evenodd"></path>
                                             </svg>
                                         </span>
-                                            <div class="ml-10 mt-4">
+                                            <div class="ml-10 mt-4 mr-14">
                                                 <a href="{{ route('courses.tasks.show', [$course, $task]) }}"
                                                    class="flex items-center mb-1 text-lg font-semibold text-gray-900 dark:text-white">
                                                     {{ $task->name }}
@@ -66,8 +63,8 @@
                                     </div>
                                 @endif
                             @endforeach
-                            @foreach($oldTasks as $oldTask)
-                                @if($oldTask->ends_at->isPast())
+                            @foreach($tasks as $task)
+                                @if($task->ends_at->isPast())
                                     <ol class="relative border-l border-gray-200 dark:border-lime-green-700 dark:bg-gray-800 rounded-r">
                                         <li class="mb-15">
                                         <span
@@ -99,11 +96,16 @@
                                             </div>
                                         </li>
                                     </ol>
-                                    <div
-                                        class="block h-14 w-full dark:bg-gray-700 relative border-l border-gray-200 dark:border-lime-green-700">
-                                    </div>
+                                    @if(!$tasks->last())
+                                        <div
+                                            class="block h-14 w-full dark:bg-gray-700 relative border-l border-gray-200 dark:border-lime-green-700">
+                                        </div>
+                                    @endif
                                 @endif
                             @endforeach
+                            <div
+                                class="block h-14 w-full dark:bg-gray-700">
+                            </div>
                         </div>
                     </section>
                 </div>
