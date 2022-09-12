@@ -132,6 +132,13 @@ class Course extends Model
         return $this->hasMany(CourseTrack::class);
     }
 
+    /**
+     * @return HasMany<CourseActivity>
+     */
+    public function activities() : HasMany
+    {
+        return $this->hasMany(CourseActivity::class);
+    }
     // endregion
 
     public static function booted()
@@ -186,7 +193,7 @@ class Course extends Model
     public function exerciseEngagement(): Attribute
     {
         return Attribute::make(get: function($value, $attributes) {
-            $exerciseIds = $this->tasks()->exercises()->orderBy('starts_at')->pluck('id');
+            $exerciseIds = $this->tasks()->exercises()->orderBy('order')->pluck('id');
 
             if($exerciseIds->count() == 0)
                 return null;

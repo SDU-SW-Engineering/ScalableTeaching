@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Domain\ActivityLogging\Course\CourseActivityLogging;
+use Domain\ActivityLogging\Course\CourseActivityMessage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +33,7 @@ use Illuminate\Support\Carbon;
 class GroupInvitation extends Model
 {
     use HasFactory;
+    use CourseActivityLogging;
 
     protected $fillable = ['recipient_user_id', 'invited_by_user_id'];
 
@@ -56,5 +59,12 @@ class GroupInvitation extends Model
     public function recipient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recipient_user_id');
+    }
+
+    public function logCreated(Model $created): ?CourseActivityMessage
+    {
+        $groupName = $this->group->name;
+
+        return new CourseActivityMessage("Invited to group \"$groupName\".", $this->group->course_id, $this->recipient_user_id, $this->invited_by_user_id);
     }
 }
