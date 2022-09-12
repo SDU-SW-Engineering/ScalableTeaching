@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Enums\GradeEnum;
+use Domain\ActivityLogging\Course\CourseActivityLogging;
+use Domain\ActivityLogging\Course\CourseActivityMessage;
 use Eloquent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +29,7 @@ use Illuminate\Support\Carbon;
 class Grade extends Model
 {
     use HasFactory;
+    use CourseActivityLogging;
 
     protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id', 'started_at', 'ended_at'];
 
@@ -62,6 +66,7 @@ class Grade extends Model
     {
         return $this->morphTo("source");
     }
+
     // endregion
 
     public static function booted()
@@ -87,11 +92,33 @@ class Grade extends Model
         });
     }
 
-    public function select() : void
+    public function select(): void
     {
         Grade::where('user_id', $this->user_id)
             ->where('task_id', $this->task_id)
             ->update(['selected' => \DB::raw("id = $this->id")]);
     }
+
+    // region ActivityLogging
+    protected function logCreated(Grade $created): ?CourseActivityMessage
+    {
+        $class = $created->value == GradeEnum::Passed ? 'text-lime-green-600 dark:text-lime-green-400' : 'text-red-600 dark:text-red-400';
+        $message = "<span class='$class'> " . $created->value->name . "</span> <a href='" . route('courses.tasks.show', [$created->task->course_id, $created->task_id]) . "'>{$created->task->name}</a>";
+
+        $affectedBy = match ($created->source_type)
+        {
+            User::class            => $created->source_id,
+            GradeDelegation::class => $created->source->user_id,
+            default                => null
+        };
+        if($affectedBy == $created->user_id)
+            $message .= " (self grading)";
+        else if($created->source_type == Task::class)
+            $message .= " (graded by system)";
+
+
+        return new CourseActivityMessage($message, $created->task->course_id, $created->user_id, $affectedBy);
+    }
+    // endregion
 }
 

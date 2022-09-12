@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Domain\ActivityLogging\Course\CourseActivityLogging;
+use Domain\ActivityLogging\Course\CourseActivityMessage;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +21,7 @@ use Illuminate\Support\Str;
 class Group extends Model
 {
     use HasFactory;
+    use CourseActivityLogging;
 
     protected $fillable = ['name'];
 
@@ -80,5 +83,15 @@ class Group extends Model
     public function memberString() : Attribute
     {
         return Attribute::make(get: fn($value, $attributes) => $this->members()->pluck('name')->sort()->join(', '));
+    }
+
+    protected function logCreated(Group $created): ?CourseActivityMessage
+    {
+        return new CourseActivityMessage("Created group \"$created->name\".", $created->course_id, auth()->id(), auth()->id());
+    }
+
+    protected function logDeleted(Group $deleted): ?CourseActivityMessage
+    {
+        return new CourseActivityMessage("Deleted group \"$deleted->name\".", $deleted->course_id, auth()->id(), auth()->id());
     }
 }
