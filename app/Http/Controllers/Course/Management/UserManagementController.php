@@ -90,14 +90,24 @@ class UserManagementController extends Controller
 
     public function groups(Course $course)
     {
-        $groups = $course->groups()->withCount('members')->withCount('projects')->orderBy('name')->paginate(30);
+        $groups = $course->groups()->withCount('members')->withCount('projects')->orderBy('name');
+
+        if(request()->has('filter')) {
+            $groups->where('name', 'like', '%'. request('filter') . '%')->orWhereHas('members', function(Builder $query) {
+                $query->where('name', 'like', '%' . request('filter') . '%');
+            });
+        }
+
+        $groups = $groups->paginate(30);
 
         return view('courses.manage.groups', compact('course', 'groups'));
     }
 
     public function showGroup(Course $course, Group $group)
     {
-        return view('courses.manage.group', compact('course', 'group'));
+        $members = $group->members()->orderBy('name')->get();
+
+        return view('courses.manage.group', compact('course', 'group', 'members'));
     }
 
     public function createGroup(Course $course)
@@ -123,15 +133,17 @@ class UserManagementController extends Controller
     public function addGroupMember(Course $course, Group $group)
     {
         $validated = request()->validate([
-            'user' => 'required|numeric'
+            'email' => 'required|email'
         ]);
-        $user = User::find($validated['user']);
+        $user = User::where('email', $validated['email'])->first();
+        if ($user == null)
+            return redirect()->route('courses.manage.groups.show', [$course, $group])->withErrors(['email' => 'This user doesn\'t exist.']);
 
         $userIsPartOfCourse = $course->members()->where('users.id', $user->id)->exists();
         if(!$userIsPartOfCourse)
             return redirect()->route('courses.manage.groups.show', [$course, $group])->withErrors(['name' => 'User is not part of the course']);
 
-        $group->members()->attach($validated['user']);
+        $group->members()->syncWithoutDetaching($user->id);
 
         return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', $user->name . " added");
     }

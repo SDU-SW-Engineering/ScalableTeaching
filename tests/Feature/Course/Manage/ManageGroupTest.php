@@ -102,8 +102,8 @@ it('fails to add a member that is not part of the course', function() {
         'email' => 'test@tech.dk'
     ]);
 
-    put(route('courses.manage.groups.add-member', [$this->course, $this->group]), [
-        'user' => $user->id
+    post(route('courses.manage.groups.add-member', [$this->course, $this->group]), [
+        'email' => 'test@tech.dk'
     ])->assertRedirect(route('courses.manage.groups.show', [$this->course, $this->group]))
         ->assertSessionHasErrors('name');
 
@@ -119,8 +119,8 @@ it('adds a member to a group', function() {
         'email' => 'test@tech.dk'
     ]);
 
-    put(route('courses.manage.groups.add-member', [$this->course, $this->group]), [
-        'user' => $user->id
+    post(route('courses.manage.groups.add-member', [$this->course, $this->group]), [
+        'email' => 'test@tech.dk'
     ])->assertSessionHas('success', 'Test user added')
         ->assertRedirect(route('courses.manage.groups.show', [$this->course, $this->group]));
 

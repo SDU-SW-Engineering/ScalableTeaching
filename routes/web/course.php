@@ -62,7 +62,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             Route::get('groups/{group}', 'showGroup')->name('groups.show')->can('view,group');
             Route::delete('groups/{group}', 'deleteGroup')->name('groups.delete')->can('delete,group');
             Route::put('groups/{group}', 'updateGroup')->name('groups.update')->can('update,group');
-            Route::put('groups/{group}/members', 'addGroupMember')->name('groups.add-member')->can('addMember,group');
+            Route::post('groups/{group}/members', 'addGroupMember')->name('groups.add-member')->can('addMember,group');
             Route::delete('groups/{group}/members', 'removeGroupMember')->name('groups.remove-member')->can('removeMemberAsAdmin,group');
             Route::put('groups', 'updateGroupSettings')->name('groups.update-settings');
             //Route::get('roles', [UserManagementController::class, 'roles'])->name('roles');

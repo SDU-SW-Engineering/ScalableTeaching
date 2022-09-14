@@ -20,8 +20,8 @@ class UserSeeder extends Seeder
         User::factory(1)->admin()->create()->each(function(User $admin) use ($courses) {
             $admin->courses()->attach($courses);
         });
-        User::factory(6)->create()->each(function(User $user) use ($courses) {
-            $user->courses()->attach($courses->random(2));
+        User::factory(20)->create()->each(function(User $user) use ($courses) {
+            $user->courses()->attach($courses->random(4));
         });
     }
 }
