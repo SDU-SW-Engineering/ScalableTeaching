@@ -14,6 +14,11 @@ class GroupPolicy
 {
     use HandlesAuthorization;
 
+    private function isTeacher(Group $group, User $user) : bool
+    {
+        return $group->course->hasTeacher($user);
+    }
+
     /**
      * Determine whether the user can view the model.
      *
@@ -23,6 +28,9 @@ class GroupPolicy
      */
     public function view(User $user, Group $group) : bool
     {
+        if ($this->isTeacher($group, $user))
+            return true;
+
         return $group->members()->where('user_id', $user->id)->exists();
     }
 
@@ -35,6 +43,9 @@ class GroupPolicy
      */
     public function delete(User $user, Group $group)
     {
+        if ($this->isTeacher($group, $user))
+            return true;
+
         if ( ! $this->isGroupOwner($group, $user))
             return Response::deny('Only the group owner can delete the group.');
 
@@ -89,6 +100,11 @@ class GroupPolicy
         return Response::allow();
     }
 
+    public function removeMemberAsAdmin(User $user, Group $group): bool
+    {
+        return $this->isTeacher($group, $user);
+    }
+
     public function removeMember(User $user, Group $group, User $userToRemove) : bool
     {
         if ($user->id == $userToRemove->id)
@@ -97,6 +113,16 @@ class GroupPolicy
             return false;
 
         return true;
+    }
+
+    public function update(User $user, Group $group) : bool
+    {
+        return $this->isTeacher($group, $user);
+    }
+
+    public function addMember(User $user, Group $group) : bool
+    {
+        return $this->isTeacher($group, $user);
     }
 
     /**

@@ -145,6 +145,14 @@ class User extends Authenticatable
     /**
      * @return Attribute<string,null>
      */
+    public function avatar() : Attribute
+    {
+        return Attribute::make(get: fn($value, $attributes) => $attributes['avatar'] ?? "data:image/jpeg;base64,".base64_encode(file_get_contents(storage_path('avatar.jpg'))));
+    }
+
+    /**
+     * @return Attribute<string,null>
+     */
     public function avatarHtml(): Attribute
     {
         return Attribute::make(get: function() {

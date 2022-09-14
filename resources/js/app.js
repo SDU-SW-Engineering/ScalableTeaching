@@ -48,6 +48,16 @@ Vue.component(
     require("./components/Course/Management/Exercises").default
 );
 
+Vue.component(
+    "group-settings",
+    require("./components/Course/Management/GroupSettings").default
+);
+
+Vue.component(
+    "group-rename",
+    require("./components/Course/Management/GroupRename").default
+);
+
 const settings = {
     "t-rich-select": {
         component: TRichSelect,
