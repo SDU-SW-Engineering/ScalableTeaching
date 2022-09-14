@@ -2,7 +2,10 @@
 
 @section('manageContent')
     <div class="bg-white dark:bg-gray-600 shadow p-4 rounded-lg">
-        <h1 class="text-3xl font-thin mb-4 dark:text-white">Groups</h1>
+        <div class="flex items-center justify-between">
+            <h1 class="text-3xl font-thin mb-4 dark:text-white">Groups</h1>
+            <group-settings save-route="{{ route('courses.manage.groups.update-settings', $course) }}" :group-size-input="{{ $course->max_group_size }}" :max-group-custom="{{ $course->max_groups_amount }}" max-groups-input="{{ $course->max_groups }}"/>
+        </div>
         <form class="flex mb-4">
             <input type="text" id="filter" name="filter" value="{{ request('filter') }}" class="disabled:bg-gray-200 dark:disabled:bg-gray-700 bg-gray-50
                            border border-gray-300 text-gray-900 sm:text-sm rounded-l-md focus:outline-none p-2.5 dark:bg-gray-700 dark:border-gray-700 dark:text-gray-200">

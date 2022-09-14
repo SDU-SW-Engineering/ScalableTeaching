@@ -93,8 +93,10 @@ class UserManagementController extends Controller
         $groups = $course->groups()->withCount('members')->withCount('projects')->orderBy('name');
 
         if(request()->has('filter')) {
-            $groups->where('name', 'like', '%'. request('filter') . '%')->orWhereHas('members', function(Builder $query) {
+            $groups->whereHas('members', function(Builder $query) {
                 $query->where('name', 'like', '%' . request('filter') . '%');
+            })->orWhere(function(Builder $query) use ($course) {
+                $query->where('course_id', $course->id)->where('name', 'like', '%'. request('filter') . '%');
             });
         }
 
@@ -173,7 +175,7 @@ class UserManagementController extends Controller
             'name' => $validated['name']
         ]);
 
-        return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', "Group renamed");
+        return "ok";
     }
 
     public function updateGroupSettings(Course $course)
@@ -186,20 +188,16 @@ class UserManagementController extends Controller
 
         if(array_key_exists('max-group-size', $validated)) {
             $course->update(['max_group_size' => $validated['max-group-size']]);
-
-            return redirect()->route('courses.manage.groups.index', [$course])->with('success', "Max group size set to " . $validated['max-group-size']);
         }
 
-        $course->update([
-            'max_groups'        => $validated['max-groups'],
-            'max_groups_amount' => array_key_exists('max-groups-amount', $validated) ? $validated['max-groups-amount'] : null
-        ]);
+        if (array_key_exists('max-groups',$validated)){
+            $course->update([
+                'max_groups'        => $validated['max-groups'],
+                'max_groups_amount' => array_key_exists('max-groups-amount', $validated) ? $validated['max-groups-amount'] : null
+            ]);
+        }
 
-        return redirect()->route('courses.manage.groups.index', [$course])->with('success', match ($validated['max-groups']) {
-            'same_as_assignments' => 'Each student can now be part of one group per assignment',
-            'custom' => "Each student can now be part of {$validated['max-groups-amount']} group(s)",
-            'none' => "Students can no longer form groups"
-        });
+        return "ok";
     }
 
     public function roles(Course $course): View
