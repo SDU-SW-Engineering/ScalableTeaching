@@ -72,14 +72,16 @@ class UserManagementController extends Controller
         else if(is_string($searchFilter))
             $activities->whereRelation('affected', 'name', 'like', "%$searchFilter%");
 
-        if(filled(request('kind'))) {
-            $activities->where('resource_type', match (request('kind')) {
-                'grade' => Grade::class,
-                'membership' => CourseUser::class,
-                'group' => Group::class,
+        if(filled(request('kind')))
+        {
+            $activities->where('resource_type', match (request('kind'))
+            {
+                'grade'            => Grade::class,
+                'membership'       => CourseUser::class,
+                'group'            => Group::class,
                 'group-invitation' => GroupInvitation::class,
                 'group-membership' => GroupUser::class,
-                default => null
+                default            => null
             });
         }
 
@@ -92,7 +94,8 @@ class UserManagementController extends Controller
     {
         $groups = $course->groups()->withCount('members')->withCount('projects')->orderBy('name');
 
-        if(request()->has('filter')) {
+        if(request()->has('filter'))
+        {
             $groups->whereHas('members', function(Builder $query) {
                 $query->where('name', 'like', '%' . request('filter') . '%');
             })->orWhere(function(Builder $query) use ($course) {
@@ -115,11 +118,11 @@ class UserManagementController extends Controller
     public function createGroup(Course $course)
     {
         $validated = request()->validate([
-            'name' => 'required'
+            'name' => 'required',
         ]);
 
         $group = $course->groups()->create([
-            'name' => $validated['name']
+            'name' => $validated['name'],
         ]);
 
         return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', 'Group created');
@@ -135,14 +138,14 @@ class UserManagementController extends Controller
     public function addGroupMember(Course $course, Group $group)
     {
         $validated = request()->validate([
-            'email' => 'required|email'
+            'email' => 'required|email',
         ]);
         $user = User::where('email', $validated['email'])->first();
         if ($user == null)
             return redirect()->route('courses.manage.groups.show', [$course, $group])->withErrors(['email' => 'This user doesn\'t exist.']);
 
         $userIsPartOfCourse = $course->members()->where('users.id', $user->id)->exists();
-        if(!$userIsPartOfCourse)
+        if( ! $userIsPartOfCourse)
             return redirect()->route('courses.manage.groups.show', [$course, $group])->withErrors(['name' => 'User is not part of the course']);
 
         $group->members()->syncWithoutDetaching($user->id);
@@ -153,7 +156,7 @@ class UserManagementController extends Controller
     public function removeGroupMember(Course $course, Group $group)
     {
         $validated = request()->validate([
-            'user' => 'required|numeric'
+            'user' => 'required|numeric',
         ]);
 
         $user = $group->members()->where('users.id', $validated['user'])->first();
@@ -168,11 +171,11 @@ class UserManagementController extends Controller
     public function updateGroup(Course $course, Group $group)
     {
         $validated = request()->validate([
-            'name' => 'required'
+            'name' => 'required',
         ]);
 
         $group->update([
-            'name' => $validated['name']
+            'name' => $validated['name'],
         ]);
 
         return "ok";
@@ -183,17 +186,19 @@ class UserManagementController extends Controller
         $validated = request()->validate([
             'max-group-size'    => ['required_without:max-groups', 'nullable', 'numeric'],
             'max-groups'        => ['required_without:max-group-size'],
-            'max-groups-amount' => ['required_if:max-groups,custom']
+            'max-groups-amount' => ['required_if:max-groups,custom'],
         ]);
 
-        if(array_key_exists('max-group-size', $validated)) {
+        if(array_key_exists('max-group-size', $validated))
+        {
             $course->update(['max_group_size' => $validated['max-group-size']]);
         }
 
-        if (array_key_exists('max-groups',$validated)){
+        if (array_key_exists('max-groups', $validated))
+        {
             $course->update([
                 'max_groups'        => $validated['max-groups'],
-                'max_groups_amount' => array_key_exists('max-groups-amount', $validated) ? $validated['max-groups-amount'] : null
+                'max_groups_amount' => array_key_exists('max-groups-amount', $validated) ? $validated['max-groups-amount'] : null,
             ]);
         }
 

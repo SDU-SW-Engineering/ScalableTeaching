@@ -25,14 +25,14 @@ beforeEach(function() {
     $this->student2 = User::factory()->hasAttached($this->course)->create();
 
     $this->group = Group::factory()->for($this->course)->create([
-        'name' => 'WebTech Elites'
+        'name' => 'WebTech Elites',
     ]);
     $this->group2 = Group::factory()->for($this->course)->create([
-        'name' => 'Spartans'
+        'name' => 'Spartans',
     ]);
     $this->groupUser = User::factory()->hasAttached($this->course)->create([
         'name'  => 'WebTech User',
-        'email' => 'web@tech.dk'
+        'email' => 'web@tech.dk',
     ]);
     $this->groupUser->groups()->attach($this->group);
     $this->task = Task::factory()->for($this->course)->create();
@@ -75,12 +75,12 @@ it('cannot create a group without a name', function() {
 
 it('creates a group', function() {
     post(route('courses.manage.groups.create', $this->course), [
-        'name' => 'Test Group'
+        'name' => 'Test Group',
     ])->assertSessionHas('success');
 
     assertDatabaseHas('groups', [
         'name'      => 'Test Group',
-        'course_id' => $this->course->id
+        'course_id' => $this->course->id,
     ]);
 });
 
@@ -91,18 +91,18 @@ it('deletes a group', function() {
 
     assertDatabaseMissing('groups', [
         'name'      => 'WebTech Elites',
-        'course_id' => $this->course->id
+        'course_id' => $this->course->id,
     ]);
 });
 
 it('fails to add a member that is not part of the course', function() {
     $user = User::factory()->hasAttached(Course::factory()->create())->create([
         'name'  => 'Test user',
-        'email' => 'test@tech.dk'
+        'email' => 'test@tech.dk',
     ]);
 
     post(route('courses.manage.groups.add-member', [$this->course, $this->group]), [
-        'email' => 'test@tech.dk'
+        'email' => 'test@tech.dk',
     ])->assertRedirect(route('courses.manage.groups.show', [$this->course, $this->group]))
         ->assertSessionHasErrors('name');
 
@@ -115,11 +115,11 @@ it('fails to add a member that is not part of the course', function() {
 it('adds a member to a group', function() {
     $user = User::factory()->hasAttached($this->course)->create([
         'name'  => 'Test user',
-        'email' => 'test@tech.dk'
+        'email' => 'test@tech.dk',
     ]);
 
     post(route('courses.manage.groups.add-member', [$this->course, $this->group]), [
-        'email' => 'test@tech.dk'
+        'email' => 'test@tech.dk',
     ])->assertSessionHas('success', 'Test user added')
         ->assertRedirect(route('courses.manage.groups.show', [$this->course, $this->group]));
 
@@ -132,12 +132,12 @@ it('adds a member to a group', function() {
 it('removes a member from a group', function() {
     $user = User::factory()->hasAttached($this->course)->create([
         'name'  => 'Test user',
-        'email' => 'test@tech.dk'
+        'email' => 'test@tech.dk',
     ]);
     $user->groups()->attach($this->group);
 
     delete(route('courses.manage.groups.remove-member', [$this->course, $this->group]), [
-        'user' => $user->id
+        'user' => $user->id,
     ])->assertRedirect(route('courses.manage.groups.show', [$this->course, $this->group]))
         ->assertSessionHas('success', 'User removed');
 
@@ -149,57 +149,57 @@ it('removes a member from a group', function() {
 
 it('renames a group', function() {
     put(route('courses.manage.groups.update', [$this->course, $this->group]), [
-        'name' => 'Renamed Group'
+        'name' => 'Renamed Group',
     ])->assertOk();
 
     assertDatabaseHas('groups', [
         'id'   => $this->group->id,
-        'name' => 'Renamed Group'
+        'name' => 'Renamed Group',
     ]);
 });
 
 it('sets the max group size to 2', function() {
     put(route('courses.manage.groups.update-settings', $this->course), [
-        'max-group-size' => 2
+        'max-group-size' => 2,
     ])->assertOk();
 
     assertDatabaseHas('courses', [
         'id'             => $this->course->id,
-        'max_group_size' => 2
+        'max_group_size' => 2,
     ]);
 });
 
 it('sets the allowed number of groups to same as assignments', function() {
     put(route('courses.manage.groups.update-settings', $this->course), [
-        'max-groups' => 'same_as_assignments'
+        'max-groups' => 'same_as_assignments',
     ])->assertOk();
 
     assertDatabaseHas('courses', [
         'id'         => $this->course->id,
-        'max_groups' => 'same_as_assignments'
+        'max_groups' => 'same_as_assignments',
     ]);
 });
 
 it('sets the allowed number of groups to 3', function() {
     put(route('courses.manage.groups.update-settings', $this->course), [
         'max-groups'        => 'custom',
-        'max-groups-amount' => 3
+        'max-groups-amount' => 3,
     ])->assertOk();
 
     assertDatabaseHas('courses', [
         'id'                => $this->course->id,
         'max_groups'        => 'custom',
-        'max_groups_amount' => 3
+        'max_groups_amount' => 3,
     ]);
 });
 
 it('sets the allowed number of groups to none', function() {
     put(route('courses.manage.groups.update-settings', $this->course), [
-        'max-groups' => 'none'
+        'max-groups' => 'none',
     ])->assertOk();
 
     assertDatabaseHas('courses', [
         'id'         => $this->course->id,
-        'max_groups' => 'none'
+        'max_groups' => 'none',
     ]);
 });

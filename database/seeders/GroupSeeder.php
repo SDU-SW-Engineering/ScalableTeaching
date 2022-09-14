@@ -24,7 +24,7 @@ class GroupSeeder extends Seeder
         {
             /** @var Collection<int,Group> $groups */
             $groups = Group::factory(4)->for($course)->create();
-            $course->members->each(fn(User $member)  => $member->groups()->attach($groups->pluck('id')->random(rand(0,$groups->count()))));
+            $course->members->each(fn(User $member)  => $member->groups()->attach($groups->pluck('id')->random(rand(0, $groups->count()))));
         }
     }
 }
