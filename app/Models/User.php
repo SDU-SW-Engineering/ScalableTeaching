@@ -142,6 +142,9 @@ class User extends Authenticatable
         return $this->hasMany(GradeDelegation::class);
     }
 
+    /**
+     * @return Attribute<string,null>
+     */
     public function avatar() : Attribute
     {
         return Attribute::make(get: fn($value, $attributes) => $attributes['avatar'] ?? "data:image/jpeg;base64,".base64_encode(file_get_contents(storage_path('avatar.jpg'))));

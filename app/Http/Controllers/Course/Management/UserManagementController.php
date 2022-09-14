@@ -11,6 +11,7 @@ use App\Models\GroupInvitation;
 use App\Models\GroupUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\View;
 
@@ -90,7 +91,7 @@ class UserManagementController extends Controller
         return view('courses.manage.activity', compact('course', 'activities'));
     }
 
-    public function groups(Course $course)
+    public function groups(Course $course) : View
     {
         $groups = $course->groups()->withCount('members')->withCount('projects')->orderBy('name');
 
@@ -98,7 +99,7 @@ class UserManagementController extends Controller
         {
             $groups->whereHas('members', function(Builder $query) {
                 $query->where('name', 'like', '%' . request('filter') . '%');
-            })->orWhere(function(Builder $query) use ($course) {
+            })->orWhere(function(Builder $query) use ($course) { // @phpstan-ignore-line
                 $query->where('course_id', $course->id)->where('name', 'like', '%'. request('filter') . '%');
             });
         }
@@ -108,14 +109,14 @@ class UserManagementController extends Controller
         return view('courses.manage.groups', compact('course', 'groups'));
     }
 
-    public function showGroup(Course $course, Group $group)
+    public function showGroup(Course $course, Group $group) : View
     {
         $members = $group->members()->orderBy('name')->get();
 
         return view('courses.manage.group', compact('course', 'group', 'members'));
     }
 
-    public function createGroup(Course $course)
+    public function createGroup(Course $course) : RedirectResponse
     {
         $validated = request()->validate([
             'name' => 'required',
@@ -128,14 +129,14 @@ class UserManagementController extends Controller
         return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', 'Group created');
     }
 
-    public function deleteGroup(Course $course, Group $group)
+    public function deleteGroup(Course $course, Group $group) : RedirectResponse
     {
         $group->delete();
 
         return redirect()->route('courses.manage.groups.index', $course)->with('success', 'Group deleted');
     }
 
-    public function addGroupMember(Course $course, Group $group)
+    public function addGroupMember(Course $course, Group $group) : RedirectResponse
     {
         $validated = request()->validate([
             'email' => 'required|email',
@@ -148,12 +149,12 @@ class UserManagementController extends Controller
         if( ! $userIsPartOfCourse)
             return redirect()->route('courses.manage.groups.show', [$course, $group])->withErrors(['name' => 'User is not part of the course']);
 
-        $group->members()->syncWithoutDetaching($user->id);
+        $group->members()->syncWithoutDetaching([$user->id]);
 
         return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', $user->name . " added");
     }
 
-    public function removeGroupMember(Course $course, Group $group)
+    public function removeGroupMember(Course $course, Group $group) : RedirectResponse
     {
         $validated = request()->validate([
             'user' => 'required|numeric',
@@ -168,7 +169,7 @@ class UserManagementController extends Controller
         return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', "User removed");
     }
 
-    public function updateGroup(Course $course, Group $group)
+    public function updateGroup(Course $course, Group $group) : string
     {
         $validated = request()->validate([
             'name' => 'required',
@@ -181,7 +182,7 @@ class UserManagementController extends Controller
         return "ok";
     }
 
-    public function updateGroupSettings(Course $course)
+    public function updateGroupSettings(Course $course) : string
     {
         $validated = request()->validate([
             'max-group-size'    => ['required_without:max-groups', 'nullable', 'numeric'],
