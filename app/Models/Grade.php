@@ -116,7 +116,6 @@ class Grade extends Model
         else if($created->source_type == Task::class)
             $message .= " (graded by system)";
 
-
         return new CourseActivityMessage($message, $created->task->course_id, $created->user_id, $affectedBy);
     }
     // endregion

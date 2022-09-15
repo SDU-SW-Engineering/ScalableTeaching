@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\CorrectionType;
+use App\Models\Enums\GradeEnum;
 use App\Models\Enums\TaskTypeEnum;
 use App\Models\Grade;
 use App\Models\GradeDelegation;
@@ -38,7 +39,7 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task): View
     {
-        abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
+        abort_if(!$task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
 
         return $this->showProject($course, $task, $project);
@@ -143,8 +144,8 @@ class TaskController extends Controller
         $isSolo = request('as', 'solo') == 'solo';
         $group = $isSolo ? null : Group::findOrFail(request('as'));
 
-        abort_if( ! $isSolo && ! auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
-        abort_if( ! $task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
+        abort_if(!$isSolo && !auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
+        abort_if(!$task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
 
         $owner = $isSolo ? auth()->user() : $group;
         $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
@@ -313,7 +314,7 @@ class TaskController extends Controller
 
     public function toggleVisibility(Course $course, Task $task): RedirectResponse
     {
-        $task->is_visible = ! $task->is_visible;
+        $task->is_visible = !$task->is_visible;
         $task->save();
 
         return redirect()->back()->with('success-task', 'The visibility was updated.');
@@ -321,11 +322,9 @@ class TaskController extends Controller
 
     public function refreshReadme(Course $course, Task $task): RedirectResponse
     {
-        try
-        {
+        try {
             $task->reloadDescriptionFromRepo();
-        } catch(\Exception $exception)
-        {
+        } catch(\Exception $exception) {
         }
 
         return redirect()->back()->with('success-task', 'The readme was updated.');
@@ -352,8 +351,7 @@ class TaskController extends Controller
         ])->toArray();
 
         /** @var SubTask $subTask */
-        foreach($task->sub_tasks->all() as $subTask)
-        {
+        foreach($task->sub_tasks->all() as $subTask) {
             $found = collect($tasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
             if($found === false)
                 continue;
@@ -406,6 +404,7 @@ class TaskController extends Controller
             'task_id'     => $task->id,
             'source_id'   => auth()->id(),
             'source_type' => User::class,
+            'value'       => GradeEnum::Passed
         ]);
 
         return "OK";
