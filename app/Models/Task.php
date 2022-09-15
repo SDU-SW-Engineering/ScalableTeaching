@@ -241,7 +241,7 @@ class Task extends Model
      */
     public function isPublishable(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => filled($this->starts_at) && filled($this->ends_at));
+        return Attribute::make(get: fn($value, $attributes) => filled($this->starts_at) && filled($this->ends_at) && filled($this->description));
     }
 
     public function earliestEndDate(bool $excludeToday = false): Carbon

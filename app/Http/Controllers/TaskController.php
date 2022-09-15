@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\CorrectionType;
+use App\Models\Enums\GradeEnum;
 use App\Models\Enums\TaskTypeEnum;
 use App\Models\Grade;
 use App\Models\GradeDelegation;
@@ -406,6 +407,7 @@ class TaskController extends Controller
             'task_id'     => $task->id,
             'source_id'   => auth()->id(),
             'source_type' => User::class,
+            'value'       => GradeEnum::Passed,
         ]);
 
         return "OK";
