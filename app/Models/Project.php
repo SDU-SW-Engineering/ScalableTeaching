@@ -288,9 +288,9 @@ class Project extends Model
             'user_id'     => $user->id,
             'value'       => match ($status)
             {
-                ProjectStatus::Overdue => 'failed',
+                ProjectStatus::Overdue  => 'failed',
                 ProjectStatus::Finished => 'passed',
-                default => throw new Exception("Passes status must be a final value.")
+                default                 => throw new Exception("Passes status must be a final value.")
             },
             'value_raw'   => $gradeMeta,
             'started_at'  => $startedAt,

@@ -21,6 +21,11 @@ export default {
             type: Boolean,
             required: false,
             default: false
+        },
+        displayCategories: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     data() {
@@ -78,6 +83,29 @@ export default {
                             },
                             gridLines: {
                                 display: false
+                            }
+                        },
+                        {
+                            type: "category",
+                            gridLines: {
+                                drawOnChartArea: false
+                            },
+                            display: this.displayCategories,
+                            ticks: {
+                                callback(value, index, values) {
+                                    let categories = values.map(v => v.split(";")[1]);
+                                    if (categories.every(v  => v == null))
+                                        return null;
+                                    value = categories[index];
+                                    let applicableCategories = categories.filter(v => v === value);
+                                    let normalizeIndex = index - categories.indexOf(value);
+                                    let showLabel = normalizeIndex + 1 === applicableCategories.length;
+
+                                    if (showLabel === false)
+                                        return null;
+
+                                    return value;
+                                }
                             }
                         }
                     ],

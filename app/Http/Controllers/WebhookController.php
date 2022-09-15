@@ -55,7 +55,7 @@ class WebhookController extends Controller
         $succeedingBuilds->each(fn($build) => $project->subTasks()->firstOrCreate([
             'sub_task_id' => $tracking->flip()->get($build['name']),
             'source_type' => Pipeline::class,
-            'source_id' => $pipeline->id,
+            'source_id'   => $pipeline->id,
         ]));
 
         return "OK";

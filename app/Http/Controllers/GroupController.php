@@ -14,14 +14,15 @@ use Illuminate\View\View;
 
 class GroupController extends Controller
 {
-    public function index(Request $request, Course $course) : View
+    public function index(Request $request, Course $course): View
     {
         $invitations = $course->groupInvitations()
             ->with(['invitedBy', 'group.members'])
             ->where('recipient_user_id', auth()->id())->get()->map(fn(GroupInvitation $invite) => [
+                'group'        => $invite->group,
                 'acceptRoute'  => route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'accept']),
                 'declineRoute' => route('courses.groups.respondInvite', [$invite->group->course_id, $invite->group_id, $invite->id, 'decline']),
-                'canAccept'    => \Gate::inspect('canAcceptInvite', [$invite->group, $invite])->toArray(),
+                'canAccept'    => \Gate::inspect('accept-invite', [$invite->group, $invite])->toArray(),
             ]);
 
         return view('groups.index', [
@@ -39,7 +40,7 @@ class GroupController extends Controller
     /**
      * @throws \Throwable
      */
-    public function create(Course $course) : Response
+    public function create(Course $course): Response
     {
         $groupRequest = request()->validate([
             'name' => ['required', 'alpha_hyphen'],
@@ -56,7 +57,7 @@ class GroupController extends Controller
         ], 201);
     }
 
-    public function destroy(Course $course, Group $group) : string
+    public function destroy(Course $course, Group $group): string
     {
         $group->members()->detach();
         $group->invitations()->delete();
@@ -68,7 +69,7 @@ class GroupController extends Controller
     /**
      * @throws \Throwable
      */
-    public function inviteUser(Course $course, Group $group) : Response
+    public function inviteUser(Course $course, Group $group): Response
     {
         $validated = \request()->validate([
             'email' => ['email'],
@@ -87,17 +88,17 @@ class GroupController extends Controller
         $invitation->load('recipient');
 
         return response([
-            'invitation'  => $invitation,
+            'recipient'   => $invitation->recipient,
             'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
         ], 201);
     }
 
-    public function respondToInvite(Course $course, Group $group, GroupInvitation $groupInvitation, string $mode) : string | Response
+    public function respondToInvite(Course $course, Group $group, GroupInvitation $groupInvitation, string $mode): string|Response
     {
         $accepting = $mode == 'accept';
-        if ($accepting)
+        if($accepting)
         {
-            if (auth()->user()->cannot('acceptInvite', [$group, $groupInvitation]))
+            if(auth()->user()->cannot('acceptInvite', [$group, $groupInvitation]))
                 return response("failed", 422);
 
             $group->members()->attach(auth()->id());
@@ -107,14 +108,14 @@ class GroupController extends Controller
         return "ok";
     }
 
-    public function leave(Course $course, Group $group) : string
+    public function leave(Course $course, Group $group): string
     {
         $group->members()->detach(auth()->id());
 
         return "ok";
     }
 
-    public function deleteInvite(Course $course, Group $group, GroupInvitation $groupInvitation) : string
+    public function deleteInvite(Course $course, Group $group, GroupInvitation $groupInvitation): string
     {
         $groupInvitation->delete();
 
@@ -127,7 +128,7 @@ class GroupController extends Controller
      * @param User $user
      * @return array{group_id:int,canDelete:array}
      */
-    public function removeMember(Course $course, Group $group, User $user) : array
+    public function removeMember(Course $course, Group $group, User $user): array
     {
         $group->members()->detach($user);
 

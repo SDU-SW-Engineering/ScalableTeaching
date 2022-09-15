@@ -9,7 +9,7 @@
             <select onchange="window.location = '/staging/impersonate/' + this.value"
                     class="py-0 text-sm text-black dark:bg-gray-700 dark:text-white border-none rounded-sm mr-2">
                 <option value="-1">Signed out</option>
-                @foreach(\App\Models\User::all() as $user)
+                @foreach(\App\Models\User::orderBy('is_admin', 'desc')->orderBy('name')->get() as $user)
                     <option value="{{ $user->id }}" @selected(auth()->id() == $user->id)>{{ $user->name }} @if($user->is_admin)(admin)@endif</option>
                 @endforeach
             </select>

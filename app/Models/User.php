@@ -41,6 +41,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_sys_admin
  * @property array|null $ad_groups
  * @property string|null $avatar
+ * @property string $avatar_html
+ * @property-read CourseUser $courseMembership
  */
 class User extends Authenticatable
 {
@@ -139,6 +141,14 @@ class User extends Authenticatable
     public function gradeDelegations(): HasMany
     {
         return $this->hasMany(GradeDelegation::class);
+    }
+
+    /**
+     * @return Attribute<string,null>
+     */
+    public function avatar() : Attribute
+    {
+        return Attribute::make(get: fn($value, $attributes) => $attributes['avatar'] ?? "data:image/jpeg;base64,".base64_encode(file_get_contents(storage_path('avatar.jpg'))));
     }
 
     /**

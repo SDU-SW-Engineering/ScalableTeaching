@@ -9,7 +9,7 @@
                 Members
             </dt>
             <div class="pr-6">
-                <dd v-for="member in invitation.group.users"
+                <dd v-for="member in invitation.group.members"
                     class="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-full py-1 pl-4 pr-4 flex items-center mb-4 last:mb-0"
                     v-text="member.name">
                 </dd>
