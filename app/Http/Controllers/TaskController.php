@@ -319,68 +319,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The readme was updated.');
     }
 
-    public function subtasks(Course $course, Task $task): View|RedirectResponse
-    {
-        $breadcrumbs = [
-            'Courses'     => route('courses.index'),
-            $course->name => null,
-        ];
 
-        $ciFile = $task->ciFile();
-        if($ciFile == null)
-            return redirect()->back()->withErrors('Source project doesn\'t contain the .gitlab-ci.yml file.', 'task');
-        $tasks = collect((new CIReader($ciFile))->tasks())->map(fn(CITask $task) => [
-            'stage'      => $task->getStage(),
-            'name'       => $task->getName(),
-            'id'         => null,
-            'alias'      => '',
-            'points'     => 0,
-            'isRequired' => false,
-            'isSelected' => false,
-        ])->toArray();
-
-        /** @var SubTask $subTask */
-        foreach($task->sub_tasks->all() as $subTask) {
-            $found = collect($tasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
-            if($found === false)
-                continue;
-            $tasks[$found]['name'] = $subTask->getName();
-            $tasks[$found]['alias'] = $subTask->getAlias();
-            $tasks[$found]['id'] = $subTask->getId();
-            $tasks[$found]['points'] = $subTask->getPoints();
-            $tasks[$found]['isRequired'] = $subTask->isRequired();
-            $tasks[$found]['isSelected'] = true;
-        }
-
-        return view('courses.manage.taskSubtasks', compact('course', 'task', 'breadcrumbs', 'tasks'));
-    }
-
-    public function updateSubtasks(Course $course, Task $task): string
-    {
-        $tasks = new Collection(request('tasks'));
-        $correctionType = CorrectionType::from(request('correctionType'));
-
-        $selected = $tasks->filter(fn($task) => $task['isSelected']);
-        $currentSubTasks = $task->sub_tasks;
-        $removeIds = $task->sub_tasks->all()->map(fn(SubTask $subTask) => $subTask->getId())->diff($selected->pluck('id'));
-        $currentSubTasks->remove($removeIds->toArray());
-        $selected->each(function($task) use ($currentSubTasks) {
-            $subTask = (new SubTask($task['name'], $task['alias'] == '' ? null : $task['alias']))
-                ->setPoints($task['points'])
-                ->setIsRequired($task['required']);
-            if($task['id'] == null)
-                $currentSubTasks->add($subTask);
-            else
-                $currentSubTasks->update($task['id'], $subTask);
-
-        });
-        $task->correction_type = $correctionType;
-        $task->correction_points_required = request('requiredPoints');
-        $task->correction_tasks_required = request('requiredTasks');
-        $task->save();
-
-        return "OK";
-    }
 
     public function markComplete(Course $course, Task $task): string|Response
     {
