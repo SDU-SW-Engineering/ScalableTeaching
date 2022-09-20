@@ -248,7 +248,7 @@ class TaskController extends Controller
                 'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
             ];
         }
-        
+
         $project = $sourceControl->showProject($validated['repo-id'], user: 'auth');
         if($project == null)
             return back()

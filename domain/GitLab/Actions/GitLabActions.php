@@ -30,7 +30,7 @@ class GitLabActions implements SourceControl
             ->selectNamespace()->selectName()->selectFullName();
         $client = new Client(getenv('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . $token]);
 
-        $projects = $client->runQuery($rootObject)->getResults()->data->projects->nodes;
+        $projects = $client->runQuery($rootObject)->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
         if(count($projects) == 0)
             return null;
@@ -45,7 +45,7 @@ class GitLabActions implements SourceControl
             ->selectId();
 
         $client = new Client(getenv('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . User::token($user)]);
-        $user = $client->runQuery($rootObject)->getResults()->data->currentUser;
+        $user = $client->runQuery($rootObject)->getResults()->data->currentUser; // @phpstan-ignore-line
 
         return new User($user->id, $user->name);
     }
@@ -70,7 +70,7 @@ class GitLabActions implements SourceControl
                 'name' => $name,
                 'path' => Str::snake($name),
             ]);
-        $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->post('/groups', $params);
+        $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->post('/groups', $params->toArray());
         return new Group($response->json('id'));
     }
 }
