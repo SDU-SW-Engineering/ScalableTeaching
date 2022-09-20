@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
 /**
@@ -55,6 +56,8 @@ class Pipeline extends Model
      */
     public static array $upgradable = [
         'pending' => [PipelineStatusEnum::Running, PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
+        'failed'  => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
+        'success' => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
         'running' => [PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
     ];
 
@@ -75,7 +78,7 @@ class Pipeline extends Model
 
     public function isUpgradable(PipelineStatusEnum $to): bool
     {
-        if( ! array_key_exists($this->status->value, static::$upgradable))
+        if(!array_key_exists($this->status->value, static::$upgradable))
             return false;
 
         return in_array($to, static::$upgradable[$this->status->value]);
@@ -85,7 +88,7 @@ class Pipeline extends Model
      * @param Builder<Pipeline> $query
      * @return Builder<Pipeline>
      */
-    public function scopeFinished(Builder $query) : Builder
+    public function scopeFinished(Builder $query): Builder
     {
         return $query->where('status', 'finished');
     }
@@ -99,17 +102,17 @@ class Pipeline extends Model
     }
 
     /**
-     * @return HasMany<ProjectSubTask>
+     * @return MorphMany
      */
-    public function subTasks() : HasMany
+    public function subTasks(): MorphMany
     {
-        return $this->hasMany(ProjectSubTask::class);
+        return $this->morphMany(ProjectSubTask::class, 'source');
     }
 
     /**
      * @return Attribute<Collection<int,array{name:string,completed:bool}>,null>
      */
-    public function prettySubTasks() : Attribute
+    public function prettySubTasks(): Attribute
     {
         return Attribute::make(get: function($value, $attributes) {
             $availableSubTasks = $this->project->task->sub_tasks;
@@ -125,7 +128,7 @@ class Pipeline extends Model
     /**
      * @return Attribute<string,null>
      */
-    public function runTime() : Attribute
+    public function runTime(): Attribute
     {
         return Attribute::make(get: fn($value, $attributes) => CarbonInterval::seconds($attributes['duration'])->forHumans());
     }
@@ -133,7 +136,7 @@ class Pipeline extends Model
     /**
      * @return Attribute<string,null>
      */
-    public function queuedFor() : Attribute
+    public function queuedFor(): Attribute
     {
         return Attribute::make(get: fn($value, $attributes) => CarbonInterval::seconds($attributes['queue_duration'])->forHumans());
     }

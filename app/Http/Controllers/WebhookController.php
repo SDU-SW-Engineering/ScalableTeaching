@@ -52,6 +52,7 @@ class WebhookController extends Controller
         $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
         $builds = new Collection(request('builds'));
         $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains($build['name']) && $build['status'] == 'success');
+        $project->subTasks()->delete();
         $succeedingBuilds->each(fn($build) => $project->subTasks()->firstOrCreate([
             'sub_task_id' => $tracking->flip()->get($build['name']),
             'source_type' => Pipeline::class,

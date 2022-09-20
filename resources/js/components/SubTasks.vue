@@ -1,7 +1,9 @@
 <template>
     <div class="bg-white p-4 rounded-md shadow-md dark:bg-gray-800 flex">
         <div class="w-24 mr-4" v-if="projectStatus !== null">
-            <simple-doughnut-chart :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%"
+            <simple-doughnut-chart v-if="correctionType === 'all_tasks'" :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%"
+                                   :data="[pointSum, lengthMax - pointSum]"></simple-doughnut-chart>
+            <simple-doughnut-chart v-else :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%"
                                    :data="[pointSum, pointMax - pointSum]"></simple-doughnut-chart>
         </div>
         <div class="flex-1">
@@ -30,8 +32,10 @@
                             v-if="correctionType === 'manual' && graded">Your assignment has been graded.</h2>
                     </div>
                 </div>
-                <h3 v-if="graded" class="font-thin dark:text-lime-green-400 text-2xl flex-shrink-0">{{ pointSum }} /
-                    {{ pointMax }} points</h3>
+                <h3 v-if="graded" class="font-thin dark:text-lime-green-400 text-2xl flex-shrink-0">
+                    <span v-if="correctionType === 'all_tasks'">{{ pointSum }} / {{ lengthMax }}</span>
+                    <span v-else>{{ pointSum }} / {{ pointMax }} points</span>
+                </h3>
             </div>
             <div v-if="tasks.gradeDelegations != null && tasks.gradeDelegations.length > 0"
                  class="text-sm mt-2 text-black dark:text-gray-200">
@@ -46,7 +50,7 @@
                     class="text-xs text-gray-500 dark:text-gray-400">Use the id when communicating with the grader.</span>
             </div>
 
-            <div class="mt-4" v-if="tasks.list.length === 1">
+            <div class="mt-4" v-if="tasks.list.length === 1 && correctionType !== 'all_tasks'">
                 <div v-for="task in tasks.list"
                      class="flex items-center bg-gray-300 dark:bg-gray-600 rounded-lg mb-4 w-full py-2">
                     <i class="bx bx-x text-3xl w-12 text-center text-red-400" v-if="ended && !task.completed"></i>
@@ -101,11 +105,26 @@
                                         </svg>
                                         <span class="text-xs mr-2 text-black dark:text-gray-300">{{ task.name }}</span>
                                     </div>
-                                    <span v-if="task.pointsAcquired === null"
-                                          class="text-xs py-0.5 text-black dark:text-gray-400 font-medium">Ungraded</span>
-                                    <span v-else class="text-xs py-0.5 text-black dark:text-gray-300 font-medium">{{
-                                            task.pointsAcquired
-                                        }}/{{ task.points }}</span>
+                                    <template v-if="correctionType === 'manual'">
+                                        <span v-if="task.pointsAcquired === null"
+                                              class="text-xs py-0.5 text-black dark:text-gray-400 font-medium">Ungraded</span>
+                                        <span v-else class="text-xs py-0.5 text-black dark:text-gray-300 font-medium">{{
+                                                task.pointsAcquired
+                                            }}/{{ task.points }}</span>
+                                    </template>
+                                    <template v-else>
+                                        <span v-if="task.pointsAcquired === null"
+                                              class="text-xs py-0.5 text-black dark:text-gray-400 font-medium">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-red-400 w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </span>
+                                        <span v-else class="text-xs py-0.5 text-black dark:text-gray-300 font-medium">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-lime-green-400 w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                        </span>
+                                    </template>
                                 </div>
                                 <div class="flex ml-5 mb-0.5" v-for="comment in task.comments">
                                     <span class="mr-1 text-blue-200"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
@@ -120,7 +139,7 @@
                         </ul>
                     </div>
                     <div class="flex justify-between font-bold text-black dark:text-gray-200"
-                         v-if="projectStatus != null">
+                         v-if="projectStatus != null && correctionType === 'manual'">
                         <span>Total</span>
                         <span>{{ completedPoints(group) }}/{{ maxPoints(group) }}</span>
                     </div>
@@ -142,6 +161,11 @@ export default {
         pointMax: function () {
             return this.tasks.list.reduce((total, group) => {
                 return total + group.tasks.reduce((total, c) => total + c.points, 0);
+            }, 0)
+        },
+        lengthMax: function() {
+            return this.tasks.list.reduce((total, group) => {
+                return total + group.tasks.length;
             }, 0)
         },
         graded: function () {

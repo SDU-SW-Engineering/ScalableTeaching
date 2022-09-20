@@ -67,11 +67,12 @@ class TaskController extends Controller
             'author'      => $comment->author->name,
             'text'        => $comment->text,
         ])->groupBy('sub_task_id');
+
         $subTasks = $task->sub_tasks->all()->groupBy('group')->map(fn(\Illuminate\Support\Collection $subTasks, $group) => [
             'group' => $group,
             'tasks' => $subTasks->map(fn(SubTask $subTask) => [
                 'name'           => $subTask->getDisplayName(),
-                'pointsAcquired' => $completedSubTasks?->has($subTask->getId()) ? $completedSubTasks->get($subTask->getId())->points : null,
+                'pointsAcquired' => $completedSubTasks?->has($subTask->getId()) ? $completedSubTasks->get($subTask->getId())->points ?? 1 : null,
                 'comments'       => $completedSubTaskComments?->has($subTask->getId()) ? $completedSubTaskComments->get($subTask->getId()) : [],
                 'points'         => $subTask->getPoints(),
                 'required'       => $subTask->isRequired() ?? true,
