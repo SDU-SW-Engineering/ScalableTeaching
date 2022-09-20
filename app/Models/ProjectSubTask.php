@@ -31,9 +31,7 @@ class ProjectSubTask extends Model
             if ($isFinished == false)
                 return;
 
-            $project->update([
-                'status' => ProjectStatus::Finished,
-            ]);
+            $project->setProjectStatus(ProjectStatus::Finished);
         });
     }
 

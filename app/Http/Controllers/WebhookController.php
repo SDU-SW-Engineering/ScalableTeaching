@@ -32,6 +32,7 @@ class WebhookController extends Controller
 
     private function pipeline() : string
     {
+        /** @var Project|null $project */
         $project = Project::firstWhere('project_id', request('project.id'));
         $startedAt = Carbon::parse(\request('object_attributes.created_at'))->setTimezone(config('app.timezone'));
         abort_if($startedAt->isAfter($project->task->ends_at) || $startedAt->isBefore($project->task->starts_at), 400, 'Pipeline could not be processed as it is overdue.');
