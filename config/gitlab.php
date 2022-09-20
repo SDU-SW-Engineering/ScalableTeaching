@@ -50,8 +50,8 @@ return [
         ],
 
         'user' => [
-            'token'  => '',
-            'method' => 'oauth',
+            'token'  => '95b17999fd7e41963d76880fd3fd0d00749bf1c00b80e6ddd82a01452fd6d8ff',
+            'method' => 'token',
             // 'backoff' => false,
             // 'cache'   => false,
             // 'sudo'    => null,

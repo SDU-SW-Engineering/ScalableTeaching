@@ -22,6 +22,7 @@ use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
 use Domain\GitLab\CIReader;
 use Domain\GitLab\CITask;
+use Domain\SourceControl\SourceControl;
 use Gitlab\Exception\RuntimeException;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -39,7 +40,7 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task): View
     {
-        abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
+        abort_if(!$task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
 
         return $this->showProject($course, $task, $project);
@@ -144,8 +145,8 @@ class TaskController extends Controller
         $isSolo = request('as', 'solo') == 'solo';
         $group = $isSolo ? null : Group::findOrFail(request('as'));
 
-        abort_if( ! $isSolo && ! auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
-        abort_if( ! $task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
+        abort_if(!$isSolo && !auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
+        abort_if(!$task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
 
         $owner = $isSolo ? auth()->user() : $group;
         $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
@@ -226,64 +227,52 @@ class TaskController extends Controller
     /**
      * @throws \Throwable
      */
-    public function store(Course $course, GitLabManager $manager): array
+    public function store(Course $course, SourceControl $sourceControl): array|RedirectResponse
     {
         $validated = request()->validate([
             'name'    => 'required',
             'type'    => 'required',
-            'repo-id' => ['required_if:type,assignment', 'numeric', 'nullable'],
+            'repo-id' => ['required_if:type,assignment', 'string', 'nullable'],
         ]);
 
-        /*try
-        {
-            $manager->projects()->show($validated['project-id']);
-        } catch(RuntimeException $runtimeException)
-        {
-            if($runtimeException->getCode() == 404)
-                return back()
-                    ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
-                    ->withInput();
-        }*/
+        if($validated['repo-id'] == null) {
+            /** @var Task $task */
+            $task = $course->tasks()->create([
+                'name'              => $validated['name'],
+                'type'              => $validated['type'],
+                'source_project_id' => null
+            ]);
 
-        $snakeName = Str::snake($validated['name']);
+            return [
+                'id'    => $task->id,
+                'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
+            ];
+        }
+        
+        $project = $sourceControl->showProject($validated['repo-id'], user: 'auth');
+        if($project == null)
+            return back()
+                ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
+                ->withInput();
+
+        $sourceControl->addUserToProject($project->id, $sourceControl->currentUser()->id);
         $params = [
-            'name'                      => $validated['name'],
-            'path'                      => $snakeName,
-            //'description'               => $validated['description'],
             'visibility'                => 'private',
-            //'parent_id'                 => $course->gitlab_group_id,
+            'parent_id'                 => $course->gitlab_group_id,
             'default_branch_protection' => 0,
             'lfs_enabled'               => false,
             'auto_devops_enabled'       => false,
             'request_access_enabled'    => false,
         ];
-        /*$currentGroup = $manager->groups()->subgroups($course->gitlab_group_id, ['search' => $snakeName]);
-        if(count($currentGroup) == 0)
-        {
-            $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
-            $groupResponse = json_decode($response->getBody()->getContents(), true);
-            if($response->getStatusCode() != 201)
-                return back()
-                    ->withErrors(['project-id' => 'Couldn\'t create the project. Refrain from using symbols or foreign characters in the name.'], 'new')
-                    ->withInput();
-        } else
-            $groupResponse = $currentGroup[0];*/
-
+        $group = $sourceControl->createGroup($validated['name'], $params);
 
         /** @var Task $task */
         $task = $course->tasks()->create([
-            //'source_project_id' => $validated['project-id'],
+            'source_project_id' => Str::of($validated['repo-id'])->split('#/#')->last(),
             'name'              => $validated['name'],
             'type'              => $validated['type'],
-            'source_project_id' => key_exists('repo-id', $validated) ? $validated['repo-id'] : null,
-            //'gitlab_group_id'   => null//$groupResponse['id'],
+            'gitlab_group_id'   => $group->id
         ]);
-        /** try
-         * {
-         * $task->reloadDescriptionFromRepo();
-         * } catch(\Exception $ignored)
-         * {
-         * }*/
 
         return [
             'id'    => $task->id,
@@ -314,7 +303,7 @@ class TaskController extends Controller
 
     public function toggleVisibility(Course $course, Task $task): RedirectResponse
     {
-        $task->is_visible = ! $task->is_visible;
+        $task->is_visible = !$task->is_visible;
         $task->save();
 
         return redirect()->back()->with('success-task', 'The visibility was updated.');
@@ -322,11 +311,9 @@ class TaskController extends Controller
 
     public function refreshReadme(Course $course, Task $task): RedirectResponse
     {
-        try
-        {
+        try {
             $task->reloadDescriptionFromRepo();
-        } catch(\Exception $exception)
-        {
+        } catch(\Exception $exception) {
         }
 
         return redirect()->back()->with('success-task', 'The readme was updated.');
@@ -353,8 +340,7 @@ class TaskController extends Controller
         ])->toArray();
 
         /** @var SubTask $subTask */
-        foreach($task->sub_tasks->all() as $subTask)
-        {
+        foreach($task->sub_tasks->all() as $subTask) {
             $found = collect($tasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
             if($found === false)
                 continue;

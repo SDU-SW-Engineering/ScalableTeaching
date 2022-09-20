@@ -183,6 +183,8 @@ return [
         /*
          * Domain Service Providers
          */
+        \Domain\SourceControl\SourceControlProvider::class,
+        \Domain\GitLab\Actions\GitLabSourceProvider::class,
         \Domain\Analytics\AnalyticsServiceProvider::class,
 
     ],
