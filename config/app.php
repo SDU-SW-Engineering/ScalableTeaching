@@ -241,8 +241,8 @@ return [
         'GitLab'                          => GrahamCampbell\GitLab\Facades\GitLab::class,
 
         // GitLab Source Control
-        'GitLabSourceControlDriver'       => \Domain\GitLab\Actions\GitLabActions::class,
-        'MockedGitLabSourceControlDriver' => \Domain\GitLab\MockedActions\MockedGitlabActions::class,
+        'GitLabSourceControl'       => \Domain\GitLab\Actions\GitLabSourceProvider::class,
+        'MockedGitLabSourceControl' => \Domain\GitLab\MockedActions\MockedGitlabSourceProvider::class,
     ],
 
 ];

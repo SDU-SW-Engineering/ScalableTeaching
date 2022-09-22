@@ -13,6 +13,6 @@ class SourceControlProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(SourceControl::class, config('sourcecontrol.driver'));
+        $this->app->register(config('sourcecontrol.provider'));
     }
 }
