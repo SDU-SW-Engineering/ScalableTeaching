@@ -23,8 +23,8 @@
                                         @endif
                                         @foreach($group as $exercise)
                                             <a @class(['rounded-t' => $groupName == null,
-                                            'cursor-not-allowed' => $exercise['details']->starts_at->isFuture(),
-                                            'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-750' =>  !$exercise['details']->starts_at->isFuture(),
+                                            'cursor-not-allowed' => $exercise['details']->starts_at?->isFuture(),
+                                            'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-750' =>  !$exercise['details']->starts_at?->isFuture(),
                                             'flex bg-white dark:bg-gray-800 w-full py-4 px-4 last:rounded-b last:border-0 items-center gap-4 border-b border-gray-400 dark:border-gray-600'])
                                                href="{{ route(auth()->user()->can('viewDashboard', $exercise['details']) ? 'courses.tasks.admin.index' : 'courses.tasks.show', [$exercise['details']->course->id, $exercise['details']->id]) }}">
                                                 @if($exercise['details']->grade() == null)
@@ -58,12 +58,12 @@
                                                 <div class="w-2/6 flex flex-col">
                                                     <span class="text-xs dark:text-gray-400">Opens</span>
                                                     <span
-                                                        class="text-sm dark:text-gray-200">{{ $exercise['details']->starts_at->diffForHumans() }}</span>
+                                                        class="text-sm dark:text-gray-200">{{ $exercise['details']->starts_at?->diffForHumans() }}</span>
                                                 </div>
                                                 <div class="w-2/6 flex flex-col">
                                                     <span class="text-xs dark:text-gray-400">Closes</span>
                                                     <span
-                                                        class="text-sm dark:text-gray-200">{{ $exercise['details']->ends_at->diffForHumans() }}</span>
+                                                        class="text-sm dark:text-gray-200">{{ $exercise['details']->ends_at?->diffForHumans() }}</span>
                                                 </div>
                                                 @can('viewInvisible', $course)
                                                     <div class="text-lime-green-700 task-visibility">

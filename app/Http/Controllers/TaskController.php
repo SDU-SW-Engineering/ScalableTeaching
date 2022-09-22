@@ -22,6 +22,7 @@ use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
 use Domain\GitLab\CIReader;
 use Domain\GitLab\CITask;
+use Domain\SourceControl\SourceControl;
 use Gitlab\Exception\RuntimeException;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -66,11 +67,12 @@ class TaskController extends Controller
             'author'      => $comment->author->name,
             'text'        => $comment->text,
         ])->groupBy('sub_task_id');
+
         $subTasks = $task->sub_tasks->all()->groupBy('group')->map(fn(\Illuminate\Support\Collection $subTasks, $group) => [
             'group' => $group,
             'tasks' => $subTasks->map(fn(SubTask $subTask) => [
                 'name'           => $subTask->getDisplayName(),
-                'pointsAcquired' => $completedSubTasks?->has($subTask->getId()) ? $completedSubTasks->get($subTask->getId())->points : null,
+                'pointsAcquired' => $completedSubTasks?->has($subTask->getId()) ? $completedSubTasks->get($subTask->getId())->points ?? 1 : null,
                 'comments'       => $completedSubTaskComments?->has($subTask->getId()) ? $completedSubTaskComments->get($subTask->getId()) : [],
                 'points'         => $subTask->getPoints(),
                 'required'       => $subTask->isRequired() ?? true,
@@ -226,64 +228,52 @@ class TaskController extends Controller
     /**
      * @throws \Throwable
      */
-    public function store(Course $course, GitLabManager $manager): array
+    public function store(Course $course, SourceControl $sourceControl): array|RedirectResponse
     {
         $validated = request()->validate([
             'name'    => 'required',
             'type'    => 'required',
-            'repo-id' => ['required_if:type,assignment', 'numeric', 'nullable'],
+            'repo-id' => ['required_if:type,assignment', 'string', 'nullable'],
         ]);
 
-        /*try
+        if( ! array_key_exists('repo-id', $validated) || $validated['repo-id'] == null)
         {
-            $manager->projects()->show($validated['project-id']);
-        } catch(RuntimeException $runtimeException)
-        {
-            if($runtimeException->getCode() == 404)
-                return back()
-                    ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
-                    ->withInput();
-        }*/
+            /** @var Task $task */
+            $task = $course->tasks()->create([
+                'name'              => $validated['name'],
+                'type'              => $validated['type'],
+                'source_project_id' => null,
+            ]);
 
-        $snakeName = Str::snake($validated['name']);
+            return [
+                'id'    => $task->id,
+                'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
+            ];
+        }
+
+        $project = $sourceControl->showProject($validated['repo-id'], user: 'auth');
+        if($project == null)
+            return back()
+                ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
+                ->withInput();
+
+        $sourceControl->addUserToProject($project->id, $sourceControl->currentUser()->id);
         $params = [
-            'name'                      => $validated['name'],
-            'path'                      => $snakeName,
-            //'description'               => $validated['description'],
             'visibility'                => 'private',
-            //'parent_id'                 => $course->gitlab_group_id,
+            'parent_id'                 => $course->gitlab_group_id,
             'default_branch_protection' => 0,
             'lfs_enabled'               => false,
             'auto_devops_enabled'       => false,
             'request_access_enabled'    => false,
         ];
-        /*$currentGroup = $manager->groups()->subgroups($course->gitlab_group_id, ['search' => $snakeName]);
-        if(count($currentGroup) == 0)
-        {
-            $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($params));
-            $groupResponse = json_decode($response->getBody()->getContents(), true);
-            if($response->getStatusCode() != 201)
-                return back()
-                    ->withErrors(['project-id' => 'Couldn\'t create the project. Refrain from using symbols or foreign characters in the name.'], 'new')
-                    ->withInput();
-        } else
-            $groupResponse = $currentGroup[0];*/
-
-
+        $group = $sourceControl->createGroup($validated['name'], $params);
         /** @var Task $task */
         $task = $course->tasks()->create([
-            //'source_project_id' => $validated['project-id'],
+            'source_project_id' => Str::of($validated['repo-id'])->split('#/#')->last(),
             'name'              => $validated['name'],
             'type'              => $validated['type'],
-            'source_project_id' => key_exists('repo-id', $validated) ? $validated['repo-id'] : null,
-            //'gitlab_group_id'   => null//$groupResponse['id'],
+            'gitlab_group_id'   => $group->id,
         ]);
-        /** try
-         * {
-         * $task->reloadDescriptionFromRepo();
-         * } catch(\Exception $ignored)
-         * {
-         * }*/
 
         return [
             'id'    => $task->id,
@@ -332,69 +322,7 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The readme was updated.');
     }
 
-    public function subtasks(Course $course, Task $task): View|RedirectResponse
-    {
-        $breadcrumbs = [
-            'Courses'     => route('courses.index'),
-            $course->name => null,
-        ];
 
-        $ciFile = $task->ciFile();
-        if($ciFile == null)
-            return redirect()->back()->withErrors('Source project doesn\'t contain the .gitlab-ci.yml file.', 'task');
-        $tasks = collect((new CIReader($ciFile))->tasks())->map(fn(CITask $task) => [
-            'stage'      => $task->getStage(),
-            'name'       => $task->getName(),
-            'id'         => null,
-            'alias'      => '',
-            'points'     => 0,
-            'isRequired' => false,
-            'isSelected' => false,
-        ])->toArray();
-
-        /** @var SubTask $subTask */
-        foreach($task->sub_tasks->all() as $subTask)
-        {
-            $found = collect($tasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
-            if($found === false)
-                continue;
-            $tasks[$found]['name'] = $subTask->getName();
-            $tasks[$found]['alias'] = $subTask->getAlias();
-            $tasks[$found]['id'] = $subTask->getId();
-            $tasks[$found]['points'] = $subTask->getPoints();
-            $tasks[$found]['isRequired'] = $subTask->isRequired();
-            $tasks[$found]['isSelected'] = true;
-        }
-
-        return view('courses.manage.taskSubtasks', compact('course', 'task', 'breadcrumbs', 'tasks'));
-    }
-
-    public function updateSubtasks(Course $course, Task $task): string
-    {
-        $tasks = new Collection(request('tasks'));
-        $correctionType = CorrectionType::from(request('correctionType'));
-
-        $selected = $tasks->filter(fn($task) => $task['isSelected']);
-        $currentSubTasks = $task->sub_tasks;
-        $removeIds = $task->sub_tasks->all()->map(fn(SubTask $subTask) => $subTask->getId())->diff($selected->pluck('id'));
-        $currentSubTasks->remove($removeIds->toArray());
-        $selected->each(function($task) use ($currentSubTasks) {
-            $subTask = (new SubTask($task['name'], $task['alias'] == '' ? null : $task['alias']))
-                ->setPoints($task['points'])
-                ->setIsRequired($task['required']);
-            if($task['id'] == null)
-                $currentSubTasks->add($subTask);
-            else
-                $currentSubTasks->update($task['id'], $subTask);
-
-        });
-        $task->correction_type = $correctionType;
-        $task->correction_points_required = request('requiredPoints');
-        $task->correction_tasks_required = request('requiredTasks');
-        $task->save();
-
-        return "OK";
-    }
 
     public function markComplete(Course $course, Task $task): string|Response
     {

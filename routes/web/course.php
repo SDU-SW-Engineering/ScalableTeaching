@@ -77,8 +77,6 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
         Route::get('tasks/create', [TaskController::class, 'showCreate'])->name('createTask')->can('manage,course');
         Route::get('tasks/{task}/edit', [TaskController::class, 'edit'])->name('editTask')->middleware('can:manage,course');
         Route::patch('tasks/{task}/edit', [TaskController::class, 'update'])->name('updateTask')->middleware('can:manage,course');
-        Route::get('tasks/{task}/subtasks', [TaskController::class, 'subtasks'])->name('subtasks')->middleware('can:manage,course');
-        Route::post('tasks/{task}/subtasks', [TaskController::class, 'updateSubtasks'])->name('updateSubtasks')->middleware('can:manage,course');
         Route::get('tasks/{task}/toggle-visibility', [TaskController::class, 'toggleVisibility'])->name('toggleVisibility')->middleware('can:manage,course');
         Route::get('tasks/{task}/refresh-readme', [TaskController::class, 'refreshReadme'])->name('refreshReadme')->middleware('can:manage,course');
         Route::post('add-teacher', [CourseController::class, 'addTeacher'])->name('addTeacher')->middleware('can:manage,course');
