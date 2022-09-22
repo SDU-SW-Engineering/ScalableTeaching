@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'driver' => \Domain\GitLab\Actions\GitLabActions::class,
+    'driver' => env('SOURCE_CONTROL_DRIVER', 'GitLabSourceControlDriver'),
     'url'    => env('GITLAB_URL'),
 
     'gitlab' => [
@@ -12,7 +12,7 @@ return [
         'default' => [
             'token' => env('GITLAB_ACCESS_TOKEN')
         ],
-        'auth' => [
+        'auth'    => [
             'token' => null
         ]
     ]
