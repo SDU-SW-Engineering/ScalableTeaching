@@ -236,7 +236,7 @@ class TaskController extends Controller
             'repo-id' => ['required_if:type,assignment', 'string', 'nullable'],
         ]);
 
-        if($validated['repo-id'] == null) {
+        if(!array_key_exists('repo-id', $validated) || $validated['repo-id'] == null) {
             /** @var Task $task */
             $task = $course->tasks()->create([
                 'name'              => $validated['name'],
@@ -266,7 +266,6 @@ class TaskController extends Controller
             'request_access_enabled'    => false,
         ];
         $group = $sourceControl->createGroup($validated['name'], $params);
-
         /** @var Task $task */
         $task = $course->tasks()->create([
             'source_project_id' => Str::of($validated['repo-id'])->split('#/#')->last(),
