@@ -102,7 +102,7 @@ class Pipeline extends Model
     }
 
     /**
-     * @return MorphMany
+     * @return MorphMany<ProjectSubTask>
      */
     public function subTasks(): MorphMany
     {

@@ -41,6 +41,6 @@ class MockedGitlabActions implements SourceControl
 
     public function createGroup(string $name, array $params): ?Group
     {
-        return new Group($this->factory->randomDigit(4));
+        return new Group($this->factory->randomNumber(4));
     }
 }

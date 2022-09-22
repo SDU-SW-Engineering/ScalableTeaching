@@ -278,7 +278,7 @@ class Project extends Model
     public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, ?array $gradeMeta = [], Carbon $startedAt = null, Carbon $endedAt = null): void
     {
         $this->update(['status' => $status]);
-        $this->owners()?->each(/**
+        $this->owners()->each(/**
          * @throws Exception
          */ fn(User $user) => Grade::create([
             'task_id'     => $this->task_id,
