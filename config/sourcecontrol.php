@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'driver' => env('SOURCE_CONTROL_DRIVER', 'GitLabSourceControlDriver'),
-    'url'    => env('GITLAB_URL'),
+    'provider' => env('SOURCE_CONTROL_PROVIDER', 'GitLabSourceControl'),
+    'url'      => env('GITLAB_URL'),
 
     'gitlab' => [
         'group' => env('GITLAB_GROUP'),
