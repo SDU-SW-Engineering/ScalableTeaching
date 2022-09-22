@@ -5,15 +5,15 @@ return [
     'url'    => env('GITLAB_URL'),
 
     'gitlab' => [
-        'group' => env('GITLAB_GROUP')
+        'group' => env('GITLAB_GROUP'),
     ],
 
     'users' => [
         'default' => [
-            'token' => env('GITLAB_ACCESS_TOKEN')
+            'token' => env('GITLAB_ACCESS_TOKEN'),
         ],
         'auth'    => [
-            'token' => null
-        ]
-    ]
+            'token' => null,
+        ],
+    ],
 ];

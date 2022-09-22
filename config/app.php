@@ -242,7 +242,7 @@ return [
 
         // GitLab Source Control
         'GitLabSourceControlDriver'       => \Domain\GitLab\Actions\GitLabActions::class,
-        'MockedGitLabSourceControlDriver' => \Domain\GitLab\MockedActions\MockedGitlabActions::class
+        'MockedGitLabSourceControlDriver' => \Domain\GitLab\MockedActions\MockedGitlabActions::class,
     ],
 
 ];
