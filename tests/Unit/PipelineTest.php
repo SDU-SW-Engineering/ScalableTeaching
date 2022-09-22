@@ -8,16 +8,16 @@ it('ensures a failing pipeline is not upgradable', function() {
     $pipeline->status = PipelineStatusEnum::Failed;
 
     expect($pipeline->isUpgradable(PipelineStatusEnum::Pending))->toBeFalse();
-    expect($pipeline->isUpgradable(PipelineStatusEnum::Success))->toBeFalse();
+    expect($pipeline->isUpgradable(PipelineStatusEnum::Success))->toBeTrue();
     expect($pipeline->isUpgradable(PipelineStatusEnum::Running))->toBeFalse();
 });
 
-it('ensures a succeeding pipeline is not upgradable', function() {
+it('ensures a succeeding pipeline is upgradable', function() {
     $pipeline = new Pipeline();
     $pipeline->status = PipelineStatusEnum::Success;
 
     expect($pipeline->isUpgradable(PipelineStatusEnum::Pending))->toBeFalse();
-    expect($pipeline->isUpgradable(PipelineStatusEnum::Failed))->toBeFalse();
+    expect($pipeline->isUpgradable(PipelineStatusEnum::Failed))->toBeTrue();
     expect($pipeline->isUpgradable(PipelineStatusEnum::Running))->toBeFalse();
 });
 
