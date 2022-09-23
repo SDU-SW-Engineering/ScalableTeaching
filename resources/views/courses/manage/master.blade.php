@@ -8,7 +8,7 @@
                 <div class="flex items-center">
                     <div class="mr-20 flex gap-20">
                         <div class="flex items-center justify-center flex-col">
-                            <span class="text-lime-green-600 -mb-2 text-3xl dark:text-lime-green-300 font-bold">{{ $course->members->count() }}</span>
+                            <span class="text-lime-green-600 -mb-2 text-3xl dark:text-lime-green-300 font-bold">{{ $course->students->count() }}</span>
                             <span class="font-thin text-lg dark:text-gray-300">students</span>
                         </div>
                         @if($course->projects->count() > 0)
