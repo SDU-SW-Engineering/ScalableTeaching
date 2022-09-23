@@ -60,7 +60,7 @@ function sendRunningPipeline() : Pipeline
     return $project->pipelines()->first();
 }
 
-function sendFailedPipeline() : Pipeline
+function sendFailedPipeline() : ?Pipeline
 {
     postJson(route('reporter'), test()->pipelineFailedRequest, [
         'X-Gitlab-Event' => 'Pipeline Hook',
@@ -251,11 +251,10 @@ it('ensures failing pipelines don\'t overwrite the status of a finished project'
     $this->project->update([
         'status' => ProjectStatus::Finished,
     ]);
-    $pipeline = sendFailedPipeline();
+    sendFailedPipeline();
 
     $this->project->refresh();
     expect($this->project->status)->toBe(ProjectStatus::Finished);
-    expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
 });
 
 it('ensures running pipelines gets updated to a failed status', function () {
@@ -264,15 +263,6 @@ it('ensures running pipelines gets updated to a failed status', function () {
 
     $pipeline->refresh();
     expect($pipeline->project->status)->toBe(ProjectStatus::Active);
-    expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
-});
-
-it('ensures succeeded pipelines can be updated to a failing', function () {
-    $pipeline = sendSucceedingPipeline();
-    sendFailedPipeline();
-
-    $pipeline->refresh();
-    expect($pipeline->project->status)->toBe(ProjectStatus::Finished);
     expect($pipeline->status)->toBe(PipelineStatusEnum::Failed);
 });
 
