@@ -36,6 +36,8 @@ class StudentController extends Controller
 
     public function pushes(Course $course, Task $task)
     {
+        $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
 
+        return view('tasks.admin.pushes', compact('pushes'));
     }
 }
