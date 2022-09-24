@@ -339,7 +339,7 @@ class TaskController extends Controller
         return "OK";
     }
 
-    public function nextExercise(Course $course, Task $task)
+    public function nextExercise(Course $course, Task $task) : array
     {
         $nextExercise = $course->tasks()->exercises()->where('order', '>', $task->order)->orderBy('order')->first();
 

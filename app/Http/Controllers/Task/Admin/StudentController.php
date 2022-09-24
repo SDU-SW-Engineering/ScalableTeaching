@@ -16,7 +16,7 @@ class StudentController extends Controller
         return view('tasks.admin.students', compact('course', 'task'));
     }
 
-    public function builds(Course $course, Task $task)
+    public function builds(Course $course, Task $task) : VIew
     {
         $dailyBuilds = $task->dailyBuilds(true, true);
         $activeIndex = $dailyBuilds->keys()->search(\request('q'));
@@ -35,7 +35,7 @@ class StudentController extends Controller
         return view('tasks.admin.builds', compact('course', 'task', 'dailyBuildsGraph', 'builds'));
     }
 
-    public function pushes(Course $course, Task $task)
+    public function pushes(Course $course, Task $task) : View
     {
         $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
 
