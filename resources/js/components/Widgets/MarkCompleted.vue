@@ -14,7 +14,7 @@
                         here.</p>
                     <div class="mt-2">
                         <button @click="mark()"
-                            class="flex items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-lime-green-600 rounded-md hover:bg-lime-green-500 focus:outline-none focus:ring focus:ring-lime-green-300 focus:ring-opacity-80">
+                                class="flex items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-lime-green-600 rounded-md hover:bg-lime-green-500 focus:outline-none focus:ring focus:ring-lime-green-300 focus:ring-opacity-80">
                             <svg v-if="marking" class="animate-spin h-5 w-5 mr-1 text-white"
                                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
@@ -29,7 +29,8 @@
             </div>
             <div class="flex items-center" v-else>
                 <svg xmlns="http://www.w3.org/2000/svg"
-                     class="h-24 w-24 text-lime-green-300 dark:text-lime-green-400 mr-4 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+                     class="h-24 w-24 text-lime-green-300 dark:text-lime-green-400 mr-4 flex-shrink-0" fill="none"
+                     viewBox="0 0 24 24"
                      stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -37,6 +38,14 @@
                 <div class="flex flex-col w-full justify-center">
                     <h3 class="font-bold text-lg dark:text-white">Marked completed</h3>
                     <p class="text-gray-600 dark:text-gray-300">Nice! Task is marked as completed.</p>
+                    <a v-if="next !== null" :href="next" class="flex mt-4 items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-lime-green-600 rounded-md hover:bg-lime-green-500 focus:outline-none focus:ring focus:ring-lime-green-300 focus:ring-opacity-80">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                             stroke="currentColor" class="w-6 h-6 mr-1">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"/>
+                        </svg>
+                        <span>Next exercise</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -48,19 +57,22 @@ export default {
     props: ['grade', 'csrf', 'course-id', 'task-id'],
     data: function () {
         return {
-            marking: false
+            marking: false,
+            next: null
         }
     },
     methods: {
-        mark: async function() {
+        mark: async function () {
             if (this.marking === true)
                 return;
             this.marking = true;
-            await axios.post(`/courses/${this.courseId}/tasks/${this.taskId}/mark-complete`, {
-                _token: this.csrf
-            });
+            await axios.post(`/courses/${this.courseId}/tasks/${this.taskId}/mark-complete`);
             location.reload();
         }
+    },
+    async mounted() {
+        let response = await axios.get(`/courses/${this.courseId}/tasks/${this.taskId}/next-exercise`);
+        this.next = response.data.route;
     }
 }
 </script>

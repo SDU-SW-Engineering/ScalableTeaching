@@ -322,8 +322,6 @@ class TaskController extends Controller
         return redirect()->back()->with('success-task', 'The readme was updated.');
     }
 
-
-
     public function markComplete(Course $course, Task $task): string|Response
     {
         if($task->correction_type != CorrectionType::Self)
@@ -339,5 +337,14 @@ class TaskController extends Controller
         ]);
 
         return "OK";
+    }
+
+    public function nextExercise(Course $course, Task $task) : array
+    {
+        $nextExercise = $course->tasks()->exercises()->where('order', '>', $task->order)->orderBy('order')->first();
+
+        return [
+            'route' => $nextExercise != null ? route('courses.tasks.show', [$course, $nextExercise]) : null,
+        ];
     }
 }

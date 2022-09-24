@@ -25,10 +25,12 @@ class ProjectSubTask extends Model
     protected static function booted()
     {
         static::created(function (ProjectSubTask $projectSubTask) {
+            if ($projectSubTask->project->status == ProjectStatus::Finished)
+                return;
+
             $project = $projectSubTask->project;
             $isFinished = static::isFinished($project);
-
-            if ($isFinished == false)
+            if ( ! $isFinished)
                 return;
 
             $project->setProjectStatus(ProjectStatus::Finished);

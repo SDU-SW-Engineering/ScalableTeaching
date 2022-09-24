@@ -1,23 +1,20 @@
-@extends('master')
+@extends('tasks.admin.master')
 
-@section('content')
-    <div class="container mx-auto px-6 pt-4">
+@section('adminContent')
+    <div class="container mx-auto">
         <div class="bg-white shadow-lg p-4 rounded-t-md h-80 dark:bg-gray-900 border dark:border-gray-800">
             <div class="flex justify-between items-center">
                 <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds Per Day</h3>
-                <div class="flex items-center">
-                    <a class="bg-lime-green-500 text-white text-sm px-2 py-0.5 hover:bg-lime-green-600 transition-colors rounded-md mr-2" href="{{ request()->url() }}">Clear</a>
-                    <a href="{{ route('courses.tasks.analytics.index', [$course->id, $task->id]) }}" class="bg-lime-green-500 text-white text-sm px-1 py-1 hover:bg-lime-green-600 transition-colors rounded-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </a>
-                </div>
+                @if(request()->has('q'))
+                    <div class="flex items-center">
+                        <a class="bg-lime-green-500 text-white text-sm px-2 py-0.5 hover:bg-lime-green-600 transition-colors rounded-md mr-2" href="{{ request()->url() }}">Clear filter</a>
+                    </div>
+                @endif
             </div>
             <div>
                 <bar-chart :disable-animations="true" :height="250" :labels="{{ $dailyBuildsGraph->labels() }}"
                            :data="{{ $dailyBuildsGraph->datasets()  }}"
-                           route="{{ route('courses.tasks.analytics.builds', [$course->id, $task->id]) }}"></bar-chart>
+                           route="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}"></bar-chart>
             </div>
         </div>
         <div class="overflow-x-auto shadow-md rounded-b-md bg-gray-600">
@@ -81,10 +78,6 @@
                             </th>
                             <th scope="col"
                                 class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-                                Branch
-                            </th>
-                            <th scope="col"
-                                class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
                                 Run Time
                             </th>
                             <th scope="col"
@@ -99,31 +92,24 @@
                                 <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
                                     <div class="flex items-center">
                                         <div @class(['flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center', 'bg-lime-green-200' => $build->status == 'success', 'bg-red-200' => $build->status == 'failed', 'bg-yellow-200' => $build->status == 'pending', 'bg-blue-200' => $build->status == 'running', 'bg-gray-200' => $build->status == 'canceled'])>
-                                            @if($build->status == 'success')
+                                            @if($build->status == \App\Models\Enums\PipelineStatusEnum::Success)
                                                 <svg xmlns="http://www.w3.org/2000/svg"
-                                                     class="h-5 w-5 text-lime-green-700"
+                                                     class="h-5 w-5 text-lime-green-700 dark:text-lime-green-400"
                                                      viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd"
                                                           d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                                           clip-rule="evenodd"/>
                                                 </svg>
-                                            @elseif($build->status == 'failed')
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-700"
+                                            @elseif($build->status == \App\Models\Enums\PipelineStatusEnum::Failed)
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-700 dark:text-red-400"
                                                      fill="none"
                                                      viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
                                                           d="M6 18L18 6M6 6l12 12"/>
                                                 </svg>
-                                            @elseif($build->status == 'canceled')
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700"
-                                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                                                </svg>
-                                            @elseif($build->status == 'running')
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-700"
+                                            @elseif($build->status == \App\Models\Enums\PipelineStatusEnum::Running)
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-700 dark:text-blue-400"
                                                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
@@ -132,8 +118,8 @@
                                                           stroke-width="2"
                                                           d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                 </svg>
-                                            @elseif($build->status == 'pending')
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-700"
+                                            @elseif($build->status == \App\Models\Enums\PipelineStatusEnum::Pending)
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-700 dark:text-yellow-400"
                                                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
@@ -143,7 +129,7 @@
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
-                                                <span class="capitalize">{{ $build->status }}</span>
+                                                <span class="capitalize">{{ $build->status->value }}</span>
                                             </div>
                                             <div class="text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $build->runner }}
@@ -167,10 +153,6 @@
                                     @else
                                         {{ $build->project->repo_name }}
                                     @endif
-                                </td>
-                                <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
-                                    <span
-                                        class="text-gray-700 dark:text-gray-200 text-sm">{{ $build->repo_branch }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">

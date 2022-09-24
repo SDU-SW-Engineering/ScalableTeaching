@@ -6,6 +6,7 @@ use App\Models\Casts\SubTask;
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
 use App\Models\Project;
+use App\ProjectStatus;
 use App\WebhookTypes;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -34,6 +35,8 @@ class WebhookController extends Controller
     {
         /** @var Project|null $project */
         $project = Project::firstWhere('project_id', request('project.id'));
+        if ($project->status == ProjectStatus::Finished)
+            return "OK";
         $startedAt = Carbon::parse(\request('object_attributes.created_at'))->setTimezone(config('app.timezone'));
         abort_if($startedAt->isAfter($project->task->ends_at) || $startedAt->isBefore($project->task->starts_at), 400, 'Pipeline could not be processed as it is overdue.');
 
