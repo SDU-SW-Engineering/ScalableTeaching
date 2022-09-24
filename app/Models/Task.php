@@ -7,6 +7,7 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
 use App\ProjectStatus;
 use Carbon\Carbon;
+use Domain\SourceControl\SourceControl;
 use Eloquent;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
@@ -59,6 +60,7 @@ class Task extends Model
     protected $fillable = [
         'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order', 'source_project_id',
         'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required',
+        'current_sha'
     ];
 
     protected $dates = ['ends_at', 'starts_at'];
@@ -168,13 +170,13 @@ class Task extends Model
      */
     public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection|null
     {
-        if( ! $this->is_publishable)
+        if(!$this->is_publishable)
             return null;
         $query = $this->jobs();
         if($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 
     /**
@@ -388,8 +390,7 @@ class Task extends Model
 
     public function canStart(Group|User $entity, string &$message = null): bool
     {
-        if( ! now()->isBetween($this->starts_at, $this->ends_at))
-        {
+        if(!now()->isBetween($this->starts_at, $this->ends_at)) {
             $message = 'The task cannot be started outside of the task time frame';
 
             return false;
@@ -400,23 +401,20 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
-        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0)
-        {
+        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
             $message = "You have already started this task";
 
             return false;
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
-        {
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
             $message = 'Another user in your group have already started this task';
 
             return false;
         }
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
-        {
+        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
             $message = "Your group have already started this task";
 
             return false;
@@ -432,8 +430,7 @@ class Task extends Model
             $groups->pluck('id')
         );
 
-        if($otherTrackHaveBeenPicked)
-        {
+        if($otherTrackHaveBeenPicked) {
             $message = "A conflicting track have already been started, and thus this task cannot be started.";
 
             return false;
@@ -502,11 +499,11 @@ class Task extends Model
     {
         return Attribute::make(get: function($value, $attributes) {
             $missing = [];
-            if( ! filled($attributes['description']))
+            if(!filled($attributes['description']))
                 $missing[] = 'description';
-            if( ! filled($attributes['starts_at']))
+            if(!filled($attributes['starts_at']))
                 $missing[] = 'starts at date';
-            if( ! filled($attributes['ends_at']))
+            if(!filled($attributes['ends_at']))
                 $missing[] = 'ends at date';
 
             return $missing;
@@ -521,11 +518,19 @@ class Task extends Model
         return Attribute::make(
             get: fn($value, $attributes) => (bool)$value,
             set: function($value, $attributes) {
-                if( ! $this->is_publishable)
+                if(!$this->is_publishable)
                     throw new \Exception("Task is not publishable.");
 
                 return $value;
             }
         );
+    }
+
+    public function loadSha() : void
+    {
+        $project = app(SourceControl::class)->showProject($this->source_project_id);
+        if ($project == null)
+            return;
+        $this->update(['current_sha' => $project->lastSha]);
     }
 }
