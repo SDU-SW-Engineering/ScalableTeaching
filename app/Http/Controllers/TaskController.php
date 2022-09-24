@@ -40,7 +40,7 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task): View
     {
-        abort_if(!$task->is_visible && auth()->user()->cannot('manage', $course), 401);
+        abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
 
         return $this->showProject($course, $task, $project);
@@ -146,8 +146,8 @@ class TaskController extends Controller
         $isSolo = request('as', 'solo') == 'solo';
         $group = $isSolo ? null : Group::findOrFail(request('as'));
 
-        abort_if(!$isSolo && !auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
-        abort_if(!$task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
+        abort_if( ! $isSolo && ! auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
+        abort_if( ! $task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
 
         $owner = $isSolo ? auth()->user() : $group;
         $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
@@ -236,7 +236,8 @@ class TaskController extends Controller
             'repo-id' => ['required_if:type,assignment', 'string', 'nullable'],
         ]);
 
-        if(!array_key_exists('repo-id', $validated) || $validated['repo-id'] == null) {
+        if( ! array_key_exists('repo-id', $validated) || $validated['repo-id'] == null)
+        {
             /** @var Task $task */
             $task = $course->tasks()->create([
                 'name'              => $validated['name'],
@@ -303,7 +304,7 @@ class TaskController extends Controller
 
     public function toggleVisibility(Course $course, Task $task): RedirectResponse
     {
-        $task->is_visible = !$task->is_visible;
+        $task->is_visible = ! $task->is_visible;
         $task->save();
 
         return redirect()->back()->with('success-task', 'The visibility was updated.');
@@ -311,9 +312,11 @@ class TaskController extends Controller
 
     public function refreshReadme(Course $course, Task $task): RedirectResponse
     {
-        try {
+        try
+        {
             $task->reloadDescriptionFromRepo();
-        } catch(\Exception $exception) {
+        } catch(\Exception $exception)
+        {
         }
 
         return redirect()->back()->with('success-task', 'The readme was updated.');
@@ -341,7 +344,7 @@ class TaskController extends Controller
         $nextExercise = $course->tasks()->exercises()->where('order', '>', $task->order)->orderBy('order')->first();
 
         return [
-            'route' => $nextExercise != null ? route('courses.tasks.show', [$course, $nextExercise]) : null
+            'route' => $nextExercise != null ? route('courses.tasks.show', [$course, $nextExercise]) : null,
         ];
     }
 }

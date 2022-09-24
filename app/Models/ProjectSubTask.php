@@ -30,7 +30,7 @@ class ProjectSubTask extends Model
 
             $project = $projectSubTask->project;
             $isFinished = static::isFinished($project);
-            if (!$isFinished)
+            if ( ! $isFinished)
                 return;
 
             $project->setProjectStatus(ProjectStatus::Finished);

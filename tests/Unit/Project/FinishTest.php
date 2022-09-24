@@ -8,7 +8,7 @@ use function Pest\Laravel\assertDatabaseHas;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 it('sets the finished_at timestamp when a project is marked as finished', function() {
-    Carbon::setTestNow(Carbon::create(2022, 1, 23, 12, 00, 00));
+    Carbon::setTestNow(Carbon::create(2022, 1, 23, 12, 0, 0));
     /** @var Project $project */
     $project = Project::factory()->createQuietly();
     $project->setProjectStatus(ProjectStatus::Finished);
@@ -16,6 +16,6 @@ it('sets the finished_at timestamp when a project is marked as finished', functi
     assertDatabaseHas('projects', [
         'id'          => $project->id,
         'status'      => ProjectStatus::Finished->value,
-        'finished_at' => Carbon::create(2022, 1, 23, 12, 00, 00)
+        'finished_at' => Carbon::create(2022, 1, 23, 12, 0, 0),
     ]);
 });

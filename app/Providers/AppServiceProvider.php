@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
             $value = Str::of($value)->trim();
             if($value->startsWith('-') || $value->endsWith('-'))
                 return false;
+
             return preg_match("/^[A-Za-z-0-9]+$/", $value->value()) === 1;
         });
 

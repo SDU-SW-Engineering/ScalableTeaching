@@ -31,6 +31,7 @@ class StudentController extends Controller
 
         $buildQuery->latest();
         $builds = $buildQuery->paginate(25)->withQueryString();
+
         return view('tasks.admin.builds', compact('course', 'task', 'dailyBuildsGraph', 'builds'));
     }
 

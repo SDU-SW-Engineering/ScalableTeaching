@@ -54,13 +54,13 @@ it('ensures a finished project creates gradings', function() {
         'user_id'     => $user->id,
         'task_id'     => $this->project->task_id,
         'source_type' => Project::class,
-        'source_id'   => $this->project->id
+        'source_id'   => $this->project->id,
     ]);
 });
 
 it('ensures a finished project creates gradings for group members', function() {
     $group = Group::factory()->create([
-        'course_id' => $this->project->task->course_id
+        'course_id' => $this->project->task->course_id,
     ]);
     /** @var User $user */
     $users = User::factory(2)->create();
@@ -91,13 +91,13 @@ it('ensures a finished project creates gradings for group members', function() {
         'user_id'     => $users[0]->id,
         'task_id'     => $this->project->task_id,
         'source_type' => Project::class,
-        'source_id'   => $this->project->id
+        'source_id'   => $this->project->id,
     ]);
     assertDatabaseHas('grades', [
         'user_id'     => $users[1]->id,
         'task_id'     => $this->project->task_id,
         'source_type' => Project::class,
-        'source_id'   => $this->project->id
+        'source_id'   => $this->project->id,
     ]);
 });
 
@@ -148,6 +148,6 @@ it('ensures a finished project can\'t be graded twice', function() {
         'user_id'     => $user->id,
         'task_id'     => $this->project->task_id,
         'source_type' => Project::class,
-        'source_id'   => $this->project->id
+        'source_id'   => $this->project->id,
     ]);
 });

@@ -279,7 +279,7 @@ class Project extends Model
     {
         $this->update([
             'status' => $status,
-            ...$status == ProjectStatus::Finished ? ['finished_at' => now()] : []
+            ...$status == ProjectStatus::Finished ? ['finished_at' => now()] : [],
         ]);
         $this->owners()->each(/**
          * @throws Exception
