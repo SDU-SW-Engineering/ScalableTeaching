@@ -148,7 +148,7 @@ it('stores a pipeline request', function() {
     assertDatabaseHas('pipelines', [
         'status'     => PipelineStatusEnum::Pending,
         'project_id' => $this->project->id,
-        'sha'        => 'bccf22832b61fb7232a1f5bd7dbd96184d5d28b4'
+        'sha'        => 'bccf22832b61fb7232a1f5bd7dbd96184d5d28b4',
     ]);
 });
 

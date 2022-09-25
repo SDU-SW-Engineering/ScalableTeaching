@@ -26,6 +26,6 @@ class ProjectDiffIndex extends Model
 
     protected $casts = [
         'changes' => 'array',
-        'status'  => ProjectDiffIndexStatus::class
+        'status'  => ProjectDiffIndexStatus::class,
     ];
 }

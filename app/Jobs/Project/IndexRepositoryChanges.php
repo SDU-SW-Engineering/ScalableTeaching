@@ -48,20 +48,24 @@ class IndexRepositoryChanges implements ShouldQueue
         $index->last_try = now();
         $index->from = $this->project->task->current_sha;
         $index->to = $this->comparisonSha;
-        if($code != 0) {
+        if($code != 0)
+        {
             $output = Str::of($output[0]);
             $index->status = ProjectDiffIndexStatus::Failure;
-            $index->message = match (true) {
+            $index->message = match (true)
+            {
                 $output->contains('docker') => "Docker: "  . $output,
-                default => "Unable to index: " . $output
+                default                     => "Unable to index: " . $output
             };
             $index->save();
+
             return;
         }
 
         /** @var array{file: string, status: string, lines: int, proportion: string} $changes */
         $changes = [];
-        foreach($output as $line) {
+        foreach($output as $line)
+        {
             $line = Str::of($line);
             if(preg_match("/(.*)\|.*(\d+)\s*([+-]+)/", $line, $matches) !== 1)
                 continue;
@@ -74,7 +78,7 @@ class IndexRepositoryChanges implements ShouldQueue
                 'file'       => $fileParts[1],
                 'status'     => $status,
                 'lines'      => $matches[2],
-                'proportion' => $matches[3]
+                'proportion' => $matches[3],
             ];
         }
 

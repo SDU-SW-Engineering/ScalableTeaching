@@ -23,10 +23,11 @@ class WebhookController extends Controller
         abort_unless(request()->has('project_id') || request()->has('project.id'), 400, 'Project ID missing');
         abort_unless(Project::isCorrectToken(request('project_id', request('project.id')), request()->header('X-Gitlab-Token')), 400, 'Token mismatch');
 
-        return match (WebhookTypes::tryFrom(request()->header('X-GitLab-Event'))) {
+        return match (WebhookTypes::tryFrom(request()->header('X-GitLab-Event')))
+        {
             WebhookTypes::Pipeline => $this->pipeline(),
-            WebhookTypes::Push => $this->push(),
-            default => "ignored",
+            WebhookTypes::Push     => $this->push(),
+            default                => "ignored",
         };
     }
 
@@ -40,7 +41,7 @@ class WebhookController extends Controller
         abort_if($startedAt->isAfter($project->task->ends_at) || $startedAt->isBefore($project->task->starts_at), 400, 'Pipeline could not be processed as it is overdue.');
 
         $pipeline = $project->pipelines()->firstWhere('pipeline_id', request('object_attributes.id'));
-        if($pipeline != null && !$pipeline->isUpgradable(PipelineStatusEnum::tryFrom(request('object_attributes.status'))))
+        if($pipeline != null && ! $pipeline->isUpgradable(PipelineStatusEnum::tryFrom(request('object_attributes.status'))))
             return "OK";
 
         if($pipeline == null)
