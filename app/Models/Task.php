@@ -50,6 +50,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property Carbon $starts_at
  * @property Carbon $ends_at
  * @property bool $is_visible
+ * @property string|null $current_sha
  * @property-read bool $is_publishable
  * @mixin Eloquent
  */

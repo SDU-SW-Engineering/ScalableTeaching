@@ -29,6 +29,7 @@ class GitLabActions implements SourceControl
         $nodeSelector
             ->selectId()
             ->selectName()
+            ->selectHttpUrlToRepo()
             ->selectCreatedAt()
             ->selectNamespace()->selectName()->selectFullName();
         $nodeSelector->selectRepository()
@@ -43,6 +44,7 @@ class GitLabActions implements SourceControl
 
         $project = new Project($projects[0]->id);
         $project->lastSha = $projects[0]->repository->tree->lastCommit->sha;
+        $project->cloneUrl = $projects[0]->httpUrlToRepo;
 
         return $project;
     }

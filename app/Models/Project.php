@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use App\Events\ProjectCreated;
-use App\Exceptions\Project\DownloadException;
 use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Domain\SourceControl\SourceControl;
 use Exception;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Contracts\Auth\Access\Authorizable;
@@ -151,10 +151,18 @@ class Project extends Model
     }
 
     /**
+     * @return HasMany<ProjectDiffIndex>
+     */
+    public function changes() : HasMany
+    {
+        return $this->hasMany(ProjectDiffIndex::class);
+    }
+
+    /**
      * @param Builder<Project> $query
      * @return Builder<Project>
      */
-    public function scopeEnded(Builder $query) : Builder
+    public function scopeEnded(Builder $query): Builder
     {
         return $query->whereIn('status', [ProjectStatus::Overdue, ProjectStatus::Finished]);
     }
@@ -186,7 +194,7 @@ class Project extends Model
      */
     public function dailyBuilds(bool $withToday = false): \Illuminate\Support\Collection
     {
-        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate( ! $withToday))->get();
+        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(!$withToday))->get();
     }
 
     /**
@@ -216,10 +224,9 @@ class Project extends Model
 
     public function progress(): int
     {
-        return match ($this->task->correction_type)
-        {
+        return match ($this->task->correction_type) {
             CorrectionType::PointsRequired => $this->pointProgress(),
-            default                        => $this->plainProgress()
+            default => $this->plainProgress()
         };
     }
 
@@ -237,7 +244,7 @@ class Project extends Model
 
     private function plainProgress(): int
     {
-        if($this->status == ProjectStatus::Finished && ! in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
+        if($this->status == ProjectStatus::Finished && !in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
             return 100;
 
         $subTasks = $this->task->sub_tasks;
@@ -255,7 +262,7 @@ class Project extends Model
     public function isMissed(): Attribute
     {
         return Attribute::make(get: function($value, $attributes) {
-            if( ! $this->task->hasEnded)
+            if(!$this->task->hasEnded)
                 return false;
             if(in_array($this->task->correction_type, [CorrectionType::None, CorrectionType::Manual]))
                 return $this->pushes()->where('created_at', '<', $this->task->ends_at)->count() == 0;
@@ -288,11 +295,10 @@ class Project extends Model
             'source_type' => $ownableType,
             'source_id'   => $ownableId,
             'user_id'     => $user->id,
-            'value'       => match ($status)
-            {
-                ProjectStatus::Overdue  => 'failed',
+            'value'       => match ($status) {
+                ProjectStatus::Overdue => 'failed',
                 ProjectStatus::Finished => 'passed',
-                default                 => throw new Exception("Passes status must be a final value.")
+                default => throw new Exception("Passes status must be a final value.")
             },
             'value_raw'   => $gradeMeta,
             'started_at'  => $startedAt,
@@ -306,5 +312,14 @@ class Project extends Model
     public function setProjectStatus(ProjectStatus $status): void
     {
         $this->setProjectStatusFor($status, Project::class, $this->id, null);
+    }
+
+    /**
+     * @return \Domain\SourceControl\Project
+     */
+    public function sourceControl(): \Domain\SourceControl\Project
+    {
+        $sourceControl = app(SourceControl::class);
+        return $sourceControl->showProject($this->project_id);
     }
 }

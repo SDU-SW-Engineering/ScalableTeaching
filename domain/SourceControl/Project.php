@@ -9,4 +9,6 @@ class Project
     }
 
     public string $lastSha;
+
+    public string $cloneUrl;
 }
