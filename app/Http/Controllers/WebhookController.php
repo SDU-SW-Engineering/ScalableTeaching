@@ -16,7 +16,7 @@ class WebhookController extends Controller
     /**
      * @throws \Throwable
      */
-    public function reporter() : WebhookTypes|string
+    public function reporter(): WebhookTypes|string
     {
         abort_unless(request()->hasHeader('X-Gitlab-Token'), 400, 'No GitLab token supplied');
         abort_unless(request()->hasHeader('X-GitLab-Event'), 400, 'GitLab event missing');
@@ -31,20 +31,20 @@ class WebhookController extends Controller
         };
     }
 
-    private function pipeline() : string
+    private function pipeline(): string
     {
         /** @var Project|null $project */
         $project = Project::firstWhere('project_id', request('project.id'));
-        if ($project->status == ProjectStatus::Finished)
+        if($project->status == ProjectStatus::Finished)
             return "OK";
         $startedAt = Carbon::parse(\request('object_attributes.created_at'))->setTimezone(config('app.timezone'));
         abort_if($startedAt->isAfter($project->task->ends_at) || $startedAt->isBefore($project->task->starts_at), 400, 'Pipeline could not be processed as it is overdue.');
 
         $pipeline = $project->pipelines()->firstWhere('pipeline_id', request('object_attributes.id'));
-        if ($pipeline != null && ! $pipeline->isUpgradable(PipelineStatusEnum::tryFrom(request('object_attributes.status'))))
+        if($pipeline != null && ! $pipeline->isUpgradable(PipelineStatusEnum::tryFrom(request('object_attributes.status'))))
             return "OK";
 
-        if ($pipeline == null)
+        if($pipeline == null)
             $pipeline = $this->createPipeline($project);
         else
             $pipeline->update([
@@ -70,11 +70,12 @@ class WebhookController extends Controller
      * @param Project $project
      * @return Pipeline
      */
-    private function createPipeline(Project $project) : Pipeline
+    private function createPipeline(Project $project): Pipeline
     {
         return $project->pipelines()->create([
             'pipeline_id'    => request('object_attributes.id'),
             'status'         => request('object_attributes.status'),
+            'sha'            => request('object_attributes.sha') ?? null,
             'user_name'      => request('user.username'),
             'duration'       => request('object_attributes.duration') ?? null,
             'queue_duration' => request('object_attributes.queued_duration') ?? null,
@@ -82,7 +83,7 @@ class WebhookController extends Controller
         ]);
     }
 
-    private function push() : string
+    private function push(): string
     {
         /** @var Project $project */
         $project = Project::firstWhere('project_id', request('project.id'));

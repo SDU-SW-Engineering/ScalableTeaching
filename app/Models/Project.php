@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use App\Events\ProjectCreated;
-use App\Exceptions\Project\DownloadException;
 use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Domain\SourceControl\SourceControl;
 use Exception;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Contracts\Auth\Access\Authorizable;
@@ -151,10 +151,18 @@ class Project extends Model
     }
 
     /**
+     * @return HasMany<ProjectDiffIndex>
+     */
+    public function changes() : HasMany
+    {
+        return $this->hasMany(ProjectDiffIndex::class);
+    }
+
+    /**
      * @param Builder<Project> $query
      * @return Builder<Project>
      */
-    public function scopeEnded(Builder $query) : Builder
+    public function scopeEnded(Builder $query): Builder
     {
         return $query->whereIn('status', [ProjectStatus::Overdue, ProjectStatus::Finished]);
     }
@@ -306,5 +314,15 @@ class Project extends Model
     public function setProjectStatus(ProjectStatus $status): void
     {
         $this->setProjectStatusFor($status, Project::class, $this->id, null);
+    }
+
+    /**
+     * @return \Domain\SourceControl\Project
+     */
+    public function sourceControl(): \Domain\SourceControl\Project
+    {
+        $sourceControl = app(SourceControl::class);
+
+        return $sourceControl->showProject((string)$this->project_id);
     }
 }

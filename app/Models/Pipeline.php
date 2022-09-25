@@ -44,7 +44,7 @@ class Pipeline extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['project_id', 'pipeline_id', 'status', 'user_name', 'runners', 'duration', 'queue_duration', 'created_at'];
+    protected $fillable = ['project_id', 'pipeline_id', 'status', 'sha', 'user_name', 'runners', 'duration', 'queue_duration', 'created_at'];
 
     protected $casts = [
         'status'  => PipelineStatusEnum::class,

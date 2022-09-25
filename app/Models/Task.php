@@ -7,6 +7,7 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
 use App\ProjectStatus;
 use Carbon\Carbon;
+use Domain\SourceControl\SourceControl;
 use Eloquent;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
@@ -49,6 +50,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property Carbon $starts_at
  * @property Carbon $ends_at
  * @property bool $is_visible
+ * @property string|null $current_sha
  * @property-read bool $is_publishable
  * @mixin Eloquent
  */
@@ -59,6 +61,7 @@ class Task extends Model
     protected $fillable = [
         'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order', 'source_project_id',
         'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required',
+        'current_sha',
     ];
 
     protected $dates = ['ends_at', 'starts_at'];
@@ -527,5 +530,13 @@ class Task extends Model
                 return $value;
             }
         );
+    }
+
+    public function loadSha() : void
+    {
+        $project = app(SourceControl::class)->showProject((string)$this->source_project_id);
+        if ($project == null)
+            return;
+        $this->update(['current_sha' => $project->lastSha]);
     }
 }

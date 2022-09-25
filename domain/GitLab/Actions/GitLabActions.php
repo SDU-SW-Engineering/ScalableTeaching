@@ -17,24 +17,36 @@ class GitLabActions implements SourceControl
 {
     public function showProject(string $id, string $user = 'default'): ?Project
     {
+        $id = self::idToGid($id);
         $token = User::token($user);
         $rootObject = new RootQueryObject();
-        $rootObject->selectProjects((new RootProjectsArgumentsObject())
+        $nodeSelector = $rootObject->selectProjects((new RootProjectsArgumentsObject())
             ->setFirst(1)
             ->setIds([$id])
             ->setSearchNamespaces(true))
-            ->selectNodes()
+            ->selectNodes();
+
+        $nodeSelector
             ->selectId()
             ->selectName()
+            ->selectHttpUrlToRepo()
             ->selectCreatedAt()
             ->selectNamespace()->selectName()->selectFullName();
+        $nodeSelector->selectRepository()
+            ->selectTree()
+            ->selectLastCommit()
+            ->selectSha();
         $client = new Client(getenv('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . $token]);
 
         $projects = $client->runQuery($rootObject)->getResults()->data->projects->nodes; // @phpstan-ignore-line
-
         if(count($projects) == 0)
             return null;
-        return new Project($projects[0]->id);
+
+        $project = new Project($projects[0]->id);
+        $project->lastSha = $projects[0]->repository->tree->lastCommit->sha;
+        $project->cloneUrl = $projects[0]->httpUrlToRepo;
+
+        return $project;
     }
 
     public function currentUser(string $user = 'default'): User
@@ -61,6 +73,15 @@ class GitLabActions implements SourceControl
     private static function gidToId(string $id): string
     {
         return Str::of($id)->split('#/#')->last();
+    }
+
+    private static function idToGid(string|int $id) : string
+    {
+        $id = Str::of($id);
+        if ($id->contains('gid://gitlab/Project/'))
+            return $id;
+
+        return $id->prepend('gid://gitlab/Project/');
     }
 
     public function createGroup(string $name, array $params): ?Group
