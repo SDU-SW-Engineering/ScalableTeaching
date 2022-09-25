@@ -320,6 +320,6 @@ class Project extends Model
     public function sourceControl(): \Domain\SourceControl\Project
     {
         $sourceControl = app(SourceControl::class);
-        return $sourceControl->showProject($this->project_id);
+        return $sourceControl->showProject((string)$this->project_id);
     }
 }

@@ -529,7 +529,7 @@ class Task extends Model
 
     public function loadSha() : void
     {
-        $project = app(SourceControl::class)->showProject($this->source_project_id);
+        $project = app(SourceControl::class)->showProject((string)$this->source_project_id);
         if ($project == null)
             return;
         $this->update(['current_sha' => $project->lastSha]);
