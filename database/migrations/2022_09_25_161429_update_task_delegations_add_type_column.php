@@ -15,7 +15,9 @@ return new class extends Migration
     {
         Schema::table('task_delegations', function (Blueprint $table) {
             $table->enum('type', ['last_pushes', 'succeeding_pushes', 'succeed_last_pushes'])->after('number_of_tasks');
-            $table->dateTime('deadline_at')->after('type');
+            $table->boolean('grading')->after('type');
+            $table->boolean('feedback')->after('grading');
+            $table->dateTime('deadline_at')->after('feedback');
             $table->boolean('delegated')->default(false)->after('deadline_at');
         });
     }
@@ -28,7 +30,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('task_delegations', function (Blueprint $table) {
-            $table->dropColumn(['type', 'deadline_at', 'delegated']);
+            $table->dropColumn(['type', 'grading', 'feedback', 'deadline_at', 'delegated']);
         });
     }
 };

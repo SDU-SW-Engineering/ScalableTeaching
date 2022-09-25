@@ -16,10 +16,8 @@ return new class extends Migration
         Schema::rename('grade_delegations', 'project_feedback');
         Schema::table('project_feedback', function(Blueprint $table) {
             $table->unsignedBigInteger('task_delegation_id')->after('project_id')->nullable();
-            $table->boolean('grading')->after('pseudonym');
-            $table->boolean('feedback')->after('grading');
-            $table->string('sha')->nullable()->after('feedback');
-            $table->boolean('reviewed')->default(false)->comment('indicates that the user_id has finished reviewing this delegation.');
+            $table->string('sha')->nullable()->after('pseudonym');
+            $table->boolean('reviewed')->after('sha')->default(false)->comment('indicates that the user_id has finished reviewing this delegation.');
 
             $table->foreign('task_delegation_id')->references('id')->on('task_delegations');
         });
@@ -34,7 +32,7 @@ return new class extends Migration
     {
         Schema::table('project_feedback', function(Blueprint $table) {
             $table->dropForeign(['task_delegation_id']);
-            $table->dropColumn(['grading', 'feedback', 'task_delegation_id','sha']);
+            $table->dropColumn(['task_delegation_id','sha','reviewed']);
         });
         Schema::rename('project_feedback', 'grade_delegations');
     }
