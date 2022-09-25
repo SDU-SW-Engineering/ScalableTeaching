@@ -8,7 +8,7 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\GradeEnum;
 use App\Models\Enums\TaskTypeEnum;
 use App\Models\Grade;
-use App\Models\GradeDelegation;
+use App\Models\ProjectFeedback;
 use App\Models\Group;
 use App\Models\Project;
 use App\Models\ProjectSubTaskComment;
@@ -90,7 +90,7 @@ class TaskController extends Controller
             new BarDataSet("You", $myBuilds->values(), "#7BB026")
         );
 
-        $gradeDelegations = $project?->status == ProjectStatus::Finished ? $project->gradeDelegations()->with('user')->get()->map(fn(GradeDelegation $gradeDelegation) => [
+        $gradeDelegations = $project?->status == ProjectStatus::Finished ? $project->feedback()->with('user')->get()->map(fn(ProjectFeedback $gradeDelegation) => [
             'by'         => $gradeDelegation->user->name,
             'identifier' => $gradeDelegation->pseudonym,
         ]) : null;

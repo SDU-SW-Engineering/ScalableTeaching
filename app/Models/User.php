@@ -135,11 +135,11 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<GradeDelegation>
+     * @return HasMany<ProjectFeedback>
      */
     public function gradeDelegations(): HasMany
     {
-        return $this->hasMany(GradeDelegation::class);
+        return $this->hasMany(ProjectFeedback::class);
     }
 
     /**

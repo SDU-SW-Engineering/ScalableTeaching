@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\GradeDelegation;
+use App\Models\ProjectFeedback;
 use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;

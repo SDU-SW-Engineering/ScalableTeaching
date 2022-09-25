@@ -171,13 +171,13 @@ class Task extends Model
      */
     public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection|null
     {
-        if( ! $this->is_publishable)
+        if(!$this->is_publishable)
             return null;
         $query = $this->jobs();
         if($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 
     /**
@@ -391,8 +391,7 @@ class Task extends Model
 
     public function canStart(Group|User $entity, string &$message = null): bool
     {
-        if( ! now()->isBetween($this->starts_at, $this->ends_at))
-        {
+        if(!now()->isBetween($this->starts_at, $this->ends_at)) {
             $message = 'The task cannot be started outside of the task time frame';
 
             return false;
@@ -403,23 +402,20 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
-        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0)
-        {
+        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
             $message = "You have already started this task";
 
             return false;
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
-        {
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
             $message = 'Another user in your group have already started this task';
 
             return false;
         }
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
-        {
+        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
             $message = "Your group have already started this task";
 
             return false;
@@ -435,8 +431,7 @@ class Task extends Model
             $groups->pluck('id')
         );
 
-        if($otherTrackHaveBeenPicked)
-        {
+        if($otherTrackHaveBeenPicked) {
             $message = "A conflicting track have already been started, and thus this task cannot be started.";
 
             return false;
@@ -505,11 +500,11 @@ class Task extends Model
     {
         return Attribute::make(get: function($value, $attributes) {
             $missing = [];
-            if( ! filled($attributes['description']))
+            if(!filled($attributes['description']))
                 $missing[] = 'description';
-            if( ! filled($attributes['starts_at']))
+            if(!filled($attributes['starts_at']))
                 $missing[] = 'starts at date';
-            if( ! filled($attributes['ends_at']))
+            if(!filled($attributes['ends_at']))
                 $missing[] = 'ends at date';
 
             return $missing;
@@ -524,7 +519,7 @@ class Task extends Model
         return Attribute::make(
             get: fn($value, $attributes) => (bool)$value,
             set: function($value, $attributes) {
-                if( ! $this->is_publishable)
+                if(!$this->is_publishable)
                     throw new \Exception("Task is not publishable.");
 
                 return $value;
@@ -532,11 +527,24 @@ class Task extends Model
         );
     }
 
-    public function loadSha() : void
+    public function loadSha(): void
     {
         $project = app(SourceControl::class)->showProject((string)$this->source_project_id);
-        if ($project == null)
+        if($project == null)
             return;
         $this->update(['current_sha' => $project->lastSha]);
+    }
+
+    /**
+     * Key corresponds to the user id
+     * Value corresponds to their associated project
+     * Users that haven't created a project won't be in the dictionary
+     * @return Collection|\Illuminate\Support\Collection<int, int>
+     */
+    public function userProjectDictionary()
+    {
+        return $userProjects = $this->projects()->get()
+            ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
+            ->mapWithKeys(fn($userProject) => $userProject);
     }
 }

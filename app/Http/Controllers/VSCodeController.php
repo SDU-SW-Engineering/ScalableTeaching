@@ -6,7 +6,7 @@ use App\Jobs\Project\DownloadProject;
 use App\Models\Casts\SubTask;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Course;
-use App\Models\GradeDelegation;
+use App\Models\ProjectFeedback;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -199,7 +199,7 @@ class VSCodeController extends Controller
         if($validator->fails())
             return response("The submitted data is invalid, are you using the latest version of the extension?", 400);
 
-        $userDelegation = $project->gradeDelegations()->firstWhere('user_id', auth()->id());
+        $userDelegation = $project->feedback()->firstWhere('user_id', auth()->id());
         abort_if($userDelegation == null, 403, "You can't grade this project.");
         $project->subTasks()->delete();
         $project->subTaskComments()->delete();
@@ -211,7 +211,7 @@ class VSCodeController extends Controller
             $subTasks[] = [
                 'sub_task_id' => $task['subtaskId'],
                 'points'      => $task['points'] ?? 0,
-                'source_type' => GradeDelegation::class,
+                'source_type' => ProjectFeedback::class,
                 'source_id'   => $userDelegation->id,
             ];
 
@@ -230,7 +230,7 @@ class VSCodeController extends Controller
 
         $startedAt = \request('startedAt') == null ? null : Carbon::parse(\request('startedAt'))->setTimezone(config('app.timezone'));
         $endedAt = \request('endedAt') == null ? null : Carbon::parse(\request('endedAt'))->setTimezone(config('app.timezone'));
-        $project->setProjectStatusFor(ProjectStatus::Finished, GradeDelegation::class, $userDelegation->id, [
+        $project->setProjectStatusFor(ProjectStatus::Finished, ProjectFeedback::class, $userDelegation->id, [
             'subtasks' => \request('tasks'),
         ], $startedAt, $endedAt);
 

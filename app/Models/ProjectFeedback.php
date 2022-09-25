@@ -7,16 +7,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class GradeDelegation extends Model
+class ProjectFeedback extends Model
 {
     use HasFactory;
 
-    protected $table = 'grade_delegations';
-    protected $fillable = ['project_id', 'pseudonym'];
+    protected $table = 'project_feedback';
+    protected $fillable = ['project_id', 'user_id', 'pseudonym', 'task_delegation_id', 'sha', 'reviewed'];
+
+    protected $casts = [
+        'reviewed' => 'bool'
+    ];
 
     public static function booted()
     {
-        static::creating(function (GradeDelegation $gradeDelegation) {
+        static::creating(function (ProjectFeedback $gradeDelegation) {
             do
             {
                 $pseudonym = PhraseGenerator::generate(2);
@@ -26,7 +30,7 @@ class GradeDelegation extends Model
     }
 
     /**
-     * @return BelongsTo<User,GradeDelegation>
+     * @return BelongsTo<User,ProjectFeedback>
      */
     public function user() : BelongsTo
     {
@@ -34,7 +38,7 @@ class GradeDelegation extends Model
     }
 
     /**
-     * @return BelongsTo<Project,GradeDelegation>
+     * @return BelongsTo<Project,ProjectFeedback>
      */
     public function project() : BelongsTo
     {

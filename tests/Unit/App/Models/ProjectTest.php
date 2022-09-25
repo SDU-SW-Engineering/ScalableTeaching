@@ -6,7 +6,7 @@ use App\Models\Course;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\GradeEnum;
 use App\Models\Grade;
-use App\Models\GradeDelegation;
+use App\Models\ProjectFeedback;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
@@ -30,17 +30,17 @@ it('has downloads', function() {
     expect($project->downloads)->toHaveLength(3);
 });
 
-it('has gradeDelegations', function() {
+it('has projectFeedback', function() {
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])
             ->for(Course::factory()))
         ->createQuietly();
 
-    GradeDelegation::factory()->for(User::factory())->for($project)->create();
-    GradeDelegation::factory()->for(User::factory())->for($project)->create();
-    GradeDelegation::factory()->for(User::factory())->for($project)->create();
+    ProjectFeedback::factory()->for(User::factory())->for($project)->create();
+    ProjectFeedback::factory()->for(User::factory())->for($project)->create();
+    ProjectFeedback::factory()->for(User::factory())->for($project)->create();
 
-    expect($project->gradeDelegations)->toHaveLength(3);
+    expect($project->feedback)->toHaveLength(3);
 });
 
 test('owners returns the user when project is user ownable', function() {

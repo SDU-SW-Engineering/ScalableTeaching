@@ -3,7 +3,7 @@
 use App\Models\Course;
 use App\Models\CourseActivity;
 use App\Models\Grade;
-use App\Models\GradeDelegation;
+use App\Models\ProjectFeedback;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -53,12 +53,12 @@ it("logs when a user is graded through a grade delegation", function() {
         ->createQuietly();
     $secondUser = User::factory()->hasAttached($this->course)->create();
 
-    $gradeDelegation = GradeDelegation::factory()
+    $gradeDelegation = ProjectFeedback::factory()
         ->for($project)
         ->for($secondUser)->create();
 
     $grade = Grade::factory()->passed()->for($this->user)->for($this->task)->for($this->task, 'source')->create([
-        'source_type' => GradeDelegation::class,
+        'source_type' => ProjectFeedback::class,
         'source_id'   => $gradeDelegation->id,
     ]);
 
