@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->string('to');
             $table->json('changes')->nullable();
             $table->text('message')->nullable();
-            $table->timestamp('last_try');
+            $table->dateTime('last_try');
             $table->timestamps();
 
             $table->foreign('project_id')->references('id')->on('projects');

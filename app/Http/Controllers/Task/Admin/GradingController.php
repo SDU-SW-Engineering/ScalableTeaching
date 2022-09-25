@@ -26,12 +26,12 @@ class GradingController extends Controller
     public function addDelegation(Request $request, Course $course, Task $task) : RedirectResponse
     {
         $request->validate([
-            'role'  => ['required', Rule::in($course->roles->pluck('id')), Rule::notIn($task->delegations->pluck('course_role_id'))],
+            'role'  => ['required', /*Rule::in($course->roles->pluck('id')), Rule::notIn($task->delegations->pluck('course_role_id'))*/], // todo: enable when roles are better defined
             'tasks' => ['required', 'numeric'],
         ]);
 
         $task->delegations()->create([
-            'course_role_id'  => $request->get('role'),
+            'course_role_id'  => $request->get('role') == 'student' ? 1 : 2, // 1 = student, 2 = teahcer, todo: should reflect actual roles.
             'number_of_tasks' => $request->get('tasks'),
         ]);
 
@@ -44,7 +44,7 @@ class GradingController extends Controller
             'role'  => ['required', Rule::in($task->delegations->pluck('id'))],
         ]);
 
-        $task->delegations()->where('id', $request->get('role'))->delete();
+        $task->delegations()->where('id', $request->get('role') )->delete();
 
         return redirect()->back();
     }

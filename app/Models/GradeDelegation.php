@@ -20,7 +20,6 @@ class GradeDelegation extends Model
             do
             {
                 $pseudonym = PhraseGenerator::generate(2);
-
             } while(static::where('pseudonym', $pseudonym)->where('user_id', $gradeDelegation->user_id)->exists());
             $gradeDelegation->pseudonym = $pseudonym;
         });
