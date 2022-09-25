@@ -88,20 +88,20 @@
                         </thead>
                         <tbody>
                         @foreach($builds as $build)
-                            <tr class="border-b dark:border-gray-700">
+                            <tr class="border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
                                 <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
                                     <div class="flex items-center">
-                                        <div @class(['flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center', 'bg-lime-green-200' => $build->status == 'success', 'bg-red-200' => $build->status == 'failed', 'bg-yellow-200' => $build->status == 'pending', 'bg-blue-200' => $build->status == 'running', 'bg-gray-200' => $build->status == 'canceled'])>
+                                        <div @class(['flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center', 'bg-lime-green-200' => $build->status == \App\Models\Enums\PipelineStatusEnum::Success, 'bg-red-200' => $build->status == \App\Models\Enums\PipelineStatusEnum::Failed, 'bg-yellow-200' => $build->status == \App\Models\Enums\PipelineStatusEnum::Pending, 'bg-blue-200' => $build->status == \App\Models\Enums\PipelineStatusEnum::Running, 'bg-gray-200' => $build->status == 'canceled'])>
                                             @if($build->status == \App\Models\Enums\PipelineStatusEnum::Success)
                                                 <svg xmlns="http://www.w3.org/2000/svg"
-                                                     class="h-5 w-5 text-lime-green-700 dark:text-lime-green-400"
+                                                     class="h-5 w-5 text-lime-green-700"
                                                      viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd"
                                                           d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                                           clip-rule="evenodd"/>
                                                 </svg>
                                             @elseif($build->status == \App\Models\Enums\PipelineStatusEnum::Failed)
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-700 dark:text-red-400"
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-700"
                                                      fill="none"
                                                      viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -109,7 +109,7 @@
                                                           d="M6 18L18 6M6 6l12 12"/>
                                                 </svg>
                                             @elseif($build->status == \App\Models\Enums\PipelineStatusEnum::Running)
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-700 dark:text-blue-400"
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-700"
                                                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
@@ -119,7 +119,7 @@
                                                           d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                 </svg>
                                             @elseif($build->status == \App\Models\Enums\PipelineStatusEnum::Pending)
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-700 dark:text-yellow-400"
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-700"
                                                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
