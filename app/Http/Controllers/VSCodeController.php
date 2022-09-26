@@ -99,7 +99,7 @@ class VSCodeController extends Controller
         $tasks->makeHidden('description');
         $tasks->makeHidden('markdown_description');
 
-        $delegatedProjectIds = auth()->user()->gradeDelegations()->pluck('pseudonym', 'project_id');
+        $delegatedProjectIds = auth()->user()->feedback()->pluck('pseudonym', 'project_id');
         $delegatedProjects = Project::with(['task' => function(BelongsTo $query) {
             $query->select('id', 'name');
         }])->whereIn('task_id', $tasks->pluck('id'))

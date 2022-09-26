@@ -52,6 +52,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $final_commit_sha
  * @property \Illuminate\Support\Carbon|null $finished_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read string $duration
  * @property-read Task $task
  * @method static \Illuminate\Database\Query\Builder|Project onlyTrashed()
  * @method static Builder|Project whereDeletedAt($value)

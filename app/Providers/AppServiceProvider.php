@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\GitLabSocialite;
+use App\Jobs\Project\DownloadProject;
 use Http;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Horizon\Horizon;
@@ -11,6 +13,7 @@ use Laravel\Socialite\Contracts\Factory;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\SocialiteManager;
 use Laravel\Socialite\Two\GitlabProvider;
+use RateLimiter;
 use Str;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,6 +45,10 @@ class AppServiceProvider extends ServiceProvider
 
         Http::macro('gitlab', function() {
             return Http::withToken(config('scalable.gitlab_token'))->baseUrl(config('scalable.gitlab_url') . '/api/v4');
+        });
+
+        RateLimiter::for('downloads', function(DownloadProject $job) {
+            return Limit::perMinute(2);
         });
     }
 }

@@ -137,7 +137,7 @@ class User extends Authenticatable
     /**
      * @return HasMany<ProjectFeedback>
      */
-    public function gradeDelegations(): HasMany
+    public function feedback(): HasMany
     {
         return $this->hasMany(ProjectFeedback::class);
     }

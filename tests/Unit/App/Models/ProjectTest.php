@@ -54,8 +54,8 @@ test('owners returns the user when project is user ownable', function() {
         ->createQuietly();
 
     $owners = $project->owners();
-    expect($owners)->toHaveLength(1);
-    expect($owners->first()->id)->toBe($user->id);
+    expect($owners)->toHaveLength(1)
+        ->and($owners->first()->id)->toBe($user->id);
 });
 
 test('owners returns all the group members when project is group ownable', function() {
@@ -73,11 +73,12 @@ test('owners returns all the group members when project is group ownable', funct
         ->createQuietly();
 
     $owners = $project->owners();
-    expect($owners)->toHaveLength(2);
-    expect($owners->pluck('id')->toArray())->toEqualCanonicalizing([$user1->id, $user2->id]);
+    expect($owners)->toHaveLength(2)
+        ->and($owners->pluck('id')->toArray())->toEqualCanonicalizing([$user1->id, $user2->id]);
 });
 
 test('duration returns null if the task is not done', function() {
+    /** @var Project $project */
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
     expect($project->duration)->toBeNull();
@@ -85,6 +86,7 @@ test('duration returns null if the task is not done', function() {
 
 test('duration returns 2 if the task has been completed two days ago', function() {
     $source = Carbon::now()->addMonth();
+    /** @var Project $project */
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => $source])->for(Course::factory()))->createQuietly(
             [
@@ -97,6 +99,7 @@ test('duration returns 2 if the task has been completed two days ago', function(
 });
 
 test('dailyBuilds returns an empty collection when no start date is specified', function() {
+    /** @var Project $project */
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
     expect($project->dailyBuilds())->toBeEmpty();
@@ -105,6 +108,7 @@ test('dailyBuilds returns an empty collection when no start date is specified', 
 test('dailyBuilds returns an array of days between start date and day before now', function() {
     $start = Carbon::now()->subMonth();
     $end = Carbon::now()->addMonth();
+    /** @var Project $project */
     $project = Project::factory()->for(Task::factory([
         'starts_at' => $start,
         'ends_at'   => $end,
@@ -112,9 +116,9 @@ test('dailyBuilds returns an array of days between start date and day before now
 
     $dailyBuilds = $project->dailyBuilds();
     $days = $dailyBuilds->map(fn($v, $k) => $k)->values();
-    expect($days[0])->toBe($start->format('Y-m-d'));
-    expect($days[count($days) - 1])->toBe(now()->subDay()->format('Y-m-d'));
-    expect($dailyBuilds)->toHaveLength($start->diff(now())->days);
+    expect($days[0])->toBe($start->format('Y-m-d'))
+        ->and($days[count($days) - 1])->toBe(now()->subDay()->format('Y-m-d'))
+        ->and($dailyBuilds)->toHaveLength($start->diff(now())->days);
 });
 
 test('dailyBuilds returns an array of days between start date and now', function() {

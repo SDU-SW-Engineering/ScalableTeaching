@@ -28,12 +28,12 @@ it('creates a task delegation', function() {
     post(route('courses.tasks.admin.addDelegation', [$this->course, $this->task]), [
         'tasks'         => 3,
         'options'       => [
-            'feedback' => 'on'
+            'feedback' => 'on',
         ],
         'deadline_date' => $this->taskEndsAt->copy()->addDays(2)->format('Y-m-d'),
         'deadline_hour' => "23:59",
         'type'          => 'last_pushes',
-        'role'          => 'student'
+        'role'          => 'student',
     ])->assertStatus(302);
 
     assertDatabaseCount('task_delegations', 1);
@@ -41,6 +41,6 @@ it('creates a task delegation', function() {
         'number_of_tasks' => 3,
         'feedback'        => true,
         'type'            => TaskDelegationType::LastPushes,
-        'deadline_at'     => $this->taskEndsAt->copy()->addDays(2)->toDateTimeString()
+        'deadline_at'     => $this->taskEndsAt->copy()->addDays(2)->toDateTimeString(),
     ]);
 });

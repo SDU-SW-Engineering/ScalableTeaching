@@ -9,6 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
 use Storage;
 
@@ -22,6 +23,11 @@ class DownloadProject implements ShouldQueue
      * @var int[]
      */
     public array $backoff = [60, 120, 300, 600];
+
+    public function middleware()
+    {
+        return [new RateLimited('downloads')];
+    }
 
     /**
      * Create a new job instance.

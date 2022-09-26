@@ -15,7 +15,7 @@ class ProjectFeedback extends Model
     protected $fillable = ['project_id', 'user_id', 'pseudonym', 'task_delegation_id', 'sha', 'reviewed'];
 
     protected $casts = [
-        'reviewed' => 'bool'
+        'reviewed' => 'bool',
     ];
 
     public static function booted()

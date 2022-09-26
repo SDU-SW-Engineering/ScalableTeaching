@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Exceptions\TaskDelegationException;
+use App\Jobs\Project\DownloadProject;
 use App\Models\Enums\TaskDelegationType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -43,11 +45,22 @@ class TaskDelegation extends Model
         return $this->belongsTo(Task::class);
     }
 
+    public function feedback()
+    {
+        return $this->hasMany(ProjectFeedback::class);
+    }
+
+    /**
+     * @throws \Throwable
+     */
     public function delegate()
     {
+        throw_if($this->task->ends_at->gt(now()), new TaskDelegationException('Cannot delegate before task has ended.'));
+        throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
         /** @var Collection<Project> $projects */
         $projects = $this->task->projects;
-        foreach($this->task->course->students as $user) {
+        foreach($this->task->course->students as $user)
+        {
             $this->userDelegations($projects, $user)->each(function(Project $project) use ($user) {
                 $sha = $this->relevantPush($project);
                 if($sha == null)
@@ -58,6 +71,11 @@ class TaskDelegation extends Model
                     'task_delegation_id' => $this->id,
                     'user_id'            => $user->id,
                 ]);
+                $download = $project->downloads()->create([
+                    'ref'       => $sha,
+                    'expire_at' => now()->addYears(2),
+                ]);
+                DownloadProject::dispatch($download)->onQueue('downloads');
             });
         }
     }
@@ -68,7 +86,8 @@ class TaskDelegation extends Model
      */
     private function relevantPush(Project $project): ?string
     {
-        return match ($this->type) {
+        return match ($this->type)
+        {
             TaskDelegationType::LastPushes => $project
                 ->pushes()
                 ->isAccepted($project->task)
@@ -86,6 +105,7 @@ class TaskDelegation extends Model
     private function userDelegations(Collection $projects, User $user): Collection
     {
         $userProjects = $this->task->userProjectDictionary();
+
         return $projects
             ->reject(fn(Project $project) => $userProjects->has($user->id) && $project->id == $userProjects[$user->id])
             ->shuffle()
