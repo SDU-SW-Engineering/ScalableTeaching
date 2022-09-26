@@ -26,7 +26,7 @@ class TaskDelegation extends Model
         'grading'     => 'bool',
         'feedback'    => 'bool',
         'delegated'   => 'bool',
-        'deadline_at' => 'datetime'
+        'deadline_at' => 'datetime',
     ];
 
     /**
@@ -62,7 +62,8 @@ class TaskDelegation extends Model
         throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
         /** @var Collection<int,Project> $projects */
         $projects = $this->task->projects;
-        foreach($this->task->course->students as $user) {
+        foreach($this->task->course->students as $user)
+        {
             $this->userDelegations($projects, $user)->each(function(Project $project) use ($user) {
                 $sha = $this->relevantPush($project);
                 if($sha == null)
@@ -88,14 +89,15 @@ class TaskDelegation extends Model
      */
     private function relevantPush(Project $project): ?string
     {
-        return match ($this->type) {
+        return match ($this->type)
+        {
             TaskDelegationType::LastPushes => $project
                 ->pushes()
                 ->isAccepted($project->task)
                 ->isValid()
                 ->first()
                 ?->after_sha,
-            TaskDelegationType::SucceedingPushes => throw new \Exception('To be implemented'),
+            TaskDelegationType::SucceedingPushes       => throw new \Exception('To be implemented'),
             TaskDelegationType::SucceedingOrLastPushes => throw new \Exception('To be implemented')
         };
     }
