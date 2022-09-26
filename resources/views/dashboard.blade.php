@@ -22,7 +22,7 @@
                     @endforeach
                 </div>
             </div>
-            <div class="mt-10 mb-5 pb-3 rounded-lg shadow bg-gray-800 place-items-center">
+            <div class="overflow-auto h-1/4 mt-10 mb-5 pb-3 rounded-lg shadow bg-gray-800 place-items-center">
                 <div class="px-10 pt-5">
                     <h1 class="text-white text-lg font-semibold">
                         Active assignments
@@ -55,20 +55,20 @@
             </div>
         </div>
         <div class="flex-auto w-1/2">
-            <div class="flex flex-col h-44 rounded-lg bg-gray-800">
+            <div class="flex flex-col pb-5 rounded-lg bg-gray-800">
                 <h1 class="text-white text-lg font-semibold ml-10 mt-5">
                     Upcoming deadline
                 </h1>
-                <a href="{{ route('courses.tasks.show', [$task->course_id, $task]) }}"
+                <a href="{{ route('courses.tasks.show', [$tasks->first()->course_id, $tasks->first()]) }}"
                    class="flex items-center mb-1 mt-3 text-gray-900 dark:text-white ml-10">
                     {{ $tasks->first()->name }}
                 </a>
-                <a href="{{ route('courses.tasks.show', [$task->course_id, $task]) }}"
+                <a href="{{ route('courses.show', $tasks->first()->course_id) }}"
                    class="flex items-center mb-1 text-gray-900 dark:text-white ml-10">
-                    {{ $tasks->first()->course_id }}
+                    {{ $courses[$tasks->first()->course_id]->name }}
                 </a>
                 <time
-                    class="mb-2 text font-normal leading-none text-gray-400 dark:text-lime-green-400 ml-10">
+                    class="text font-normal leading-none text-gray-400 dark:text-lime-green-400 ml-10">
                     Due {{ $tasks->first()->ends_at->diffForHumans() }}
                 </time>
             </div>
