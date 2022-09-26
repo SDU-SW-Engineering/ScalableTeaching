@@ -548,7 +548,7 @@ class Task extends Model
      */
     public function userProjectDictionary()
     {
-        return $userProjects = $this->projects()->get()
+        return $userProjects = $this->projects()->get() // @phpstan-ignore-line
             ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
             ->mapWithKeys(fn($userProject) => $userProject);
     }

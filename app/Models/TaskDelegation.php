@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read Task $task
@@ -21,13 +22,12 @@ class TaskDelegation extends Model
     protected $fillable = ['course_role_id', 'number_of_tasks', 'type', 'grading', 'feedback', 'deadline_at', 'delegated'];
 
     protected $casts = [
-        'type'      => TaskDelegationType::class,
-        'grading'   => 'bool',
-        'feedback'  => 'bool',
-        'delegated' => 'bool',
+        'type'        => TaskDelegationType::class,
+        'grading'     => 'bool',
+        'feedback'    => 'bool',
+        'delegated'   => 'bool',
+        'deadline_at' => 'datetime'
     ];
-
-    public $timestamps = ['deadline_at'];
 
     /**
      * @return BelongsTo<CourseRole,TaskDelegation>
@@ -38,14 +38,17 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @return BelongsTo<Task>
+     * @return BelongsTo<Task, TaskDelegation>
      */
-    public function task()
+    public function task() : BelongsTo
     {
         return $this->belongsTo(Task::class);
     }
 
-    public function feedback()
+    /**
+     * @return HasMany<ProjectFeedback>
+     */
+    public function feedback(): HasMany
     {
         return $this->hasMany(ProjectFeedback::class);
     }
@@ -53,14 +56,13 @@ class TaskDelegation extends Model
     /**
      * @throws \Throwable
      */
-    public function delegate()
+    public function delegate() : void
     {
         throw_if($this->task->ends_at->gt(now()), new TaskDelegationException('Cannot delegate before task has ended.'));
         throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
-        /** @var Collection<Project> $projects */
+        /** @var Collection<int,Project> $projects */
         $projects = $this->task->projects;
-        foreach($this->task->course->students as $user)
-        {
+        foreach($this->task->course->students as $user) {
             $this->userDelegations($projects, $user)->each(function(Project $project) use ($user) {
                 $sha = $this->relevantPush($project);
                 if($sha == null)
@@ -86,21 +88,22 @@ class TaskDelegation extends Model
      */
     private function relevantPush(Project $project): ?string
     {
-        return match ($this->type)
-        {
+        return match ($this->type) {
             TaskDelegationType::LastPushes => $project
                 ->pushes()
                 ->isAccepted($project->task)
                 ->isValid()
                 ->first()
-                ?->after_sha
+                ?->after_sha,
+            TaskDelegationType::SucceedingPushes => throw new \Exception('To be implemented'),
+            TaskDelegationType::SucceedingOrLastPushes => throw new \Exception('To be implemented')
         };
     }
 
     /**
-     * @param Collection $projects
+     * @param Collection<int,Project> $projects
      * @param User $user
-     * @return Collection<Project>
+     * @return Collection<int,Project>
      */
     private function userDelegations(Collection $projects, User $user): Collection
     {
