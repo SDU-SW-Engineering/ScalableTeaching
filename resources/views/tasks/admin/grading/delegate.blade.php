@@ -1,29 +1,12 @@
 @extends('tasks.admin.master')
 
 @section('adminContent')
-    <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
-        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" data-tabs-toggle="#myTabContent"
-            role="tablist">
-            <li class="mr-2" role="presentation">
-                <button
-                    @class(['inline-block p-4 border-b-2 rounded-t-lg', 'text-lime-green-500 border-lime-green-500']) id="profile-tab"
-                    data-tabs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">
-                    Overview
-                </button>
-            </li>
-            <li class="mr-2" role="presentation">
-                <button
-                    class="inline-block p-4 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-                    id="dashboard-tab" data-tabs-target="#dashboard" type="button" role="tab" aria-controls="dashboard"
-                    aria-selected="false">Delegated
-                </button>
-            </li>
-        </ul>
-    </div>
+    @include('tasks.admin.partials.delegationTabs')
     <section class="grid gap-4 grid-cols-2">
         <div class="flex flex-col bg-white dark:bg-gray-800 shadow-md p-4 rounded-md">
             <h3 class="text-xl dark:text-white font-semibold">Delegate amongst roles</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Delegate tasks amongst a specific course role and specify the amount of
+            <p class="text-sm text-gray-600 dark:text-gray-400">Delegate tasks amongst a specific course role and
+                specify the amount of
                 tasks each recipient should give feedback on. Tasks will be automatically delegated upon deadline
                 end.</p>
             <hr class="my-2">
@@ -52,7 +35,9 @@
                                     class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-lime-green-500 focus:border-lime-green-500 block p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500">
                                 <option value="last_pushes">Last pushes before deadline</option>
                                 <option value="succeeding_pushes">Succeeding pushes (excluding failed projects)</option>
-                                <option value="succeed_last_pushes">Succeeding pushes + last pushes for failed projects</option>
+                                <option value="succeed_last_pushes">Succeeding pushes + last pushes for failed
+                                    projects
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -71,14 +56,16 @@
                     <div class="flex flex-col">
                         <span class="text-left text-sm font-bold dark:text-white">Options</span>
                         <div>
-                            <input @checked(old('options.grade')) name="options[grade]" id="grade" type="checkbox" @disabled($task->correction_type != \App\Models\Enums\CorrectionType::Manual)
+                            <input @checked(old('options.grade')) name="options[grade]" id="grade" type="checkbox"
+                                   @disabled($task->correction_type != \App\Models\Enums\CorrectionType::Manual)
                                    class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                             <label for="grade"
-                                   @class([$task->correction_type == \App\Models\Enums\CorrectionType::Manual ? 'text-gray-900 dark:text-gray-300' : 'text-gray-400', 'ml-2 font-medium text-sm'])
-                                   >Grade (Only available in manual correction mode)</label>
+                                @class([$task->correction_type == \App\Models\Enums\CorrectionType::Manual ? 'text-gray-900 dark:text-gray-300' : 'text-gray-400', 'ml-2 font-medium text-sm'])
+                            >Grade (Only available in manual correction mode)</label>
                         </div>
                         <div>
-                            <input @checked(old('options.feedback')) id="feedback" type="checkbox" name="options[feedback]"
+                            <input @checked(old('options.feedback')) id="feedback" type="checkbox"
+                                   name="options[feedback]"
                                    class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                             <label for="feedback" class="ml-2 font-medium text-gray-900 text-sm dark:text-gray-300">Feedback</label>
                         </div>
@@ -97,42 +84,29 @@
                     </div>
                 </form>
             </div>
-            @foreach($task->delegations as $currentlyDelegated)
-                <form action="{{ route('courses.tasks.admin.removeDelegation', [$course, $task]) }}"
-                      method="post">
-                    <table class="table-fixed">
-                        <tbody>
-                        <tr class="text-sm border-t">
-                            <td class="w-1/2 text-left text-sm py-1">{{ $currentlyDelegated->role->name }}</td>
-                            <td class="w-1/4">{{ $currentlyDelegated->number_of_tasks }}</td>
-                            <td>
-                                @method('DELETE')
-                                @csrf
-                                <input type="hidden" name="role" value="{{ $currentlyDelegated->id }}">
-                                <button type="submit" class="text-red-800">Remove</button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </form>
-            @endforeach
         </div>
-        {{-- <div class="flex flex-col">
-            <div class="shadow-md p-4 rounded-md bg-white">
-                <h3 class="text-xl font-semibold">Gradual delegation</h3>
-                <p class="text-sm text-gray-600">Delegate tasks amongst a specific course role and specify the amount of
-                    tasks each recipient should give feedback on.</p>
-                <hr class="my-2">
-                <div class="flex items-center mr-4">
-                    <input id="inline-checkbox" type="checkbox" value=""
-                           class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-lime-green-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                    <label for="inline-checkbox" class="ml-2 font-medium text-gray-900 dark:text-gray-300">Enable</label>
-                </div>
-                <button type="submit"                         class="text-white bg-lime-green-700 hover:bg-lime-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-1.5 text-center dark:bg-lime-green-600 dark:hover:bg-blue-700 dark:focus:ring-lime-green-800">
-                    Save
-                </button>
+        <div>
+            <div class="flex flex-col bg-white dark:bg-gray-800 shadow-md p-4 rounded-md">
+                @foreach($task->delegations as $delegated)
+                    <h3 class="text-xl dark:text-white font-semibold">{{ $delegated->course_role_id == 1 ? 'Student' : 'Teacher' }}
+                        Delegation</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">This task is currently <span
+                            class="font-bold text-lime-green-600">{{ $delegated->delegated ? 'delegated' : 'not delegated' }}</span>.
+                    </p>
+                    @if($task->delegated == false)
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                            Shortly after the deadline {{ $task->ends_at }} ({{ $task->ends_at->diffForHumans() }}), the task will be delegated amongst {{ $course->students()->count() }} {{ Str::plural('student') }}. At that point this task delegation can no longer be deleted.
+                        </p>
+                    @endif
+                    <div class="flex flex-col justify-center mt-4">
+                        <button type="submit"
+                                class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-1.5 text-center dark:bg-lime-green-600 dark:hover:bg-lime-green-700 dark:focus:ring-lime-green-800">
+                            Delete
+                        </button>
+                    </div>
+                @endforeach
             </div>
-        </div> --}}
+        </div>
     </section>
 @endsection
 

@@ -43,7 +43,7 @@ class TaskDelegation extends Model
     /**
      * @return BelongsTo<Task, TaskDelegation>
      */
-    public function task() : BelongsTo
+    public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);
     }
@@ -60,7 +60,7 @@ class TaskDelegation extends Model
      * @param Builder<TaskDelegation> $query
      * @return Builder<TaskDelegation>
      */
-    public function scopeUndelegated(Builder $query) : Builder
+    public function scopeUndelegated(Builder $query): Builder
     {
         return $query->where('delegated', false);
     }
@@ -68,18 +68,34 @@ class TaskDelegation extends Model
     /**
      * @throws \Throwable
      */
-    public function delegate() : void
+    public function delegate(): void
     {
         throw_if($this->task->ends_at->gt(now()), new TaskDelegationException('Cannot delegate before task has ended.'));
         throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
         /** @var Collection<int,Project> $projects */
-        $projects = $this->task->projects;
-        foreach($this->task->course->students as $user)
-        {
-            $this->userDelegations($projects, $user)->each(function(Project $project) use ($user) {
-                $sha = $this->relevantPush($project);
-                if($sha == null) //user has not pushed anything
-                    return;
+        $projects = $this->task->projects->keyBy('id');
+
+        $remainingTasks = $this->projectCounter($projects);
+
+        foreach($this->task->course->students as $user) {
+            if($remainingTasks->count() == 0)
+                $remainingTasks = $this->projectCounter(); // out of tasks, replenish to start over
+            
+            $ineligibleTasks = [];
+            $userProject = $this->userProject($user);
+            if($userProject != null)
+                $ineligibleTasks[] = $userProject;
+
+            for($i = 0; $i < $this->number_of_tasks; $i++) {
+                $project = null;
+                do // keep looking for a valid repo to assign to the user
+                {
+                    $projectId = $this->pickRandomProject($remainingTasks, $ineligibleTasks);
+                    $sha = $this->relevantPush($projects[$projectId]);
+                    if($sha == null)
+                        continue;
+                    $project = $projects[$projectId];
+                } while($project == null);
 
                 $project->feedback()->create([
                     'sha'                => $sha,
@@ -91,11 +107,64 @@ class TaskDelegation extends Model
                     'ref'       => $sha,
                     'expire_at' => now()->addYears(2),
                 ]);
-                $this->update(['delegated' => true]);
+                $ineligibleTasks[] = $projectId;
                 DownloadProject::dispatch($download)->onQueue('downloads');
                 IndexRepositoryChanges::dispatch($download->project, $download->ref)->onQueue('index');
-            });
+            }
         }
+        $this->update(['delegated' => true]);
+    }
+
+    /**
+     * @param Collection<int,Project> $projects
+     * @return Collection<int, int>
+     */
+    private function projectCounter(Collection $projects): \Illuminate\Support\Collection
+    {
+        return $projects->mapWithKeys(fn(Project $project) => [$project->id => $this->number_of_tasks]);
+    }
+
+    /**
+     * Returns the project the user is working on for the task (if any)
+     * @param User $user
+     * @return int|null
+     */
+    private function userProject(User $user): ?int
+    {
+        $userProjects = $this->task->userProjectDictionary();
+
+        return $userProjects->has($user->id) ? $userProjects[$user->id] : null;
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection<int,int> $tasks
+     * @param array $exclude
+     * @return int
+     */
+    private function pickRandomProject(\Illuminate\Support\Collection &$tasks, array $exclude = []): int
+    {
+        do {
+            $eligibleTasks = $tasks->reject(fn(int $counter, int $projectId) => in_array($projectId, $exclude));
+            if ($eligibleTasks->count() == 0)
+            {
+                // This user is out of eligible tasks, take frrom general pool.
+                $eligibleTasks = $this->projectCounter($this->task->projects)
+                    ->reject(fn(int $counter, int $projectId) => in_array($projectId, $exclude));
+                $tasks = $eligibleTasks;
+            }
+            $pickedProjectId = $eligibleTasks->keys()[rand(0, $eligibleTasks->count() - 1)];
+            if($tasks[$pickedProjectId] == 0) {
+                $tasks->forget($pickedProjectId);
+                $pickedProjectId = null;
+                continue;
+            }
+
+            $tasks[$pickedProjectId] = $tasks[$pickedProjectId] - 1;
+            if ($tasks[$pickedProjectId] == 0)
+                $tasks->forget($pickedProjectId);
+        } while($pickedProjectId == null);
+
+        return $pickedProjectId;
     }
 
     /**
@@ -104,31 +173,15 @@ class TaskDelegation extends Model
      */
     private function relevantPush(Project $project): ?string
     {
-        return match ($this->type)
-        {
+        return match ($this->type) {
             TaskDelegationType::LastPushes => $project
                 ->pushes()
                 ->isAccepted($project->task)
                 ->isValid()
                 ->first()
                 ?->after_sha,
-            TaskDelegationType::SucceedingPushes       => throw new \Exception('To be implemented'),
+            TaskDelegationType::SucceedingPushes => throw new \Exception('To be implemented'),
             TaskDelegationType::SucceedingOrLastPushes => throw new \Exception('To be implemented')
         };
-    }
-
-    /**
-     * @param Collection<int,Project> $projects
-     * @param User $user
-     * @return Collection<int,Project>
-     */
-    private function userDelegations(Collection $projects, User $user): Collection
-    {
-        $userProjects = $this->task->userProjectDictionary();
-
-        return $projects
-            ->reject(fn(Project $project) => $userProjects->has($user->id) && $project->id == $userProjects[$user->id])
-            ->shuffle()
-            ->take($this->number_of_tasks);
     }
 }

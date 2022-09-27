@@ -5,8 +5,13 @@ namespace App\Http\Controllers\Task\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\CourseRole;
+use App\Models\ProjectFeedback;
 use App\Models\Task;
+use App\Models\TaskDelegation;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -39,12 +44,12 @@ class GradingController extends Controller
             return back()->withInput()->withErrors('The deadline must occur after the end of the task.');
 
         $task->delegations()->create([
-            'course_role_id'   => $validated['role'] == 'student' ? 1 : 2, // 1 = student, 2 = teahcer, todo: should reflect actual roles.
-            'number_of_tasks'  => $validated['tasks'],
-            'type'             => $validated['type'],
-            'deadline_at'      => $deadline,
-            'feedback'         => $request->has('options.feedback'),
-            'grading'          => $request->has('options.grading'),
+            'course_role_id'  => $validated['role'] == 'student' ? 1 : 2, // 1 = student, 2 = teahcer, todo: should reflect actual roles.
+            'number_of_tasks' => $validated['tasks'],
+            'type'            => $validated['type'],
+            'deadline_at'     => $deadline,
+            'feedback'        => $request->has('options.feedback'),
+            'grading'         => $request->has('options.grading'),
         ]);
 
         return redirect()->back();
@@ -59,5 +64,24 @@ class GradingController extends Controller
         $task->delegations()->where('id', $request->get('role'))->delete();
 
         return redirect()->back();
+    }
+
+    public function showDelegation(Course $course, Task $task, TaskDelegation $taskDelegation)
+    {
+        $taskDelegation->load('feedback.user');
+
+        if(!$taskDelegation->delegated)
+            return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation'));
+
+        #dd($taskDelegation->feedback()->count(), $taskDelegation->task->course->members()->count());
+        $groupedByUser = $taskDelegation->getRelation('feedback')->groupBy(function(ProjectFeedback $feedback) {
+            return $feedback->user_id;
+        });
+
+        $users = $taskDelegation->getRelation('feedback')->mapWithKeys(fn(ProjectFeedback $feedback) => [$feedback->user_id => $feedback->user]);
+
+        return $groupedByUser;
+
+        return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation'));
     }
 }
