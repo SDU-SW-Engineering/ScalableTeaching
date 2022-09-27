@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Models\ProjectDownload;
 use App\Models\ProjectPush;
 use App\Models\Task;
+use App\Models\TaskDelegation;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,10 +34,12 @@ beforeEach(function() {
     actingAs($this->user);
 });
 
-function createStudents(int $count)
+function createStudents(int $count, bool $withPushes = true)
 {
-    test()->students = User::factory($count)->hasAttached(test()->course)->create()->each(function(User $user) {
+    test()->students = User::factory($count)->hasAttached(test()->course)->create()->each(function(User $user) use ($withPushes) {
         $project = Project::factory()->for(test()->task)->for($user, 'ownable')->createQuietly();
+        if (!$withPushes)
+            return;
         test()->latestPushes[] = ProjectPush::factory()->for($project)->create([
             'created_at' => test()->taskEndsAt->copy()->subHours(2), // push needs to be before the deadline of task
         ]);
@@ -63,16 +66,20 @@ function createGroup()
     return $group;
 }
 
-function delegateTasks(int $numberOfTasks)
+function delegateTasks(int $numberOfTasks) : TaskDelegation
 {
-    test()->task->delegations()->create([
+    $delegation = test()->task->delegations()->create([
         'number_of_tasks' => $numberOfTasks,
         'type'            => TaskDelegationType::LastPushes,
         'course_role_id'  => 1, // students (for now),
         'feedback'        => 1,
         'grading'         => 0,
         'deadline_at'     => test()->taskEndsAt->addDays(2),
-    ])->delegate();
+    ]);
+    $delegation->delegate();
+
+    $delegation->refresh();
+    return $delegation;
 }
 
 it('delegates tasks with type of last pushes', function() {
@@ -194,4 +201,17 @@ it('queues indexing of repository changes when tasks are delegated', function() 
 
     Queue::assertPushedOn('index', IndexRepositoryChanges::class);
     Queue::assertPushed(IndexRepositoryChanges::class, 6);;
+});
+
+it('marks itself as delegated when done delegating', function() {
+    createStudents(3);
+    $delegation = delegateTasks(2);
+    expect($delegation->delegated)->toBeTrue();
+});
+
+it('skips tasks that have zero pushes', function() {
+    createStudents(1, false);
+    createStudents(2);
+    delegateTasks(2);
+    assertDatabaseCount('project_feedback', 4);
 });

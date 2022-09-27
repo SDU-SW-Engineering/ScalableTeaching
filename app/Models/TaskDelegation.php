@@ -6,6 +6,7 @@ use App\Exceptions\TaskDelegationException;
 use App\Jobs\Project\DownloadProject;
 use App\Jobs\Project\IndexRepositoryChanges;
 use App\Models\Enums\TaskDelegationType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property-read Task $task
  * @property TaskDelegationType $type
+ * @property bool $delegated
  */
 class TaskDelegation extends Model
 {
@@ -54,6 +56,11 @@ class TaskDelegation extends Model
         return $this->hasMany(ProjectFeedback::class);
     }
 
+    public function scopeUndelegated(Builder $query) : Builder
+    {
+        return $query->where('delegated', false);
+    }
+
     /**
      * @throws \Throwable
      */
@@ -67,7 +74,7 @@ class TaskDelegation extends Model
         {
             $this->userDelegations($projects, $user)->each(function(Project $project) use ($user) {
                 $sha = $this->relevantPush($project);
-                if($sha == null)
+                if($sha == null) //user has not pushed anything
                     return;
 
                 $project->feedback()->create([
@@ -80,6 +87,7 @@ class TaskDelegation extends Model
                     'ref'       => $sha,
                     'expire_at' => now()->addYears(2),
                 ]);
+                $this->update(['delegated' => true]);
                 DownloadProject::dispatch($download, true)->onQueue('downloads');
                 IndexRepositoryChanges::dispatch($download->project, $download->ref)->onQueue('index');
             });
