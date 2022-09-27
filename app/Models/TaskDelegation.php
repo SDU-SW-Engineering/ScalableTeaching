@@ -56,6 +56,10 @@ class TaskDelegation extends Model
         return $this->hasMany(ProjectFeedback::class);
     }
 
+    /**
+     * @param Builder<TaskDelegation> $query
+     * @return Builder<TaskDelegation>
+     */
     public function scopeUndelegated(Builder $query) : Builder
     {
         return $query->where('delegated', false);
@@ -88,7 +92,7 @@ class TaskDelegation extends Model
                     'expire_at' => now()->addYears(2),
                 ]);
                 $this->update(['delegated' => true]);
-                DownloadProject::dispatch($download, true)->onQueue('downloads');
+                DownloadProject::dispatch($download)->onQueue('downloads');
                 IndexRepositoryChanges::dispatch($download->project, $download->ref)->onQueue('index');
             });
         }
