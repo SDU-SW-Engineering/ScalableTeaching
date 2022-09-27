@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Exceptions\TaskDelegationException;
 use App\Jobs\Project\DownloadProject;
+use App\Jobs\Project\IndexRepositoryChanges;
 use App\Models\Enums\TaskDelegationType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -74,11 +75,13 @@ class TaskDelegation extends Model
                     'task_delegation_id' => $this->id,
                     'user_id'            => $user->id,
                 ]);
+                /** @var ProjectDownload $download */
                 $download = $project->downloads()->create([
                     'ref'       => $sha,
                     'expire_at' => now()->addYears(2),
                 ]);
-                DownloadProject::dispatch($download)->onQueue('downloads');
+                DownloadProject::dispatch($download, true)->onQueue('downloads');
+                IndexRepositoryChanges::dispatch($download->project, $download->ref)->onQueue('index');
             });
         }
     }

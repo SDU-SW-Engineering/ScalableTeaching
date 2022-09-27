@@ -2,6 +2,7 @@
 
 use App\Exceptions\TaskDelegationException;
 use App\Jobs\Project\DownloadProject;
+use App\Jobs\Project\IndexRepositoryChanges;
 use App\Models\Course;
 use App\Models\Enums\TaskDelegationType;
 use App\Models\Group;
@@ -19,7 +20,7 @@ use function Pest\Laravel\assertDatabaseCount;
 uses(RefreshDatabase::class);
 
 beforeEach(function() {
-    Queue::fake([DownloadProject::class]);
+    Queue::fake([DownloadProject::class, IndexRepositoryChanges::class]);
     $this->latestPushes = new Collection();
     $this->course = Course::factory()->create();
     $this->taskEndsAt = Carbon::create(2022, 8, 24, 23, 59);
@@ -185,4 +186,12 @@ it('queues delegated tasks for download', function() {
 
     Queue::assertPushedOn('downloads', DownloadProject::class);
     Queue::assertPushed(DownloadProject::class, 6);
+});
+
+it('queues indexing of repository changes when tasks are delegated', function() {
+    createStudents(3);
+    delegateTasks(2);
+
+    Queue::assertPushedOn('index', IndexRepositoryChanges::class);
+    Queue::assertPushed(IndexRepositoryChanges::class, 6);;
 });

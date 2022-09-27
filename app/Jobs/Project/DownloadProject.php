@@ -34,7 +34,7 @@ class DownloadProject implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private ProjectDownload $download)
+    public function __construct(private readonly ProjectDownload $download)
     {
     }
 
@@ -42,6 +42,7 @@ class DownloadProject implements ShouldQueue
     {
         if ($this->download->downloaded_at != null)
             return;
+
         $gitLabManager = app(GitLabManager::class);
 
         $archiveContent = $gitLabManager->repositories()->archive($this->download->project->project_id, [
