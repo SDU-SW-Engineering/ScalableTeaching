@@ -110,14 +110,18 @@ class TaskDelegation extends Model
                     'task_delegation_id' => $this->id,
                     'user_id'            => $user->id,
                 ]);
+
+                IndexRepositoryChanges::dispatch($project, $projectPush->after_sha)->onQueue('index');
+                $ineligibleTasks[] = $projectId;
+                if ($project->downloads()->where('ref', $projectPush->after_sha)->exists())
+                    continue; // download is already queued.
+
                 /** @var ProjectDownload $download */
                 $download = $project->downloads()->create([
                     'ref'       => $projectPush->after_sha,
                     'expire_at' => now()->addYears(2),
                 ]);
-                $ineligibleTasks[] = $projectId;
                 DownloadProject::dispatch($download)->onQueue('downloads');
-                IndexRepositoryChanges::dispatch($download->project, $download->ref)->onQueue('index');
             }
         }
         $this->update(['delegated' => true]);

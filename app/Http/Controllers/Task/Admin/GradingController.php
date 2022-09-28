@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Task\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\CourseRole;
+use App\Models\Project;
+use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
 use App\Models\Task;
 use App\Models\TaskDelegation;
@@ -73,15 +75,14 @@ class GradingController extends Controller
         if(!$taskDelegation->delegated)
             return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation'));
 
-        #dd($taskDelegation->feedback()->count(), $taskDelegation->task->course->members()->count());
         $groupedByUser = $taskDelegation->getRelation('feedback')->groupBy(function(ProjectFeedback $feedback) {
             return $feedback->user_id;
         });
 
+        $downloads = ProjectDownload::whereIn('project_id', $task->projects()->pluck('id'))->get();
+
         $users = $taskDelegation->getRelation('feedback')->mapWithKeys(fn(ProjectFeedback $feedback) => [$feedback->user_id => $feedback->user]);
 
-        return $groupedByUser;
-
-        return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation'));
+        return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation', 'users', 'groupedByUser'));
     }
 }
