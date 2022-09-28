@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Task\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\CourseRole;
+use App\Models\Enums\ProjectDiffIndexStatus;
 use App\Models\Project;
+use App\Models\ProjectDiffIndex;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
 use App\Models\Task;
@@ -79,10 +81,23 @@ class GradingController extends Controller
             return $feedback->user_id;
         });
 
-        $downloads = ProjectDownload::whereIn('project_id', $task->projects()->pluck('id'))->get();
+        $downloadDictionary = ProjectDownload::whereIn('project_id', $task->projects()->pluck('id'))
+            ->whereNotNull('downloaded_at')
+            ->pluck('id', 'project_id');
 
-        $users = $taskDelegation->getRelation('feedback')->mapWithKeys(fn(ProjectFeedback $feedback) => [$feedback->user_id => $feedback->user]);
+        $indexDictionary = ProjectDiffIndex::whereIn('project_id', $task->projects()->pluck('id'))
+            ->where('from', $task->current_sha)
+            ->where('status', ProjectDiffIndexStatus::Success)
+            ->pluck('id', 'to');
 
-        return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation', 'users', 'groupedByUser'));
+        $users = $taskDelegation->getRelation('feedback')
+            ->mapWithKeys(fn(ProjectFeedback $feedback) => [$feedback->user_id => $feedback->user]);
+
+        return view('tasks.admin.grading.showFeedbackDelegation', compact(
+            'task',
+            'course',
+            'taskDelegation',
+            'users',
+            'groupedByUser', 'downloadDictionary', 'indexDictionary'));
     }
 }

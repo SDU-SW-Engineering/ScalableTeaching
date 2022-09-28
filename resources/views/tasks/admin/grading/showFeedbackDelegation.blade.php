@@ -19,18 +19,18 @@
                     </div>
                     <div class="flex flex-col gap-4">
                         @foreach($groupedByUser[$user->id] as $projectDelegation)
-                            <div class="bg-white dark:bg-gray-700 border p-1.5 dark:border-none hover:shadow rounded w-72">
+                            <div class="bg-white dark:bg-gray-700 border p-1.5 dark:border-none hover:shadow rounded w-72 project-{{ $projectDelegation->project_id }}">
                                 <div class="flex items-center justify-between">
                                     <span
                                         class="text-sm dark:text-gray-300 leading-none">{{ $projectDelegation->project->ownable->name }}</span>
                                     <div class="flex gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" @class(['h-6 w-6', rand(0,1) == 1 ? 'text-lime-green-300' : 'text-gray-400']) fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" @class(['h-6 w-6', $projectDelegation->reviewed ? 'text-lime-green-300' : 'text-gray-400']) fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <svg xmlns="http://www.w3.org/2000/svg" @class(['h-6 w-6', rand(0,1) == 1 ? 'text-blue-300' : 'text-gray-400']) fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
+                                        <svg xmlns="http://www.w3.org/2000/svg" @class(['h-6 w-6', $downloadDictionary->has($projectDelegation->project_id) ? 'text-blue-300' : 'text-gray-400']) fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <svg xmlns="http://www.w3.org/2000/svg" @class(['h-6 w-6', rand(0,1) == 1 ? 'text-yellow-200' : 'text-gray-400']) fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" @class(['h-6 w-6',  $indexDictionary->has($projectDelegation->sha) ? 'text-yellow-200' : 'text-gray-400']) fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
@@ -49,4 +49,37 @@
                     )</span></h3>
         </div>
     @endif
+
+
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+    let classes = [{!! $task->projects->pluck('id')->map(fn($id) => '\'project-' . $id . '\'')->join(', ') !!}]; //list of your classes
+    let elms = {};
+    let n = {}, nclasses = classes.length;
+
+    function changeColor(classname, remove, add) {
+        let curN = n[classname];
+        for(let i = 0; i < curN; i ++) {
+            elms[classname][i].classList.remove(...remove);
+            elms[classname][i].classList.add(...add);
+        }
+    }
+
+    for(let k = 0; k < nclasses; k ++) {
+        const curClass = classes[k];
+        elms[curClass] = document.getElementsByClassName(curClass);
+        n[curClass] = elms[curClass].length;
+        const curN = n[curClass];
+        for(let i = 0; i < curN; i ++) {
+            elms[curClass][i].onmouseover = function() {
+                changeColor([...this.classList].filter(x => classes.includes(x)), ['bg-white', 'dark:bg-gray-700'], ['dark:bg-lime-green-800']);
+            };
+            elms[curClass][i].onmouseout = function() {
+                changeColor([...this.classList].filter(x => classes.includes(x)),['dark:bg-lime-green-800'],  ['bg-white',  'dark:bg-gray-700']);
+            };
+        }
+    }
+</script>
 @endsection
