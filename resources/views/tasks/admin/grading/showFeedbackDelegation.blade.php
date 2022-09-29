@@ -15,7 +15,7 @@
                                 <span class="text-sm text-lime-green-500">Student</span>
                             </div>
                         </div>
-                        <span class="font-medium text-xs text-lime-green-600 mt-4">1/2 Reviewed</span>
+                        <span class="font-medium text-xs text-lime-green-600 mt-4">{{ $groupedByUser[$user->id]->filter(fn($x) => $x->reviewed)->count() }}/{{ $groupedByUser[$user->id]->count() }} Reviewed</span>
                     </div>
                     <div class="flex flex-col gap-4">
                         @foreach($groupedByUser[$user->id] as $projectDelegation)
