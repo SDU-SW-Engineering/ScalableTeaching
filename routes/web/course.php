@@ -22,6 +22,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
     Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function() {
         Route::get('{task}', [TaskController::class, 'show'])->name('show');
         Route::post('{task}/mark-complete', [TaskController::class, 'markComplete'])->name('mark-complete');
+        Route::get('{task}/next-exercise', [TaskController::class, 'nextExercise'])->name('next-exercise');
         Route::get('{task}/projects/{project}', [TaskController::class, 'showProject'])->name('showProject')->middleware('can:view,project');
         Route::get('{task}/projects/{project}/download', [ProjectController::class, 'download'])->name('downloadProject')->middleware('can:download,project');
         Route::get('{task}/projects/{project}/validate', [ProjectController::class, 'validateProject'])->name('validateProject')->middleware('can:validate,project');
@@ -73,12 +74,9 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             Route::put('exercises/reorganize', 'reorganizeExercises')->name('exercises.reorganize');
         });
 
-
         Route::get('tasks/create', [TaskController::class, 'showCreate'])->name('createTask')->can('manage,course');
         Route::get('tasks/{task}/edit', [TaskController::class, 'edit'])->name('editTask')->middleware('can:manage,course');
         Route::patch('tasks/{task}/edit', [TaskController::class, 'update'])->name('updateTask')->middleware('can:manage,course');
-        Route::get('tasks/{task}/subtasks', [TaskController::class, 'subtasks'])->name('subtasks')->middleware('can:manage,course');
-        Route::post('tasks/{task}/subtasks', [TaskController::class, 'updateSubtasks'])->name('updateSubtasks')->middleware('can:manage,course');
         Route::get('tasks/{task}/toggle-visibility', [TaskController::class, 'toggleVisibility'])->name('toggleVisibility')->middleware('can:manage,course');
         Route::get('tasks/{task}/refresh-readme', [TaskController::class, 'refreshReadme'])->name('refreshReadme')->middleware('can:manage,course');
         Route::post('add-teacher', [CourseController::class, 'addTeacher'])->name('addTeacher')->middleware('can:manage,course');

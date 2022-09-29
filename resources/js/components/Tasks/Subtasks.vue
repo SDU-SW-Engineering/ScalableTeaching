@@ -1,5 +1,6 @@
 <template>
     <div class="grid md:grid-cols-1 xl:grid-cols-2 gap-4">
+        <h1 class="text-black dark:text-white xl:col-span-2 text-2xl font-thin mb-2 -mt-2">Correction</h1>
         <div class="flex flex-col justify-between">
             <div>
                 <div class="flex items-center mb-2">
@@ -134,7 +135,7 @@ export default {
             if (this.saving)
                 return;
             this.saving = true;
-            await axios.post(`/courses/${this.task.course_id}/manage/tasks/${this.task.id}/subtasks`, {
+            await axios.post(`/courses/${this.task.course_id}/tasks/${this.task.id}/admin/preferences/subtasks`, {
                 tasks: this.subTasks,
                 correctionType: this.correctionType,
                 requiredTasks: this.numberOfTasks,

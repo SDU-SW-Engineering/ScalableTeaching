@@ -123,8 +123,8 @@
                             <th scope="col"
                                 class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
                                 <a class="flex items-center"
-                                   href="{{ request()->fullUrlWithQuery(['sort' => 'job_statuses_count', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">
-                                    @if (request('sort') == 'job_statuses_count')
+                                   href="{{ request()->fullUrlWithQuery(['sort' => 'pipelines_count', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">
+                                    @if (request('sort') == 'pipelines_count')
                                         @if (request('direction') == 'asc')
                                             <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
                                                  viewBox="0 0 20 20" fill="currentColor">
@@ -143,6 +143,12 @@
                                     <span>Builds</span>
                                 </a>
                             </th>
+                            @if($task->sub_tasks != null)
+                            <th scope="col"
+                                class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
+                                    <span>Progress</span>
+                            </th>
+                            @endif
                             <th scope="col"
                                 class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
                                 Status
@@ -199,6 +205,9 @@
                                 </td>
                                 <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
                                     {{ $project->pipelines->count() }}
+                                </td>
+                                <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
+                                    {{ $project->progress() }}%
                                 </td>
                                 <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap">
                                     @if($project->status == \App\ProjectStatus::Active)

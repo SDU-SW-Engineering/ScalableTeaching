@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
+use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
@@ -51,7 +52,7 @@ class ProjectController extends Controller
      */
     public function reset(GitLabManager $gitLabManager, Project $project) : string
     {
-        abort_unless($project->status == 'active', 400);
+        abort_unless($project->status == ProjectStatus::Active, 400);
         \DB::transaction(function () use ($gitLabManager, $project) {
             $found = true;
             try

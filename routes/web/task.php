@@ -38,6 +38,8 @@ Route::prefix('{task}')->group(function() {
             Route::post('update-title', 'updateTitle')->name('update-title');
             Route::post('update-duration', 'updateDuration')->name('update-duration');
             Route::post('toggle-visibility', 'toggleVisibility')->name('toggle-visibility');
+
+            Route::post('preferences/subtasks', 'updateSubtasks')->name('updateSubtasks')->middleware('can:manage,course');
         });
     });
 });

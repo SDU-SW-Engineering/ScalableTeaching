@@ -12,7 +12,7 @@
                             <span class="font-thin text-lg dark:text-gray-300">projects</span>
                         </div>
                         <div class="flex items-center justify-center flex-col">
-                            <span class="text-lime-green-600 -mb-2 text-3xl dark:text-lime-green-300 font-bold">0</span>
+                            <span class="text-lime-green-600 -mb-2 text-3xl dark:text-lime-green-300 font-bold">{{ $task->jobs->count() }}</span>
                             <span class="font-thin text-lg dark:text-gray-300">builds</span>
                         </div>
                     </div>

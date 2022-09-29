@@ -38,6 +38,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroups($value)
  * @property-read \Illuminate\Support\Collection<int|string,int>|null $exercise_engagement
  * @property-read \Illuminate\Support\Collection<int|string,int>|null $enrolment_per_day
+ * @property string $gitlab_group_id
  */
 class Course extends Model
 {
@@ -207,6 +208,7 @@ class Course extends Model
                 ->select([DB::raw("count(tasks.id)/$enrolledCount as grade_count"), 'tasks.id', 'tasks.grouped_by', 'tasks.starts_at', 'tasks.name'])
                 ->groupBy('task_id')
                 ->orderBy('tasks.starts_at')
+                ->orderBy('tasks.order')
                 ->get()
                 ->mapWithKeys(fn($result) => [$result->name . ";" . $result->grouped_by  => round($result->grade_count, 2)]); // @phpstan-ignore-line
         });

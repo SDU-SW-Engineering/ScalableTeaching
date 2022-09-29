@@ -3,11 +3,20 @@
 @section('adminContent')
     <div class="dark:bg-gray-800 p-4 rounded-lg">
         <h1 class="font-light dark:text-white text-2xl">Pushes</h1>
-        <h1 class="font-medium dark:text-gray-400 text-xl -mt-2 mb-4">{{ $pushes->count() }} pushes</h1>
+        <h1 class="font-medium dark:text-gray-400 text-xl -mt-2 mb-4">{{ $pushes->total() }} pushes</h1>
         @foreach($pushes as $push)
             <div class="bg-gray-700 flex mb-4 rounded-md items-center py-3 px-2">
                 <div class="px-4 flex items-center flex-col flex-shrink-0 w-40">
-                    {!! $push->project->ownable->avatarHtml !!}
+                    @if($push->project->ownable_type == \App\Models\Group::class)
+                        <div class="flex justify-end sm:justify-start lg:justify-end xl:justify-start -space-x-4">
+                            @foreach($push->project->ownable->members as $member)
+                                <img alt="avatar" src="{{ $member->avatar }}" class="w-12 h-12 border-4 rounded-full border-lime-green-600 dark:border-lime-green-400">
+                            @endforeach
+                        </div>
+                    @else
+                        <img alt="avatar" class="w-12 h-12 border-4 rounded-full border-lime-green-600 dark:border-lime-green-400"
+                             src="{{ $push->project->ownable->avatar }}"/>
+                    @endif
                     <span class="text-gray-200 text-xs mt-1">{{ $push->project->ownable->shortName }}</span>
                 </div>
                 <div class="flex items-center flex-1">

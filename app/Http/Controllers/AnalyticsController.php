@@ -23,25 +23,6 @@ use Illuminate\View\View;
 
 class AnalyticsController extends Controller
 {
-    public function builds(Course $course, Task $task) : View
-    {
-        $dailyBuilds = $task->dailyBuilds(true, true);
-        $activeIndex = $dailyBuilds->keys()->search(\request('q'));
-        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B", $activeIndex === false ? null : $activeIndex));
-        $buildQuery = $task->jobs();
-
-        if(\request('q') != null)
-            $buildQuery->whereRaw('date(job_statuses.created_at) = ?', \request('q'));
-
-        if(\request('status') != null)
-            $buildQuery->where('job_statuses.status', \request('status'));
-
-        $buildQuery->latest();
-        $builds = $buildQuery->paginate(10)->withQueryString();
-
-        return view('tasks.admin.builds', compact('dailyBuildsGraph', 'builds'));
-    }
-
     public function pushes(Course $course, Task $task) : View
     {
         $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);

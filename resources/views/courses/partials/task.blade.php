@@ -1,4 +1,4 @@
-<a href="{{ route(auth()->user()->can('write', $task['details']) ? 'courses.tasks.admin.index' : 'courses.tasks.show', [$task['details']->course->id, $task['details']->id]) }}" class="hover:shadow-md shadow rounded-lg mb-4 cursor-not-allowed">
+<a href="{{ route(auth()->user()->can('write', $task['details']) ? 'courses.tasks.admin.index' : 'courses.tasks.show', [$task['details']->course->id, $task['details']->id]) }}" class="hover:shadow-md shadow rounded-lg mb-4">
     <div @class([
         'px-8 py-4 mx-auto bg-white dark:bg-gray-600 rounded-lg']) class="">
         <div class="flex items-center justify-between">
@@ -24,13 +24,13 @@
         <div class="flex items-end justify-between mt-4">
             <div class="flex gap-2 text-lime-green-600 dark:text-lime-green-400 text-sm">
                 <div class="flex flex-col">
-                    <span class="font-bold">{{ $task['details']->starts_at->toDateString() }}</span>
-                    <span class="text-xs text-gray-400">{{ $task['details']->starts_at->toTimeString() }}</span>
+                    <span class="font-bold">{{ $task['details']->starts_at?->toDateString() }}</span>
+                    <span class="text-xs text-gray-400">{{ $task['details']->starts_at?->toTimeString() }}</span>
                 </div>
                 -
                 <div class="flex flex-col">
-                    <span class="font-bold">{{ $task['details']->ends_at->toDateString() }}</span>
-                    <span class="text-xs text-gray-400">{{ $task['details']->ends_at->toTimeString() }}</span>
+                    <span class="font-bold">{{ $task['details']->ends_at?->toDateString() }}</span>
+                    <span class="text-xs text-gray-400">{{ $task['details']->ends_at?->toTimeString() }}</span>
                 </div>
             </div>
 
@@ -40,10 +40,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                @if ($task['details']->starts_at->isFuture())
-                    <span>{{ $task['details']->starts_at->diffForHumans() }}</span>
+                @if ($task['details']->starts_at?->isFuture())
+                    <span>{{ $task['details']->starts_at?->diffForHumans() }}</span>
                 @else
-                    <span>{{ $task['details']->ends_at->diffForHumans() }}</span>
+                    <span>{{ $task['details']->ends_at?->diffForHumans() }}</span>
                 @endif
             </div>
         </div>
