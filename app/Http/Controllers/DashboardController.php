@@ -6,6 +6,7 @@ use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
+use App\Models\Grade;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,15 +15,22 @@ use App\Models\User;
 
 class DashboardController extends Controller
 {
-    public function index() : View
+    public function index(): View
     {
         $courses = auth()->user()->courses()->get();
-        $tasks = Task::whereIn('course_id', $courses->pluck('id'))->assignments()->orderBy('ends_at', 'asc')->get();
+        $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->assignments()->orderBy('ends_at', 'asc')->get();
+        $nextAssignment = $tasks->first();
+        $courseAssignments = Task::assignments()->whereIn('course_id', $courses->pluck('id'))->get();
+        $completedAssignments = Grade::where('value', '=', 'passed')->get();
+        //dd(sizeof($completedAssignments)/sizeof($courseAssignments));
 
         return view('dashboard', [
-            'courses'     => $courses,
-            'tasks'       => $tasks,
-            'bg'          => 'bg-gray-100 dark:bg-gray-700',
+            'courses' => $courses,
+            'tasks' => $tasks,
+            'courseAssignments' => $courseAssignments,
+            'nextAssignment' => $nextAssignment,
+            'completedAssignments' => $completedAssignments,
+            'bg' => 'bg-gray-100 dark:bg-gray-700',
             'breadcrumbs' => [
                 'Dashboard' => null,
             ],
