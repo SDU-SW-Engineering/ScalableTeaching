@@ -67,7 +67,7 @@
                                         {{ $exercise->name }}
                                     </a>
                                     <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">
-                                        {{ Str::words($exercise->description, 20) }}</p>
+                                        {{ strip_tags(Str::words($exercise->description, 20)) }}</p>
                                 </div>
                             </li>
                         </ol>
@@ -90,7 +90,7 @@
                                         {{ $exercise->name }}
                                     </a>
                                     <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">
-                                        {{ Str::words($exercise->description, 20) }}</p>
+                                        {{ strip_tags(Str::words($exercise->description, 20)) }}</p>
                                 </div>
                             </li>
                         </ol>
@@ -135,8 +135,8 @@
                                             ({{ $task->ends_at->diffForHumans() }})
                                         </time>
                                     </time>
-                                    <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">
-                                        {{ Str::words($task->description, 30) }}</p>
+                                    <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400 !important">
+                                        {{ strip_tags(Str::words($task->description, 30)) }}</p>
                                 </div>
                             </li>
                         </ol>
@@ -166,8 +166,8 @@
                                             ({{ $task->ends_at->diffForHumans() }})
                                         </time>
                                     </time>
-                                    <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">
-                                        {{ Str::words($task->description, 30) }}</p>
+                                    <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400 !important">
+                                        {{ strip_tags(Str::words($task->description, 30)) }}</p>
                                 </div>
                             </li>
                         </ol>
