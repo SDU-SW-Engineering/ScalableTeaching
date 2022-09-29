@@ -21,12 +21,14 @@ class DashboardController extends Controller
         $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->assignments()->orderBy('ends_at', 'asc')->get();
         $nextAssignment = $tasks->first();
         $courseAssignments = Task::assignments()->whereIn('course_id', $courses->pluck('id'))->get();
+        $exercises = Task::exercises()->whereIn('course_id', $courses->pluck('id'))->orderBy('starts_at', 'asc')->limit(5)->get();
         $completedAssignments = Grade::where('value', '=', 'passed')->get();
-        //dd(sizeof($completedAssignments)/sizeof($courseAssignments));
+        //dd($exercises);
 
         return view('dashboard', [
             'courses' => $courses,
             'tasks' => $tasks,
+            'exercises' => $exercises,
             'courseAssignments' => $courseAssignments,
             'nextAssignment' => $nextAssignment,
             'completedAssignments' => $completedAssignments,

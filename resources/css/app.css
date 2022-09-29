@@ -26,7 +26,11 @@
 }
 
 .dashboard-assignments {
-    height: calc(100vh - 440px);
+    height: calc(100vh - 230px);
+}
+
+.exercise-assignments {
+    height: calc(100vh - 450px);
 }
 
 .vh50 {
