@@ -16,8 +16,11 @@ return new class extends Migration {
             $table->enum('type', ['last_pushes', 'succeeding_pushes', 'succeed_last_pushes'])->after('number_of_tasks');
             $table->boolean('grading')->after('type');
             $table->boolean('feedback')->after('grading');
-            $table->dateTime('deadline_at')->after('feedback');
+            $table->boolean('is_moderated')->after('feedback')->default(false);
+            $table->dateTime('deadline_at')->after('is_moderated');
             $table->boolean('delegated')->default(false)->after('deadline_at');
+
+            $table->dropForeign('task_delegations_course_role_id_foreign');
         });
     }
 
@@ -29,7 +32,8 @@ return new class extends Migration {
     public function down()
     {
         Schema::table('task_delegations', function (Blueprint $table) {
-            $table->dropColumn(['type', 'grading', 'feedback', 'deadline_at', 'delegated']);
+            $table->dropColumn(['type', 'grading', 'feedback', 'deadline_at', 'delegated', 'is_moderated']);
+            $table->foreign('course_role_id')->references('id')->on('course_roles');
         });
     }
 };
