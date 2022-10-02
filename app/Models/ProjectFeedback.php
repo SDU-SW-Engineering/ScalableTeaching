@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Badcow\PhraseGenerator\PhraseGenerator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $user_id
  * @property User $user
+ * @mixin \Eloquent
  */
 class ProjectFeedback extends Model
 {
@@ -33,6 +35,10 @@ class ProjectFeedback extends Model
         });
     }
 
+    public function scopeUnreviewed(Builder $query)
+    {
+        return $query->where('reviewed', false);
+    }
     /**
      * @return BelongsTo<User,ProjectFeedback>
      */

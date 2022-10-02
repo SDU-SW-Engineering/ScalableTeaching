@@ -10,6 +10,7 @@ use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
+use App\Models\ProjectDownload;
 use App\Models\Task;
 use App\ProjectStatus;
 use Carbon\Carbon;
@@ -24,6 +25,7 @@ use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Spatie\ShikiPhp\Shiki;
 use Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use function Pest\Laravel\get;
@@ -34,9 +36,9 @@ class ProjectController extends Controller
      * @param Project $project
      * @return Collection<int, array{status:PipelineStatusEnum,run_time:string,queued_for:string,ran:string,ran_date:string,sub_tasks:Collection<int,array{name:string,completed:bool}>,user_name:string}>
      */
-    public function builds(Project $project) : Collection
+    public function builds(Project $project): Collection
     {
-        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(fn (Pipeline $job) => [
+        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(fn(Pipeline $job) => [
             'status'     => $job->status,
             'run_time'   => CarbonInterval::seconds($job->duration)->forHumans(),
             'queued_for' => CarbonInterval::seconds($job->queue_duration)->forHumans(),
@@ -50,20 +52,18 @@ class ProjectController extends Controller
     /**
      * @throws \Throwable
      */
-    public function reset(GitLabManager $gitLabManager, Project $project) : string
+    public function reset(GitLabManager $gitLabManager, Project $project): string
     {
         abort_unless($project->status == ProjectStatus::Active, 400);
-        \DB::transaction(function () use ($gitLabManager, $project) {
+        \DB::transaction(function() use ($gitLabManager, $project) {
             $found = true;
-            try
-            {
+            try {
                 $gitLabManager->projects()->show($project->project_id);
-            } catch(RuntimeException $runtimeException)
-            {
+            } catch(RuntimeException $runtimeException) {
                 $found = $runtimeException->getCode() != 404;
             }
 
-            if ($found)
+            if($found)
                 $gitLabManager->projects()->remove($project->project_id);
 
 
@@ -73,11 +73,11 @@ class ProjectController extends Controller
         return "OK";
     }
 
-    public function migrate(Project $project, Group $group) : string
+    public function migrate(Project $project, Group $group): string
     {
-        $activeUsers = $project->task->projectsForUsers($group->members)->reject(function (Project $currentProject) use ($project) {
+        $activeUsers = $project->task->projectsForUsers($group->members)->reject(function(Project $currentProject) use ($project) {
             return $currentProject->id == $project->id;
-        })->map(function (Project $project) {
+        })->map(function(Project $project) {
             return $project->owners()->pluck('name');
         })->flatten();
 
@@ -91,19 +91,19 @@ class ProjectController extends Controller
         return "ok";
     }
 
-    public function refreshAccess(Project $project) : string
+    public function refreshAccess(Project $project): string
     {
         \App\Jobs\Project\RefreshMemberAccess::dispatch($project);
 
         return "ok";
     }
 
-    public function download(Course $course, Task $task, Project $project, GitLabManager $gitLabManager) : StreamedResponse
+    public function download(Course $course, Task $task, Project $project, GitLabManager $gitLabManager): StreamedResponse
     {
         $sha = $project->final_commit_sha;
         abort_if($sha == null, 404);
 
-        return response()->streamDownload(function () use ($sha, $project, $gitLabManager) {
+        return response()->streamDownload(function() use ($sha, $project, $gitLabManager) {
             echo $gitLabManager->repositories()->archive($project->project_id, [
                 'sha' => $sha,
             ], 'zip');
@@ -113,16 +113,15 @@ class ProjectController extends Controller
     /**
      * @throws \Exception
      */
-    public function validateProject(Course $course, Task $task, Project $project) : RedirectResponse
+    public function validateProject(Course $course, Task $task, Project $project): RedirectResponse
     {
-        if ($project->final_commit_sha == null)
+        if($project->final_commit_sha == null)
             return redirect()->back()->withErrors('Can\'t validate this project as it isn\' finished yet');
 
         $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
         $errors = [];
-        foreach ($directories as $directory => $files)
-        {
+        foreach($directories as $directory => $files) {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
                 ->setIds(["gid://gitlab/Project/$project->project_id"])
@@ -137,28 +136,23 @@ class ProjectController extends Controller
             $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . getenv('GITLAB_ACCESS_TOKEN')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
-            if (count($projects) == 0)
-            {
+            if(count($projects) == 0) {
                 throw new \Exception("Project with id $project->id wasn't found.");
             }
 
             $repoFiles = collect($projects[0]->repository->tree->blobs->nodes); //@phpstan-ignore-line
-            foreach ($files as $file)
-            {
+            foreach($files as $file) {
                 $lookFor = $file->baseName;
                 $found = $repoFiles->firstWhere('name', $lookFor);
-                if ($found == null)
-                {
+                if($found == null) {
                     $errors[] = "The file \"{$file->path}\" is missing.";
                     continue;
                 }
 
                 $shaValues = new Collection($file->sha_values);
                 $shaIntact = $shaValues->contains($found->sha);
-                if ( ! $shaIntact)
-                {
+                if(!$shaIntact)
                     $errors[] = "The file \"{$file->path}\" has been altered! Expected one of [{$shaValues->join(', ')}] but got $found->sha.";
-                }
             }
         }
 
@@ -168,5 +162,39 @@ class ProjectController extends Controller
         ]);
 
         return redirect()->back();
+    }
+
+    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    {
+        return view('tasks.editor');
+    }
+
+    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    {
+        return $projectDownload->fileTree()->trim();
+    }
+
+    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    {
+        $contents = $projectDownload->file(\request('path'));
+
+        $extension = pathinfo(\request('path'), PATHINFO_EXTENSION);
+
+        $highlighted = Shiki::highlight($contents, $extension);
+
+        $xml = simplexml_load_string($highlighted);
+        $lines = $xml->xpath('//span[@class="line"]');
+        $processedLines = [];
+        foreach($lines as $index => $line)
+            $processedLines[] = [
+                'number' => $index + 1,
+                'line'   => $line->asXML()
+            ];
+
+        return [
+            ...pathinfo(\request('path')),
+            'full'  => \request('path'),
+            'lines' => $processedLines
+        ];
     }
 }

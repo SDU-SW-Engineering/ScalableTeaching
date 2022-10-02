@@ -26,6 +26,9 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
         Route::get('{task}/projects/{project}', [TaskController::class, 'showProject'])->name('showProject')->middleware('can:view,project');
         Route::get('{task}/projects/{project}/download', [ProjectController::class, 'download'])->name('downloadProject')->middleware('can:download,project');
         Route::get('{task}/projects/{project}/validate', [ProjectController::class, 'validateProject'])->name('validateProject')->middleware('can:validate,project');
+        Route::get('{task}/projects/{project}/editor/{projectDownload}', [ProjectController::class, 'showEditor'])->name('show-editor')->can('accessCode', ['project', 'projectDownload']);
+        Route::get('{task}/projects/{project}/editor/{projectDownload}/tree', [ProjectController::class, 'showTree'])->name('show-tree')->can('accessCode', ['project', 'projectDownload']);
+        Route::get('{task}/projects/{project}/editor/{projectDownload}/file', [ProjectController::class, 'showFile'])->name('show-file')->can('accessCode', ['project', 'projectDownload']);
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
     });
 

@@ -30,7 +30,7 @@ Route::prefix('{task}')->group(function() {
             Route::get('feedback', 'gradingDelegate')->name('gradingDelegate');
             Route::post('feedback', 'addDelegation')->name('addDelegation');
             Route::get('feedback/{taskDelegation}', 'showDelegation')->name('showDelegation');
-            Route::delete('grading-delegate', 'removeDelegation')->name('removeDelegation');
+            Route::delete('feedback/{taskDelegation}', 'removeDelegation')->name('removeDelegation');
         });
 
         Route::controller(SettingsController::class)->group(function() {

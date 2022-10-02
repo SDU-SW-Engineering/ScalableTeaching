@@ -69,6 +69,14 @@
                                    class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                             <label for="feedback" class="ml-2 font-medium text-gray-900 text-sm dark:text-gray-300">Feedback</label>
                         </div>
+                        <div>
+                            <input @checked(old('options.moderation')) name="options[moderation]" id="moderation"
+                                   type="checkbox"
+                                   class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                            <label for="moderation"
+                                @class(['text-gray-900 dark:text-gray-300 ml-2 font-medium text-sm'])
+                            >Feedback moderation</label>
+                        </div>
                     </div>
                     <div>
                         <span class="text-left text-sm font-bold dark:text-white">Number of Tasks</span>
@@ -86,26 +94,33 @@
             </div>
         </div>
         <div>
-            <div class="flex flex-col bg-white dark:bg-gray-800 shadow-md p-4 rounded-md">
-                @foreach($task->delegations as $delegated)
+            @foreach($task->delegations as $delegated)
+                <div class="flex flex-col bg-white dark:bg-gray-800 shadow-md p-4 rounded-md">
                     <h3 class="text-xl dark:text-white font-semibold">{{ $delegated->course_role_id == 1 ? 'Student' : 'Teacher' }}
                         Delegation</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400">This task is currently <span
                             class="font-bold text-lime-green-600">{{ $delegated->delegated ? 'delegated' : 'not delegated' }}</span>.
                     </p>
-                    @if($task->delegated == false)
+                    @unless($task->delegated)
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                            Shortly after the deadline {{ $task->ends_at }} ({{ $task->ends_at->diffForHumans() }}), the task will be delegated amongst {{ $course->students()->count() }} {{ Str::plural('student') }}. At that point this task delegation can no longer be deleted.
+                            Shortly after the deadline {{ $task->ends_at }} ({{ $task->ends_at->diffForHumans() }}), the
+                            task will be delegated
+                            amongst {{ $course->students()->count() }} {{ Str::plural('student') }}.
+                            At that point this task delegation can no longer be deleted.
                         </p>
-                    @endif
-                    <div class="flex flex-col justify-center mt-4">
+                    @endunless
+                    <form method="post"
+                          action="{{ route('courses.tasks.admin.removeDelegation', [$course, $task, $delegated]) }}"
+                          class="flex flex-col justify-center mt-4">
+                        @method('DELETE')
+                        @csrf
                         <button type="submit"
                                 class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-1.5 text-center dark:bg-lime-green-600 dark:hover:bg-lime-green-700 dark:focus:ring-lime-green-800">
                             Delete
                         </button>
-                    </div>
-                @endforeach
-            </div>
+                    </form>
+                </div>
+            @endforeach
         </div>
     </section>
 @endsection

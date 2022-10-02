@@ -6,15 +6,15 @@ use JsonSerializable;
 
 class File implements JsonSerializable
 {
-    private string $name;
+    public string $name;
 
-    public function __construct(private string $fullPath)
+    public function __construct(public string $fullPath)
     {
         $paths = explode("/", $this->fullPath);
         $this->name = $paths[count($paths) -1];
     }
 
-    public function jsonSerialize(): mixed
+    public function jsonSerialize(): array
     {
         return [
             'name' => $this->name,

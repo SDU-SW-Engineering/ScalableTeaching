@@ -22,7 +22,7 @@ class TaskDelegation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['course_role_id', 'number_of_tasks', 'type', 'grading', 'feedback', 'deadline_at', 'delegated'];
+    protected $fillable = ['course_role_id', 'number_of_tasks', 'type', 'grading', 'feedback', 'deadline_at', 'delegated', 'is_moderated'];
 
     protected $casts = [
         'type'        => TaskDelegationType::class,
