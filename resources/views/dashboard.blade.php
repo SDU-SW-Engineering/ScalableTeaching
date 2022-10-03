@@ -152,21 +152,21 @@
                     </div>
                     @foreach($tasks as $task)
                         <ol>
-                            <li class="m-6 mt-5 bg-white dark:bg-gray-750 rounded-lg">
-                                <div class="m-5">
+                            <li class="py-0.5 m-6 mt-5 bg-white dark:bg-gray-750 rounded-lg">
+                                <div class="m-4">
                                     <a href="{{ route('courses.tasks.show', [$task->course_id, $task]) }}"
-                                       class="flex items-center mb-1 mt-5 text-lg font-semibold text-gray-900 dark:text-white">
+                                       class="flex items-center mb-1 text-lg font-semibold text-gray-900 dark:text-white">
                                         {{ $task->name }}
                                     </a>
                                     <time
-                                        class="block mb-2 text-sm font-normal leading-none text-lime-green-400 dark:text-lime-green-400">
+                                        class="flex text-sm font-normal leading-none text-lime-green-400 dark:text-lime-green-400 justify-between">
                                         {{ $task->starts_at }} - {{ $task->ends_at }}
                                         <time
-                                            class="mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
+                                            class="text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
                                             ({{ $task->ends_at->diffForHumans() }})
                                         </time>
                                     </time>
-                                    <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400 !important">
+                                    <p class="text-base font-normal text-gray-500 dark:text-gray-400">
                                         {{ strip_tags(Str::words($task->description, 30)) }}</p>
                                 </div>
                             </li>
