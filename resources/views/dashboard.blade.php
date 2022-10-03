@@ -3,7 +3,7 @@
 @section('content')
     <div class="container flex gap-x-20 px-6 mx-auto pt-10">
         <div class="flex-auto w-1/2">
-            @if(sizeof($courses) == 0)
+            @if($courses->count() == 0)
                 <div class="pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
                     <div class="px-6 pt-5">
                         <h1 class="text-black dark:text-white text-lg font-semibold">
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             @endif
-            @if(sizeof($exercises) == 0)
+            @if($exercises->count() == 0)
                 <div
                     class="overflow-auto mt-10 mb-5 pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
                     <div class="px-6 pt-5">
@@ -50,7 +50,7 @@
                         </p>
                     </div>
                 </div>
-            @elseif(sizeof($exercises) < 4)
+            @elseif($exercises->count() < 4)
                 <div
                     class="overflow-auto mt-10 mb-5 pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
                     <div class="px-6 pt-5">
@@ -99,7 +99,7 @@
             @endif
         </div>
         <div class="flex-auto w-1/2">
-            @if(sizeof($tasks) == 0)
+            @if($tasks->count() == 0)
                 <div
                     class="overflow-auto mb-5 pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
                     <div class="px-6 pt-5">
@@ -111,7 +111,7 @@
                         </p>
                     </div>
                 </div>
-            @elseif(sizeof($tasks) < 5)
+            @elseif($tasks->count() < 5)
                 <div
                     class="overflow-auto mb-5 pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
                     <div class="px-6 pt-5">
