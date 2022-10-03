@@ -111,9 +111,9 @@
                         </p>
                     </div>
                 </div>
-            @elseif($tasks->count() < 5)
+            @elseif($tasks->count() < 4)
                 <div
-                    class="overflow-auto mb-5 pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
+                    class="overflow-auto rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
                     <div class="px-6 pt-5">
                         <h1 class="text-black dark:text-white text-lg font-semibold">
                             Active assignments
@@ -144,7 +144,7 @@
                 </div>
             @else
                 <div
-                    class="overflow-auto dashboard-assignments mb-5 pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
+                    class="overflow-auto dashboard-assignments rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
                     <div class="px-6 pt-5">
                         <h1 class="text-black dark:text-white text-lg font-semibold">
                             Active assignments
