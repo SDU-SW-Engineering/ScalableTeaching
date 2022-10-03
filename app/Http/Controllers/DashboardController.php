@@ -18,10 +18,10 @@ class DashboardController extends Controller
     public function index(): View
     {
         $courses = auth()->user()->courses()->get();
-        $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->assignments()->orderBy('ends_at', 'asc')->get();
+        $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->assignments()->orderBy('ends_at', 'asc')->visible()->get();
         $nextAssignment = $tasks->first();
         $courseAssignments = Task::assignments()->whereIn('course_id', $courses->pluck('id'))->get();
-        $exercises = Task::exercises()->whereIn('course_id', $courses->pluck('id'))->orderBy('starts_at', 'asc')->take(5)->get();
+        $exercises = Task::exercises()->whereIn('course_id', $courses->pluck('id'))->orderBy('starts_at', 'asc')->take(5)->visible()->get();
 
         return view('dashboard', [
             'courses'           => $courses,

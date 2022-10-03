@@ -36,6 +36,15 @@ class TaskFactory extends Factory
         });
     }
 
+    public function visible()
+    {
+        return $this->state(function(array $attributes) {
+            return [
+                'is_visible' => true,
+            ];
+        });
+    }
+
     public function group($group)
     {
         return $this->state(function(array $attributes) use ($group) {
