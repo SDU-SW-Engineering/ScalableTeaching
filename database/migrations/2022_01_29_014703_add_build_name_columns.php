@@ -32,7 +32,7 @@ class AddBuildNameColumns extends Migration
     public function down()
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->dropColumn(['sub_tasks', 'correction_type', 'correction_value']);
+            $table->dropColumn(['sub_tasks', 'correction_type', 'correction_tasks_required', 'correction_points_required']);
         });
     }
 }

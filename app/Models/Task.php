@@ -163,6 +163,11 @@ class Task extends Model
         return $query->where('type', 'exercise');
     }
 
+    public function scopeVisible(Builder $query): Builder
+    {
+        return $query->where('is_visible', true);
+    }
+
 
     /**
      * @param bool $withTrash
