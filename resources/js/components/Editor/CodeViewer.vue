@@ -1,6 +1,6 @@
 <template>
     <div class="whitespace-pre-wrap">
-        <code-line :line="line" :key="line.number + file.full" v-for="line in file.lines"></code-line>
+        <code-line :file="file.full" :line="line" :key="line.number + file.full" v-for="line in file.lines"></code-line>
     </div>
 </template>
 

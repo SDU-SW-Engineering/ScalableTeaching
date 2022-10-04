@@ -1,12 +1,13 @@
 <template>
     <div>
-        <div @click="isCommenting = !isCommenting" class="flex cursor-pointer hover:bg-gray-700 group">
+        <div class="flex hover:bg-gray-700 group">
             <div :class="[isCommenting ? 'items-start' : 'items-center']"
                  class="w-14 justify-end flex-shrink-0 mr-4 flex">
-                <div class="flex items-center">
-                    <span class="dark:text-gray-400 select-none" v-text="line.number"></span>
+                <div @click="toggleComment" class="flex cursor-pointer items-center">
+                    <span class="text-gray-400 select-none" v-text="line.number"></span>
                     <div class="w-4 h-4 ml-1">
-                        <svg v-if="isCommenting" class="text-lime-green-400 w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                        <svg v-if="isCommenting" class="text-lime-green-400 w-4 h-4 fill-current"
+                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                              style="transform: ;msFilter:;">
                             <path
                                 d="M20 2H4c-1.103 0-2 .897-2 2v18l4-4h14c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2z"></path>
@@ -22,33 +23,36 @@
                 </div>
             </div>
             <div>
-                <span v-html="line.line"></span>
-                <div :style="{ marginLeft: indentation + 'ch'}" v-if="isCommenting">
-                    <div class="flex w-92 flex-col">
-                        <div class="bg-gray-800 rounded-t-md px-3 py-1 mt-1">
-                            <h2 class="text-gray-100 font-semibold">Comment</h2>
-                        </div>
-                        <div class="bg-black p-3  items-start">
-                            <textarea class="bg-gray-800 border-none"></textarea>
-                        </div>
-                    </div>
-                </div>
+                <span class="commentable" v-html="line.line"></span>
+                <comment-editor :file="file" @close="isCommenting = false" v-if="isCommenting" :line="line.number" :indentation="indentation"></comment-editor>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import CommentEditor from "./CommentEditor";
+
 export default {
+    components: {CommentEditor},
     props: {
         line: {
             type: Object,
+            required: true
+        },
+        file: {
+            type: String,
             required: true
         }
     },
     data() {
         return {
             isCommenting: false
+        }
+    },
+    methods: {
+        toggleComment(event) {
+            this.isCommenting = !this.isCommenting;
         }
     },
     computed: {

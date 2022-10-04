@@ -1,6 +1,7 @@
 <template>
     <div>
         <overlay v-if="initialLoad"></overlay>
+        <toolbar :file="openedFile"/>
         <div class="flex">
             <div class="flex vh80">
                 <side-bar @openFile="openFile" :file-tree="fileTree"/>
@@ -19,9 +20,10 @@ import Overlay from "./Overlay";
 import axios from "axios";
 import CodeViewer from "./CodeViewer";
 import Welcome from "./Welcome";
+import Toolbar from "./Toolbar";
 
 export default {
-    components: {Welcome, CodeViewer, Overlay, SideBar},
+    components: {Toolbar, Welcome, CodeViewer, Overlay, SideBar},
     data() {
         return {
             initialLoad: true,

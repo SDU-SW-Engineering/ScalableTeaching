@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\ProjectDownload;
+use App\Models\ProjectFeedback;
 use App\Models\Task;
 use App\ProjectStatus;
 use Carbon\Carbon;
@@ -196,5 +197,24 @@ class ProjectController extends Controller
             'full'  => \request('path'),
             'lines' => $processedLines
         ];
+    }
+
+    public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    {
+        $validated = \request()->validate([
+            'comment' => ['string', 'required'],
+            'file'    => ['string', 'required'],
+            'line'    => ['numeric', 'required']
+        ]);
+
+        /** @var ?ProjectFeedback $feedback */
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first();
+        abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
+
+        return $feedback->comments()->create([
+            'filename' => $validated['file'],
+            'comment'  => $validated['comment'],
+            'line'     => $validated['line']
+        ]);
     }
 }
