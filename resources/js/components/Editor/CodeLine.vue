@@ -6,18 +6,19 @@
                 <div @click="toggleComment" class="flex cursor-pointer items-center">
                     <span class="text-gray-400 select-none" v-text="line.number"></span>
                     <div class="w-4 h-4 ml-1">
-                        <svg v-if="isCommenting" class="text-lime-green-400 w-4 h-4 fill-current"
-                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                             style="transform: ;msFilter:;">
-                            <path
-                                d="M20 2H4c-1.103 0-2 .897-2 2v18l4-4h14c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2z"></path>
-                        </svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg"
+                        <svg v-if="!isCommenting && this.relevantComments.length === 0" xmlns="http://www.w3.org/2000/svg"
                              class="hidden group-hover:block text-lime-green-400 w-4 h-4 fill-current"
                              viewBox="0 0 24 24" style="transform: ;msFilter:;">
                             <path
                                 d="M20 2H4c-1.103 0-2 .897-2 2v18l4-4h14c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm-3 9h-4v4h-2v-4H7V9h4V5h2v4h4v2z"></path>
                         </svg>
+                        <svg v-else class="text-lime-green-400 w-4 h-4 fill-current"
+                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                             style="transform: ;msFilter:;">
+                            <path
+                                d="M20 2H4c-1.103 0-2 .897-2 2v18l4-4h14c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2z"></path>
+                        </svg>
+
 
                     </div>
                 </div>
@@ -43,6 +44,9 @@ export default {
         file: {
             type: String,
             required: true
+        },
+        comments: {
+            type: Array
         }
     },
     data() {
@@ -62,6 +66,11 @@ export default {
                 return 0;
 
             return indentation[1].length
+        },
+        relevantComments: function () {
+            if (this.comments.length === 0)
+                return [];
+            return this.comments.filter(x => x.line === this.line.number);
         }
     }
 }

@@ -12,6 +12,7 @@ use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
+use App\Models\ProjectFeedbackComment;
 use App\Models\Task;
 use App\ProjectStatus;
 use Carbon\Carbon;
@@ -199,6 +200,13 @@ class ProjectController extends Controller
         ];
     }
 
+    public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    {
+        return ProjectFeedbackComment::whereIn('project_feedback_id', $project->feedback()->pluck('id'))
+            ->where('filename', \request('file'))
+            ->get();
+    }
+
     public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
     {
         $validated = \request()->validate([
@@ -208,7 +216,7 @@ class ProjectController extends Controller
         ]);
 
         /** @var ?ProjectFeedback $feedback */
-        $feedback = $project->feedback()->where('user_id', auth()->id())->first();
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
         abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
 
         return $feedback->comments()->create([

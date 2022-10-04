@@ -1,17 +1,39 @@
 <template>
     <div class="whitespace-pre-wrap">
-        <code-line :file="file.full" :line="line" :key="line.number + file.full" v-for="line in file.lines"></code-line>
+        <code-line :comments="comments" :file="file.full" :line="line" :key="line.number + file.full" v-for="line in file.lines"></code-line>
     </div>
 </template>
 
 <script>
 import CodeLine from "./CodeLine";
+import axios from "axios";
+
+let request = "";
+
 export default {
     components: {CodeLine},
     props: {
         file: {
             type: Object,
             required: true
+        }
+    },
+    data() {
+        return {
+            comments: []
+        }
+    },
+    watch: {
+        file: {
+            immediate: true,
+            async handler(to, from) {
+                this.comments = [];
+                this.comments = (await axios.get(location.pathname + '/comments', {
+                    params: {
+                        file: this.file.full
+                    }
+                })).data;
+            }
         }
     }
 }
@@ -21,6 +43,7 @@ export default {
 div {
     font-family: 'Fira Code';
 }
+
 @font-face {
     font-family: 'Fira Code';
     src: url('/fonts/woff2/FiraCode-Light.woff2') format('woff2'),
