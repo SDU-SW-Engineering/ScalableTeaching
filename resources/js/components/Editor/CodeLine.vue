@@ -23,8 +23,8 @@
             </div>
             <div>
                 <span class="commentable" v-html="line.line"></span>
-                <comment-editor @commentCreated="commentCreated" :file="file" @close="isCommenting = false" v-if="isCommenting && relevantComments.length === 0" :line="line.number" :indentation="indentation"></comment-editor>
-                <comment @commentDeleted="commentDeleted" :comment="comment" perspective="sender" :indentation="indentation" :key="comment.id" v-for="comment in relevantComments"></comment>
+                <comment-editor @commentCreated="commentCreated" :file="file" @close="closeEditor" :updating="editing" v-if="isCommenting" :line="line.number" :indentation="indentation"></comment-editor>
+                <comment v-if="editing == null" @edit="edit" @delete="commentDeleted" :comment="comment" perspective="sender" :indentation="indentation" :key="comment.id" v-for="comment in relevantComments"></comment>
             </div>
         </div>
     </div>
@@ -52,20 +52,31 @@ export default {
     },
     data() {
         return {
-            isCommenting: false
+            isCommenting: false,
+            editing: null
         }
     },
     methods: {
-        toggleComment(event) {
+        closeEditor: function() {
+            this.isCommenting = false;
+            this.editing = null;
+        },
+        toggleComment() {
             if (this.relevantComments.length > 0)
                 return;
             this.isCommenting = !this.isCommenting;
         },
         commentCreated: function (comment) {
+            this.isCommenting = false;
+            this.editing = null;
             this.$emit('commentCreated', comment);
         },
         commentDeleted: function (comment) {
             this.$emit('commentDeleted', comment);
+        },
+        edit: function(comment) {
+            this.editing = comment;
+            this.isCommenting = true;
         }
     },
     computed: {
@@ -81,6 +92,8 @@ export default {
                 return [];
             return this.comments.filter(x => x.line === this.line.number);
         },
+    },
+    mounted() {
     }
 }
 </script>

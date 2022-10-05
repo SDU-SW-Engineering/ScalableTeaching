@@ -232,4 +232,14 @@ class ProjectController extends Controller
 
         return "ok";
     }
+
+    public function updateComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment)
+    {
+        $projectFeedbackComment->update([
+            'comment' => \request('comment')
+        ]);
+
+        $projectFeedbackComment->refresh();
+        return $projectFeedbackComment;
+    }
 }

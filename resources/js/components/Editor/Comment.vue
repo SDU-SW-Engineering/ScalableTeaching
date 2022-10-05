@@ -23,7 +23,7 @@
             </div>
         </div>
         <div class="flex bg-black rounded-b-md border-b border-r border-l border-gray-600">
-            <button v-if="perspective === 'sender'"
+            <button @click="edit" v-if="perspective === 'sender'"
                     class="w-full flex flex-col items-center py-2 first:rounded-bl-md hover:bg-gray-900">
                 <div class="h-5 w-5 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="text-gray-300 w-4 h-4">
@@ -73,7 +73,10 @@ export default {
     methods: {
         remove: async function () {
             await axios.delete(location.pathname + '/comments/' + this.comment.id);
-            this.$emit('commentDeleted')
+            this.$emit('delete')
+        },
+        edit: function() {
+            this.$emit('edit', this.comment)
         }
     }
 }
