@@ -1,8 +1,8 @@
 <template>
     <div>
         <div class="flex hover:bg-gray-700 group">
-            <div :class="[isCommenting ? 'items-start' : 'items-center']"
-                 class="w-14 justify-end flex-shrink-0 mr-4 flex">
+            <div
+                 class="w-14 items-start justify-end flex-shrink-0 mr-4 flex">
                 <div @click="toggleComment" class="flex cursor-pointer items-center">
                     <span class="text-gray-400 select-none" v-text="line.number"></span>
                     <div class="w-4 h-4 ml-1">
@@ -18,14 +18,13 @@
                             <path
                                 d="M20 2H4c-1.103 0-2 .897-2 2v18l4-4h14c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2z"></path>
                         </svg>
-
-
                     </div>
                 </div>
             </div>
             <div>
                 <span class="commentable" v-html="line.line"></span>
-                <comment-editor :file="file" @close="isCommenting = false" v-if="isCommenting" :line="line.number" :indentation="indentation"></comment-editor>
+                <comment-editor :file="file" @close="isCommenting = false" v-if="isCommenting && relevantComments.length === 0" :line="line.number" :indentation="indentation"></comment-editor>
+                <comment :comment="comment" perspective="sender" :indentation="indentation" :key="comment.id" v-for="comment in relevantComments"></comment>
             </div>
         </div>
     </div>
@@ -34,8 +33,10 @@
 <script>
 import CommentEditor from "./CommentEditor";
 
+import Comment from "./Comment";
+
 export default {
-    components: {CommentEditor},
+    components: {Comment, CommentEditor},
     props: {
         line: {
             type: Object,
@@ -56,6 +57,8 @@ export default {
     },
     methods: {
         toggleComment(event) {
+            if (this.relevantComments.length > 0)
+                return;
             this.isCommenting = !this.isCommenting;
         }
     },

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('line');
             $table->text('comment');
             $table->enum('mark_as', ['helpful', 'not_helpful'])->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])->default('draft');
             $table->string('rejection_reason')->nullable();
             $table->timestamps();
 

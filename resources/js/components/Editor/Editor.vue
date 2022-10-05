@@ -21,6 +21,8 @@ import axios from "axios";
 import CodeViewer from "./CodeViewer";
 import Welcome from "./Welcome";
 import Toolbar from "./Toolbar";
+import Vue from "vue";
+export const bus = new Vue();
 
 export default {
     components: {Toolbar, Welcome, CodeViewer, Overlay, SideBar},

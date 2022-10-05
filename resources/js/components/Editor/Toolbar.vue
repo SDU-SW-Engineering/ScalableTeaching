@@ -4,7 +4,7 @@
 
         </div>
         <div class="w-full justify-between flex">
-            <div class="flex flex-col items-start justify-center">
+            <div class="flex flex-col items-center flex-grow justify-center">
                 <span v-if="file!==null" class="text-white font-medium text-sm leading-3" v-text="file.basename"></span>
                 <!--<span v-if="file!==null" class="text-gray-400 text-sm leading-5">/this/is/a/path</span>-->
                 <span v-if="file==null" class="text-white font-medium text-sm leading-3">No file open</span>
