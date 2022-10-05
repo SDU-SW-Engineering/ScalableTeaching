@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Badcow\PhraseGenerator\PhraseGenerator;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $user_id
  * @property User $user
- * @mixin \Eloquent
+ * @property TaskDelegation $taskDelegation
+ * @mixin Eloquent
  */
 class ProjectFeedback extends Model
 {
@@ -62,5 +64,10 @@ class ProjectFeedback extends Model
     public function comments() : HasMany
     {
         return $this->hasMany(ProjectFeedbackComment::class);
+    }
+
+    public function taskDelegation() : BelongsTo
+    {
+        return $this->belongsTo(TaskDelegation::class);
     }
 }

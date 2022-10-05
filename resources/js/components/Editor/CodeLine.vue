@@ -24,7 +24,7 @@
             <div>
                 <span class="commentable" v-html="line.line"></span>
                 <comment-editor @commentCreated="commentCreated" :file="file" @close="isCommenting = false" v-if="isCommenting && relevantComments.length === 0" :line="line.number" :indentation="indentation"></comment-editor>
-                <comment :comment="comment" perspective="sender" :indentation="indentation" :key="comment.id" v-for="comment in relevantComments"></comment>
+                <comment @commentDeleted="commentDeleted" :comment="comment" perspective="sender" :indentation="indentation" :key="comment.id" v-for="comment in relevantComments"></comment>
             </div>
         </div>
     </div>
@@ -63,6 +63,9 @@ export default {
         },
         commentCreated: function (comment) {
             this.$emit('commentCreated', comment);
+        },
+        commentDeleted: function (comment) {
+            this.$emit('commentDeleted', comment);
         }
     },
     computed: {

@@ -2,10 +2,12 @@
 
 namespace App\Policies;
 
+use App\Models\Enums\FeedbackCommentStatus;
 use App\Models\Group;
 use App\Models\Project;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
+use App\Models\ProjectFeedbackComment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -73,11 +75,23 @@ class ProjectPolicy
         if($this->view($user, $project))
             return true;
 
-        if (ProjectFeedback::where('sha', $projectDownload->ref)
+        if(ProjectFeedback::where('sha', $projectDownload->ref)
             ->where('user_id', $user->id)
-            ->unreviewed()->exists())
+            ->exists())
             return true;
 
         return false;
+    }
+
+    public function updateFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): bool
+    {
+        if(!$this->accessCode($user, $project, $projectDownload))
+            return false;
+        if($projectFeedbackComment->author->isNot($user))
+            return false;
+        if ($projectFeedbackComment->feedback->taskDelegation->deadline_at->isPast())
+            return false;
+
+        return $projectFeedbackComment->status == FeedbackCommentStatus::Draft;
     }
 }

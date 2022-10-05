@@ -6,6 +6,7 @@ use App\Exceptions\TaskDelegationException;
 use App\Jobs\Project\DownloadProject;
 use App\Jobs\Project\IndexRepositoryChanges;
 use App\Models\Enums\TaskDelegationType;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Task $task
  * @property TaskDelegationType $type
  * @property bool $delegated
+ * @property Carbon $deadline_at
  */
 class TaskDelegation extends Model
 {

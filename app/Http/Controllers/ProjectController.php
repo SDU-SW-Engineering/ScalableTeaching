@@ -225,4 +225,11 @@ class ProjectController extends Controller
             'line'     => $validated['line']
         ]);
     }
+
+    public function deleteComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment)
+    {
+        $projectFeedbackComment->delete();
+
+        return "ok";
+    }
 }
