@@ -23,7 +23,7 @@
             </div>
             <div>
                 <span class="commentable" v-html="line.line"></span>
-                <comment-editor :file="file" @close="isCommenting = false" v-if="isCommenting && relevantComments.length === 0" :line="line.number" :indentation="indentation"></comment-editor>
+                <comment-editor @commentCreated="commentCreated" :file="file" @close="isCommenting = false" v-if="isCommenting && relevantComments.length === 0" :line="line.number" :indentation="indentation"></comment-editor>
                 <comment :comment="comment" perspective="sender" :indentation="indentation" :key="comment.id" v-for="comment in relevantComments"></comment>
             </div>
         </div>
@@ -60,6 +60,9 @@ export default {
             if (this.relevantComments.length > 0)
                 return;
             this.isCommenting = !this.isCommenting;
+        },
+        commentCreated: function (comment) {
+            this.$emit('commentCreated', comment);
         }
     },
     computed: {
@@ -74,7 +77,7 @@ export default {
             if (this.comments.length === 0)
                 return [];
             return this.comments.filter(x => x.line === this.line.number);
-        }
+        },
     }
 }
 </script>

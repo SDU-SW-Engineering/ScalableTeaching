@@ -1,5 +1,5 @@
 <template>
-    <div class="w-80 mb-2" :style="{ marginLeft: indentation + 'ch'}">
+    <div class="w-80 mb-1" :style="{ marginLeft: indentation + 'ch'}">
         <div class="flex flex-col shadow-md">
             <div class="bg-gray-800 rounded-t-md px-3 py-1 mt-1">
                 <h2 class="text-gray-100 font-semibold">Comment</h2>
@@ -58,13 +58,14 @@ export default {
             if (this.comment.trim() === "")
                 return;
             this.saving = true;
-            let test = (await axios.post(location.pathname + '/comments', {
+            let comment = (await axios.post(location.pathname + '/comments', {
                 comment: this.comment,
                 line: this.line,
                 file: this.file
             })).data
             this.saving = false;
             this.cancel();
+            this.$emit('commentCreated', comment)
         }
     }
 }

@@ -1,6 +1,6 @@
 <template>
     <div class="whitespace-pre-wrap">
-        <code-line :comments="comments" :file="file.full" :line="line" :key="line.number + file.full" v-for="line in file.lines"></code-line>
+        <code-line @commentCreated="refreshComments" :comments="comments" :file="file.full" :line="line" :key="line.number + file.full" v-for="line in file.lines"></code-line>
     </div>
 </template>
 
@@ -23,16 +23,21 @@ export default {
             comments: []
         }
     },
+    methods: {
+        async refreshComments() {
+            this.comments = (await axios.get(location.pathname + '/comments', {
+                params: {
+                    file: this.file.full
+                }
+            })).data;
+        }
+    },
     watch: {
         file: {
             immediate: true,
             async handler(to, from) {
                 this.comments = [];
-                this.comments = (await axios.get(location.pathname + '/comments', {
-                    params: {
-                        file: this.file.full
-                    }
-                })).data;
+                await this.refreshComments()
             }
         }
     }
