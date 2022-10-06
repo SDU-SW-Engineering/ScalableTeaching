@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="flex hover:bg-gray-700 group">
+        <div class="flex hover:bg-gray-700 group" :id="'line-' + line.number">
             <div
                  class="w-14 items-start justify-end flex-shrink-0 mr-4 flex">
                 <div @click="toggleComment" class="flex cursor-pointer items-center">

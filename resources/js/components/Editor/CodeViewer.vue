@@ -16,6 +16,10 @@ export default {
         file: {
             type: Object,
             required: true
+        },
+        scrollTo: {
+            type: Number,
+            default: null
         }
     },
     data() {
@@ -30,6 +34,10 @@ export default {
                     file: this.file.full
                 }
             })).data;
+            if (this.scrollTo == null)
+                return;
+            await new Promise(r => setTimeout(r, 100));
+            await document.getElementById('line-' + this.scrollTo).scrollIntoView()
         }
     },
     watch: {

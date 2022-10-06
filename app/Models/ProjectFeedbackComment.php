@@ -21,7 +21,7 @@ class ProjectFeedbackComment extends Model
 
     protected $fillable = ['filename', 'line', 'comment'];
 
-    protected $hidden = ['status', 'mark_as', 'rejection_reason', 'filename'];
+    protected $hidden = ['status', 'mark_as', 'rejection_reason'];
 
     protected $appends = ['time_since'];
 

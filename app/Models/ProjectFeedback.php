@@ -42,6 +42,11 @@ class ProjectFeedback extends Model
     {
         return $query->where('reviewed', false);
     }
+
+    public function scopeReviewed(Builder $query)
+    {
+        return $query->where('reviewed', true);
+    }
     /**
      * @return BelongsTo<User,ProjectFeedback>
      */

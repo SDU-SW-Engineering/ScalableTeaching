@@ -14,6 +14,7 @@ use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
 use App\Models\ProjectFeedbackComment;
 use App\Models\Task;
+use App\Models\User;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
@@ -181,8 +182,16 @@ class ProjectController extends Controller
         $contents = $projectDownload->file(\request('path'));
 
         $extension = pathinfo(\request('path'), PATHINFO_EXTENSION);
-
-        $highlighted = Shiki::highlight($contents, $extension);
+        try {
+            $highlighted = Shiki::highlight($contents, $extension);
+        } catch(\Exception $e) {
+            try {
+                $highlighted = Shiki::highlight($contents, 'txt');
+            }
+            catch(\Exception $e2) {
+                return response("Can't be opened", 400);
+            }
+        }
 
         $xml = simplexml_load_string($highlighted);
         $lines = $xml->xpath('//span[@class="line"]');
@@ -202,8 +211,16 @@ class ProjectController extends Controller
 
     public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
     {
-        return ProjectFeedbackComment::whereIn('project_feedback_id', $project->feedback()->pluck('id'))
-            ->where('filename', \request('file'))
+        $isOwner = $project->owners()->contains(fn(User $user) => $user->is(auth()->user()));
+        $feedbackIds = $isOwner ? $project->feedback()->reviewed()->pluck('id') : $project->feedback()->where('user_id', auth()->id())->pluck('id');
+        if(\request()->has('file'))
+            return ProjectFeedbackComment::whereIn('project_feedback_id', $feedbackIds)
+                ->where('filename', \request('file'))
+                ->get();
+
+        return ProjectFeedbackComment::whereIn('project_feedback_id', $feedbackIds)
+            ->orderBy('filename')
+            ->orderBy('line')
             ->get();
     }
 
