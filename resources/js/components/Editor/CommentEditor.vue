@@ -31,7 +31,8 @@
 </template>
 
 <script>
-import axios from "axios";
+import axios from "axios"
+import {bus} from "./Editor";
 
 export default {
     props: {
@@ -70,6 +71,7 @@ export default {
             let comment = this.updating == null ? await this.create() : await this.update();
             this.saving = false;
             this.cancel();
+            bus.$emit('commentsUpdated', comment);
             this.$emit('commentCreated', comment)
         },
         create: async function () {

@@ -26,6 +26,8 @@ import Welcome from "./Welcome";
 import Toolbar from "./Toolbar";
 import Vue from "vue";
 import FeedbackList from "./FeedbackList";
+
+
 export const bus = new Vue();
 
 export default {

@@ -6,6 +6,7 @@ use App\Events\ProjectCreated;
 use App\Listeners\GitLab\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
+use App\Models\Enums\FeedbackCommentStatus;
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Group;
 use App\Models\Pipeline;
@@ -258,5 +259,13 @@ class ProjectController extends Controller
 
         $projectFeedbackComment->refresh();
         return $projectFeedbackComment;
+    }
+
+    public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    {
+        /** @var ?ProjectFeedback $feedback */
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
+        abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
+        dd($feedback);
     }
 }

@@ -34,6 +34,7 @@
 import CommentEditor from "./CommentEditor";
 
 import Comment from "./Comment";
+import {bus} from "./Editor"
 
 export default {
     components: {Comment, CommentEditor},
@@ -69,10 +70,11 @@ export default {
         commentCreated: function (comment) {
             this.isCommenting = false;
             this.editing = null;
-            this.$emit('commentCreated', comment);
+            this.$emit('commentCreated', comment)
         },
         commentDeleted: function (comment) {
             this.$emit('commentDeleted', comment);
+            bus.$emit('commentsUpdated', comment);
         },
         edit: function(comment) {
             this.editing = comment;

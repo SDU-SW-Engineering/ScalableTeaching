@@ -42,7 +42,7 @@
 
 <script>
 import axios from "axios";
-
+import { bus } from "./Editor"
 export default {
     data() {
         return {
@@ -68,6 +68,8 @@ export default {
     },
     mounted: async function () {
         await this.loadComments();
+
+        bus.$on('commentsUpdated', () => this.loadComments())
     }
 }
 </script>
