@@ -22,7 +22,6 @@ class IndexRepositoryChanges implements ShouldQueue
     public function middleware(): array
     {
         return [
-            new RateLimited('downloads'),
             (new WithoutOverlapping($this->project->id . '-' . $this->comparisonSha))->dontRelease()
         ];
     }
@@ -44,6 +43,11 @@ class IndexRepositoryChanges implements ShouldQueue
      */
     public function handle(): void
     {
+        if ($this->project->task->current_sha == null)
+        {
+            $this->fail(new \Exception("Task has no sha and a comparison can't be done."));
+            return;
+        }
         /** @var ProjectDiffIndex|null $index */
         $index = $this->project->changes()->where('from', $this->project->task->current_sha)->where('to', $this->comparisonSha)->first();
         if($index != null && $index->status == ProjectDiffIndexStatus::Success) // don't reindex if already successful

@@ -73,13 +73,13 @@ class ProjectDownload extends Model
             for($j = 0; $j < count($path); $j++) {
                 $file = $path[$j];
                 if($j + 1 < count($path)) {
-                    $nextDirectory = $currentDir->getDirectory($file) ?? $currentDir->addDirectory(new Directory($file, $i == 0));
+                    $nextDirectory = $currentDir->getDirectory($file) ?? $currentDir->addDirectory(new Directory($file, $i == 0 ? null : $currentDir));
                     $currentDir = $nextDirectory;
                     continue;
                 }
                 if($file == "")
                     continue;
-                $currentDir->addFile(new File($fileName));;
+                $currentDir->addFile(new File($fileName, $currentDir));;
             }
         }
 

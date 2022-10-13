@@ -46,9 +46,5 @@ class AppServiceProvider extends ServiceProvider
         Http::macro('gitlab', function() {
             return Http::withToken(config('scalable.gitlab_token'))->baseUrl(config('scalable.gitlab_url') . '/api/v4');
         });
-
-        RateLimiter::for('downloads', function(DownloadProject $job) {
-            return Limit::perMinute(2);
-        });
     }
 }

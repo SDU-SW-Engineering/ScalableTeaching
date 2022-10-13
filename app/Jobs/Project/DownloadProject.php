@@ -24,11 +24,6 @@ class DownloadProject implements ShouldQueue
      */
     public array $backoff = [60, 120, 300, 600];
 
-    public function middleware() : array
-    {
-        return [new RateLimited('downloads')];
-    }
-
     /**
      * Create a new job instance.
      *

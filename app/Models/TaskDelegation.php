@@ -78,7 +78,7 @@ class TaskDelegation extends Model
         $projects = $this->task->projects->keyBy('id');
 
         $remainingTasks = $this->projectCounter($projects);
-
+        $delayCounter = 0;
         foreach($this->task->course->students as $user) {
             if($remainingTasks->count() == 0)
                 $remainingTasks = $this->projectCounter($projects); // out of tasks, replenish to start over
@@ -113,7 +113,8 @@ class TaskDelegation extends Model
                     'user_id'            => $user->id,
                 ]);
 
-                IndexRepositoryChanges::dispatch($project, $projectPush->after_sha)->onQueue('index');
+                IndexRepositoryChanges::dispatch($project, $projectPush->after_sha)->onQueue('index')->delay(now()->addMinutes($delayCounter / 2));
+                $delayCounter++;
                 $ineligibleTasks[] = $projectId;
                 if ($project->downloads()->where('ref', $projectPush->after_sha)->exists())
                     continue; // download is already queued.
@@ -123,7 +124,8 @@ class TaskDelegation extends Model
                     'ref'       => $projectPush->after_sha,
                     'expire_at' => now()->addYears(2),
                 ]);
-                DownloadProject::dispatch($download)->onQueue('downloads');
+                DownloadProject::dispatch($download)->onQueue('downloads')->delay(now()->addMinutes($delayCounter / 2));
+                $delayCounter++;
             }
         }
         $this->update(['delegated' => true]);
@@ -190,6 +192,7 @@ class TaskDelegation extends Model
                 ->pushes()
                 ->isAccepted($project->task)
                 ->isValid()
+                ->latest()
                 ->first(),
             TaskDelegationType::SucceedingPushes => throw new \Exception('To be implemented'),
             TaskDelegationType::SucceedingOrLastPushes => throw new \Exception('To be implemented')

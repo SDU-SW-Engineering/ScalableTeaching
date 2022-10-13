@@ -11,6 +11,7 @@ use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
+use App\Models\ProjectDiffIndex;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
 use App\Models\ProjectFeedbackComment;
@@ -20,6 +21,8 @@ use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
+use Domain\Files\Directory;
+use Domain\Files\IsChangeable;
 use Gitlab\Exception\RuntimeException;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
@@ -182,7 +185,26 @@ class ProjectController extends Controller
 
     public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
     {
-        return $projectDownload->fileTree()->trim();
+        $tree = $projectDownload->fileTree()->trim();
+        $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
+        if($changes != null) {
+            $filesChanged =array_column( $changes, 'file');
+            $tree->traverse(function(IsChangeable $item) use ($filesChanged, $changes, $tree) {
+                $path = str_replace('/', '\/', preg_quote($item->path()));
+
+                foreach ($filesChanged as $file)
+                {
+                    $pathMatches = !($path == '') && preg_match("/^$path/i", $file) === 1;
+                    if($pathMatches) {
+
+                        $item->setChanged(true);
+                        break;
+                    }
+                }
+            });
+        }
+
+        return $tree;
     }
 
     public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
@@ -267,7 +289,7 @@ class ProjectController extends Controller
         return $projectFeedbackComment;
     }
 
-    public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : string
+    public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): string
     {
         /** @var ?ProjectFeedback $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA

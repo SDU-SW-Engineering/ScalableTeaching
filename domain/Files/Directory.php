@@ -3,10 +3,13 @@
 namespace Domain\Files;
 
 
-class Directory implements \JsonSerializable
+class Directory implements \JsonSerializable, IsChangeable
 {
-    private string $path;
-    private bool $isRoot = false;
+    public string $path;
+    private string $fullPath;
+    public bool $changed = false;
+
+    public ?Directory $parent = null;
 
     /**
      * @return string
@@ -16,11 +19,12 @@ class Directory implements \JsonSerializable
         return $this->path;
     }
 
-    public function __construct(string $path, bool $isRoot = false)
+    public function __construct(string $path, Directory $parent = null)
     {
         $paths = explode("/", $path);
         $this->path = $paths[count($paths) - 1];
-        $this->isRoot = $isRoot;
+        $this->fullPath = $path;
+        $this->parent = $parent;
     }
 
     /**
@@ -68,9 +72,9 @@ class Directory implements \JsonSerializable
         return null;
     }
 
-    public function trim(string $what = null) : Directory
+    public function trim(string $what = null): Directory
     {
-        if($what == null && $this->isRoot)
+        if($what == null && $this->parent == null)
             $what = trim($this->path, '/');
         $this->path = str_replace($what, '/', $this->path);
 
@@ -79,6 +83,18 @@ class Directory implements \JsonSerializable
         }
 
         return $this;
+    }
+
+    public function traverse(\Closure $closure)
+    {
+        $closure($this);
+        foreach($this->directories as $directory) {
+            $directory->traverse($closure);
+        }
+
+        foreach($this->files as $file) {
+            $closure($file);
+        }
     }
 
     /**
@@ -93,9 +109,29 @@ class Directory implements \JsonSerializable
     {
         return [
             'name'        => $this->path,
-            'isRoot'      => $this->isRoot,
+            'isRoot'      => $this->parent == null,
             'directories' => $this->directories,
-            'files'       => $this->files
+            'files'       => $this->files,
+            'changed'     => $this->changed
         ];
+    }
+
+    public function setChanged(bool $isChanged): void
+    {
+        $this->changed = $isChanged;
+    }
+
+    public function path()
+    {
+        $parts = [$this->path];
+
+        $next = $this->parent;
+        while($next != null) {
+            if($next->path != "/")
+                $parts[] = $next->path;
+            $next = $next->parent;
+        }
+
+        return implode('/', array_reverse($parts));;
     }
 }
