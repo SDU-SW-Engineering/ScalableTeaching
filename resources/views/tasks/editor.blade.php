@@ -1,5 +1,5 @@
 @extends('master')
 
 @section('content')
-    <editor></editor>
+    <editor context="{{ $context }}"></editor>
 @endsection

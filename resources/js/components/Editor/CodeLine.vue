@@ -24,7 +24,7 @@
             <div>
                 <span class="commentable" v-html="line.line"></span>
                 <comment-editor @commentCreated="commentCreated" :file="file" @close="closeEditor" :updating="editing" v-if="isCommenting" :line="line.number" :indentation="indentation"></comment-editor>
-                <comment v-if="editing == null" @edit="edit" @delete="commentDeleted" :comment="comment" perspective="sender" :indentation="indentation" :key="comment.id" v-for="comment in relevantComments"></comment>
+                <comment :actions="context !== 'submitted'" v-if="editing == null" @edit="edit" @delete="commentDeleted" :comment="comment" :perspective="context ===  'recipient' ? 'recipient' : 'sender'" :indentation="indentation" :key="comment.id" v-for="comment in relevantComments"></comment>
             </div>
         </div>
     </div>
@@ -49,6 +49,10 @@ export default {
         },
         comments: {
             type: Array
+        },
+        context: {
+            type: String,
+            required: true
         }
     },
     data() {

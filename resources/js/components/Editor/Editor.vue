@@ -1,19 +1,25 @@
 <template>
     <div>
         <overlay v-if="initialLoad"></overlay>
-        <toolbar :file="openedFile" @toggleFeedback="showFeedbackList = !showFeedbackList"/>
+        <toolbar :context="context" :file="openedFile" @toggleFeedback="showFeedbackList = !showFeedbackList"/>
         <div class="flex">
             <div class="flex vh80">
                 <side-bar @openFile="openFile" :file-tree="fileTree"/>
             </div>
             <div class="bg-gray-900 vh80 overflow-x-auto overflow-y-auto flex-grow">
                 <welcome v-if="openedFile === null"/>
-                <code-viewer :file="openedFile" :scrollTo="goToLine" v-else/>
+                <code-viewer :context="context" :file="openedFile" :scrollTo="goToLine" v-else/>
             </div>
             <div class="flex vh80">
-                <feedback-list @openFile="openFile" @close="showFeedbackList = false" v-if="showFeedbackList"/>
+                <feedback-list :context="context" @openFile="openFile" @close="showFeedbackList = false" v-if="showFeedbackList"/>
             </div>
         </div>
+        <alert title="Submit Feedback"
+               @cancel="showSendFeedbackDialog=false"
+               method="post"
+               :url="currentPath() + '/feedback'"
+               content="Are you sure you want to submit your feedback? This cannot be undone" type="danger" v-if="showSendFeedbackDialog" confirm-button-text="Submit">
+        </alert>
     </div>
 </template>
 
@@ -26,19 +32,27 @@ import Welcome from "./Welcome";
 import Toolbar from "./Toolbar";
 import Vue from "vue";
 import FeedbackList from "./FeedbackList";
+import Alert from "../Alert";
 
 
 export const bus = new Vue();
 
 export default {
-    components: {FeedbackList, Toolbar, Welcome, CodeViewer, Overlay, SideBar},
+    components: {Alert, FeedbackList, Toolbar, Welcome, CodeViewer, Overlay, SideBar},
+    props: {
+        context: {
+            type: String,
+            required: true
+        }
+    },
     data() {
         return {
             initialLoad: true,
             fileTree: {},
             openedFile: null,
             showFeedbackList: false,
-            goToLine: null
+            goToLine: null,
+            showSendFeedbackDialog: false
         }
     },
     methods: {
@@ -54,11 +68,15 @@ export default {
             } catch (e) {
                 alert("This item can't be opened in the viewer.");
             }
+        },
+        currentPath: function() {
+            return location.pathname
         }
     },
     async mounted() {
         this.fileTree = (await axios.get(location.pathname + '/tree')).data;
         this.initialLoad = false;
+        bus.$on('submit-comments', () => this.showSendFeedbackDialog = true);
     }
 }
 </script>

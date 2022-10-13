@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $user_id
  * @property User $user
+ * @property bool $reviewed
  * @property TaskDelegation $taskDelegation
  * @mixin Eloquent
  */

@@ -8,6 +8,9 @@
                         d="M20.309 17.708C22.196 15.66 22.006 13.03 22 13V5a1 1 0 0 0-1-1h-6c-1.103 0-2 .897-2 2v7a1 1 0 0 0 1 1h3.078a2.89 2.89 0 0 1-.429 1.396c-.508.801-1.465 1.348-2.846 1.624l-.803.16V20h1c2.783 0 4.906-.771 6.309-2.292zm-11.007 0C11.19 15.66 10.999 13.03 10.993 13V5a1 1 0 0 0-1-1h-6c-1.103 0-2 .897-2 2v7a1 1 0 0 0 1 1h3.078a2.89 2.89 0 0 1-.429 1.396c-.508.801-1.465 1.348-2.846 1.624l-.803.16V20h1c2.783 0 4.906-.771 6.309-2.292z"></path>
                 </svg>
                 <span class="text-sm">Comment</span>
+                <span class="text-xs text-white bg-red-500 rounded-sm p-0.5 ml-1.5" v-if="comment.status === 'rejected'">Rejected</span>
+                <span class="text-xs text-white bg-yellow-600 rounded-sm p-0.5 ml-1.5" v-else-if="comment.status === 'pending'">Pending review</span>
+                <span class="text-xs text-white bg-lime-green-600 rounded-sm p-0.5 ml-1.5" v-else-if="comment.status === 'approved'">Approved</span>
             </div>
             <span class="text-gray-500 text-xs" v-text="comment.time_since"></span>
         </div>
@@ -22,7 +25,7 @@
                 <span v-text="comment.comment"></span>
             </div>
         </div>
-        <div class="flex bg-black rounded-b-md border-b border-r border-l border-gray-600">
+        <div v-if="actions" class="flex bg-black rounded-b-md border-b border-r border-l border-gray-600">
             <button @click="edit" v-if="perspective === 'sender'"
                     class="w-full flex flex-col items-center py-2 first:rounded-bl-md hover:bg-gray-900">
                 <div class="h-5 w-5 flex items-center justify-center">
@@ -49,6 +52,10 @@
                 <span class="text-xs text-gray-400 font-thin mt-1">Helpful</span>
             </button>
         </div>
+        <div class="bg-black rounded-b border-r border-l border-b border-gray-600 flex flex-col p-3" v-if="comment.reviewer_feedback !== null">
+            <span class="text-sm text-white">Response from reviewer</span>
+            <span class="text-sm text-gray-300 italic" v-text="comment.reviewer_feedback"></span>
+        </div>
     </div>
 </template>
 
@@ -67,6 +74,10 @@ export default {
         },
         comment: {
             type: Object,
+            required: true
+        },
+        actions: {
+            type: Boolean,
             required: true
         }
     },

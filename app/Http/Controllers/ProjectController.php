@@ -170,7 +170,14 @@ class ProjectController extends Controller
 
     public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
     {
-        return view('tasks.editor');
+        /** @var ProjectFeedback|null $feedback */
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
+        $context = match (true) {
+            $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
+            $feedback?->reviewed == false => 'pre-submission',
+            $feedback?->reviewed => 'submitted'
+        };
+        return view('tasks.editor')->with('context', $context);
     }
 
     public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
@@ -188,8 +195,7 @@ class ProjectController extends Controller
         } catch(\Exception $e) {
             try {
                 $highlighted = Shiki::highlight($contents, 'txt');
-            }
-            catch(\Exception $e2) {
+            } catch(\Exception $e2) {
                 return response("Can't be opened", 400);
             }
         }
@@ -261,11 +267,16 @@ class ProjectController extends Controller
         return $projectFeedbackComment;
     }
 
-    public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : string
     {
         /** @var ?ProjectFeedback $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
         abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
-        dd($feedback);
+        $feedback->comments()->update([
+            'status' => FeedbackCommentStatus::Pending
+        ]);
+        $feedback->update(['reviewed' => true]);
+
+        return "ok";
     }
 }

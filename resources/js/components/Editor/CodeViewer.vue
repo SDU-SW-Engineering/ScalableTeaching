@@ -1,6 +1,6 @@
 <template>
     <div class="whitespace-pre-wrap">
-        <code-line @commentCreated="refreshComments" @commentDeleted="refreshComments" :comments="comments" :file="file.full" :line="line" :key="line.number + file.full" v-for="line in file.lines"></code-line>
+        <code-line :context="context" @commentCreated="refreshComments" @commentDeleted="refreshComments" :comments="comments" :file="file.full" :line="line" :key="line.number + file.full" v-for="line in file.lines"></code-line>
     </div>
 </template>
 
@@ -20,6 +20,10 @@ export default {
         scrollTo: {
             type: Number,
             default: null
+        },
+        context: {
+            type: String,
+            required: true
         }
     },
     data() {

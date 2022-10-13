@@ -32,9 +32,10 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             Route::get('{projectDownload}/tree', 'showTree')->name('show-tree')->can('accessCode', ['project', 'projectDownload']);
             Route::get('{projectDownload}/file', 'showFile')->name('show-file')->can('accessCode', ['project', 'projectDownload']);
             Route::get('{projectDownload}/comments', 'comments')->name('comments')->can('accessCode', ['project', 'projectDownload']);
-            Route::post('{projectDownload}/comments', 'storeComment')->name('store-comment')->can('accessCode', ['project', 'projectDownload']);
+            Route::post('{projectDownload}/comments', 'storeComment')->name('store-comment')->can('createFeedbackComment', ['project', 'projectDownload']);
             Route::put('{projectDownload}/comments/{projectFeedbackComment}', 'updateComment')->name('update-comment')->can('updateFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
             Route::delete('{projectDownload}/comments/{projectFeedbackComment}', 'deleteComment')->name('delete-comment')->can('updateFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
+            Route::post('{projectDownload}/feedback', 'submitFeedback')->name('submit-feedback')->can('accessCode', ['project', 'projectDownload']);
         });
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
     });

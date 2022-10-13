@@ -17,18 +17,27 @@
                     <span class="text-gray-100 text-sm" v-else>{{ comments.length }} comments</span>
                 </div>
             </div>
-            <div class="flex flex-col overflow-auto" style="max-height: calc(80vh - 48px - 48px);">
+            <div class="flex flex-col overflow-auto" :class="[context === 'pre-submission' ? 'feedback-list' : 'feedback-list-full']">
                 <div @click="goToFile(comment)" class="cursor-pointer hover:bg-gray-700 transition-colors  p-2 flex flex-col" :key="comment.id" v-for="comment in comments">
                     <span class="text-xs font-medium text-lime-green-400">{{ comment.shortFile }}:{{ comment.line }}</span>
-                    <div class="bg-gray-600 p-2 my-1 rounded text-white text-sm">
+                    <div :class="[comment.reviewer_feedback === null ? 'my-1 rounded' : 'mt-1 rounded-t']" class="bg-gray-600 p-2 text-white text-sm">
                         <span v-text="comment.comment"></span>
                     </div>
-                    <span class="text-white text-xs" v-text="comment.time_since"></span>
+                    <div class="flex flex-col bg-gray-900 p-2 rounded-b text-xs mb-2" v-if="comment.reviewer_feedback !== null">
+                        <span class="text-white font-italic">Response from reviewer:</span>
+                        <span class="italic text-gray-300" v-text="comment.reviewer_feedback"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-white text-xs" v-text="comment.time_since"></span>
+                        <span class="text-yellow-300 text-xs font-medium" v-if="comment.status === 'pending'">Pending review</span>
+                        <span class="text-lime-green-300 text-xs font-medium" v-else-if="comment.status === 'approved'">Approved</span>
+                        <span class="text-red-400 text-xs font-medium" v-else-if="comment.status === 'rejected'">Rejected</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div>
-            <button
+        <div v-if="context === 'pre-submission'">
+            <button @click="submitComments"
                 class="bg-lime-green-500 w-full flex items-center justify-center py-3 text-white hover:bg-lime-green-600 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-1">
                     <path
@@ -44,10 +53,16 @@
 import axios from "axios";
 import { bus } from "./Editor"
 export default {
+    props: {
+        context: {
+            type: String,
+            required: true
+        }
+    },
     data() {
         return {
             isLoading: true,
-            comments: []
+            comments: [],
         }
     },
     methods: {
@@ -64,6 +79,14 @@ export default {
         },
         goToFile: function (comment) {
             this.$emit('openFile', comment.filename, comment.line);
+        },
+        submitComments: function() {
+            bus.$emit('submit-comments');
+        }
+    },
+    computed: {
+        maxHeight: function() {
+            return 10;
         }
     },
     mounted: async function () {
@@ -73,3 +96,13 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.feedback-list-full {
+    max-height: calc(80vh - 48px);
+}
+
+.feedback-list {
+    max-height: calc(80vh - 48px - 48px);
+}
+</style>

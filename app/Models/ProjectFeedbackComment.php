@@ -19,9 +19,9 @@ class ProjectFeedbackComment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['filename', 'line', 'comment'];
+    protected $fillable = ['filename', 'line', 'comment', 'status'];
 
-    protected $hidden = ['status', 'mark_as', 'rejection_reason'];
+    protected $hidden = ['mark_as'];
 
     protected $appends = ['time_since'];
 

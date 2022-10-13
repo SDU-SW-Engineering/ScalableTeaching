@@ -83,6 +83,21 @@ class ProjectPolicy
         return false;
     }
 
+    public function createFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload) : bool
+    {
+        if (!$this->accessCode($user, $project, $projectDownload))
+            return false;
+        /** @var ProjectFeedback|null $feedback */
+        $feedback = $project->feedback()->where('user_id', $user->id)->first();
+        if ($feedback == null)
+            return false;
+
+        if ($feedback->reviewed)
+            return false;
+
+        return $feedback->taskDelegation->deadline_at->isFuture();
+    }
+
     public function updateFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): bool
     {
         if(!$this->accessCode($user, $project, $projectDownload))
