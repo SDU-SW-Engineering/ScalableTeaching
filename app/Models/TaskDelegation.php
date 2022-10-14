@@ -80,7 +80,8 @@ class TaskDelegation extends Model
 
         $remainingTasks = $this->projectCounter($projects);
         $delayCounter = 0;
-        foreach($this->task->course->students as $user) {
+        foreach($this->task->course->students as $user)
+        {
             if($remainingTasks->count() == 0)
                 $remainingTasks = $this->projectCounter($projects); // out of tasks, replenish to start over
 
@@ -89,7 +90,8 @@ class TaskDelegation extends Model
             if($userProject != null)
                 $ineligibleTasks[] = $userProject;
 
-            for($i = 0; $i < $this->number_of_tasks; $i++) {
+            for($i = 0; $i < $this->number_of_tasks; $i++)
+            {
                 $project = null;
                 $projectPush = null;
                 do // keep looking for a valid repo to assign to the user
@@ -98,7 +100,8 @@ class TaskDelegation extends Model
                     if ($projectId == null)
                         break; // no valid candidate skipping
                     $projectPush = $this->relevantPush($projects[$projectId]);
-                    if($projectPush?->after_sha == null) {
+                    if($projectPush?->after_sha == null)
+                    {
                         $ineligibleTasks[] = $projectId;
                         continue;
                     }
@@ -160,7 +163,8 @@ class TaskDelegation extends Model
      */
     private function pickRandomProject(\Illuminate\Support\Collection &$tasks, array $exclude = []): ?int
     {
-        do {
+        do
+        {
             $eligibleTasks = $tasks->reject(fn(int $counter, int $projectId) => in_array($projectId, $exclude));
             if ($eligibleTasks->count() == 0)
             {
@@ -189,14 +193,15 @@ class TaskDelegation extends Model
      */
     private function relevantPush(Project $project): ?ProjectPush
     {
-        return match ($this->type) {
+        return match ($this->type)
+        {
             TaskDelegationType::LastPushes => $project
                 ->pushes()
                 ->isAccepted($project->task)
                 ->isValid()
                 ->latest()
                 ->first(),
-            TaskDelegationType::SucceedingPushes => throw new \Exception('To be implemented'),
+            TaskDelegationType::SucceedingPushes       => throw new \Exception('To be implemented'),
             TaskDelegationType::SucceedingOrLastPushes => throw new \Exception('To be implemented')
         };
     }

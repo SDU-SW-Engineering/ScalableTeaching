@@ -26,14 +26,14 @@ class DashboardController extends Controller
         $exercises = Task::exercises()->whereIn('course_id', $courses->pluck('id'))->orderBy('starts_at', 'asc')->take(5)->visible()->get();
 
         return view('dashboard', [
-            'courses'           => $courses,
-            'tasks'             => $tasks,
-            'exercises'         => $exercises,
-            'courseAssignments' => $courseAssignments,
-            'nextAssignment'    => $nextAssignment,
-            'bg'                => 'bg-gray-100 dark:bg-gray-700',
+            'courses'            => $courses,
+            'tasks'              => $tasks,
+            'exercises'          => $exercises,
+            'courseAssignments'  => $courseAssignments,
+            'nextAssignment'     => $nextAssignment,
+            'bg'                 => 'bg-gray-100 dark:bg-gray-700',
             'awaitingFeedback'   => $awaitingFeedback,
-            'breadcrumbs'       => [
+            'breadcrumbs'        => [
                 'Dashboard' => null,
             ],
         ]);

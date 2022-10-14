@@ -26,7 +26,7 @@ class ProjectFeedbackComment extends Model
     protected $appends = ['time_since'];
 
     protected $casts = [
-        'status' => FeedbackCommentStatus::class
+        'status' => FeedbackCommentStatus::class,
     ];
 
     /**

@@ -49,7 +49,7 @@ class ProjectPolicy
             return false;
         if($project->ownable->id != $user->id)
             return false;
-        if(!$group->hasMember($user))
+        if( ! $group->hasMember($user))
             return false;
 
         return true;
@@ -85,7 +85,7 @@ class ProjectPolicy
 
     public function createFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload) : bool
     {
-        if (!$this->accessCode($user, $project, $projectDownload))
+        if ( ! $this->accessCode($user, $project, $projectDownload))
             return false;
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', $user->id)->first();
@@ -100,7 +100,7 @@ class ProjectPolicy
 
     public function updateFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): bool
     {
-        if(!$this->accessCode($user, $project, $projectDownload))
+        if( ! $this->accessCode($user, $project, $projectDownload))
             return false;
         if($projectFeedbackComment->author->isNot($user))
             return false;
@@ -112,7 +112,7 @@ class ProjectPolicy
 
     public function markFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): bool
     {
-        if (!$this->accessCode($user, $project, $projectDownload))
+        if ( ! $this->accessCode($user, $project, $projectDownload))
             return false;
 
         if ($projectFeedbackComment->status !== FeedbackCommentStatus::Approved)

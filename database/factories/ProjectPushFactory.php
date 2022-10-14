@@ -29,7 +29,7 @@ class ProjectPushFactory extends Factory
     {
         return $this->state(function(array $attributes) use ($datetime) {
             return [
-                'created_at' => $datetime->subHour(4)
+                'created_at' => $datetime->subHour(4),
             ];
         });
     }

@@ -73,7 +73,7 @@ class GradingController extends Controller
     {
         $taskDelegation->load('feedback.user');
 
-        if(!$taskDelegation->delegated)
+        if( ! $taskDelegation->delegated)
             return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation'));
 
         $groupedByUser = $taskDelegation->getRelation('feedback')->groupBy(function(ProjectFeedback $feedback) {
@@ -97,6 +97,9 @@ class GradingController extends Controller
             'course',
             'taskDelegation',
             'users',
-            'groupedByUser', 'downloadDictionary', 'indexDictionary'));
+            'groupedByUser',
+            'downloadDictionary',
+            'indexDictionary'
+        ));
     }
 }

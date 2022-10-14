@@ -38,7 +38,7 @@ function createStudents(int $count, bool $withPushes = true)
 {
     test()->students = User::factory($count)->hasAttached(test()->course)->create()->each(function(User $user) use ($withPushes) {
         $project = Project::factory()->for(test()->task)->for($user, 'ownable')->createQuietly();
-        if (!$withPushes)
+        if ( ! $withPushes)
             return;
         test()->latestPushes[] = ProjectPush::factory()->for($project)->create([
             'created_at' => test()->taskEndsAt->copy()->subHours(2), // push needs to be before the deadline of task
@@ -79,6 +79,7 @@ function delegateTasks(int $numberOfTasks) : TaskDelegation
     $delegation->delegate();
 
     $delegation->refresh();
+
     return $delegation;
 }
 
@@ -185,7 +186,7 @@ it('adds projects to the projects_download table', function() {
 
     assertDatabaseCount('project_downloads', 3);
     $downloads = ProjectDownload::pluck('ref');
-    $actual= $this->task->delegations()->first()->feedback()->get()->pluck('sha');
+    $actual = $this->task->delegations()->first()->feedback()->get()->pluck('sha');
     expect($downloads->diff($actual))->toHaveCount(0);
 });
 

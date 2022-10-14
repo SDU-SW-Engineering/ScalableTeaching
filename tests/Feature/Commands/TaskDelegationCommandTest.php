@@ -40,7 +40,7 @@ it('does not delegate tasks that are before the deadline of the task', function(
     assertDatabaseCount('project_feedback', 0);
     assertDatabaseHas('task_delegations', [
         'delegated' => false,
-        'task_id'   => $this->task->id
+        'task_id'   => $this->task->id,
     ]);
 });
 
@@ -50,6 +50,6 @@ it('delegates tasks after the deadline of the task', function() {
     assertDatabaseCount('project_feedback', 8);
     assertDatabaseHas('task_delegations', [
         'delegated' => true,
-        'task_id'   => $this->task->id
+        'task_id'   => $this->task->id,
     ]);
 });

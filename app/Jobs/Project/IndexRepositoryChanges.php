@@ -22,7 +22,7 @@ class IndexRepositoryChanges implements ShouldQueue
     public function middleware(): array
     {
         return [
-            (new WithoutOverlapping($this->project->id . '-' . $this->comparisonSha))->dontRelease()
+            (new WithoutOverlapping($this->project->id . '-' . $this->comparisonSha))->dontRelease(),
         ];
     }
 
@@ -46,6 +46,7 @@ class IndexRepositoryChanges implements ShouldQueue
         if ($this->project->task->current_sha == null)
         {
             $this->fail(new \Exception("Task has no sha and a comparison can't be done."));
+
             return;
         }
         /** @var ProjectDiffIndex|null $index */
@@ -63,12 +64,14 @@ class IndexRepositoryChanges implements ShouldQueue
         $index->last_try = now();
         $index->from = $this->project->task->current_sha;
         $index->to = $this->comparisonSha;
-        if($code != 0) {
+        if($code != 0)
+        {
             $output = Str::of($output[0]);
             $index->status = ProjectDiffIndexStatus::Failure;
-            $index->message = match (true) {
+            $index->message = match (true)
+            {
                 $output->contains('docker') => "Docker: " . $output,
-                default => "Unable to index: " . $output
+                default                     => "Unable to index: " . $output
             };
             $index->save();
 
@@ -77,7 +80,8 @@ class IndexRepositoryChanges implements ShouldQueue
 
         /** @var array{file: string, status: string, lines: int, proportion: string} $changes */
         $changes = [];
-        foreach($output as $line) {
+        foreach($output as $line)
+        {
             $line = Str::of($line);
             if(preg_match("/(.*)\|.*(\d+)\s*([+-]+)/", $line, $matches) !== 1)
                 continue;

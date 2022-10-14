@@ -66,13 +66,16 @@ class ProjectDownload extends Model
         $zip->open($file, ZipArchive::RDONLY);
         $root = new Directory(".");
         $remove = Str::of($zip->getNameIndex(0))->trim('/');
-        for($i = 0; $i < $zip->numFiles; $i++) {
+        for($i = 0; $i < $zip->numFiles; $i++)
+        {
             $fileName = $zip->getNameIndex($i);
             $path = explode('/', $fileName);
             $currentDir = $root;
-            for($j = 0; $j < count($path); $j++) {
+            for($j = 0; $j < count($path); $j++)
+            {
                 $file = $path[$j];
-                if($j + 1 < count($path)) {
+                if($j + 1 < count($path))
+                {
                     $nextDirectory = $currentDir->getDirectory($file) ?? $currentDir->addDirectory(new Directory($file, $i == 0 ? null : $currentDir));
                     $currentDir = $nextDirectory;
                     continue;
@@ -97,9 +100,10 @@ class ProjectDownload extends Model
         $zip->open($fileOnDisk);
         $fp = $zip->getStream($file);
         $contents = null;
-        while(!feof($fp))
+        while( ! feof($fp))
             $contents .= fread($fp, 2);
         fclose($fp);
+
         return trim($contents);
     }
 }

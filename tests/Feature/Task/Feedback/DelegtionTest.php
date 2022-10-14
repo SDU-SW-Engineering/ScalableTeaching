@@ -28,8 +28,8 @@ it('creates a task delegation', function() {
     post(route('courses.tasks.admin.addDelegation', [$this->course, $this->task]), [
         'tasks'         => 3,
         'options'       => [
-            'feedback' => 'on',
-            'moderation' => 'on'
+            'feedback'   => 'on',
+            'moderation' => 'on',
         ],
         'deadline_date' => $this->taskEndsAt->copy()->addDays(2)->format('Y-m-d'),
         'deadline_hour' => "23:59",

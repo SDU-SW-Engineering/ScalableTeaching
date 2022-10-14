@@ -34,12 +34,15 @@ class DelegateTasks extends Command
             /** @var TaskDelegation $taskDelegation */
             if (now()->isBefore($taskDelegation->task->ends_at))
                 continue;
-            try {
+            try
+            {
                 $taskDelegation->delegate();
-            } catch(TaskDelegationException $e) {
+            } catch(TaskDelegationException $e)
+            {
                 $this->error($e->getMessage());
             }
         }
+
         return 0;
     }
 }
