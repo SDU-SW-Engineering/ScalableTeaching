@@ -20,8 +20,6 @@ return new class extends Migration {
             $table->boolean('is_moderated')->after('is_anonymous')->default(false);
             $table->dateTime('deadline_at')->after('is_moderated');
             $table->boolean('delegated')->default(false)->after('deadline_at');
-
-            $table->dropForeign('task_delegations_course_role_id_foreign');
         });
     }
 
@@ -34,7 +32,6 @@ return new class extends Migration {
     {
         Schema::table('task_delegations', function (Blueprint $table) {
             $table->dropColumn(['type', 'grading', 'feedback', 'deadline_at', 'delegated', 'is_moderated']);
-            $table->foreign('course_role_id')->references('id')->on('course_roles');
         });
     }
 };
