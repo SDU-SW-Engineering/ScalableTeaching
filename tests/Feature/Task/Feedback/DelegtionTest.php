@@ -29,6 +29,7 @@ it('creates a task delegation', function() {
         'tasks'         => 3,
         'options'       => [
             'feedback' => 'on',
+            'moderation' => 'on'
         ],
         'deadline_date' => $this->taskEndsAt->copy()->addDays(2)->format('Y-m-d'),
         'deadline_hour' => "23:59",

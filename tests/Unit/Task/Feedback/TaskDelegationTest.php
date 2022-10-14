@@ -183,8 +183,10 @@ it('adds projects to the projects_download table', function() {
     createStudents(3);
     delegateTasks(2);
 
-    assertDatabaseCount('project_downloads', 6);
-    expect(ProjectDownload::pluck('ref'))->toEqual($this->task->delegations()->first()->feedback()->get()->pluck('sha'));
+    assertDatabaseCount('project_downloads', 3);
+    $downloads = ProjectDownload::pluck('ref');
+    $actual= $this->task->delegations()->first()->feedback()->get()->pluck('sha');
+    expect($downloads->diff($actual))->toHaveCount(0);
 });
 
 it('queues delegated tasks for download', function() {
@@ -192,7 +194,7 @@ it('queues delegated tasks for download', function() {
     delegateTasks(2);
 
     Queue::assertPushedOn('downloads', DownloadProject::class);
-    Queue::assertPushed(DownloadProject::class, 6);
+    Queue::assertPushed(DownloadProject::class, 3);
 });
 
 it('queues indexing of repository changes when tasks are delegated', function() {

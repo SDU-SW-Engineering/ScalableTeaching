@@ -44,6 +44,7 @@ class GradingController extends Controller
             'options.feedback'   => ['required_without:options.grading'],
             'options.moderation' => ['required_with:options.feedback'],
         ]);
+
         $deadline = Carbon::parse($validated['deadline_date'] . " " . $validated['deadline_hour']);
         if($deadline->isBefore($task->ends_at))
             return back()->withInput()->withErrors('The deadline must occur after the end of the task.');

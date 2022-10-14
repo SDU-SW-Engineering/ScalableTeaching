@@ -98,13 +98,6 @@ test('duration returns 2 if the task has been completed two days ago', function(
     expect($project->duration)->toBe('2.00');
 });
 
-test('dailyBuilds returns an empty collection when no start date is specified', function() {
-    /** @var Project $project */
-    $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
-
-    expect($project->dailyBuilds())->toBeEmpty();
-});
-
 test('dailyBuilds returns an array of days between start date and day before now', function() {
     $start = Carbon::now()->subMonth();
     $end = Carbon::now()->addMonth();
