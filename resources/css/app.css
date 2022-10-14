@@ -25,6 +25,18 @@
     background-image: url('/svgs/hero-waves.svg')
 }
 
+.dashboard-assignments {
+    height: calc(100vh - 230px);
+}
+
+.exercise-assignments {
+    height: calc(100vh - 450px);
+}
+
+.vh50 {
+    height: 50vh;
+}
+
 .vh60 {
     height: 60vh;
 }
