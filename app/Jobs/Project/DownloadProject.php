@@ -9,6 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
 use Storage;
 
@@ -28,7 +29,7 @@ class DownloadProject implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private ProjectDownload $download)
+    public function __construct(private readonly ProjectDownload $download)
     {
     }
 
@@ -36,6 +37,7 @@ class DownloadProject implements ShouldQueue
     {
         if ($this->download->downloaded_at != null)
             return;
+
         $gitLabManager = app(GitLabManager::class);
 
         $archiveContent = $gitLabManager->repositories()->archive($this->download->project->project_id, [

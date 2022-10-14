@@ -33,6 +33,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('tasks:mark-expired')->everyFiveMinutes();
+        $schedule->command('tasks:delegate')->everyFifteenMinutes();
     }
 
     /**

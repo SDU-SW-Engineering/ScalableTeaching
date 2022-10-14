@@ -541,11 +541,24 @@ class Task extends Model
         );
     }
 
-    public function loadSha() : void
+    public function loadSha(): void
     {
         $project = app(SourceControl::class)->showProject((string)$this->source_project_id);
-        if ($project == null)
+        if($project == null)
             return;
         $this->update(['current_sha' => $project->lastSha]);
+    }
+
+    /**
+     * Key corresponds to the user id
+     * Value corresponds to their associated project
+     * Users that haven't created a project won't be in the dictionary
+     * @return Collection|\Illuminate\Support\Collection<int, int>
+     */
+    public function userProjectDictionary()
+    {
+        return $userProjects = $this->projects()->get() // @phpstan-ignore-line
+            ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
+            ->mapWithKeys(fn($userProject) => $userProject);
     }
 }

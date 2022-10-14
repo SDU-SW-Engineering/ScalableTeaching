@@ -6,15 +6,23 @@ use App\Events\ProjectCreated;
 use App\Listeners\GitLab\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
+use App\Models\Enums\FeedbackCommentStatus;
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
+use App\Models\ProjectDiffIndex;
+use App\Models\ProjectDownload;
+use App\Models\ProjectFeedback;
+use App\Models\ProjectFeedbackComment;
 use App\Models\Task;
+use App\Models\User;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
+use Domain\Files\Directory;
+use Domain\Files\IsChangeable;
 use Gitlab\Exception\RuntimeException;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
@@ -23,7 +31,10 @@ use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\View\View;
+use Spatie\ShikiPhp\Shiki;
 use Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use function Pest\Laravel\get;
@@ -34,9 +45,9 @@ class ProjectController extends Controller
      * @param Project $project
      * @return Collection<int, array{status:PipelineStatusEnum,run_time:string,queued_for:string,ran:string,ran_date:string,sub_tasks:Collection<int,array{name:string,completed:bool}>,user_name:string}>
      */
-    public function builds(Project $project) : Collection
+    public function builds(Project $project): Collection
     {
-        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(fn (Pipeline $job) => [
+        return $project->pipelines()->with('subTasks')->latest()->get()->append('prettySubTasks')->map(fn(Pipeline $job) => [
             'status'     => $job->status,
             'run_time'   => CarbonInterval::seconds($job->duration)->forHumans(),
             'queued_for' => CarbonInterval::seconds($job->queue_duration)->forHumans(),
@@ -50,10 +61,10 @@ class ProjectController extends Controller
     /**
      * @throws \Throwable
      */
-    public function reset(GitLabManager $gitLabManager, Project $project) : string
+    public function reset(GitLabManager $gitLabManager, Project $project): string
     {
         abort_unless($project->status == ProjectStatus::Active, 400);
-        \DB::transaction(function () use ($gitLabManager, $project) {
+        \DB::transaction(function() use ($gitLabManager, $project) {
             $found = true;
             try
             {
@@ -63,7 +74,7 @@ class ProjectController extends Controller
                 $found = $runtimeException->getCode() != 404;
             }
 
-            if ($found)
+            if($found)
                 $gitLabManager->projects()->remove($project->project_id);
 
 
@@ -73,11 +84,11 @@ class ProjectController extends Controller
         return "OK";
     }
 
-    public function migrate(Project $project, Group $group) : string
+    public function migrate(Project $project, Group $group): string
     {
-        $activeUsers = $project->task->projectsForUsers($group->members)->reject(function (Project $currentProject) use ($project) {
+        $activeUsers = $project->task->projectsForUsers($group->members)->reject(function(Project $currentProject) use ($project) {
             return $currentProject->id == $project->id;
-        })->map(function (Project $project) {
+        })->map(function(Project $project) {
             return $project->owners()->pluck('name');
         })->flatten();
 
@@ -91,19 +102,19 @@ class ProjectController extends Controller
         return "ok";
     }
 
-    public function refreshAccess(Project $project) : string
+    public function refreshAccess(Project $project): string
     {
         \App\Jobs\Project\RefreshMemberAccess::dispatch($project);
 
         return "ok";
     }
 
-    public function download(Course $course, Task $task, Project $project, GitLabManager $gitLabManager) : StreamedResponse
+    public function download(Course $course, Task $task, Project $project, GitLabManager $gitLabManager): StreamedResponse
     {
         $sha = $project->final_commit_sha;
         abort_if($sha == null, 404);
 
-        return response()->streamDownload(function () use ($sha, $project, $gitLabManager) {
+        return response()->streamDownload(function() use ($sha, $project, $gitLabManager) {
             echo $gitLabManager->repositories()->archive($project->project_id, [
                 'sha' => $sha,
             ], 'zip');
@@ -113,15 +124,15 @@ class ProjectController extends Controller
     /**
      * @throws \Exception
      */
-    public function validateProject(Course $course, Task $task, Project $project) : RedirectResponse
+    public function validateProject(Course $course, Task $task, Project $project): RedirectResponse
     {
-        if ($project->final_commit_sha == null)
+        if($project->final_commit_sha == null)
             return redirect()->back()->withErrors('Can\'t validate this project as it isn\' finished yet');
 
         $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
         $errors = [];
-        foreach ($directories as $directory => $files)
+        foreach($directories as $directory => $files)
         {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
@@ -137,17 +148,17 @@ class ProjectController extends Controller
             $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . getenv('GITLAB_ACCESS_TOKEN')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
-            if (count($projects) == 0)
+            if(count($projects) == 0)
             {
                 throw new \Exception("Project with id $project->id wasn't found.");
             }
 
             $repoFiles = collect($projects[0]->repository->tree->blobs->nodes); //@phpstan-ignore-line
-            foreach ($files as $file)
+            foreach($files as $file)
             {
                 $lookFor = $file->baseName;
                 $found = $repoFiles->firstWhere('name', $lookFor);
-                if ($found == null)
+                if($found == null)
                 {
                     $errors[] = "The file \"{$file->path}\" is missing.";
                     continue;
@@ -155,10 +166,8 @@ class ProjectController extends Controller
 
                 $shaValues = new Collection($file->sha_values);
                 $shaIntact = $shaValues->contains($found->sha);
-                if ( ! $shaIntact)
-                {
+                if( ! $shaIntact)
                     $errors[] = "The file \"{$file->path}\" has been altered! Expected one of [{$shaValues->join(', ')}] but got $found->sha.";
-                }
             }
         }
 
@@ -168,5 +177,169 @@ class ProjectController extends Controller
         ]);
 
         return redirect()->back();
+    }
+
+    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : View
+    {
+        /** @var ProjectFeedback|null $feedback */
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
+        $context = match (true)
+        {
+            $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
+            $feedback->reviewed == false                                              => 'pre-submission',
+            $feedback->reviewed                                                       => 'submitted'
+        };
+
+        return view('tasks.editor')->with('context', $context);
+    }
+
+    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Directory
+    {
+        $tree = $projectDownload->fileTree()->trim();
+        $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
+        if($changes != null)
+        {
+            $filesChanged = array_column($changes, 'file');
+            $tree->traverse(function(IsChangeable $item) use ($filesChanged) {
+                $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
+
+                foreach($filesChanged as $file)
+                {
+                    $pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
+                    if($pathMatches)
+                    {
+
+                        $item->setChanged(true);
+                        break;
+                    }
+                }
+            });
+        }
+
+        return $tree;
+    }
+
+    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Response|array
+    {
+        $contents = $projectDownload->file(\request('path'));
+
+        $extension = pathinfo(\request('path'), PATHINFO_EXTENSION);
+        try
+        {
+            $highlighted = Shiki::highlight($contents, $extension);
+        } catch(\Exception $e)
+        {
+            try
+            {
+                $highlighted = Shiki::highlight($contents, 'txt');
+            } catch(\Exception $e2)
+            {
+                return response("Can't be opened", 400);
+            }
+        }
+
+        $xml = simplexml_load_string($highlighted);
+        $lines = $xml->xpath('//span[@class="line"]');
+        $processedLines = [];
+        foreach($lines as $index => $line)
+            $processedLines[] = [
+                'number' => $index + 1,
+                'line'   => $line->asXML(),
+            ];
+
+        return [
+            ...pathinfo(\request('path')),
+            'full'  => \request('path'),
+            'lines' => $processedLines,
+        ];
+    }
+
+    /**
+     * @param Course $course
+     * @param Task $task
+     * @param Project $project
+     * @param ProjectDownload $projectDownload
+     * @return Collection<int,ProjectFeedbackComment>
+     */
+    public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Collection
+    {
+        $isOwner = $project->owners()->contains(fn(User $user) => $user->is(auth()->user()));
+        $feedbackIds = $isOwner ? $project->feedback()->reviewed()->pluck('id') : $project->feedback()->where('user_id', auth()->id())->pluck('id');
+
+        $query = ProjectFeedbackComment::whereIn('project_feedback_id', $feedbackIds)
+            ->orderBy('filename')
+            ->orderBy('line');
+
+        if (\request()->has('file'))
+            $query->where('filename', \request('file'));
+
+        if ($isOwner)
+        {
+            $query->where('status', FeedbackCommentStatus::Approved);
+            $query->select(['id', 'project_feedback_id', 'filename', 'line', 'marked_as', 'comment', 'created_at', 'updated_at']);
+        } else
+        {
+            $query->select(['id', 'project_feedback_id', 'filename', 'line', 'status', 'reviewer_feedback', 'comment', 'created_at', 'updated_at']);
+        }
+
+        return $query->get();
+    }
+
+    public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : ProjectFeedbackComment
+    {
+        $validated = \request()->validate([
+            'comment' => ['string', 'required'],
+            'file'    => ['string', 'required'],
+            'line'    => ['numeric', 'required'],
+        ]);
+
+        /** @var ?ProjectFeedback $feedback */
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
+        abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
+
+        return $feedback->comments()->create([
+            'filename' => $validated['file'],
+            'comment'  => $validated['comment'],
+            'line'     => $validated['line'],
+        ]);
+    }
+
+    public function deleteComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    {
+        $projectFeedbackComment->delete();
+
+        return "ok";
+    }
+
+    public function updateComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    {
+        $projectFeedbackComment->update([
+            'comment' => \request('comment'),
+        ]);
+
+        $projectFeedbackComment->refresh();
+
+        return $projectFeedbackComment;
+    }
+
+    public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): string
+    {
+        /** @var ?ProjectFeedback $feedback */
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
+        abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
+        $feedback->comments()->update([
+            'status' => FeedbackCommentStatus::Pending,
+        ]);
+        $feedback->update(['reviewed' => true]);
+
+        return "ok";
+    }
+
+    public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    {
+        $projectFeedbackComment->marked_as = \request('mark');
+        $projectFeedbackComment->save();
+
+        return "ok";
     }
 }

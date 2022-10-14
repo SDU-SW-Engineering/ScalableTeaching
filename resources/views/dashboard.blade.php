@@ -99,6 +99,29 @@
             @endif
         </div>
         <div class="flex-auto w-1/2">
+            @if($awaitingFeedback->count() > 0)
+                <div
+                    class="overflow-auto mb-5 pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">
+                    <div class="px-6 pt-5">
+                        <h1 class="text-black dark:text-white text-lg font-semibold">Awaiting Feedback</h1>
+                        <p class="dark:text-gray-400">The following {{ $awaitingFeedback->count() }} projects require
+                            your feedback</p>
+                        <table class="table w-full mt-2">
+                            <tbody>
+                            @foreach($awaitingFeedback as $feedback)
+                                <tr>
+                                    <td class="text-lime-green-300 font-medium text-sm"><a href="{{ route('courses.tasks.show-editor', [$feedback->project->task->course, $feedback->project->task, $feedback->project, $feedback->download()]) }}" target="_blank">{{ $feedback->pseudonym }}</a></td>
+                                    <td class="text-gray-300 text-sm">{{ $feedback->project->task->course->name }}
+                                        , {{ $feedback->project->task->name }}</td>
+                                    <td class="text-gray-400 text-sm text-right">Due
+                                        in {{ $feedback->taskDelegation->deadline_at->diffForHumans() }}</td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
             @if($tasks->count() == 0)
                 <div
                     class="overflow-auto mb-5 pb-3 rounded-lg shadow bg-gray-300 dark:bg-gray-800 place-items-center">

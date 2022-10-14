@@ -108,7 +108,7 @@ class Grade extends Model
         $affectedBy = match ($created->source_type)
         {
             User::class            => $created->source_id,
-            GradeDelegation::class => $created->source->user_id,
+            ProjectFeedback::class => $created->source->user_id,
             default                => null
         };
         if($affectedBy == $created->user_id)

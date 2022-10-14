@@ -8,7 +8,7 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\GradeEnum;
 use App\Models\Enums\TaskTypeEnum;
 use App\Models\Grade;
-use App\Models\GradeDelegation;
+use App\Models\ProjectFeedback;
 use App\Models\Group;
 use App\Models\Project;
 use App\Models\ProjectSubTaskComment;
@@ -90,12 +90,17 @@ class TaskController extends Controller
             new BarDataSet("You", $myBuilds->values(), "#7BB026")
         );
 
-        $gradeDelegations = $project?->status == ProjectStatus::Finished ? $project->gradeDelegations()->with('user')->get()->map(fn(GradeDelegation $gradeDelegation) => [
-            'by'         => $gradeDelegation->user->name,
-            'identifier' => $gradeDelegation->pseudonym,
-        ]) : null;
+        $gradeDelegations = $project?->status == ProjectStatus::Finished && $project ? $project->feedback()->with('user')->get()
+            ->reject(fn(ProjectFeedback $gradeDelegation) => $gradeDelegation->taskDelegation->is_anonymous)
+            ->map(fn(ProjectFeedback $gradeDelegation) => [
+                'by'         => $gradeDelegation->user->name,
+                'identifier' => $gradeDelegation->pseudonym,
+            ]) : null;
 
         $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
+
+        $download = $project?->downloads()->latest()->first();
+        $codeRoute = $download != null ? route('courses.tasks.show-editor', [$course, $task, $project, $download]) : null;
 
         return view('tasks.show', [
             'course'          => $course,
@@ -115,6 +120,7 @@ class TaskController extends Controller
             'pushes'          => $project?->pushes()
                     ->where('created_at', '<=', $task->ends_at)
                     ->pluck('created_at') ?? [],
+            'codeRoute'       => $codeRoute,
             'track'           => $task->track,
             'builds'          => $dailyBuilds,
             'myBuilds'        => $myBuilds,
@@ -339,7 +345,7 @@ class TaskController extends Controller
         return "OK";
     }
 
-    public function nextExercise(Course $course, Task $task) : array
+    public function nextExercise(Course $course, Task $task): array
     {
         $nextExercise = $course->tasks()->exercises()->where('order', '>', $task->order)->orderBy('order')->first();
 

@@ -58,6 +58,9 @@ Vue.component(
     require("./components/Course/Management/GroupRename").default
 );
 
+Vue.component("editor", require("./components/Editor/Editor").default);
+Vue.component("directory", require("./components/Editor/Directory").default);
+
 const settings = {
     "t-rich-select": {
         component: TRichSelect,

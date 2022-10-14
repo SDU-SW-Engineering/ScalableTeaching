@@ -6,15 +6,25 @@ use App\Models\Enums\ProjectDiffIndexStatus;
 use App\Models\Project;
 use App\Models\ProjectDiffIndex;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\RateLimited;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
 
 class IndexRepositoryChanges implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function middleware(): array
+    {
+        return [
+            (new WithoutOverlapping($this->project->id . '-' . $this->comparisonSha))->dontRelease(),
+        ];
+    }
 
     /**
      * Create a new job instance.
@@ -33,9 +43,15 @@ class IndexRepositoryChanges implements ShouldQueue
      */
     public function handle(): void
     {
+        if ($this->project->task->current_sha == null)
+        {
+            $this->fail(new \Exception("Task has no sha and a comparison can't be done."));
+
+            return;
+        }
         /** @var ProjectDiffIndex|null $index */
         $index = $this->project->changes()->where('from', $this->project->task->current_sha)->where('to', $this->comparisonSha)->first();
-        if($index != null && $index->status == ProjectDiffIndexStatus::Success)
+        if($index != null && $index->status == ProjectDiffIndexStatus::Success) // don't reindex if already successful
             return;
 
         $accessToken = config('sourcecontrol.users.default.token');
@@ -54,7 +70,7 @@ class IndexRepositoryChanges implements ShouldQueue
             $index->status = ProjectDiffIndexStatus::Failure;
             $index->message = match (true)
             {
-                $output->contains('docker') => "Docker: "  . $output,
+                $output->contains('docker') => "Docker: " . $output,
                 default                     => "Unable to index: " . $output
             };
             $index->save();

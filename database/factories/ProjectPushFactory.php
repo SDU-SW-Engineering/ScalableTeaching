@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,5 +23,14 @@ class ProjectPushFactory extends Factory
             'ref'        => 'origin/master',
             'username'   => $this->faker->userName,
         ];
+    }
+
+    public function before(Carbon $datetime)
+    {
+        return $this->state(function(array $attributes) use ($datetime) {
+            return [
+                'created_at' => $datetime->subHour(4),
+            ];
+        });
     }
 }

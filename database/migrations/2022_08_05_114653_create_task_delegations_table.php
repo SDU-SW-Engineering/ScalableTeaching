@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->foreign('task_id')->references('id')->on('tasks');
-            $table->foreign('course_role_id')->references('id')->on('course_roles');
+            //$table->foreign('course_role_id')->references('id')->on('course_roles');
             $table->unique(['task_id', 'course_role_id']);
         });
     }

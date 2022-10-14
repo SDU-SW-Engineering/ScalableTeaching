@@ -10,9 +10,9 @@
                 <span class="font-bold text-white">Task not publishable</span>
                 <span class="text-sm font-semibold">It is missing:</span>
                 <ul>
-                @foreach($task->missingFields as $missingField)
-                    <li class="text-sm">- {{ $missingField }}</li>
-                @endforeach
+                    @foreach($task->missingFields as $missingField)
+                        <li class="text-sm">- {{ $missingField }}</li>
+                    @endforeach
                 </ul>
             </div>
         </div>
@@ -96,7 +96,7 @@
             </svg>
         </x-sidebar-item>
     </x-sidebar-group>
-    <x-sidebar-group name="Grading">
+    <x-sidebar-group name="Feedback & Grading">
         <x-sidebar-item name="Grading overview" route="courses.tasks.admin.gradingOverview"
                         :route-params="[$course, $task]">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
@@ -105,12 +105,12 @@
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
         </x-sidebar-item>
-        <x-sidebar-item name="Delegate tasks" route="courses.tasks.admin.gradingDelegate"
+        <x-sidebar-item name="Feedback" route="courses.tasks.admin.gradingDelegate"
                         :route-params="[$course, $task]">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
-                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor" class="w-5 h-5 text-gray-400">
                 <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                      d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/>
             </svg>
         </x-sidebar-item>
     </x-sidebar-group>
