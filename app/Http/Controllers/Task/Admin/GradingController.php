@@ -68,7 +68,7 @@ class GradingController extends Controller
         return redirect()->back();
     }
 
-    public function showDelegation(Course $course, Task $task, TaskDelegation $taskDelegation)
+    public function showDelegation(Course $course, Task $task, TaskDelegation $taskDelegation) : View
     {
         $taskDelegation->load('feedback.user');
 

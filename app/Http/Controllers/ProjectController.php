@@ -31,7 +31,9 @@ use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\View\View;
 use Spatie\ShikiPhp\Shiki;
 use Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -171,26 +173,26 @@ class ProjectController extends Controller
         return redirect()->back();
     }
 
-    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : View
     {
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
         $context = match (true) {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
-            $feedback?->reviewed == false => 'pre-submission',
-            $feedback?->reviewed => 'submitted'
+            $feedback->reviewed == false => 'pre-submission',
+            $feedback->reviewed => 'submitted'
         };
         return view('tasks.editor')->with('context', $context);
     }
 
-    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Directory
     {
         $tree = $projectDownload->fileTree()->trim();
         $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
         if($changes != null) {
             $filesChanged = array_column($changes, 'file');
-            $tree->traverse(function(IsChangeable $item) use ($filesChanged, $changes, $tree) {
-                $path = str_replace('/', '\/', preg_quote($item->path()));
+            $tree->traverse(function(IsChangeable $item) use ($filesChanged) {
+                $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
 
                 foreach($filesChanged as $file) {
                     $pathMatches = !($path == '') && preg_match("/^$path/i", $file) === 1;
@@ -206,7 +208,7 @@ class ProjectController extends Controller
         return $tree;
     }
 
-    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Response|array
     {
         $contents = $projectDownload->file(\request('path'));
 
@@ -237,7 +239,14 @@ class ProjectController extends Controller
         ];
     }
 
-    public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    /**
+     * @param Course $course
+     * @param Task $task
+     * @param Project $project
+     * @param ProjectDownload $projectDownload
+     * @return Collection<int,ProjectFeedbackComment>
+     */
+    public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Collection
     {
         $isOwner = $project->owners()->contains(fn(User $user) => $user->is(auth()->user()));
         $feedbackIds = $isOwner ? $project->feedback()->reviewed()->pluck('id') : $project->feedback()->where('user_id', auth()->id())->pluck('id');
@@ -259,7 +268,7 @@ class ProjectController extends Controller
         return $query->get();
     }
 
-    public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
+    public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : ProjectFeedbackComment
     {
         $validated = \request()->validate([
             'comment' => ['string', 'required'],
@@ -278,14 +287,14 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function deleteComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment)
+    public function deleteComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
     {
         $projectFeedbackComment->delete();
 
         return "ok";
     }
 
-    public function updateComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment)
+    public function updateComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
     {
         $projectFeedbackComment->update([
             'comment' => \request('comment')
@@ -308,7 +317,7 @@ class ProjectController extends Controller
         return "ok";
     }
 
-    public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment)
+    public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
     {
         $projectFeedbackComment->marked_as = \request('mark');
         $projectFeedbackComment->save();

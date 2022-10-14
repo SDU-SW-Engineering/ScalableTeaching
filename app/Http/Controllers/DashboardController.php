@@ -16,9 +16,8 @@ use App\Models\User;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index() : View
     {
-
         $awaitingFeedback = auth()->user()->feedback()->with(['taskDelegation', 'project.task.course'])->unreviewed()->get();
         $courses = auth()->user()->courses()->get();
         $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->assignments()->orderBy('ends_at', 'asc')->visible()->get();

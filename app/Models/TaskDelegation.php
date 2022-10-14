@@ -136,7 +136,7 @@ class TaskDelegation extends Model
      * @param Collection<int,Project> $projects
      * @return Collection<int, int>
      */
-    private function projectCounter(Collection $projects): \Illuminate\Support\Collection
+    private function projectCounter(Collection $projects): \Illuminate\Support\Collection // @phpstan-ignore-line
     {
         return $projects->mapWithKeys(fn(Project $project) => [$project->id => $this->number_of_tasks]);
     }
@@ -184,7 +184,8 @@ class TaskDelegation extends Model
 
     /**
      * @param Project $project
-     * @return string|null The push
+     * @return ProjectPush|null The push
+     * @throws \Exception
      */
     private function relevantPush(Project $project): ?ProjectPush
     {

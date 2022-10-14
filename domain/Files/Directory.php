@@ -6,7 +6,6 @@ namespace Domain\Files;
 class Directory implements \JsonSerializable, IsChangeable
 {
     public string $path;
-    private string $fullPath;
     public bool $changed = false;
 
     public ?Directory $parent = null;
@@ -23,7 +22,6 @@ class Directory implements \JsonSerializable, IsChangeable
     {
         $paths = explode("/", $path);
         $this->path = $paths[count($paths) - 1];
-        $this->fullPath = $path;
         $this->parent = $parent;
     }
 
@@ -85,7 +83,7 @@ class Directory implements \JsonSerializable, IsChangeable
         return $this;
     }
 
-    public function traverse(\Closure $closure)
+    public function traverse(\Closure $closure) : void
     {
         $closure($this);
         foreach($this->directories as $directory) {
@@ -121,7 +119,7 @@ class Directory implements \JsonSerializable, IsChangeable
         $this->changed = $isChanged;
     }
 
-    public function path()
+    public function path() : string
     {
         $parts = [$this->path];
 

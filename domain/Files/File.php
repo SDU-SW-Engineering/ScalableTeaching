@@ -33,20 +33,8 @@ class File implements JsonSerializable, IsChangeable
         $this->changed = $isChanged;
     }
 
-    public function trim(): File
-    {
-        if($what == null && $this->isRoot)
-            $what = trim($this->path, '/');
-        $this->path = str_replace($what, '/', $this->path);
 
-        foreach($this->directories as $directory) {
-            $directory->trim($what);
-        }
-
-        return $this;
-    }
-
-    public function path()
+    public function path() : string
     {
         $parts = [$this->name];
 

@@ -29,11 +29,17 @@ class ProjectFeedbackComment extends Model
         'status' => FeedbackCommentStatus::class
     ];
 
+    /**
+     * @return Attribute<string,null>
+     */
     public function timeSince(): Attribute
     {
         return Attribute::make(get: fn() => $this->created_at->diffForHumans());
     }
 
+    /**
+     * @return BelongsTo<ProjectFeedback,ProjectFeedbackComment>
+     */
     public function feedback(): BelongsTo
     {
         return $this->belongsTo(ProjectFeedback::class, 'project_feedback_id');

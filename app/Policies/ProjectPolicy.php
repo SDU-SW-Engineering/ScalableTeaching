@@ -70,7 +70,7 @@ class ProjectPolicy
         return false;
     }
 
-    public function accessCode(User $user, Project $project, ProjectDownload $projectDownload)
+    public function accessCode(User $user, Project $project, ProjectDownload $projectDownload) : bool
     {
         if($this->view($user, $project))
             return true;

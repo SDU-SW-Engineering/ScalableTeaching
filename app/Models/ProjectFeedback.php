@@ -44,12 +44,20 @@ class ProjectFeedback extends Model
         return ProjectDownload::where('ref', $this->sha)->first();
     }
 
-    public function scopeUnreviewed(Builder $query)
+    /**
+     * @param Builder<ProjectFeedback> $query
+     * @return Builder<ProjectFeedback>
+     */
+    public function scopeUnreviewed(Builder $query) : Builder
     {
         return $query->where('reviewed', false);
     }
 
-    public function scopeReviewed(Builder $query)
+    /**
+     * @param Builder<ProjectFeedback> $query
+     * @return Builder<ProjectFeedback>
+     */
+    public function scopeReviewed(Builder $query) : Builder
     {
         return $query->where('reviewed', true);
     }
@@ -77,6 +85,9 @@ class ProjectFeedback extends Model
         return $this->hasMany(ProjectFeedbackComment::class);
     }
 
+    /**
+     * @return BelongsTo<TaskDelegation,ProjectFeedback>
+     */
     public function taskDelegation() : BelongsTo
     {
         return $this->belongsTo(TaskDelegation::class);
