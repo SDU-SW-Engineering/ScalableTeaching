@@ -6,7 +6,7 @@
             </svg>
             {{ directory.name }}
         </div>
-        <directory @open="open" :level="level + 1" v-if="isOpen" :directory="directory" v-for="directory in directory.directories"></directory>
+        <directory @open="open" :level="level + 1" v-if="isOpen" :directory="directory"  v-for="directory in directory.directories"></directory>
         <file @open="open" v-if="isOpen" :level="level + 1" :file="file" v-for="file in directory.files"></file>
     </div>
 </template>

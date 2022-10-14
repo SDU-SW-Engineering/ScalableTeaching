@@ -67,6 +67,8 @@ export default {
             this.editing = null;
         },
         toggleComment() {
+            if (this.context !== 'pre-submission')
+                return;
             if (this.relevantComments.length > 0)
                 return;
             this.isCommenting = !this.isCommenting;

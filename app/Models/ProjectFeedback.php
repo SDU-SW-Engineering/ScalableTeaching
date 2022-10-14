@@ -39,6 +39,11 @@ class ProjectFeedback extends Model
         });
     }
 
+    public function download() : ?ProjectDownload
+    {
+        return ProjectDownload::where('ref', $this->sha)->first();
+    }
+
     public function scopeUnreviewed(Builder $query)
     {
         return $query->where('reviewed', false);
