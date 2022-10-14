@@ -29,7 +29,7 @@
                                        class="flex items-center mb-1 text-gray-900 dark:text-white hover:text-gray-400 justify-between">
                                         {{ $course->name }}
                                         <p class="text-gray-500 dark:text-gray-600 text-right">
-                                            {{ $course->updated_at->diffForHumans() }}
+                                            {{ $course->updated_at?->diffForHumans() }}
                                         </p>
                                     </a>
                                 </li>
@@ -109,13 +109,17 @@
                         <table class="table w-full mt-2">
                             <tbody>
                             @foreach($awaitingFeedback as $feedback)
-                                <tr>
-                                    <td class="text-lime-green-300 font-medium text-sm"><a href="{{ route('courses.tasks.show-editor', [$feedback->project->task->course, $feedback->project->task, $feedback->project, $feedback->download()]) }}" target="_blank">{{ $feedback->pseudonym }}</a></td>
-                                    <td class="text-gray-300 text-sm">{{ $feedback->project->task->course->name }}
-                                        , {{ $feedback->project->task->name }}</td>
-                                    <td class="text-gray-400 text-sm text-right">Due
-                                        in {{ $feedback->taskDelegation->deadline_at->diffForHumans() }}</td>
-                                </tr>
+                                @if($feedback->download() != null)
+                                    <tr>
+                                        <td class="text-lime-green-600 dark:text-lime-green-300 font-medium text-sm"><a
+                                                href="{{ route('courses.tasks.show-editor', [$feedback->project->task->course, $feedback->project->task, $feedback->project, $feedback->download()]) }}"
+                                                target="_blank">{{ $feedback->pseudonym }}</a></td>
+                                        <td class="text-gray-800 dark:text-gray-300 text-sm">{{ $feedback->project->task->course->name }}
+                                            , {{ $feedback->project->task->name }}</td>
+                                        <td class="text-gray-900 dark:text-gray-400 text-sm text-right">Due
+                                            in {{ $feedback->taskDelegation->deadline_at->diffForHumans() }}</td>
+                                    </tr>
+                                @endif
                             @endforeach
                             </tbody>
                         </table>
