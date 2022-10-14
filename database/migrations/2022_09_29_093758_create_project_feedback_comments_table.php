@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('filename');
             $table->integer('line');
             $table->text('comment');
-            $table->enum('mark_as', ['helpful', 'not_helpful'])->nullable();
+            $table->enum('marked_as', ['helpful', 'not_helpful'])->nullable();
             $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])->default('draft');
             $table->string('reviewer_feedback')->nullable()->comment('Comments from the person reviewing the comment.');
             $table->unsignedBigInteger('reviewer_id')->nullable();

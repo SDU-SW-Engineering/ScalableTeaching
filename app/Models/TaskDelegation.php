@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Task $task
  * @property TaskDelegationType $type
  * @property bool $delegated
+ * @property bool $is_anonymous
  * @property Carbon $deadline_at
  */
 class TaskDelegation extends Model

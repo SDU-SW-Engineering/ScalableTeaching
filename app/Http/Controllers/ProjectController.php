@@ -188,12 +188,11 @@ class ProjectController extends Controller
         $tree = $projectDownload->fileTree()->trim();
         $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
         if($changes != null) {
-            $filesChanged =array_column( $changes, 'file');
+            $filesChanged = array_column($changes, 'file');
             $tree->traverse(function(IsChangeable $item) use ($filesChanged, $changes, $tree) {
                 $path = str_replace('/', '\/', preg_quote($item->path()));
 
-                foreach ($filesChanged as $file)
-                {
+                foreach($filesChanged as $file) {
                     $pathMatches = !($path == '') && preg_match("/^$path/i", $file) === 1;
                     if($pathMatches) {
 
@@ -242,15 +241,22 @@ class ProjectController extends Controller
     {
         $isOwner = $project->owners()->contains(fn(User $user) => $user->is(auth()->user()));
         $feedbackIds = $isOwner ? $project->feedback()->reviewed()->pluck('id') : $project->feedback()->where('user_id', auth()->id())->pluck('id');
-        if(\request()->has('file'))
-            return ProjectFeedbackComment::whereIn('project_feedback_id', $feedbackIds)
-                ->where('filename', \request('file'))
-                ->get();
 
-        return ProjectFeedbackComment::whereIn('project_feedback_id', $feedbackIds)
+        $query = ProjectFeedbackComment::whereIn('project_feedback_id', $feedbackIds)
             ->orderBy('filename')
-            ->orderBy('line')
-            ->get();
+            ->orderBy('line');
+
+        if (\request()->has('file'))
+            $query->where('filename', \request('file'));
+
+        if ($isOwner) {
+            $query->where('status', FeedbackCommentStatus::Approved);
+            $query->select(['id', 'project_feedback_id', 'filename', 'line', 'marked_as', 'comment', 'created_at', 'updated_at']);
+        } else {
+            $query->select(['id', 'project_feedback_id', 'filename', 'line', 'status', 'reviewer_feedback', 'comment', 'created_at', 'updated_at']);
+        }
+
+        return $query->get();
     }
 
     public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload)
@@ -298,6 +304,14 @@ class ProjectController extends Controller
             'status' => FeedbackCommentStatus::Pending
         ]);
         $feedback->update(['reviewed' => true]);
+
+        return "ok";
+    }
+
+    public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment)
+    {
+        $projectFeedbackComment->marked_as = \request('mark');
+        $projectFeedbackComment->save();
 
         return "ok";
     }

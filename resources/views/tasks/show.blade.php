@@ -2,6 +2,7 @@
 
 @section('content')
     <task :task="{{ $task }}"
+          code-route="{{ $codeRoute }}"
           :grade="{{ $task->grade(auth()->user()) ?? 'null' }}"
           :survey="{{ json_encode($survey) }}"
           :sub-tasks="{{ json_encode($subTasks) }}" :project="{{ is_null($project) ? 'null' : $project}}" :progress="{{ json_encode($progress) }}"

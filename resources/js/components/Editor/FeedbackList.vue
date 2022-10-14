@@ -20,10 +20,10 @@
             <div class="flex flex-col overflow-auto" :class="[context === 'pre-submission' ? 'feedback-list' : 'feedback-list-full']">
                 <div @click="goToFile(comment)" class="cursor-pointer hover:bg-gray-700 transition-colors  p-2 flex flex-col" :key="comment.id" v-for="comment in comments">
                     <span class="text-xs font-medium text-lime-green-400">{{ comment.shortFile }}:{{ comment.line }}</span>
-                    <div :class="[comment.reviewer_feedback === null ? 'my-1 rounded' : 'mt-1 rounded-t']" class="bg-gray-600 p-2 text-white text-sm">
+                    <div :class="[comment.reviewer_feedback == null ? 'my-1 rounded' : 'mt-1 rounded-t']" class="bg-gray-600 p-2 text-white text-sm">
                         <span v-text="comment.comment"></span>
                     </div>
-                    <div class="flex flex-col bg-gray-900 p-2 rounded-b text-xs mb-2" v-if="comment.reviewer_feedback !== null">
+                    <div class="flex flex-col bg-gray-900 p-2 rounded-b text-xs mb-2" v-if="comment.reviewer_feedback != null">
                         <span class="text-white font-italic">Response from reviewer:</span>
                         <span class="italic text-gray-300" v-text="comment.reviewer_feedback"></span>
                     </div>

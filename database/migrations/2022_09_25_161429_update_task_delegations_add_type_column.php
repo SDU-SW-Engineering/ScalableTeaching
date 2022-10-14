@@ -16,7 +16,8 @@ return new class extends Migration {
             $table->enum('type', ['last_pushes', 'succeeding_pushes', 'succeed_last_pushes'])->after('number_of_tasks');
             $table->boolean('grading')->after('type');
             $table->boolean('feedback')->after('grading');
-            $table->boolean('is_moderated')->after('feedback')->default(false);
+            $table->boolean('is_anonymous')->default(true)->after('feedback')->comment('recipients can\'t see who gave them feedback');
+            $table->boolean('is_moderated')->after('is_anonymous')->default(false);
             $table->dateTime('deadline_at')->after('is_moderated');
             $table->boolean('delegated')->default(false)->after('deadline_at');
 

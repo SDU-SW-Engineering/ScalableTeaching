@@ -109,4 +109,15 @@ class ProjectPolicy
 
         return $projectFeedbackComment->status == FeedbackCommentStatus::Draft;
     }
+
+    public function markFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): bool
+    {
+        if (!$this->accessCode($user, $project, $projectDownload))
+            return false;
+
+        if ($projectFeedbackComment->status !== FeedbackCommentStatus::Approved)
+            return false;
+
+        return $project->owners()->contains(fn(User $owner) => $owner->is($user));
+    }
 }

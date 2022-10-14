@@ -36,6 +36,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             Route::put('{projectDownload}/comments/{projectFeedbackComment}', 'updateComment')->name('update-comment')->can('updateFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
             Route::delete('{projectDownload}/comments/{projectFeedbackComment}', 'deleteComment')->name('delete-comment')->can('updateFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
             Route::post('{projectDownload}/feedback', 'submitFeedback')->name('submit-feedback')->can('accessCode', ['project', 'projectDownload']);
+            Route::put('{projectDownload}/comments/{projectFeedbackComment}/mark-as', 'markComment')->name('mark-comment')->can('markFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
         });
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
     });
