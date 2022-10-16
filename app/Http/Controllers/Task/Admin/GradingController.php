@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Models\ProjectDiffIndex;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
+use App\Models\ProjectFeedbackComment;
 use App\Models\Task;
 use App\Models\TaskDelegation;
 use App\Models\User;
@@ -101,5 +102,20 @@ class GradingController extends Controller
             'downloadDictionary',
             'indexDictionary'
         ));
+    }
+
+    public function showFeedbackModeration(Course $course, Task $task)
+    {
+        $comments = ProjectFeedbackComment::whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))->paginate(20);
+
+        return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments);
+    }
+
+    public function showComment(Course $course, Task $task, ProjectFeedbackComment $comment)
+    {
+        $comment->load(['feedback.user', 'feedback.project']);
+        $comment->code = $comment->surroundingCode()->values();
+        $comment->owner = $comment->feedback->project->ownable->name;
+        return $comment;
     }
 }

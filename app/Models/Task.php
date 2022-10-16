@@ -105,6 +105,10 @@ class Task extends Model
         return $this->hasManyThrough(Pipeline::class, Project::class)->withTrashedParents();
     }
 
+    public function feedbacks()
+    {
+        return $this->hasManyThrough(ProjectFeedback::class, TaskDelegation::class);
+    }
     /**
      * @return HasMany<Grade>
      */

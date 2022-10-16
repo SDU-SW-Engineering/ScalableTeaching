@@ -278,10 +278,8 @@ class Project extends Model
         /** @var ProjectPush | null $latestPush */
         $latestPush = $this->pushes()
             ->where('created_at', '<=', $this->task->ends_at)->latest()->first();
-        if($latestPush == null)
-            return null;
 
-        return $latestPush->download();
+        return $latestPush?->download();
     }
 
     public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, ?array $gradeMeta = [], Carbon $startedAt = null, Carbon $endedAt = null): void

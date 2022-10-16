@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
 use Domain\Files\Directory;
+use Domain\Files\Highlight;
 use Domain\Files\IsChangeable;
 use Gitlab\Exception\RuntimeException;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -222,30 +223,9 @@ class ProjectController extends Controller
     public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Response|array
     {
         $contents = $projectDownload->file(\request('path'));
-
-        $extension = pathinfo(\request('path'), PATHINFO_EXTENSION);
-        try
-        {
-            $highlighted = Shiki::highlight($contents, $extension);
-        } catch(\Exception $e)
-        {
-            try
-            {
-                $highlighted = Shiki::highlight($contents, 'txt');
-            } catch(\Exception $e2)
-            {
-                return response("Can't be opened", 400);
-            }
-        }
-
-        $xml = simplexml_load_string($highlighted);
-        $lines = $xml->xpath('//span[@class="line"]');
-        $processedLines = [];
-        foreach($lines as $index => $line)
-            $processedLines[] = [
-                'number' => $index + 1,
-                'line'   => $line->asXML(),
-            ];
+        $processedLines = (new Highlight(\request('path')))->code($contents);
+        if ($processedLines == null)
+            return response("Can't be opened", 400);
 
         return [
             ...pathinfo(\request('path')),

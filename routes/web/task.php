@@ -29,6 +29,8 @@ Route::prefix('{task}')->group(function() {
             Route::get('grading-overview', 'gradingOverview')->name('gradingOverview');
             Route::get('feedback', 'gradingDelegate')->name('gradingDelegate');
             Route::post('feedback', 'addDelegation')->name('addDelegation');
+            Route::get('feedback/moderation', 'showFeedbackModeration')->name('feedback.moderation');
+            Route::get('feedback/moderation/comments/{comment}', 'showComment')->name('feedback.moderation.show-comment');
             Route::get('feedback/{taskDelegation}', 'showDelegation')->name('showDelegation');
             Route::delete('feedback/{taskDelegation}', 'removeDelegation')->name('removeDelegation');
         });
@@ -39,7 +41,6 @@ Route::prefix('{task}')->group(function() {
             Route::post('update-title', 'updateTitle')->name('update-title');
             Route::post('update-duration', 'updateDuration')->name('update-duration');
             Route::post('toggle-visibility', 'toggleVisibility')->name('toggle-visibility');
-
             Route::post('preferences/subtasks', 'updateSubtasks')->name('updateSubtasks')->middleware('can:manage,course');
         });
     });
