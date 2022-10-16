@@ -33,7 +33,7 @@ class ProjectFeedbackComment extends Model
 
     protected $casts = [
         'status' => FeedbackCommentStatus::class,
-        'line'   => 'int'
+        'line'   => 'int',
     ];
 
     /**

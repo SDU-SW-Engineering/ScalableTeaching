@@ -26,7 +26,9 @@ class AdminViewComposer
         ];
 
 
-        $view->with('commentCount', $task->delegations()
+        $view->with(
+            'commentCount',
+            $task->delegations()
                 ->with('comments')
                 ->get()->map(fn(TaskDelegation $taskDelegation) => $taskDelegation->comments)
             ->flatten()->count()
