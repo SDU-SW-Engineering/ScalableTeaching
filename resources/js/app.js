@@ -60,6 +60,10 @@ Vue.component(
 
 Vue.component("editor", require("./components/Editor/Editor").default);
 Vue.component("directory", require("./components/Editor/Directory").default);
+Vue.component(
+    "feedback-review",
+    require("./components/Admin/FeedbackReview").default
+);
 
 const settings = {
     "t-rich-select": {

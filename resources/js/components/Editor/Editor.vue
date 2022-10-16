@@ -11,15 +11,23 @@
                 <code-viewer :context="context" :file="openedFile" :scrollTo="goToLine" v-else/>
             </div>
             <div class="flex vh80">
-                <feedback-list :context="context" @openFile="openFile" @close="showFeedbackList = false" v-if="showFeedbackList"/>
+                <feedback-list :context="context" @openFile="openFile" @close="showFeedbackList = false"
+                               v-if="showFeedbackList"/>
             </div>
         </div>
-        <alert title="Submit Feedback"
-               @cancel="showSendFeedbackDialog=false"
-               method="post"
-               :url="currentPath() + '/feedback'"
-               content="Are you sure you want to submit your feedback? This cannot be undone" type="danger" v-if="showSendFeedbackDialog" confirm-button-text="Submit">
-        </alert>
+        <new-alert title="Submit Feedback"
+                   @cancel="showSendFeedbackDialog=false"
+                   @confirm="submitFeedback"
+                   :loading="dialogLoading"
+                   :error-text="dialogError"
+                   type="danger" v-if="showSendFeedbackDialog" confirm-button-text="Submit">
+            <div>
+                <p class="dark:text-white text-sm font-medium mt-1">General feedback:</p>
+                <textarea v-model="generalFeedback"
+                    class="text-sm dark:text-white dark:bg-gray-700 mt-1 w-full rounded-md dark:border-none"></textarea>
+                <p class="text-blue-500 text-xs">Your feedback is anonymous to the recipient.</p>
+            </div>
+        </new-alert>
     </div>
 </template>
 
@@ -32,13 +40,13 @@ import Welcome from "./Welcome";
 import Toolbar from "./Toolbar";
 import Vue from "vue";
 import FeedbackList from "./FeedbackList";
-import Alert from "../Alert";
+import NewAlert from "../NewAlert";
 
 
 export const bus = new Vue();
 
 export default {
-    components: {Alert, FeedbackList, Toolbar, Welcome, CodeViewer, Overlay, SideBar},
+    components: {NewAlert, FeedbackList, Toolbar, Welcome, CodeViewer, Overlay, SideBar},
     props: {
         context: {
             type: String,
@@ -52,7 +60,10 @@ export default {
             openedFile: null,
             showFeedbackList: false,
             goToLine: null,
-            showSendFeedbackDialog: false
+            showSendFeedbackDialog: false,
+            generalFeedback: "",
+            dialogError: "",
+            dialogLoading: false
         }
     },
     methods: {
@@ -69,8 +80,20 @@ export default {
                 alert("This item can't be opened in the viewer.");
             }
         },
-        currentPath: function() {
+        currentPath: function () {
             return location.pathname
+        },
+        submitFeedback: async function () {
+            if (this.generalFeedback.trim().length === 0) {
+                this.dialogError = "Please enter a general comment on the entire solution."
+                return;
+            }
+            this.dialogError = "";
+            this.dialogLoading = true;
+            await axios.post(this.currentPath() + '/feedback', {
+                general: this.generalFeedback
+            });
+            location.reload();
         }
     },
     async mounted() {

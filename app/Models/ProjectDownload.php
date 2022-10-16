@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\Project\DownloadProject;
 use Carbon\Carbon;
 use Domain\Files\Directory;
 use Domain\Files\File;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\FilesystemException;
 use Spatie\ShikiPhp\Shiki;
 use Str;
 use ZipArchive;
@@ -20,10 +22,10 @@ use ZipArchive;
 /**
  * @property int $project_id
  * @property-read Project $project
- * @property Carbon $downloaded_at
+ * @property Carbon|null $downloaded_at
  * @property string $ref
  * @property-read bool $isDownloaded
- * @property string $location
+ * @property string|null $location
  * @mixin Eloquent
  */
 class ProjectDownload extends Model
@@ -59,9 +61,35 @@ class ProjectDownload extends Model
         return Attribute::make(get: fn($value, $attributes) => $attributes['downloaded_at'] != null);
     }
 
+    public function queue() : void
+    {
+        DownloadProject::dispatch($this)->onQueue('downloads');
+    }
+
+    private function getZipFile(): ?string
+    {
+        try
+        {
+            if( ! Storage::disk('local')->has($this->location))
+            {
+                $this->location = null;
+                $this->downloaded_at = null;
+                $this->save();
+                $this->queue();
+
+                return null;
+            }
+
+            return Storage::disk('local')->path($this->location);
+        } catch(FilesystemException $exception)
+        {
+            return null;
+        }
+    }
+
     public function fileTree(): Directory
     {
-        $file = Storage::disk('local')->path($this->location);
+        $file = $this->getZipFile();
         $zip = new ZipArchive();
         $zip->open($file, ZipArchive::RDONLY);
         $root = new Directory(".");
@@ -95,7 +123,7 @@ class ProjectDownload extends Model
      */
     public function file(string $file): string
     {
-        $fileOnDisk = Storage::disk('local')->path($this->location);
+        $fileOnDisk = $this->getZipFile();
         $zip = new ZipArchive();
         $zip->open($fileOnDisk);
         $fp = $zip->getStream($file);

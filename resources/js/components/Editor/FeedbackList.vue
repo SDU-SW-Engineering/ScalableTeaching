@@ -18,8 +18,9 @@
                 </div>
             </div>
             <div class="flex flex-col overflow-auto" :class="[context === 'pre-submission' ? 'feedback-list' : 'feedback-list-full']">
-                <div @click="goToFile(comment)" class="cursor-pointer hover:bg-gray-700 transition-colors  p-2 flex flex-col" :key="comment.id" v-for="comment in comments">
-                    <span class="text-xs font-medium text-lime-green-400">{{ comment.shortFile }}:{{ comment.line }}</span>
+                <div @click="goToFile(comment)" :class="[comment.shortFile == null ? '' : 'hover:bg-gray-700 cursor-pointer']" class=" transition-colors  p-2 flex flex-col" :key="comment.id" v-for="comment in comments">
+                    <span v-if="comment.shortFile != null" class="text-xs font-medium text-lime-green-400">{{ comment.shortFile }}:{{ comment.line }}</span>
+                    <span v-else class="text-xs font-medium text-lime-green-400">General feedback</span>
                     <div :class="[comment.reviewer_feedback == null ? 'my-1 rounded' : 'mt-1 rounded-t']" class="bg-gray-600 p-2 text-white text-sm">
                         <span v-text="comment.comment"></span>
                     </div>
@@ -69,6 +70,12 @@ export default {
         loadComments: async function () {
             this.isLoading = true;
             this.comments = (await axios.get(location.pathname + '/comments')).data.map(comment => {
+                if (comment.filename == null)
+                    return {
+                        ...comment,
+                        shortFile: null
+                    };
+
                 let slashIndex = comment.filename.indexOf('/');
                 return {
                     ...comment,
@@ -78,6 +85,8 @@ export default {
             this.isLoading = false;
         },
         goToFile: function (comment) {
+            if (comment.filename == null)
+                return;
             this.$emit('openFile', comment.filename, comment.line);
         },
         submitComments: function() {

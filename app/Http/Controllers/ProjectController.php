@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
 use Domain\Files\Directory;
+use Domain\Files\Highlight;
 use Domain\Files\IsChangeable;
 use Gitlab\Exception\RuntimeException;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -179,7 +180,7 @@ class ProjectController extends Controller
         return redirect()->back();
     }
 
-    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : View
+    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
     {
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
@@ -193,7 +194,7 @@ class ProjectController extends Controller
         return view('tasks.editor')->with('context', $context);
     }
 
-    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Directory
+    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Directory
     {
         $tree = $projectDownload->fileTree()->trim();
         $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
@@ -219,33 +220,12 @@ class ProjectController extends Controller
         return $tree;
     }
 
-    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Response|array
+    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Response|array
     {
         $contents = $projectDownload->file(\request('path'));
-
-        $extension = pathinfo(\request('path'), PATHINFO_EXTENSION);
-        try
-        {
-            $highlighted = Shiki::highlight($contents, $extension);
-        } catch(\Exception $e)
-        {
-            try
-            {
-                $highlighted = Shiki::highlight($contents, 'txt');
-            } catch(\Exception $e2)
-            {
-                return response("Can't be opened", 400);
-            }
-        }
-
-        $xml = simplexml_load_string($highlighted);
-        $lines = $xml->xpath('//span[@class="line"]');
-        $processedLines = [];
-        foreach($lines as $index => $line)
-            $processedLines[] = [
-                'number' => $index + 1,
-                'line'   => $line->asXML(),
-            ];
+        $processedLines = (new Highlight(\request('path')))->code($contents);
+        if($processedLines == null)
+            return response("Can't be opened", 400);
 
         return [
             ...pathinfo(\request('path')),
@@ -261,7 +241,7 @@ class ProjectController extends Controller
      * @param ProjectDownload $projectDownload
      * @return Collection<int,ProjectFeedbackComment>
      */
-    public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Collection
+    public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Collection
     {
         $isOwner = $project->owners()->contains(fn(User $user) => $user->is(auth()->user()));
         $feedbackIds = $isOwner ? $project->feedback()->reviewed()->pluck('id') : $project->feedback()->where('user_id', auth()->id())->pluck('id');
@@ -270,10 +250,10 @@ class ProjectController extends Controller
             ->orderBy('filename')
             ->orderBy('line');
 
-        if (\request()->has('file'))
+        if(\request()->has('file'))
             $query->where('filename', \request('file'));
 
-        if ($isOwner)
+        if($isOwner)
         {
             $query->where('status', FeedbackCommentStatus::Approved);
             $query->select(['id', 'project_feedback_id', 'filename', 'line', 'marked_as', 'comment', 'created_at', 'updated_at']);
@@ -285,7 +265,7 @@ class ProjectController extends Controller
         return $query->get();
     }
 
-    public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : ProjectFeedbackComment
+    public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): ProjectFeedbackComment
     {
         $validated = \request()->validate([
             'comment' => ['string', 'required'],
@@ -304,14 +284,14 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function deleteComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    public function deleteComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): string
     {
         $projectFeedbackComment->delete();
 
         return "ok";
     }
 
-    public function updateComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    public function updateComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): string
     {
         $projectFeedbackComment->update([
             'comment' => \request('comment'),
@@ -324,18 +304,25 @@ class ProjectController extends Controller
 
     public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): string
     {
+        $validated = \request()->validate([
+            'general' => ['required', 'filled'],
+        ]);
         /** @var ?ProjectFeedback $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
         abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
         $feedback->comments()->update([
             'status' => FeedbackCommentStatus::Pending,
         ]);
+        $feedback->comments()->create([
+            'comment' => Str::of($validated['general'])->trim(),
+            'status'  => FeedbackCommentStatus::Pending,
+        ]);
         $feedback->update(['reviewed' => true]);
 
         return "ok";
     }
 
-    public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): string
     {
         $projectFeedbackComment->marked_as = \request('mark');
         $projectFeedbackComment->save();

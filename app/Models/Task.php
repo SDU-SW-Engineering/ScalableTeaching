@@ -106,6 +106,13 @@ class Task extends Model
     }
 
     /**
+     * @return HasManyThrough<ProjectFeedback>
+     */
+    public function feedbacks(): HasManyThrough
+    {
+        return $this->hasManyThrough(ProjectFeedback::class, TaskDelegation::class);
+    }
+    /**
      * @return HasMany<Grade>
      */
     public function grades(): HasMany
