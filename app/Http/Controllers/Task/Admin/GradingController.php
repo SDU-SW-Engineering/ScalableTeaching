@@ -104,18 +104,18 @@ class GradingController extends Controller
         ));
     }
 
-    public function showFeedbackModeration(Course $course, Task $task)
+    public function showFeedbackModeration(Course $course, Task $task) : View
     {
         $comments = ProjectFeedbackComment::whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))->paginate(20);
 
         return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments);
     }
 
-    public function showComment(Course $course, Task $task, ProjectFeedbackComment $comment)
+    public function showComment(Course $course, Task $task, ProjectFeedbackComment $comment) : ProjectFeedbackComment
     {
         $comment->load(['feedback.user', 'feedback.project']);
-        $comment->code = $comment->filename == null ? null :  $comment->surroundingCode()->values();
-        $comment->owner = $comment->feedback->project->ownable->name;
+        $comment->code = $comment->filename == null ? null :  $comment->surroundingCode()->values(); // @phpstan-ignore-line
+        $comment->owner = $comment->feedback->project->ownable->name; // @phpstan-ignore-line
         return $comment;
     }
 }

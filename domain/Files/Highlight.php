@@ -31,6 +31,7 @@ class Highlight
 
         $xml = simplexml_load_string($highlighted);
         $lines = $xml->xpath('//span[@class="line"]');
+        /** @var Collection<int,HighlightedLine> $processedLines */
         $processedLines = new Collection();
         foreach($lines as $index => $line)
             $processedLines[] = new HighlightedLine($index + 1, $line->asXML());

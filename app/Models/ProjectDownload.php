@@ -22,10 +22,10 @@ use ZipArchive;
 /**
  * @property int $project_id
  * @property-read Project $project
- * @property Carbon $downloaded_at
+ * @property Carbon|null $downloaded_at
  * @property string $ref
  * @property-read bool $isDownloaded
- * @property string $location
+ * @property string|null $location
  * @mixin Eloquent
  */
 class ProjectDownload extends Model
@@ -61,7 +61,7 @@ class ProjectDownload extends Model
         return Attribute::make(get: fn($value, $attributes) => $attributes['downloaded_at'] != null);
     }
 
-    public function queue()
+    public function queue() : void
     {
         DownloadProject::dispatch($this)->onQueue('downloads');
     }

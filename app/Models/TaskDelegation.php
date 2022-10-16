@@ -60,6 +60,9 @@ class TaskDelegation extends Model
         return $this->hasMany(ProjectFeedback::class);
     }
 
+    /**
+     * @return HasManyThrough<ProjectFeedbackComment>
+     */
     public function comments(): HasManyThrough
     {
         return $this->hasManyThrough(ProjectFeedbackComment::class, ProjectFeedback::class);

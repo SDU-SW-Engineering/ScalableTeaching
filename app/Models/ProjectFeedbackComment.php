@@ -67,12 +67,16 @@ class ProjectFeedbackComment extends Model
     {
         $project = $this->feedback->project;
         $sha = $this->feedback->sha;
-        $content = $this->feedback->project->downloads()->where('ref', $sha)?->first()->file($this->filename);
+        $content = $this->feedback->project->downloads()->where('ref', $sha)->first()?->file($this->filename);
 
         return (new Highlight($this->filename))->code($content);
     }
 
-    public function surroundingCode($lines = 5): ?Collection
+    /**
+     * @param int $lines
+     * @return Collection<int,HighlightedLine>|null
+     */
+    public function surroundingCode(int $lines = 5): ?Collection
     {
         return $this->lines()->filter(fn(HighlightedLine $line) => $line->number > $this->line - $lines - 1 && $line->number < $this->line + $lines + 1);
     }
