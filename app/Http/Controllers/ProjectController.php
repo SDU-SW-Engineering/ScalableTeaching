@@ -67,11 +67,9 @@ class ProjectController extends Controller
         abort_unless($project->status == ProjectStatus::Active, 400);
         \DB::transaction(function() use ($gitLabManager, $project) {
             $found = true;
-            try
-            {
+            try {
                 $gitLabManager->projects()->show($project->project_id);
-            } catch(RuntimeException $runtimeException)
-            {
+            } catch(RuntimeException $runtimeException) {
                 $found = $runtimeException->getCode() != 404;
             }
 
@@ -133,8 +131,7 @@ class ProjectController extends Controller
         $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
         $errors = [];
-        foreach($directories as $directory => $files)
-        {
+        foreach($directories as $directory => $files) {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
                 ->setIds(["gid://gitlab/Project/$project->project_id"])
@@ -149,25 +146,22 @@ class ProjectController extends Controller
             $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . getenv('GITLAB_ACCESS_TOKEN')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
-            if(count($projects) == 0)
-            {
+            if(count($projects) == 0) {
                 throw new \Exception("Project with id $project->id wasn't found.");
             }
 
             $repoFiles = collect($projects[0]->repository->tree->blobs->nodes); //@phpstan-ignore-line
-            foreach($files as $file)
-            {
+            foreach($files as $file) {
                 $lookFor = $file->baseName;
                 $found = $repoFiles->firstWhere('name', $lookFor);
-                if($found == null)
-                {
+                if($found == null) {
                     $errors[] = "The file \"{$file->path}\" is missing.";
                     continue;
                 }
 
                 $shaValues = new Collection($file->sha_values);
                 $shaIntact = $shaValues->contains($found->sha);
-                if( ! $shaIntact)
+                if(!$shaIntact)
                     $errors[] = "The file \"{$file->path}\" has been altered! Expected one of [{$shaValues->join(', ')}] but got $found->sha.";
             }
         }
@@ -180,35 +174,31 @@ class ProjectController extends Controller
         return redirect()->back();
     }
 
-    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : View
+    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
     {
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
-        $context = match (true)
-        {
+        $context = match (true) {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
-            $feedback->reviewed == false                                              => 'pre-submission',
-            $feedback->reviewed                                                       => 'submitted'
+            $feedback->reviewed == false => 'pre-submission',
+            $feedback->reviewed => 'submitted'
         };
 
         return view('tasks.editor')->with('context', $context);
     }
 
-    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Directory
+    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Directory
     {
         $tree = $projectDownload->fileTree()->trim();
         $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
-        if($changes != null)
-        {
+        if($changes != null) {
             $filesChanged = array_column($changes, 'file');
             $tree->traverse(function(IsChangeable $item) use ($filesChanged) {
                 $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
 
-                foreach($filesChanged as $file)
-                {
-                    $pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
-                    if($pathMatches)
-                    {
+                foreach($filesChanged as $file) {
+                    $pathMatches = !($path == '') && preg_match("/^$path/i", $file) === 1;
+                    if($pathMatches) {
 
                         $item->setChanged(true);
                         break;
@@ -220,11 +210,11 @@ class ProjectController extends Controller
         return $tree;
     }
 
-    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Response|array
+    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Response|array
     {
         $contents = $projectDownload->file(\request('path'));
         $processedLines = (new Highlight(\request('path')))->code($contents);
-        if ($processedLines == null)
+        if($processedLines == null)
             return response("Can't be opened", 400);
 
         return [
@@ -241,7 +231,7 @@ class ProjectController extends Controller
      * @param ProjectDownload $projectDownload
      * @return Collection<int,ProjectFeedbackComment>
      */
-    public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : Collection
+    public function comments(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Collection
     {
         $isOwner = $project->owners()->contains(fn(User $user) => $user->is(auth()->user()));
         $feedbackIds = $isOwner ? $project->feedback()->reviewed()->pluck('id') : $project->feedback()->where('user_id', auth()->id())->pluck('id');
@@ -250,22 +240,20 @@ class ProjectController extends Controller
             ->orderBy('filename')
             ->orderBy('line');
 
-        if (\request()->has('file'))
+        if(\request()->has('file'))
             $query->where('filename', \request('file'));
 
-        if ($isOwner)
-        {
+        if($isOwner) {
             $query->where('status', FeedbackCommentStatus::Approved);
             $query->select(['id', 'project_feedback_id', 'filename', 'line', 'marked_as', 'comment', 'created_at', 'updated_at']);
-        } else
-        {
+        } else {
             $query->select(['id', 'project_feedback_id', 'filename', 'line', 'status', 'reviewer_feedback', 'comment', 'created_at', 'updated_at']);
         }
 
         return $query->get();
     }
 
-    public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : ProjectFeedbackComment
+    public function storeComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): ProjectFeedbackComment
     {
         $validated = \request()->validate([
             'comment' => ['string', 'required'],
@@ -284,14 +272,14 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function deleteComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    public function deleteComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): string
     {
         $projectFeedbackComment->delete();
 
         return "ok";
     }
 
-    public function updateComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    public function updateComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): string
     {
         $projectFeedbackComment->update([
             'comment' => \request('comment'),
@@ -304,18 +292,25 @@ class ProjectController extends Controller
 
     public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): string
     {
+        $validated = \request()->validate([
+            'general' => ['required', 'filled']
+        ]);
         /** @var ?ProjectFeedback $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
         abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
         $feedback->comments()->update([
             'status' => FeedbackCommentStatus::Pending,
         ]);
+        $feedback->comments()->create([
+            'comment' => Str::of($validated['general'])->trim(),
+            'status'  => FeedbackCommentStatus::Pending
+        ]);
         $feedback->update(['reviewed' => true]);
 
         return "ok";
     }
 
-    public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment) : string
+    public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): string
     {
         $projectFeedbackComment->marked_as = \request('mark');
         $projectFeedbackComment->save();

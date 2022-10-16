@@ -114,7 +114,7 @@ class GradingController extends Controller
     public function showComment(Course $course, Task $task, ProjectFeedbackComment $comment)
     {
         $comment->load(['feedback.user', 'feedback.project']);
-        $comment->code = $comment->surroundingCode()->values();
+        $comment->code = $comment->filename == null ? null :  $comment->surroundingCode()->values();
         $comment->owner = $comment->feedback->project->ownable->name;
         return $comment;
     }

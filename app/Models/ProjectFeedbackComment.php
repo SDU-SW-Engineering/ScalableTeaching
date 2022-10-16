@@ -33,6 +33,7 @@ class ProjectFeedbackComment extends Model
 
     protected $casts = [
         'status' => FeedbackCommentStatus::class,
+        'line'   => 'int'
     ];
 
     /**
@@ -71,7 +72,7 @@ class ProjectFeedbackComment extends Model
         return (new Highlight($this->filename))->code($content);
     }
 
-    public function surroundingCode($lines =  5): ?Collection
+    public function surroundingCode($lines = 5): ?Collection
     {
         return $this->lines()->filter(fn(HighlightedLine $line) => $line->number > $this->line - $lines - 1 && $line->number < $this->line + $lines + 1);
     }

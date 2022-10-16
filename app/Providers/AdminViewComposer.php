@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Course;
 use App\Models\Task;
+use App\Models\TaskDelegation;
 use Illuminate\View\View;
 
 class AdminViewComposer
@@ -24,6 +25,12 @@ class AdminViewComposer
             'Analytics'   => null,
         ];
 
+
+        $view->with('commentCount', $task->delegations()
+                ->with('comments')
+                ->get()->map(fn(TaskDelegation $taskDelegation) => $taskDelegation->comments)
+            ->flatten()->count()
+        );
         $view->with('breadcrumbs', $breadcrumbs);
         $view->with('task', $task);
         $view->with('course', $course);
