@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Task\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\CourseRole;
+use App\Models\Enums\FeedbackCommentStatus;
 use App\Models\Enums\ProjectDiffIndexStatus;
 use App\Models\Project;
 use App\Models\ProjectDiffIndex;
@@ -70,7 +71,7 @@ class GradingController extends Controller
         return redirect()->back();
     }
 
-    public function showDelegation(Course $course, Task $task, TaskDelegation $taskDelegation) : View
+    public function showDelegation(Course $course, Task $task, TaskDelegation $taskDelegation): View
     {
         $taskDelegation->load('feedback.user');
 
@@ -104,19 +105,42 @@ class GradingController extends Controller
         ));
     }
 
-    public function showFeedbackModeration(Course $course, Task $task) : View
+    public function showFeedbackModeration(Course $course, Task $task): View
     {
-        $comments = ProjectFeedbackComment::whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))->paginate(20);
+        $comments = ProjectFeedbackComment::whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))
+            ->where('status', 'pending')->paginate(20);
 
-        return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments);
+        return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments)->with('overlay', true);
     }
 
-    public function showComment(Course $course, Task $task, ProjectFeedbackComment $comment) : ProjectFeedbackComment
+    public function showFeedbackModerationHistory(Course $course, Task $task): View
     {
-        $comment->load(['feedback.user', 'feedback.project']);
+        $comments = ProjectFeedbackComment::whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))
+            ->whereIn('status', ['approved', 'rejected'])->paginate(20);
+
+        return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments)->with('overlay', false);
+    }
+
+    public function showComment(Course $course, Task $task, ProjectFeedbackComment $comment): ProjectFeedbackComment
+    {
+        $comment->load(['feedback.user', 'feedback.project', 'reviewer']);
+        $comment->append('reviewed_time_since');
         $comment->code = $comment->filename == null ? null : $comment->surroundingCode()->values(); // @phpstan-ignore-line
         $comment->owner = $comment->feedback->project->ownable->name; // @phpstan-ignore-line
+        $comment->code_all = $comment->filename == null ? null : $comment->lines()->values(); // @phpstan-ignore-line
 
         return $comment;
+    }
+
+    public function setStatus(Course $course, Task $task, ProjectFeedbackComment $comment): string
+    {
+        $comment->update([
+            'status'            => FeedbackCommentStatus::from(\request('status')),
+            'reviewer_feedback' => \request('reason'),
+            'reviewer_id'       => auth()->id(),
+            'reviewed_at'       => now(),
+        ]);
+
+        return "ok";
     }
 }

@@ -25,15 +25,16 @@ class ProjectFeedbackComment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['filename', 'line', 'comment', 'status'];
+    protected $fillable = ['filename', 'line', 'comment', 'status', 'reviewer_id', 'reviewer_feedback', 'reviewed_at'];
 
     protected $hidden = ['mark_as'];
 
     protected $appends = ['time_since'];
 
     protected $casts = [
-        'status' => FeedbackCommentStatus::class,
-        'line'   => 'int',
+        'status'      => FeedbackCommentStatus::class,
+        'line'        => 'int',
+        'reviewed_at' => 'datetime',
     ];
 
     /**
@@ -45,11 +46,28 @@ class ProjectFeedbackComment extends Model
     }
 
     /**
+     * @return Attribute<string,null>
+     */
+    public function reviewedTimeSince(): Attribute
+    {
+        return Attribute::make(get: fn() => $this->reviewed_at?->diffForHumans());
+    }
+
+
+    /**
      * @return BelongsTo<ProjectFeedback,ProjectFeedbackComment>
      */
     public function feedback(): BelongsTo
     {
         return $this->belongsTo(ProjectFeedback::class, 'project_feedback_id');
+    }
+
+    /**
+     * @return BelongsTo<User,ProjectFeedbackComment>
+     */
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**
