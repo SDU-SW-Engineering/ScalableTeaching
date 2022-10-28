@@ -180,6 +180,8 @@ export default {
 
             let comment = this.comment.code.filter(line => line.number === this.comment.line)[0];
             let indentation = comment.line.match(/>(\s+)/);
+            if (indentation === null)
+                return 0;
             return indentation[0].length - 1;
         },
         file: function () {

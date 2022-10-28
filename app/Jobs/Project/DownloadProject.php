@@ -2,14 +2,12 @@
 
 namespace App\Jobs\Project;
 
-use App\Models\Project;
 use App\Models\ProjectDownload;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
 use Storage;
 
@@ -41,7 +39,7 @@ class DownloadProject implements ShouldQueue
         $gitLabManager = app(GitLabManager::class);
 
         $archiveContent = $gitLabManager->repositories()->archive($this->download->project->project_id, [
-            'id' => $this->download->ref,
+            'sha' => $this->download->ref,
         ], 'zip');
 
         $fileLocation = "tasks/{$this->download->project->task_id}/projects/{$this->download->project_id}_{$this->download->ref}.zip";
