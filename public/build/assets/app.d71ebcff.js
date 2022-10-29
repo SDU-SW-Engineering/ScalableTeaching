@@ -1,3 +1,47 @@
+const scriptRel = "modulepreload";
+const assetsURL = function(dep) {
+  return "/build/" + dep;
+};
+const seen$2 = {};
+const __vitePreload = function preload(baseModule, deps, importerUrl) {
+  if (!deps || deps.length === 0) {
+    return baseModule();
+  }
+  const links = document.getElementsByTagName("link");
+  return Promise.all(deps.map((dep) => {
+    dep = assetsURL(dep);
+    if (dep in seen$2)
+      return;
+    seen$2[dep] = true;
+    const isCss = dep.endsWith(".css");
+    const cssSelector = isCss ? '[rel="stylesheet"]' : "";
+    const isBaseRelative = !!importerUrl;
+    if (isBaseRelative) {
+      for (let i = links.length - 1; i >= 0; i--) {
+        const link2 = links[i];
+        if (link2.href === dep && (!isCss || link2.rel === "stylesheet")) {
+          return;
+        }
+      }
+    } else if (document.querySelector(`link[href="${dep}"]${cssSelector}`)) {
+      return;
+    }
+    const link = document.createElement("link");
+    link.rel = isCss ? "stylesheet" : scriptRel;
+    if (!isCss) {
+      link.as = "script";
+      link.crossOrigin = "";
+    }
+    link.href = dep;
+    document.head.appendChild(link);
+    if (isCss) {
+      return new Promise((res, rej) => {
+        link.addEventListener("load", res);
+        link.addEventListener("error", () => rej(new Error(`Unable to preload CSS for ${dep}`)));
+      });
+    }
+  })).then(() => baseModule());
+};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -15580,27 +15624,14 @@ function compileToFunction(template, options) {
   return compileCache[key] = render2;
 }
 registerRuntimeCompiler(compileToFunction);
-const _export_sfc = (sfc, props) => {
-  const target = sfc.__vccOpts || sfc;
-  for (const [key, val] of props) {
-    target[key] = val;
-  }
-  return target;
-};
-const _sfc_main = {
-  mounted() {
-    console.log("Component mounted.");
-  }
-};
-const _hoisted_1 = { class: "container" };
-const _hoisted_2 = /* @__PURE__ */ createStaticVNode('<div class="row justify-content-center"><div class="col-md-8"><div class="card"><div class="card-header">Example Component</div><div class="card-body"> I&#39;m an example component. </div></div></div></div>', 1);
-const _hoisted_3 = [
-  _hoisted_2
-];
-function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("div", _hoisted_1, _hoisted_3);
-}
-const ExampleComponent = /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render]]);
 const app = createApp({});
-app.component("example-component", ExampleComponent);
+app.component(
+  "example-component",
+  defineAsyncComponent(() => __vitePreload(() => import("./ExampleComponent.d0244df7.js"), true ? [] : void 0))
+);
 app.mount("#app");
+export {
+  createStaticVNode as a,
+  createElementBlock as c,
+  openBlock as o
+};
