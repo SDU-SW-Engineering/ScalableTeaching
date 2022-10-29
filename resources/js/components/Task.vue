@@ -192,21 +192,21 @@
 </template>
 
 <script>
-import LineChart from "./LineChart";
-import BuildTable from "./BuildTable";
-import Settings from "./Settings";
-import NotStarted from "./Widgets/NotStarted";
-import Started from "./Widgets/Started";
-import Completed from "./Widgets/Completed";
-import Overdue from "./Widgets/Overdue";
-import Alert from "./Alert";
-import BarChart from "./BarChart";
-import Warning from "./Widgets/Warning";
-import SubTasks from "./SubTasks";
-import PartOfTrack from "./Widgets/PartOfTrack";
-import Waiting from "./Widgets/Waiting";
-import Survey from "./Task/Tabs/Survey";
-import MarkCompleted from "./Widgets/MarkCompleted";
+import LineChart from "./LineChart.vue";
+import BuildTable from "./BuildTable.vue";
+import Settings from "./Settings.vue";
+import NotStarted from "./Widgets/NotStarted.vue";
+import Started from "./Widgets/Started.vue";
+import Completed from "./Widgets/Completed.vue";
+import Overdue from "./Widgets/Overdue.vue";
+import Alert from "./Alert.vue";
+import BarChart from "./BarChart.vue";
+import Warning from "./Widgets/Warning.vue";
+import SubTasks from "./SubTasks.vue";
+import PartOfTrack from "./Widgets/PartOfTrack.vue";
+import Waiting from "./Widgets/Waiting.vue";
+import Survey from "./Task/Tabs/Survey.vue";
+import MarkCompleted from "./Widgets/MarkCompleted.vue";
 
 export default {
     components: {
@@ -264,6 +264,7 @@ export default {
         }*/
     },
     mounted() {
+        alert("loaded");
         if (this.task.track != null)
             this.hideMissingAssignmentWarning = true;
         if (this.showSurvey)

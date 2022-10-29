@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ScalableTeaching</title>
-    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    @vite('resources/css/app.css')
+
+    @vite('resources/js/app.js')
     <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1f2937" media="(prefers-color-scheme: dark)">
     @yield('styles')
@@ -17,10 +19,11 @@
         @include('staging.modal')
     @endenv
     @includeUnless(isset($hideHeader), 'partials.navbar')
+        <div>
+            <example-component></example-component>
+        </div>
     @yield('content')
 </div>
 
-<script type="text/javascript" src="{{ mix('js/app.js') }}"></script>
-@yield('scripts')
 </body>
 </html>

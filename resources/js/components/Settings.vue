@@ -71,11 +71,12 @@
 </template>
 
 <script>
-import Alert from "./Alert";
-import GroupBox from "./GroupBox";
+import Alert from "./Alert.vue";
 
 export default {
-    components: {GroupBox, Alert},
+    components: {
+        Alert
+    },
     props: ['project', 'groups'],
     data: function () {
         return {
@@ -90,12 +91,12 @@ export default {
         }
     },
     methods: {
-        migrateProject: function() {
+        migrateProject: function () {
             if (this.migrate.group == null)
                 return;
             this.migrate.showConfirm = true;
         },
-        refreshProject: async function() {
+        refreshProject: async function () {
             this.refresh.loading = true;
             await axios.post('/projects/' + this.project.id + '/refresh-access', {
                 csrf: this.csrf

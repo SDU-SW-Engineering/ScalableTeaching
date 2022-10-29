@@ -37,24 +37,3 @@
     </div>
 </div>
 
-<script>
-    var resetting = false;
-    async function reset()
-    {
-        var icon = document.getElementById('loader-icon');
-        icon.classList.toggle('hidden')
-        document.getElementById('loader-text').innerText = resetting ? "Reset environment": "Resetting"
-        resetting = !resetting;
-        icon.parentElement.classList.toggle('disable')
-        icon.parentElement.disabled = true;
-        await fetch('/staging/reset-environment', {
-            method: 'POST',
-            headers: {
-                "Accept": "application/json",
-                "X-Requested-With": "XMLHttpRequest",
-                'X-CSRF-Token': '{{ csrf_token() }}'
-            }
-        });
-        location.reload();
-    }
-</script>

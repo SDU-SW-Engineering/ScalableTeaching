@@ -1,5 +1,3 @@
-
-
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
  * for JavaScript based Bootstrap features such as modals and tabs. This
@@ -11,14 +9,17 @@
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
 
-window.axios = require('axios');
-import 'tippy.js/dist/tippy.css'
+import axios from "axios";
+window.axios = axios;
+import "tippy.js/dist/tippy.css";
 
-window.tippy = require('tippy.js').default
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+/*import { tippy } from "vue-tippy";
 
-import IMask from 'imask';
-window.IMask = IMask
+window.tippy = tippy;*/
+window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+
+import IMask from "imask";
+window.IMask = IMask;
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
