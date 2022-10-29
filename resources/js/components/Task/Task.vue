@@ -77,7 +77,7 @@
                     </button>
                 </div>
                 <div v-if="showSurvey" v-show="tab === 'survey'">
-                    <survey :project-id="project.id" :survey="survey"></survey>
+                    <survey-tab :project-id="project.id" :survey="survey"></survey-tab>
                 </div>
                 <div v-show="tab === 'description'" class="relative">
                     <div
@@ -138,17 +138,17 @@
                     </div>
                 </div>
                 <div v-if="subTasks != null" v-show="tab === 'tasks'">
-                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended"
+                    <SubtasksTab :ended="(project != null && project.status !== 'active') || progress.ended"
                                :tasks="subTasks" :tasks-required="task.correction_tasks_required"
                                :points-required="task.correction_points_required"
                                :correction-type="task.correction_type"
-                               :project-status="project == null ? null : project.status"></sub-tasks>
+                               :project-status="project == null ? null : project.status"></SubtasksTab>
                 </div>
                 <div v-show="tab === 'builds'">
-                    <build-table :project-id="project.id" v-if="project != null"></build-table>
+                    <BuildTableTab :project-id="project.id" v-if="project != null"></BuildTableTab>
                 </div>
                 <div v-show="tab === 'settings'">
-                    <settings :groups="groups" :project="project" v-if="project != null"></settings>
+                    <SettingsTab :groups="groups" :project="project" v-if="project != null"></SettingsTab>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
@@ -174,39 +174,75 @@
                                :validation="project.validationStatus"></completed>
                     <overdue v-else-if="project != null && project.isMissed"></overdue>
                 </div>
-                <mark-completed v-if="task.source_project_id === null && task.correction_type === 'self'" :csrf="this.csrf" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
-                <div v-if="false" class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
-                    <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
-                    <div>
-                        <bar-chart :height="200" :data="datasets" :labels="labels"></bar-chart>
-                    </div>
-                    <p class="dark:text-gray-300">A total of <b
-                        class="text-lime-green-400 dark:text-lime-green-500">{{ totalBuilds }}</b> builds have
-                        completed during the task, of which
-                        you account for <b class="text-lime-green-400 dark:text-lime-green-500">{{ totalMyBuilds }}</b>.
-                    </p>
-                </div>
+                <mark-completed v-if="task.source_project_id === null && task.correction_type === 'self'" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
             </div>
         </div>
     </div>
 </template>
 
-<script>
-import LineChart from "./LineChart.vue";
-import BuildTable from "./BuildTable.vue";
-import Settings from "./Settings.vue";
-import NotStarted from "./Widgets/NotStarted.vue";
-import Started from "./Widgets/Started.vue";
-import Completed from "./Widgets/Completed.vue";
-import Overdue from "./Widgets/Overdue.vue";
-import Alert from "./Alert.vue";
-import BarChart from "./BarChart.vue";
-import Warning from "./Widgets/Warning.vue";
-import SubTasks from "./SubTasks.vue";
-import PartOfTrack from "./Widgets/PartOfTrack.vue";
-import Waiting from "./Widgets/Waiting.vue";
-import Survey from "./Task/Tabs/Survey.vue";
-import MarkCompleted from "./Widgets/MarkCompleted.vue";
+<script setup lang="ts">
+import {ref, onMounted, defineAsyncComponent, computed} from "vue";
+
+const SurveyTab = defineAsyncComponent(() => import('./Tabs/Survey.vue'))
+const SubtasksTab = defineAsyncComponent(() => import('./Tabs/SubTasks.vue'))
+const BuildTableTab = defineAsyncComponent(() => import('./Tabs/BuildTable.vue'))
+const SettingsTab = defineAsyncComponent(() => import('./Tabs/Settings.vue'))
+const Warning = defineAsyncComponent(() => import('./Widgets/Warning.vue'))
+const PartOfTrack = defineAsyncComponent(() => import('./Widgets/PartOfTrack.vue'))
+const NotStarted = defineAsyncComponent(() => import('./Widgets/NotStarted.vue'))
+const Started = defineAsyncComponent(() => import('./Widgets/Started.vue'))
+const Waiting = defineAsyncComponent(() => import('./Widgets/Waiting.vue'))
+const Completed = defineAsyncComponent(() => import('./Widgets/Completed.vue'))
+const Overdue = defineAsyncComponent(() => import('./Widgets/Overdue.vue'))
+const MarkCompleted = defineAsyncComponent(() => import('./Widgets/MarkCompleted.vue'))
+
+const props = defineProps<{
+    project?: {
+        id: number
+        status: 'finished' | 'active'
+    },
+    task: {
+        source_project_id?: number,
+        correction_type: 'self',
+        course_id: number,
+        correction_points_required?: number
+    },
+    grade?: {
+
+    },
+    survey: {
+        details: string,
+        can: {
+            view: boolean
+        }
+    },
+    pushes: {
+
+    },
+    progress: {
+
+    },
+    groups: {
+
+    },
+    subTasks: {
+
+    },
+    warning: string,
+    codeRoute: string,
+    userName: string,
+}>()
+
+const hideMissingAssignmentWarning = ref<boolean>(props.task.source_project_id === null)
+const errorMessage = ref<string>('');
+const tab = ref<'description'|'survey'>('description')
+const startAs = ref<'solo'>('solo')
+const startingAssignment = ref<boolean>(false)
+
+const showSurvey = computed(() => props.project != null && props.survey.details != null && props.survey.can.view)
+
+/*import LineChart from "../LineChart.vue";
+
 
 export default {
     components: {
@@ -261,15 +297,14 @@ export default {
         },
         completedTaskCount: function () {
             return this.subTasks.list.reduce((total, group) => total + group.tasks.filter(x => x.completed).length, 0);
-        }*/
+        }*//*
     },
     mounted() {
-        alert("loaded");
         if (this.task.track != null)
             this.hideMissingAssignmentWarning = true;
         if (this.showSurvey)
             this.tab = 'survey';
 
     }
-}
+}*/
 </script>

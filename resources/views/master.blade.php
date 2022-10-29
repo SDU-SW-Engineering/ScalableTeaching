@@ -19,9 +19,6 @@
         @include('staging.modal')
     @endenv
     @includeUnless(isset($hideHeader), 'partials.navbar')
-        <div>
-            <example-component></example-component>
-        </div>
     @yield('content')
 </div>
 
