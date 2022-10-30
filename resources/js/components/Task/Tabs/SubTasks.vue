@@ -1,6 +1,10 @@
 <template>
     <div class="bg-white p-4 rounded-md shadow-md dark:bg-gray-800 flex">
         <div class="w-24 mr-4" v-if="projectStatus !== null">
+            <simple-doughnut-chart v-if="correctionType === 'all_tasks'" :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%"
+                                   :data="[pointSum, lengthMax - pointSum]"></simple-doughnut-chart>
+            <simple-doughnut-chart v-else :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%"
+                                   :data="[pointSum, pointMax - pointSum]"></simple-doughnut-chart>
         </div>
         <div class="flex-1">
             <div class="flex">
