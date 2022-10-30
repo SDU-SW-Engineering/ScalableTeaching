@@ -15,7 +15,15 @@ app.component(
     defineAsyncComponent(() => import("./components/Task/Task.vue"))
 );
 
+app.component(
+    "visibility-dropdown",
+    defineAsyncComponent(() =>
+        import("./components/Tasks/VisibilityDropdown.vue")
+    )
+);
+
 /**
+ *
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
  * components and automatically register them with their "basename".
