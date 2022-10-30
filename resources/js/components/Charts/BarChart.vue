@@ -1,5 +1,35 @@
-<script>
+<template>
+    <Bar></Bar>
+</template>
+<script setup lang="ts">
 import {Bar} from 'vue-chartjs'
+import {
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LinearScale,
+    Title,
+    Tooltip
+} from "chart.js";
+import {ref} from "vue";
+
+ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale)
+
+const props = defineProps<{
+    data: [],
+    labels: [],
+    route: string | null,
+    disableAnimations: boolean,
+    displayCategories: boolean
+}>();
+
+const darkMode = ref<boolean>(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+const chartData = ref<any>({
+    datasets: props.data
+})
+
+/*import {Bar} from 'vue-chartjs'
 
 export default {
     extends: Bar,
@@ -124,7 +154,7 @@ export default {
             })
         }
     }
-}
+}*/
 </script>
 
 <style>

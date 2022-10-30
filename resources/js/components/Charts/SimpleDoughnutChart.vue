@@ -33,23 +33,22 @@ const chartData = ref<any>({
 });
 
 const chartOptions = ref<any>({
-        legend: {
-            display: false
-        },
-        elements: {
-            arc: {
-                borderWidth: 0
-            }
-        },
-        tooltips: {
-            enabled: false
-        },
-        hover: {
-            mode: null
-        },
-        responsive: true
-    }
-);
+    legend: {
+        display: false
+    },
+    elements: {
+        arc: {
+            borderWidth: 0
+        }
+    },
+    tooltips: {
+        enabled: false
+    },
+    hover: {
+        mode: null
+    },
+    responsive: true
+});
 </script>
 
 <style>

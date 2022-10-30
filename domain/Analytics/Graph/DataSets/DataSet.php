@@ -40,6 +40,7 @@ class DataSet implements Arrayable
             'backgroundColor' => $this->backgroundColor,
             'label'           => $this->label,
             'data'            => $this->data,
+            'fill'            => true
         ];
     }
 }

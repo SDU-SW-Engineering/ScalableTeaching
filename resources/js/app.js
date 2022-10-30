@@ -22,6 +22,15 @@ app.component(
     )
 );
 
+app.component(
+    "line-chart",
+    defineAsyncComponent(() => import("./components/Charts/LineChart.vue"))
+);
+app.component(
+    "bar-chart",
+    defineAsyncComponent(() => import("./components/Charts/BarChart.vue"))
+);
+
 /**
  *
  * The following block of code may be used to automatically register your

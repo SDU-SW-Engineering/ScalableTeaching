@@ -156,7 +156,7 @@ import {SubTaskListItem} from "../../../Interfaces/SubTaskListItem";
 import {GroupedSubTaskList} from "../../../Interfaces/GroupedSubTaskList";
 import {GroupedSubTaskListGroup} from "../../../Interfaces/GroupedSubTaskListGroup";
 
-const SimpleDoughnutChart = defineAsyncComponent(() => import('../../SimpleDoughnutChart.vue'))
+const SimpleDoughnutChart = defineAsyncComponent(() => import('../../Charts/SimpleDoughnutChart.vue'))
 
 const props = defineProps<{
     tasks: GroupedSubTaskList
