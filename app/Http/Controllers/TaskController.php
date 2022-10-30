@@ -91,7 +91,7 @@ class TaskController extends Controller
         );
 
         $gradeDelegations = $project?->status == ProjectStatus::Finished && $project ? $project->feedback()->with('user')->get()
-            ->reject(fn(ProjectFeedback $gradeDelegation) => $gradeDelegation->taskDelegation->is_anonymous)
+            ->reject(fn(ProjectFeedback $gradeDelegation) => $gradeDelegation->taskDelegation?->is_anonymous)
             ->map(fn(ProjectFeedback $gradeDelegation) => [
                 'by'         => $gradeDelegation->user->name,
                 'identifier' => $gradeDelegation->pseudonym,

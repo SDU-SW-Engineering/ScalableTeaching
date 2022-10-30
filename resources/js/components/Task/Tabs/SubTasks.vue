@@ -1,10 +1,6 @@
 <template>
     <div class="bg-white p-4 rounded-md shadow-md dark:bg-gray-800 flex">
         <div class="w-24 mr-4" v-if="projectStatus !== null">
-            <simple-doughnut-chart v-if="correctionType === 'all_tasks'" :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%"
-                                   :data="[pointSum, lengthMax - pointSum]"></simple-doughnut-chart>
-            <simple-doughnut-chart v-else :secondary="[ended ?'#f87171' : '#374151']" style="width: 100%"
-                                   :data="[pointSum, pointMax - pointSum]"></simple-doughnut-chart>
         </div>
         <div class="flex-1">
             <div class="flex">
@@ -149,45 +145,48 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: ['tasks', 'correctionType', 'tasksRequired', 'pointsRequired', 'ended', 'projectStatus'],
-    computed: {
-        pointSum: function () {
-            return this.tasks.list.reduce((total, group) => {
-                return total + group.tasks.filter(t => t.pointsAcquired).reduce((total, c) => total + c.pointsAcquired, 0);
-            }, 0)
-        },
-        pointMax: function () {
-            return this.tasks.list.reduce((total, group) => {
-                return total + group.tasks.reduce((total, c) => total + c.points, 0);
-            }, 0)
-        },
-        lengthMax: function() {
-            return this.tasks.list.reduce((total, group) => {
-                return total + group.tasks.length;
-            }, 0)
-        },
-        graded: function () {
-            if (this.projectStatus === null)
-                return false;
-            if (this.correctionType === 'manual')
-                return this.projectStatus === 'finished';
+<script setup lang="ts">
+import {computed, defineAsyncComponent} from "vue";
+import { SubTaskList } from "../../../Interfaces/SubTaskList"
+import {SubTaskListItem} from "../../../Interfaces/SubTaskListItem";
+import {GroupedSubTaskList} from "../../../Interfaces/GroupedSubTaskList";
+import {GroupedSubTaskListGroup} from "../../../Interfaces/GroupedSubTaskListGroup";
 
-            return true;
-        }
-    },
-    methods: {
-        maxPoints: function (group) {
-            return group.tasks.map(g => g.points).reduce((a, b) => a + b);
-        },
-        completedPoints: function (group) {
-            let completed = group.tasks.filter(g => g.pointsAcquired !== null || g.pointsAcquired === 0);
-            if (completed.length === 0)
-                return 0;
+const SimpleDoughnutChart = defineAsyncComponent(() => import('../../SimpleDoughnutChart.vue'))
 
-            return completed.map(g => g.pointsAcquired).reduce((a, b) => a + b);
-        }
-    }
+const props = defineProps<{
+    tasks: GroupedSubTaskList
+    correctionType: 'manual',
+    pointsRequired?: number,
+    ended: boolean,
+    projectStatus?: 'overdue' | 'finished',
+    tasksRequired?: []
+}>();
+
+const pointSum = computed(() =>  props.tasks.list.reduce((total, group) => total + group.tasks.filter(t => t.pointsAcquired).reduce((total, c) => total + c.pointsAcquired, 0), 0));
+const pointMax = computed(() =>  props.tasks.list.reduce((total, group) => total + group.tasks.reduce((total, c) => total + c.points, 0), 0))
+const lengthMax = computed(() => this.tasks.list.reduce((total, group) => total + group.tasks.length, 0))
+const graded = computed(() => {
+    if (props.projectStatus === null)
+        return false;
+    if (props.correctionType === 'manual')
+        return props.projectStatus === 'finished';
+
+    return true;
+})
+
+function maxPoints(group: GroupedSubTaskListGroup)
+{
+    return group.tasks.map(g => g.points).reduce((a, b) => a + b);
 }
+
+function completedPoints(group: GroupedSubTaskListGroup)
+{
+    let completed = group.tasks.filter(g => g.pointsAcquired !== null || g.pointsAcquired === 0);
+    if (completed.length === 0)
+        return 0;
+
+    return completed.map(g => g.pointsAcquired).reduce((a, b) => a + b);
+}
+
 </script>

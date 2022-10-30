@@ -4,7 +4,7 @@
             class="bg-white p-4 rounded-md shadow-md dark:bg-gray-800">
             <h2 class="dark:text-white font-semibold text-2xl">Settings</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div v-if="project.ownable_type === 'App\\Models\\Group'">
+                <div v-if="props.project.ownable_type === 'App\\Models\\Group'">
                     <div class="border-2 rounded-xl p-4 mt-6 border-lime-green-400 relative">
                         <h3 class="absolute text-lime-green-400 -my-8 -ml-2 bg-white dark:bg-gray-800 px-2">Repository
                             Access</h3>
@@ -42,15 +42,14 @@
                             project.</p>
                         <div class="flex items-center mt-4 mb-2">
                             <span class="text-sm mr-1 dark:text-gray-200">Group:</span>
-                            <select v-model="migrate.group"
+                            <select v-model="migrateGroup"
                                     class="bg-gray-100 dark:bg-gray-600 border-gray-300 text-gray-900 dark:text-gray-200 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5">
                                 <option :key="id" :value="id" v-for="(group, id) in groups"
                                         v-text="group"></option>
                             </select>
                         </div>
-                        <tippy v-if="migrate.group == null" to="btnMigrate">Please select a group first.</tippy>
-                        <button name="btnMigrate" @click="migrateProject"
-                                :class="[migrate.group == null ? 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-600' : 'bg-red-600 text-white hover:bg-red-500']"
+                        <button v-tippy="migrateGroup == null ? 'Please select a group first.' : null" name="btnMigrate" @click="migrateProject"
+                                :class="[migrateGroup == null ? 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-600' : 'bg-red-600 text-white hover:bg-red-500']"
                                 class="py-1 px-2 font-semibold rounded transition-colors text-sm mt-2">Migrate Project
                         </button>
                     </div>
@@ -63,46 +62,43 @@
                content="Resetting your project cannot be undone. Be certain that this what you want to do before confirming."
                v-if="showResetWarning" @cancel="showResetWarning=false"></alert>
         <alert type="danger" title="Migrate to group" method="post"
-               :url="'/projects/' + project.id + '/migrate/' + migrate.group"
+               :url="'/projects/' + project.id + '/migrate/' + migrateGroup"
                confirm-button-text="Migrate Project"
                content="Migrating your project cannot be undone. Be certain that this what you want to do before confirming."
-               v-if="migrate.showConfirm" @cancel="migrate.showConfirm=false"></alert>
+               v-if="migrateShowConfirm" @cancel="migrateShowConfirm=false"></alert>
     </div>
 </template>
 
-<script>
-import Alert from "../../Alert.vue";
+<script setup lang="ts">
+import {defineAsyncComponent, PropType, ref} from "vue";
+import {Project} from "../../../Interfaces/Models/Project";
+import axios from "axios";
 
-export default {
-    components: {
-        Alert
-    },
-    props: ['project', 'groups'],
-    data: function () {
-        return {
-            showResetWarning: false,
-            migrate: {
-                group: null,
-                showConfirm: false
-            },
-            refresh: {
-                loading: false
-            }
-        }
-    },
-    methods: {
-        migrateProject: function () {
-            if (this.migrate.group == null)
-                return;
-            this.migrate.showConfirm = true;
-        },
-        refreshProject: async function () {
-            this.refresh.loading = true;
-            await axios.post('/projects/' + this.project.id + '/refresh-access', {
-                csrf: this.csrf
-            })
-            location.reload();
-        }
-    }
+const Alert = defineAsyncComponent(() => import('../../Alert.vue'))
+
+const props = defineProps<{
+    project: Project,
+    groups: []
+}>()
+
+const showResetWarning = ref<boolean>(false)
+const migrateGroup = ref<string>()
+const migrateShowConfirm = ref<boolean>(false)
+
+const refresh = ref<{loading: boolean}>({
+    loading: false
+})
+
+function migrateProject() {
+    if (migrateGroup == null)
+        return;
+    migrateShowConfirm.value = true;
+}
+
+async function refreshProject()
+{
+    this.refresh.loading = true;
+    await axios.post('/projects/' + this.props.project.id + '/refresh-access');
+    location.reload();
 }
 </script>

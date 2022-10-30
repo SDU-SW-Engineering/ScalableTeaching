@@ -1,11 +1,6 @@
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
-
 import "./bootstrap";
 import { createApp, defineAsyncComponent } from "vue";
+import VueTippy from "vue-tippy";
 
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
@@ -14,11 +9,6 @@ import { createApp, defineAsyncComponent } from "vue";
  */
 
 const app = createApp({});
-
-app.component(
-    "example-component",
-    defineAsyncComponent(() => import("./components/ExampleComponent.vue"))
-);
 
 app.component(
     "task",
@@ -42,5 +32,7 @@ app.component(
  * an "id" attribute of "app". This element is included with the "auth"
  * scaffolding. Otherwise, you will need to add an element yourself.
  */
+
+app.use(VueTippy);
 
 app.mount("#app");

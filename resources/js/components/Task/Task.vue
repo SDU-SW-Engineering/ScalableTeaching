@@ -182,6 +182,7 @@
 
 <script setup lang="ts">
 import {ref, onMounted, defineAsyncComponent, computed} from "vue";
+import axios from "axios";
 
 const SurveyTab = defineAsyncComponent(() => import('./Tabs/Survey.vue'))
 const SubtasksTab = defineAsyncComponent(() => import('./Tabs/SubTasks.vue'))
@@ -231,6 +232,7 @@ const props = defineProps<{
     warning: string,
     codeRoute: string,
     userName: string,
+    newProjectUrl: string
 }>()
 
 const hideMissingAssignmentWarning = ref<boolean>(props.task.source_project_id === null)
@@ -240,7 +242,27 @@ const startAs = ref<'solo'>('solo')
 const startingAssignment = ref<boolean>(false)
 
 const showSurvey = computed(() => props.project != null && props.survey.details != null && props.survey.can.view)
+const showBuilds = computed(() => props.task.correction_type !== 'none')
 
+async function startAssignment(override : string) : Promise<void>
+{
+    let createAs = override == null ? startAs : override;
+    startingAssignment.value = true;
+    errorMessage.value = "";
+    try {
+        await axios.post(props.newProjectUrl, {
+            as: createAs
+        });
+        location.reload();
+    } catch (e) {
+        if (e.response.status === 404) {
+            location.reload();
+            return;
+        }
+        errorMessage.value = e.response.data.message;
+        startingAssignment.value = false;
+    }
+}
 /*import LineChart from "../LineChart.vue";
 
 
