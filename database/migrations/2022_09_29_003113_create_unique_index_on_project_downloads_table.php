@@ -25,6 +25,7 @@ return new class extends Migration {
     public function down()
     {
         Schema::table('project_downloads', function (Blueprint $table) {
+            $table->dropForeign('project_downloads_project_id_foreign');
             $table->dropUnique('project_downloads_project_id_ref_unique');
         });
     }
