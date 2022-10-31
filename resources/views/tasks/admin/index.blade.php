@@ -69,7 +69,9 @@
                    href="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}">Details</a>
             </div>
             <div>
-
+                <bar-chart :height="300" :labels="{{ $dailyBuildsGraph->labels() }}"
+                           :data="{{ $dailyBuildsGraph->datasets()  }}"
+                           route="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}"></bar-chart>
             </div>
         </div>
     </div>
