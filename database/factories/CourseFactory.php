@@ -14,6 +14,7 @@ class CourseFactory extends Factory
             'name'            => $this->faker->sentence(3),
             'gitlab_group_id' => $this->faker->numberBetween(10, 2000),
             'enroll_token'    => Str::random(32),
+            'created_at' => $this->faker->dateTimeBetween('-1 week', 'now'),
         ];
     }
 }
