@@ -34,9 +34,6 @@ class DashboardController extends Controller
             'nextAssignment'     => $nextAssignment,
             'bg'                 => 'bg-gray-100 dark:bg-gray-700',
             'awaitingFeedback'   => $awaitingFeedback,
-            'breadcrumbs'        => [
-                'Dashboard' => null,
-            ],
         ]);
     }
 }
