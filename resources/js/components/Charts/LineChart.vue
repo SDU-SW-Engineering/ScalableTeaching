@@ -47,9 +47,11 @@ const chartOptions = ref<ChartOptions<LineElement>>({
     },
     responsive: true,
     maintainAspectRatio: false,
-    tooltips: {
-        mode: "index",
-        intersect: false
+    plugins: {
+        tooltip: {
+            mode: "index",
+            intersect: false
+        },
     },
     scales: {
         y: {
