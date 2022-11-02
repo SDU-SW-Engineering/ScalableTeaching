@@ -30,6 +30,10 @@ class MockedGitlabActions implements SourceControl
 
     public function addUserToProject(string $projectId, string $userId): void
     {
+
+
+
+        
     }
 
     public function createGroup(string $name, array $params): ?Group
