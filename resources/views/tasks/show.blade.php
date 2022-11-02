@@ -2,6 +2,8 @@
 
 @section('content')
     <task :task="{{ $task }}"
+          edit-route="{{  route('courses.tasks.admin.preferences', [$course, $task]) }}"
+          analytics="{{  route('courses.tasks.admin.index', [$course, $task]) }}"
           code-route="{{ $codeRoute }}"
           :grade="{{ $task->grade(auth()->user()) ?? 'null' }}"
           :survey="{{ json_encode($survey) }}"
