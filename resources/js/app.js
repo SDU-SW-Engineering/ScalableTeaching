@@ -35,6 +35,13 @@ app.component(
     "feedback-review",
     defineAsyncComponent(() => import("./components/Admin/FeedbackReview.vue"))
 );
+
+app.component(
+    "enrolled",
+    defineAsyncComponent(() =>
+        import("./components/Course/Management/Enrolled.vue")
+    )
+);
 /**
  *
  * The following block of code may be used to automatically register your

@@ -1,5 +1,5 @@
 <template>
-    <div class="relative">
+    <div ref="bounds" class="relative">
         <button :disabled="loading" @click="showDropdown = !showDropdown" id="dropdownDefault"
                 data-dropdown-toggle="dropdown"
                 class="justify-between w-44 flex transition-colors duration-200 focus:ring-4 focus:outline-none
@@ -42,59 +42,51 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        currentRole: {
-            required: true,
-            type: String
-        },
-        roles: {
-            required: true,
-            type: Object
-        },
-        route: {
-            required: true,
-            type: String
-        },
-        userId: {
-            required: true,
-            type: Number
-        }
-    },
-    data() {
-        return {
-            showDropdown: false,
-            visible: false,
-            loading: false
-        }
-    },
-    methods: {
-        setRole: async function (roleId) {
-            if (roleId === this.currentRole)
-                return;
+<script setup lang="ts">
+import {onBeforeUnmount, onMounted, ref} from "vue";
+import axios from "axios";
 
-            this.loading = true;
-            this.showDropdown = false;
-            await axios.put(this.route, {
-                role: roleId,
-                user: this.userId
-            });
-            this.$emit('new-role', roleId)
-            this.loading = false;
-        },
-        close: function (e) {
-            if (!this.$el.contains(e.target)) {
-                this.showDropdown = false
-            }
-        }
-    },
-    mounted() {
-        document.addEventListener('click', this.close)
-        this.visible = this.isVisible
-    },
-    beforeDestroy() {
-        document.removeEventListener('click', this.close)
+const emit = defineEmits<{
+    (e: 'new-role', roleId: number) : void
+}>();
+
+const props = defineProps<{
+    currentRole: string,
+    roles: object,
+    route: string,
+    userId: number
+}>()
+
+const showDropdown = ref<boolean>(false);
+const visible = ref<boolean>(false);
+const loading = ref<boolean>(false);
+const bounds = ref<Element>(null)
+
+async function setRole(roleId : number) : Promise<void> {
+    if (roleId == props.currentRole)
+        return;
+
+    loading.value = true;
+    showDropdown.value = false;
+    await axios.put(props.route, {
+        role: roleId,
+        user: props.userId
+    });
+    emit('new-role', roleId)
+    loading.value = false;
+}
+
+function close(e) {
+    if (!bounds.value.contains(e.target)) {
+        showDropdown.value = false;
     }
 }
+
+onMounted(() => {
+    document.addEventListener('click', close)
+});
+
+onBeforeUnmount(() => {
+    document.removeEventListener('click', close)
+})
 </script>
