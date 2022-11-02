@@ -57,10 +57,10 @@ const chartOptions = ref<ChartOptions<LineElement>>({
         y: {
             ticks: {
                 beginAtZero: true,
-                color: darkMode ? "#ffffff" : '#6A6A6A'
+                color: darkMode.value ? "#ffffff" : '#6A6A6A'
             },
             grid: {
-                color: darkMode ? "#3d3d3d" : '#ECECEC'
+                color: darkMode.value ? "#3d3d3d" : '#d9d9d9'
             }
         },
         x: {

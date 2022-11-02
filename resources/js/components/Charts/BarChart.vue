@@ -39,15 +39,18 @@ const chartOptions = ref<ChartOptions<BarElement>>({
             stacked: true,
             ticks: {
                 display: false
+            },
+            grid: {
+                display: false
             }
         },
         y: {
             ticks: {
                 beginAtZero: true,
-                color: darkMode ? "#ffffff" : '#6A6A6A'
+                color: darkMode.value ? "#ffffff" : '#6A6A6A'
             },
             grid: {
-                color: darkMode ? "#3d3d3d" : '#ECECEC'
+                color: darkMode.value ? "#3d3d3d" : '#ECECEC'
             }
         },
     },
