@@ -31,6 +31,10 @@ app.component(
     defineAsyncComponent(() => import("./components/Charts/BarChart.vue"))
 );
 
+app.component(
+    "feedback-review",
+    defineAsyncComponent(() => import("./components/Admin/FeedbackReview.vue"))
+);
 /**
  *
  * The following block of code may be used to automatically register your
