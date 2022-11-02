@@ -31,10 +31,11 @@ class DownloadProject implements ShouldQueue
     {
     }
 
-    public function handle() : void
+    public function handle(): void
     {
-        if ($this->download->downloaded_at != null)
+        if ($this->download->downloaded_at != null) {
             return;
+        }
 
         $gitLabManager = app(GitLabManager::class);
 
@@ -46,7 +47,7 @@ class DownloadProject implements ShouldQueue
         Storage::disk('local')->put($fileLocation, $archiveContent);
 
         $this->download->update([
-            'location'      => $fileLocation,
+            'location' => $fileLocation,
             'downloaded_at' => now(),
         ]);
     }

@@ -13,16 +13,17 @@ class TaskProtectedFile extends Model
 
     protected $casts = ['sha_values' => 'array'];
 
-    public function getBaseNameAttribute() : string
+    public function getBaseNameAttribute(): string
     {
         return pathinfo($this->path)['basename'];
     }
 
-    public function getDirectoryAttribute() : string
+    public function getDirectoryAttribute(): string
     {
         $directory = pathinfo($this->path)['dirname'];
-        if ($directory == "\\")
-            $directory = "/";
+        if ($directory == '\\') {
+            $directory = '/';
+        }
 
         return $directory;
     }

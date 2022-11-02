@@ -10,9 +10,9 @@ class BarDataSet extends DataSet
 
     /**
      * @param $label
-     * @param Collection<int, int> $data
+     * @param  Collection<int, int>  $data
      * @param $color
-     * @param int|null $activeIndex
+     * @param  int|null  $activeIndex
      */
     public function __construct($label, Collection $data, $color, ?int $activeIndex = null)
     {
@@ -23,15 +23,16 @@ class BarDataSet extends DataSet
     public function toArray()
     {
         return [
-            'borderColor'     => $this->borderColor,
-            'backgroundColor' => $this->data->map(function($value, $index) {
-                if ($index === $this->activeIndex)
-                    return "#94C843";
+            'borderColor' => $this->borderColor,
+            'backgroundColor' => $this->data->map(function ($value, $index) {
+                if ($index === $this->activeIndex) {
+                    return '#94C843';
+                }
 
                 return $this->backgroundColor;
             }),
-            'label'           => $this->label,
-            'data'            => $this->data,
+            'label' => $this->label,
+            'data' => $this->data,
         ];
     }
 }

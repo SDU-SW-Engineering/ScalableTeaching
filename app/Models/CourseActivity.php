@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use PhpParser\Node\Stmt\GroupUse;
 
 /**
  * @mixin \Eloquent
@@ -23,7 +22,7 @@ class CourseActivity extends Model
     protected $fillable = ['course_id', 'affected_id', 'affected_by_id', 'message', 'type', 'additional', 'resource_type', 'resource_id'];
 
     protected $casts = [
-        'type'       => CourseActivityType::class,
+        'type' => CourseActivityType::class,
         'additional' => 'array',
     ];
 
@@ -40,7 +39,7 @@ class CourseActivity extends Model
      */
     public function resource(): MorphTo
     {
-        return $this->morphTo("resource");
+        return $this->morphTo('resource');
     }
 
     /**
@@ -64,14 +63,13 @@ class CourseActivity extends Model
      */
     public function kind(): Attribute
     {
-        return Attribute::make(get: function($value, $attributes) {
-            return match ($this->resource_type) // @phpstan-ignore-line
-            {
-            Grade::class               => 'Grade',
-                CourseUser::class      => 'Membership',
-                Group::class           => 'Group',
+        return Attribute::make(get: function ($value, $attributes) {
+            return match ($this->resource_type) { // @phpstan-ignore-line
+                Grade::class => 'Grade',
+                CourseUser::class => 'Membership',
+                Group::class => 'Group',
                 GroupInvitation::class => 'Group Invitation',
-                GroupUser::class       => 'Group Membership',
+                GroupUser::class => 'Group Membership',
             };
         });
     }

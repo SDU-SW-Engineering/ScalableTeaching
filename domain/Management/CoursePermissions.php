@@ -2,7 +2,6 @@
 
 namespace Domain\Management;
 
-enum CoursePermissions : string
+enum CoursePermissions: string
 {
-
 }

@@ -9,36 +9,35 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TaskFactory extends Factory
 {
-
     public function definition()
     {
-        $starts_at = $this->faker->dateTimeBetween("-8 weeks", "8 weeks");
+        $starts_at = $this->faker->dateTimeBetween('-8 weeks', '8 weeks');
         $ends_at = Carbon::instance($starts_at)->addWeeks(rand(2, 4));
 
         return [
-            'name'              => $this->faker->sentence(3),
+            'name' => $this->faker->sentence(3),
             'source_project_id' => $this->faker->randomNumber(1, 2000),
-            'gitlab_group_id'   => $this->faker->randomNumber(1, 2000),
-            'description'       => $this->faker->paragraph(rand(10, 20)),
-            'correction_type'   => CorrectionType::None,
-            'starts_at'         => $starts_at,
-            'ends_at'           => $ends_at,
-            'is_visible'        => true,
+            'gitlab_group_id' => $this->faker->randomNumber(1, 2000),
+            'description' => $this->faker->paragraph(rand(10, 20)),
+            'correction_type' => CorrectionType::None,
+            'starts_at' => $starts_at,
+            'ends_at' => $ends_at,
+            'is_visible' => true,
         ];
     }
 
     public function invisible()
     {
-        return $this->state(function(array $attributes) {
-           return [
-               'is_visible' => false,
-           ];
+        return $this->state(function (array $attributes) {
+            return [
+                'is_visible' => false,
+            ];
         });
     }
 
     public function visible()
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'is_visible' => true,
             ];
@@ -47,7 +46,7 @@ class TaskFactory extends Factory
 
     public function group($group)
     {
-        return $this->state(function(array $attributes) use ($group) {
+        return $this->state(function (array $attributes) use ($group) {
             return [
                 'grouped_by' => $group,
             ];
@@ -56,7 +55,7 @@ class TaskFactory extends Factory
 
     public function exercise()
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'type' => TaskTypeEnum::Exercise,
             ];
@@ -65,7 +64,7 @@ class TaskFactory extends Factory
 
     public function assignment()
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'type' => TaskTypeEnum::Assignment,
             ];
@@ -74,7 +73,7 @@ class TaskFactory extends Factory
 
     public function selfCorrection()
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'correction_type' => CorrectionType::Self,
             ];

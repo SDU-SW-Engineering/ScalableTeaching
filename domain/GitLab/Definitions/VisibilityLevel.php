@@ -2,7 +2,7 @@
 
 namespace Domain\GitLab\Definitions;
 
-enum VisibilityLevel : int
+enum VisibilityLevel: int
 {
     case Public = 20;
     case Internal = 10;

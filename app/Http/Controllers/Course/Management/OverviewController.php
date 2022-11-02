@@ -18,21 +18,20 @@ class OverviewController extends Controller
         $exerciseEngagement = $course->exercise_engagement;
         $userEngagementGraph = new Graph(
             $exerciseEngagement->keys(),
-            new BarDataSet("Engagement %", $exerciseEngagement->values(), "#4F535B"),
+            new BarDataSet('Engagement %', $exerciseEngagement->values(), '#4F535B'),
         );
-
 
         /** @var Collection<string,int> $enrolmentPerDay */
         $enrolmentPerDay = $course->enrolment_per_day;
         $enrolmentPerDayGraph = new Graph(
             $enrolmentPerDay->keys(),
-            new LineDataSet("Enrolled in total", $enrolmentPerDay->values(), "#266ab0", true)
+            new LineDataSet('Enrolled in total', $enrolmentPerDay->values(), '#266ab0', true)
         );
 
         return view('courses.manage.index', [
-            'course'              => $course,
+            'course' => $course,
             'userEngagementGraph' => $userEngagementGraph,
-            'enrolmentGraph'      => $enrolmentPerDayGraph,
+            'enrolmentGraph' => $enrolmentPerDayGraph,
         ]);
     }
 }

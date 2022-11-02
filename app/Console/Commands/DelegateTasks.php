@@ -29,16 +29,14 @@ class DelegateTasks extends Command
      */
     public function handle()
     {
-        foreach(TaskDelegation::undelegated()->get() as $taskDelegation)
-        {
+        foreach (TaskDelegation::undelegated()->get() as $taskDelegation) {
             /** @var TaskDelegation $taskDelegation */
-            if (now()->isBefore($taskDelegation->task->ends_at))
+            if (now()->isBefore($taskDelegation->task->ends_at)) {
                 continue;
-            try
-            {
+            }
+            try {
                 $taskDelegation->delegate();
-            } catch(TaskDelegationException $e)
-            {
+            } catch(TaskDelegationException $e) {
                 $this->error($e->getMessage());
             }
         }

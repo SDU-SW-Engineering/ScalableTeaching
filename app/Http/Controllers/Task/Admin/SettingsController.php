@@ -20,8 +20,7 @@ class SettingsController extends Controller
 {
     public function preferences(Course $course, Task $task): View
     {
-        if($task->type == TaskTypeEnum::Assignment)
-        {
+        if ($task->type == TaskTypeEnum::Assignment) {
             $ciFile = $task->ciFile();
             $subTasks = $this->getSubTasks($ciFile, $task);
 
@@ -34,13 +33,13 @@ class SettingsController extends Controller
     public function saveDescription(Course $course, Task $task): string
     {
         $markdown = request('markdown');
-        $html = Http::post(getenv('FORMATTER_SERVICE_URL') . '/md', ['text' => $markdown])->json('html');
+        $html = Http::post(getenv('FORMATTER_SERVICE_URL').'/md', ['text' => $markdown])->json('html');
 
         $task->description = $html;
         $task->markdown_description = $markdown;
         $task->save();
 
-        return "OK";
+        return 'OK';
     }
 
     public function updateTitle(Course $course, Task $task): RedirectResponse
@@ -57,21 +56,22 @@ class SettingsController extends Controller
     public function updateDuration(Course $course, Task $task): RedirectResponse
     {
         $validated = request()->validateWithBag('duration', [
-            'from'       => ['required', 'date', 'before_or_equal:to'],
-            'to'         => ['required', 'date', 'after_or_equal:from'],
+            'from' => ['required', 'date', 'before_or_equal:to'],
+            'to' => ['required', 'date', 'after_or_equal:from'],
             'start-time' => ['required', 'date_format:H:i'],
-            'end-time'   => ['required', 'date_format:H:i'],
+            'end-time' => ['required', 'date_format:H:i'],
         ]);
 
-        $from = Carbon::parse($validated['from'] . " " . $validated['start-time']);
-        $to = Carbon::parse($validated['to'] . " " . $validated['end-time']);
+        $from = Carbon::parse($validated['from'].' '.$validated['start-time']);
+        $to = Carbon::parse($validated['to'].' '.$validated['end-time']);
 
-        if($from->isAfter($to) || $from->eq($to))
+        if ($from->isAfter($to) || $from->eq($to)) {
             return back()->withInput()->withErrors('The from date must happen before the to date.', 'duration');
+        }
 
         $task->update([
             'starts_at' => $from,
-            'ends_at'   => $to,
+            'ends_at' => $to,
         ]);
 
         return back()->with('duration-success', 'Changes saved');
@@ -82,7 +82,7 @@ class SettingsController extends Controller
         $task->is_visible = ! $task->is_visible;
         $task->save();
 
-        return "ok";
+        return 'ok';
     }
 
     public function updateSubtasks(Course $course, Task $task): string
@@ -90,52 +90,51 @@ class SettingsController extends Controller
         $tasks = new Collection(request('tasks'));
         $correctionType = CorrectionType::from(request('correctionType'));
 
-        $selected = $tasks->filter(fn($task) => $task['isSelected']);
+        $selected = $tasks->filter(fn ($task) => $task['isSelected']);
         $currentSubTasks = $task->sub_tasks;
-        $removeIds = $task->sub_tasks->all()->map(fn(SubTask $subTask) => $subTask->getId())->diff($selected->pluck('id'));
+        $removeIds = $task->sub_tasks->all()->map(fn (SubTask $subTask) => $subTask->getId())->diff($selected->pluck('id'));
         $currentSubTasks->remove($removeIds->toArray());
-        $selected->each(function($task) use ($currentSubTasks) {
+        $selected->each(function ($task) use ($currentSubTasks) {
             $subTask = (new SubTask($task['name'], $task['alias'] == '' ? null : $task['alias']))
                 ->setPoints($task['points'])
                 ->setIsRequired($task['required']);
-            if($task['id'] == null)
+            if ($task['id'] == null) {
                 $currentSubTasks->add($subTask);
-            else
+            } else {
                 $currentSubTasks->update($task['id'], $subTask);
-
+            }
         });
         $task->correction_type = $correctionType;
         $task->correction_points_required = request('requiredPoints');
         $task->correction_tasks_required = request('requiredTasks');
         $task->save();
 
-        return "OK";
+        return 'OK';
     }
 
     /**
-     * @param string|null $ciFile
-     * @param Task $task
+     * @param  string|null  $ciFile
+     * @param  Task  $task
      * @return mixed[]
      */
     private function getSubTasks(?string $ciFile, Task $task): array
     {
-        $subTasks = collect((new CIReader($ciFile))->tasks())->map(fn(CITask $task) => [
-            'stage'      => $task->getStage(),
-            'name'       => $task->getName(),
-            'id'         => null,
-            'alias'      => '',
-            'points'     => 0,
+        $subTasks = collect((new CIReader($ciFile))->tasks())->map(fn (CITask $task) => [
+            'stage' => $task->getStage(),
+            'name' => $task->getName(),
+            'id' => null,
+            'alias' => '',
+            'points' => 0,
             'isRequired' => false,
             'isSelected' => false,
         ])->toArray();
 
-
         /** @var SubTask $subTask */
-        foreach($task->sub_tasks->all() as $subTask)
-        {
-            $found = collect($subTasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
-            if($found === false)
+        foreach ($task->sub_tasks->all() as $subTask) {
+            $found = collect($subTasks)->search(fn ($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
+            if ($found === false) {
                 continue;
+            }
             $subTasks[$found]['name'] = $subTask->getName();
             $subTasks[$found]['alias'] = $subTask->getAlias();
             $subTasks[$found]['id'] = $subTask->getId();

@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Group $group
+ *
  * @method static Builder|GroupInvitation newModelQuery()
  * @method static Builder|GroupInvitation newQuery()
  * @method static Builder|GroupInvitation query()
@@ -40,7 +41,7 @@ class GroupInvitation extends Model
     /**
      * @return BelongsTo<Group,GroupInvitation>
      */
-    public function group() : BelongsTo
+    public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
     }

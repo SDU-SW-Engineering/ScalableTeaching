@@ -2,12 +2,6 @@
 
 namespace App\Providers;
 
-use App\Events\ProjectCreated;
-use App\Listeners\GitLab\Project\DisableForking;
-use App\Listeners\GitLab\Project\RefreshMemberAccess;
-use App\Listeners\GitLab\Project\RegisterWebhook;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider;
 
 class CourseActivityServiceProvider extends EventServiceProvider

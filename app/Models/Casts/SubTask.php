@@ -2,10 +2,7 @@
 
 namespace App\Models\Casts;
 
-use Illuminate\Contracts\Database\Eloquent\Castable;
-use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Support\Arrayable;
-use InvalidArgumentException;
 
 /**
  * @implements Arrayable<int,int|string>
@@ -13,7 +10,9 @@ use InvalidArgumentException;
 class SubTask implements Arrayable
 {
     public ?int $id = null;
+
     private ?bool $isRequired = null;
+
     public ?int $points = null;
 
     public function __construct(private string $name, private ?string $alias = null, public ?string $group = null)
@@ -60,7 +59,7 @@ class SubTask implements Arrayable
     }
 
     /**
-     * @param bool|null $isRequired
+     * @param  bool|null  $isRequired
      */
     public function setIsRequired(?bool $isRequired): SubTask
     {
@@ -77,9 +76,8 @@ class SubTask implements Arrayable
         return $this->points;
     }
 
-
     /**
-     * @param int|null $points
+     * @param  int|null  $points
      */
     public function setPoints(?int $points): SubTask
     {
@@ -88,14 +86,13 @@ class SubTask implements Arrayable
         return $this;
     }
 
-
-    public function setId(int $id) : void
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
 
     /**
-     * @param string $name
+     * @param  string  $name
      */
     public function setName(string $name): void
     {
@@ -103,7 +100,7 @@ class SubTask implements Arrayable
     }
 
     /**
-     * @param string|null $alias
+     * @param  string|null  $alias
      */
     public function setAlias(?string $alias): void
     {
@@ -119,7 +116,7 @@ class SubTask implements Arrayable
     }
 
     /**
-     * @param string|null $group
+     * @param  string|null  $group
      */
     public function setGroup(?string $group): void
     {
@@ -129,11 +126,11 @@ class SubTask implements Arrayable
     public function toArray()
     {
         return [
-            'id'     => $this->id,
+            'id' => $this->id,
             'points' => $this->points,
-            'group'  => $this->group,
-            'name'   => $this->name,
-            'alias'  => $this->alias,
+            'group' => $this->group,
+            'name' => $this->name,
+            'alias' => $this->alias,
         ];
     }
 }

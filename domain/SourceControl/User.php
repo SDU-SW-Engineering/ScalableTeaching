@@ -8,7 +8,7 @@ class User
     {
     }
 
-    public static function token(string $user = 'default') : string
+    public static function token(string $user = 'default'): string
     {
         return config("sourcecontrol.users.$user.token");
     }

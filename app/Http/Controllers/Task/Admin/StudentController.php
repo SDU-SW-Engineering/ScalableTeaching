@@ -16,18 +16,20 @@ class StudentController extends Controller
         return view('tasks.admin.students', compact('course', 'task'));
     }
 
-    public function builds(Course $course, Task $task) : VIew
+    public function builds(Course $course, Task $task): VIew
     {
         $dailyBuilds = $task->dailyBuilds(true, true);
         $activeIndex = $dailyBuilds->keys()->search(\request('q'));
-        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B", $activeIndex === false ? null : $activeIndex));
+        $dailyBuildsGraph = new Graph($dailyBuilds->keys(), new BarDataSet('Builds', $dailyBuilds->values(), '#4F535B', $activeIndex === false ? null : $activeIndex));
         $buildQuery = $task->jobs();
 
-        if(\request('q') != null)
+        if (\request('q') != null) {
             $buildQuery->whereRaw('date(pipelines.created_at) = ?', \request('q'));
+        }
 
-        if(\request('status') != null)
+        if (\request('status') != null) {
             $buildQuery->where('pipelines.status', \request('status'));
+        }
 
         $buildQuery->latest();
         $builds = $buildQuery->paginate(25)->withQueryString();
@@ -35,7 +37,7 @@ class StudentController extends Controller
         return view('tasks.admin.builds', compact('course', 'task', 'dailyBuildsGraph', 'builds'));
     }
 
-    public function pushes(Course $course, Task $task) : View
+    public function pushes(Course $course, Task $task): View
     {
         $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
 

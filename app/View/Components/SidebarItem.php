@@ -2,7 +2,6 @@
 
 namespace App\View\Components;
 
-use App\Models\Task;
 use Illuminate\View\Component;
 
 class SidebarItem extends Component

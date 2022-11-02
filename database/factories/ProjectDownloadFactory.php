@@ -18,7 +18,7 @@ class ProjectDownloadFactory extends Factory
     public function definition()
     {
         return [
-            'ref'       => $this->faker->sha256,
+            'ref' => $this->faker->sha256,
             'expire_at' => Carbon::now()->addYears(2),
         ];
     }

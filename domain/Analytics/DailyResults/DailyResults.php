@@ -2,7 +2,6 @@
 
 namespace Domain\Analytics\DailyResults;
 
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class DailyResults
@@ -13,7 +12,7 @@ class DailyResults
     private Collection $results;
 
     /**
-     * @param Collection<string,int> $data
+     * @param  Collection<string,int>  $data
      */
     public function __construct(Collection $data)
     {
@@ -23,7 +22,7 @@ class DailyResults
     /**
      * @return Collection<string,int>
      */
-    public function get() : Collection
+    public function get(): Collection
     {
         return $this->results;
     }
@@ -31,16 +30,18 @@ class DailyResults
     /**
      * @return Collection<string, int>
      */
-    public function total() : Collection
+    public function total(): Collection
     {
-        if ($this->results->count() == 0)
+        if ($this->results->count() == 0) {
             return new Collection();
+        }
 
         $carry = $this->results->first();
 
         return $this->results->map(function ($value, $key) use (&$carry) {
-            if ($this->results->keys()[0] == $key)
+            if ($this->results->keys()[0] == $key) {
                 return $carry;
+            }
 
             return $carry += $value;
         });

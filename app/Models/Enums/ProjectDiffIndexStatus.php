@@ -2,7 +2,7 @@
 
 namespace App\Models\Enums;
 
-enum ProjectDiffIndexStatus : string
+enum ProjectDiffIndexStatus: string
 {
     case Success = 'success';
     case Failure = 'failure';

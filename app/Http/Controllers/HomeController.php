@@ -6,20 +6,11 @@ use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
 use Cache;
-use Carbon\Carbon;
-use Gitlab\Client;
-use Gitlab\ResultPager;
-use GrahamCampbell\GitLab\Facades\GitLab;
-use GrahamCampbell\GitLab\GitLabManager;
-use Illuminate\Http\Request;
-use Illuminate\Queue\Jobs\Job;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
-use function Clue\StreamFilter\remove;
 
 class HomeController extends Controller
 {
-    public function index() : View
+    public function index(): View
     {
         $averageQueueTime = Cache::remember('queue1MonthAvg', 3600, function () {
             return Pipeline::where('created_at', '>=', now()->subMonth()->toDateString())
@@ -44,11 +35,11 @@ class HomeController extends Controller
         });
 
         return view('home', [
-            'hideHeader'      => true,
-            'avgQueue'        => $averageQueueTime,
-            'buildCount'      => $builds,
-            'buildAvg'        => $buildAverageTime,
-            'projectCount'    => $projectCount,
+            'hideHeader' => true,
+            'avgQueue' => $averageQueueTime,
+            'buildCount' => $builds,
+            'buildAvg' => $buildAverageTime,
+            'projectCount' => $projectCount,
             'assignmentCount' => $assignmentCount,
         ]);
     }

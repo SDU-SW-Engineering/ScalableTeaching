@@ -3,7 +3,7 @@
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
 
-it('ensures a failing pipeline is not upgradable', function() {
+it('ensures a failing pipeline is not upgradable', function () {
     $pipeline = new Pipeline();
     $pipeline->status = PipelineStatusEnum::Failed;
 
@@ -12,7 +12,7 @@ it('ensures a failing pipeline is not upgradable', function() {
     expect($pipeline->isUpgradable(PipelineStatusEnum::Running))->toBeFalse();
 });
 
-it('ensures a succeeding pipeline is upgradable', function() {
+it('ensures a succeeding pipeline is upgradable', function () {
     $pipeline = new Pipeline();
     $pipeline->status = PipelineStatusEnum::Success;
 
@@ -21,7 +21,7 @@ it('ensures a succeeding pipeline is upgradable', function() {
     expect($pipeline->isUpgradable(PipelineStatusEnum::Running))->toBeFalse();
 });
 
-it('ensures a pending pipeline is upgradable to running, success and failed', function() {
+it('ensures a pending pipeline is upgradable to running, success and failed', function () {
     $pipeline = new Pipeline();
     $pipeline->status = PipelineStatusEnum::Pending;
 
@@ -30,7 +30,7 @@ it('ensures a pending pipeline is upgradable to running, success and failed', fu
     expect($pipeline->isUpgradable(PipelineStatusEnum::Running))->toBeTrue();
 });
 
-it('ensures a running pipeline is upgradable to success and failed', function() {
+it('ensures a running pipeline is upgradable to success and failed', function () {
     $pipeline = new Pipeline();
     $pipeline->status = PipelineStatusEnum::Running;
 
@@ -38,4 +38,3 @@ it('ensures a running pipeline is upgradable to success and failed', function() 
     expect($pipeline->isUpgradable(PipelineStatusEnum::Failed))->toBeTrue();
     expect($pipeline->isUpgradable(PipelineStatusEnum::Pending))->toBeFalse();
 });
-

@@ -2,8 +2,8 @@
 
 namespace App\Models\Enums;
 
-enum TaskTypeEnum : string
+enum TaskTypeEnum: string
 {
-    case Assignment = "assignment";
-    case Exercise = "exercise";
+    case Assignment = 'assignment';
+    case Exercise = 'exercise';
 }

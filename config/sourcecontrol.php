@@ -2,7 +2,7 @@
 
 return [
     'provider' => env('SOURCE_CONTROL_PROVIDER', 'GitLabSourceControl'),
-    'url'      => env('GITLAB_URL'),
+    'url' => env('GITLAB_URL'),
 
     'gitlab' => [
         'group' => env('GITLAB_GROUP'),
@@ -12,7 +12,7 @@ return [
         'default' => [
             'token' => env('GITLAB_ACCESS_TOKEN'),
         ],
-        'auth'    => [
+        'auth' => [
             'token' => null,
         ],
     ],

@@ -20,27 +20,27 @@ class DataSet implements Arrayable
     protected Collection $data;
 
     /**
-     * @param string $label
-     * @param Collection<int,int> $data
-     * @param string $color
-     * @param bool $transparent
+     * @param  string  $label
+     * @param  Collection<int,int>  $data
+     * @param  string  $color
+     * @param  bool  $transparent
      */
     public function __construct(string $label, Collection $data, string $color, bool $transparent = false)
     {
         $this->label = $label;
         $this->data = $data->values();
         $this->borderColor = $color;
-        $this->backgroundColor = $color . ($transparent ? "44" : "");
+        $this->backgroundColor = $color.($transparent ? '44' : '');
     }
 
     public function toArray()
     {
         return [
-            'borderColor'     => $this->borderColor,
+            'borderColor' => $this->borderColor,
             'backgroundColor' => $this->backgroundColor,
-            'label'           => $this->label,
-            'data'            => $this->data,
-            'fill'            => true
+            'label' => $this->label,
+            'data' => $this->data,
+            'fill' => true,
         ];
     }
 }

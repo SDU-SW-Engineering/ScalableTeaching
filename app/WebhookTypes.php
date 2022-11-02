@@ -2,9 +2,9 @@
 
 namespace App;
 
-enum WebhookTypes : string
+enum WebhookTypes: string
 {
-    case Job = "Job Hook";
-    case Pipeline = "Pipeline Hook";
-    case Push = "Push Hook";
+    case Job = 'Job Hook';
+    case Pipeline = 'Pipeline Hook';
+    case Push = 'Push Hook';
 }

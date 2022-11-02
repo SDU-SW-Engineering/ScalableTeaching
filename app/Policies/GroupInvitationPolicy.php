@@ -5,8 +5,6 @@ namespace App\Policies;
 use App\Models\GroupInvitation;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
-use Illuminate\Database\Eloquent\Collection;
 
 class GroupInvitationPolicy
 {
@@ -15,11 +13,11 @@ class GroupInvitationPolicy
     /**
      * Determine whether the user can delete the model.
      *
-     * @param User $user
-     * @param GroupInvitation $groupInvitation
+     * @param  User  $user
+     * @param  GroupInvitation  $groupInvitation
      * @return bool
      */
-    public function delete(User $user, GroupInvitation $groupInvitation) : bool
+    public function delete(User $user, GroupInvitation $groupInvitation): bool
     {
         $groupMembers = $groupInvitation->group->members;
 

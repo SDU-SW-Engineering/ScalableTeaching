@@ -2,9 +2,9 @@
 
 namespace App\Models\Enums;
 
-enum CourseActivityType : string
+enum CourseActivityType: string
 {
-    case Created = "created";
-    case Updated = "updated";
-    case Deleted = "deleted";
+    case Created = 'created';
+    case Updated = 'updated';
+    case Deleted = 'deleted';
 }

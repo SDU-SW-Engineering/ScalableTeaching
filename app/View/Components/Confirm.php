@@ -7,8 +7,11 @@ use Illuminate\View\Component;
 class Confirm extends Component
 {
     public ?string $acceptRoute = null;
+
     public ?string $declineRoute = null;
+
     public string $header;
+
     public string $subHeader;
 
     /**

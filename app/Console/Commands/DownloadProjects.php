@@ -47,26 +47,25 @@ class DownloadProjects extends Command
         $queuedCount = ProjectDownload::queued()->count();
 
         /** @var Project $project */
-        foreach($projects as $project)
-        {
+        foreach ($projects as $project) {
             /** @var ProjectPush | null $latestPush */
             $latestPush = $project->pushes()
                 ->where('created_at', '<=', $eligibleTasks[$project->task_id])->latest()->first();
 
-            if ($latestPush == null)
-            {
+            if ($latestPush == null) {
                 $this->info("[Project $project->repo_name] No pushes prior to the deadline. Skipping.");
+
                 continue;
             }
 
-            if (ProjectDownload::where('project_id', $project->id)->where('ref', $latestPush->after_sha)->exists())
-            {
+            if (ProjectDownload::where('project_id', $project->id)->where('ref', $latestPush->after_sha)->exists()) {
                 $this->info("[Project $project->repo_name] Already been downloaded. Skipping.");
+
                 continue;
             }
 
             $projectDownload = $project->downloads()->create([
-                'ref'       => $latestPush->after_sha,
+                'ref' => $latestPush->after_sha,
                 'expire_at' => now()->addYears(2),
             ]);
             $queuedCount++;

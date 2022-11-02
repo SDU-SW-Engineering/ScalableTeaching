@@ -3,8 +3,6 @@
 namespace Domain\Files;
 
 use Illuminate\Contracts\Support\Arrayable;
-use JetBrains\PhpStorm\ArrayShape;
-use JetBrains\PhpStorm\Internal\TentativeType;
 
 /**
  * @implements Arrayable<string, string|int>
@@ -15,7 +13,6 @@ class HighlightedLine implements Arrayable, \JsonSerializable
     {
     }
 
-
     /**
      * @return array{number:int,line:string}
      */
@@ -23,7 +20,7 @@ class HighlightedLine implements Arrayable, \JsonSerializable
     {
         return [
             'number' => $this->number,
-            'line'   => $this->line
+            'line' => $this->line,
         ];
     }
 

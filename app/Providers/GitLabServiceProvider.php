@@ -15,7 +15,6 @@ class GitLabServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
     }
 
     /**
@@ -28,13 +27,13 @@ class GitLabServiceProvider extends ServiceProvider
         $this->createGitlabDriver();
     }
 
-    protected function createGitlabDriver() : void
+    protected function createGitlabDriver(): void
     {
         $config = config('services.gitlab');
 
         $socialite = app(Factory::class);
-        $socialite->extend('gitlab-new', function() use ($config, $socialite) { // @phpstan-ignore-line
-            return $socialite->buildProvider(GitLabSocialite::class, $config)->setHost($config['host'] ?? null); // @phpstan-ignore-line
+        $socialite->extend('gitlab-new', function () use ($config, $socialite) { // @phpstan-ignore-line
+        return $socialite->buildProvider(GitLabSocialite::class, $config)->setHost($config['host'] ?? null); // @phpstan-ignore-line
         });
     }
 }

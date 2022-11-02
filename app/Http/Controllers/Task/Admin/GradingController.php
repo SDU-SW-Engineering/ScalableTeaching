@@ -7,17 +7,13 @@ use App\Models\Course;
 use App\Models\CourseRole;
 use App\Models\Enums\FeedbackCommentStatus;
 use App\Models\Enums\ProjectDiffIndexStatus;
-use App\Models\Project;
 use App\Models\ProjectDiffIndex;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
 use App\Models\ProjectFeedbackComment;
 use App\Models\Task;
 use App\Models\TaskDelegation;
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -28,7 +24,7 @@ class GradingController extends Controller
     public function gradingDelegate(Course $course, Task $task): View
     {
         $currentlyDelegated = $task->delegations->pluck('course_role_id');
-        $eligibleRoles = $course->roles->reject(function(CourseRole $role) use ($currentlyDelegated) {
+        $eligibleRoles = $course->roles->reject(function (CourseRole $role) use ($currentlyDelegated) {
             return $currentlyDelegated->contains($role->id);
         });
 
@@ -38,27 +34,28 @@ class GradingController extends Controller
     public function addDelegation(Request $request, Course $course, Task $task): RedirectResponse
     {
         $validated = $request->validate([
-            'role'               => ['required'/*Rule::in($course->roles->pluck('id')), Rule::notIn($task->delegations->pluck('course_role_id'))*/], // todo: enable when roles are better defined
-            'tasks'              => ['required', 'numeric'],
-            'type'               => ['required', Rule::in('last_pushes', 'succeeding_pushes', 'succeed_last_pushes')],
-            'deadline_date'      => ['required', 'date'],
-            'deadline_hour'      => ['required', 'date_format:H:i'],
-            'options.feedback'   => ['required_without:options.grading'],
+            'role' => ['required'/*Rule::in($course->roles->pluck('id')), Rule::notIn($task->delegations->pluck('course_role_id'))*/], // todo: enable when roles are better defined
+            'tasks' => ['required', 'numeric'],
+            'type' => ['required', Rule::in('last_pushes', 'succeeding_pushes', 'succeed_last_pushes')],
+            'deadline_date' => ['required', 'date'],
+            'deadline_hour' => ['required', 'date_format:H:i'],
+            'options.feedback' => ['required_without:options.grading'],
             'options.moderation' => ['required_with:options.feedback'],
         ]);
 
-        $deadline = Carbon::parse($validated['deadline_date'] . " " . $validated['deadline_hour']);
-        if($deadline->isBefore($task->ends_at))
+        $deadline = Carbon::parse($validated['deadline_date'].' '.$validated['deadline_hour']);
+        if ($deadline->isBefore($task->ends_at)) {
             return back()->withInput()->withErrors('The deadline must occur after the end of the task.');
+        }
 
         $task->delegations()->create([
-            'course_role_id'  => $validated['role'] == 'student' ? 1 : 2, // 1 = student, 2 = teahcer, todo: should reflect actual roles.
+            'course_role_id' => $validated['role'] == 'student' ? 1 : 2, // 1 = student, 2 = teahcer, todo: should reflect actual roles.
             'number_of_tasks' => $validated['tasks'],
-            'type'            => $validated['type'],
-            'is_moderated'    => $request->has('options.moderation'),
-            'deadline_at'     => $deadline,
-            'feedback'        => $request->has('options.feedback'),
-            'grading'         => $request->has('options.grading'),
+            'type' => $validated['type'],
+            'is_moderated' => $request->has('options.moderation'),
+            'deadline_at' => $deadline,
+            'feedback' => $request->has('options.feedback'),
+            'grading' => $request->has('options.grading'),
         ]);
 
         return redirect()->back();
@@ -75,10 +72,11 @@ class GradingController extends Controller
     {
         $taskDelegation->load('feedback.user');
 
-        if( ! $taskDelegation->delegated)
+        if (! $taskDelegation->delegated) {
             return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation'));
+        }
 
-        $groupedByUser = $taskDelegation->getRelation('feedback')->groupBy(function(ProjectFeedback $feedback) {
+        $groupedByUser = $taskDelegation->getRelation('feedback')->groupBy(function (ProjectFeedback $feedback) {
             return $feedback->user_id;
         });
 
@@ -92,7 +90,7 @@ class GradingController extends Controller
             ->pluck('id', 'to');
 
         $users = $taskDelegation->getRelation('feedback')
-            ->mapWithKeys(fn(ProjectFeedback $feedback) => [$feedback->user_id => $feedback->user]);
+            ->mapWithKeys(fn (ProjectFeedback $feedback) => [$feedback->user_id => $feedback->user]);
 
         return view('tasks.admin.grading.showFeedbackDelegation', compact(
             'task',
@@ -135,12 +133,12 @@ class GradingController extends Controller
     public function setStatus(Course $course, Task $task, ProjectFeedbackComment $comment): string
     {
         $comment->update([
-            'status'            => FeedbackCommentStatus::from(\request('status')),
+            'status' => FeedbackCommentStatus::from(\request('status')),
             'reviewer_feedback' => \request('reason'),
-            'reviewer_id'       => auth()->id(),
-            'reviewed_at'       => now(),
+            'reviewer_id' => auth()->id(),
+            'reviewed_at' => now(),
         ]);
 
-        return "ok";
+        return 'ok';
     }
 }

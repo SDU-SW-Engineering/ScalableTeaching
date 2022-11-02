@@ -21,10 +21,10 @@ class CourseTrack extends Model
 
     public static function booted()
     {
-        static::creating(function(CourseTrack $track) {
-            if($track->parent_id != null)
+        static::creating(function (CourseTrack $track) {
+            if ($track->parent_id != null) {
                 $track->course_id = $track->root()->course_id;
-
+            }
         });
     }
 
@@ -57,20 +57,21 @@ class CourseTrack extends Model
      */
     public function children(): Collection
     {
-        return CourseTrack::hydrate(DB::select("with recursive cte (id, name, parent_id) as (
+        return CourseTrack::hydrate(DB::select('with recursive cte (id, name, parent_id) as (
 	        select id, name, parent_id from course_tracks where parent_id = ?
             union all
 	        select t.id, t.name, t.parent_id
 	        from course_tracks t
 	        inner join cte on t.parent_id = cte.id
         )
-        select * from cte", [$this->id]));
+        select * from cte', [$this->id]));
     }
 
     public function root(): CourseTrack
     {
-        if($this->parent_id == null)
+        if ($this->parent_id == null) {
             return $this;
+        }
 
         return $this->parent->root();
     }
@@ -82,11 +83,10 @@ class CourseTrack extends Model
     {
         $path = [];
         $pointer = $this;
-        do
-        {
+        do {
             $path[] = $pointer;
             $pointer = $pointer->parent;
-        } while($pointer != null);
+        } while ($pointer != null);
 
         return collect($path);
     }
@@ -104,30 +104,32 @@ class CourseTrack extends Model
      */
     public function siblings(): \Illuminate\Support\Collection
     {
-        if($this->parent_id == null)
+        if ($this->parent_id == null) {
             return new \Illuminate\Support\Collection();
+        }
 
-        return $this->parent->immediateChildren->reject(fn(CourseTrack $track) => $track->id == $this->id);
+        return $this->parent->immediateChildren->reject(fn (CourseTrack $track) => $track->id == $this->id);
     }
 
     public function isOn(User $user): bool
     {
-        if($this->parent_id == null)
+        if ($this->parent_id == null) {
             return false;
+        }
 
         $tasks = $this->tasks()->with('projects.ownable')->get();
 
         $userIds = $tasks->pluck('projects')
             ->flatten()
             ->unique('id')
-            ->map(fn(Project $project) => $project->owners()->pluck('id'))
+            ->map(fn (Project $project) => $project->owners()->pluck('id'))
             ->flatten();
 
         return $userIds->contains($user->id);
     }
 
     /**
-     * @param bool $withChildren
+     * @param  bool  $withChildren
      * @return Collection<int,CourseTrack>
      */
     public function rootChildrenNotInPath(bool $withChildren = true): Collection
@@ -135,8 +137,9 @@ class CourseTrack extends Model
         $ignore = $this->path()->pluck('id');
         $remaining = $this->root()->children()->whereNotIn('id', $ignore);
 
-        if ($withChildren)
+        if ($withChildren) {
             return $remaining;
+        }
 
         return $remaining->whereNotIn('id', $this->children()->pluck('id'));
     }

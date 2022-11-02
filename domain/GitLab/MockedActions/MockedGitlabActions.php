@@ -8,12 +8,6 @@ use Domain\SourceControl\SourceControl;
 use Domain\SourceControl\User;
 use Faker\Factory;
 use Faker\Generator;
-use GraphQL\Client;
-use GraphQL\SchemaObject\RootProjectsArgumentsObject;
-use GraphQL\SchemaObject\RootQueryObject;
-use Http;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class MockedGitlabActions implements SourceControl
 {
@@ -36,7 +30,7 @@ class MockedGitlabActions implements SourceControl
 
     public function addUserToProject(string $projectId, string $userId): void
     {
-        return;
+
     }
 
     public function createGroup(string $name, array $params): ?Group

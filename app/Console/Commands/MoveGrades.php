@@ -39,28 +39,28 @@ class MoveGrades extends Command
      * Execute the console command.
      *
      * @return int
+     *
      * @throws Exception
      */
     public function handle()
     {
-        foreach(Project::all() as $project)
-        {
-            if($project->ownable_type == null)
+        foreach (Project::all() as $project) {
+            if ($project->ownable_type == null) {
                 continue;
-            foreach($project->owners() as $owner)
-            {
-                if ($project->status == ProjectStatus::Active)
+            }
+            foreach ($project->owners() as $owner) {
+                if ($project->status == ProjectStatus::Active) {
                     continue;
+                }
                 Grade::firstOrCreate([
-                    'task_id'     => $project->task_id,
-                    'user_id'     => $owner->id,
+                    'task_id' => $project->task_id,
+                    'user_id' => $owner->id,
                     'source_type' => Task::class,
-                    'source_id'   => $project->task_id,
-                    'value'       => match ($project->status)
-                    {
-                        ProjectStatus::Overdue  => 'failed',
+                    'source_id' => $project->task_id,
+                    'value' => match ($project->status) {
+                        ProjectStatus::Overdue => 'failed',
                         ProjectStatus::Finished => 'passed',
-                        default                 => throw new Exception("Unexpected match value")
+                        default => throw new Exception('Unexpected match value')
                     },
                 ]);
             }

@@ -7,21 +7,19 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDeleted;
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertModelMissing;
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\getJson;
-use function Pest\Laravel\post;
 use function Pest\Laravel\postJson;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->course = Course::factory([
-        'max_groups'        => 'custom',
+        'max_groups' => 'custom',
         'max_groups_amount' => 3,
-        'max_group_size'    => 5,
+        'max_group_size' => 5,
     ])->create();
     $this->group = Group::factory()->for($this->course)->create();
     $this->user = User::factory()->hasAttached($this->course)->create();
@@ -103,7 +101,7 @@ it('disallows students to invite themselves', function () {
 
 it('allows students to accepts invites', function () {
     $groupInvitation = $this->group->invitations()->create([
-        'recipient_user_id'  => $this->user2->id,
+        'recipient_user_id' => $this->user2->id,
         'invited_by_user_id' => $this->user->id,
     ]);
 
@@ -116,7 +114,7 @@ it('allows students to accepts invites', function () {
 
 it('allows students to decline invites', function () {
     $groupInvitation = $this->group->invitations()->create([
-        'recipient_user_id'  => $this->user2->id,
+        'recipient_user_id' => $this->user2->id,
         'invited_by_user_id' => $this->user->id,
     ]);
 
@@ -172,7 +170,7 @@ it('only allows members of the same course to be invited', function () {
 it('allows group members to withdraw invites', function () {
     actingAs($this->user);
     $groupInvitation = $this->group->invitations()->create([
-        'recipient_user_id'  => User::factory()->create()->id,
+        'recipient_user_id' => User::factory()->create()->id,
         'invited_by_user_id' => $this->user->id,
     ]);
     deleteJson(route('courses.groups.invitations.delete', [$this->course, $this->group, $groupInvitation]))->assertStatus(200);
@@ -182,7 +180,7 @@ it('allows group members to withdraw invites', function () {
 it('prohibits non-members from withdrawing invities', function () {
     actingAs($this->user2);
     $groupInvitation = $this->group->invitations()->create([
-        'recipient_user_id'  => User::factory()->create()->id,
+        'recipient_user_id' => User::factory()->create()->id,
         'invited_by_user_id' => $this->user->id,
     ]);
     deleteJson(route('courses.groups.invitations.delete', [$this->course, $this->group, $groupInvitation]))->assertStatus(403);
@@ -192,7 +190,7 @@ it('prohibits non-members from withdrawing invities', function () {
 it('prohibits students from joining an already full group', function () {
     $this->course->update(['max_group_size' => 1]);
     $groupInvitation = $this->group->invitations()->create([
-        'recipient_user_id'  => $this->user2->id,
+        'recipient_user_id' => $this->user2->id,
         'invited_by_user_id' => $this->user->id,
     ]);
     actingAs($this->user2);
@@ -204,7 +202,7 @@ it('prohibits students from joining an already full group', function () {
 it('prohibits students from joining a group that is working on a project that the student has already begun', function () {
     $task = Task::factory()->for($this->course)->create();
     $groupInvitation = $this->group->invitations()->create([
-        'recipient_user_id'  => $this->user2->id,
+        'recipient_user_id' => $this->user2->id,
         'invited_by_user_id' => $this->user->id,
     ]);
 

@@ -2,7 +2,6 @@
 
 namespace Domain\GitLab;
 
-use JsonSerializable;
 use Symfony\Component\Yaml\Yaml;
 
 class CIReader
@@ -17,23 +16,25 @@ class CIReader
     public function __construct(string $content)
     {
         $content = Yaml::parse($content);
-        foreach ($content as $key => $part)
-        {
-            if ( ! is_array($part))
+        foreach ($content as $key => $part) {
+            if (! is_array($part)) {
                 continue;
-            if ( ! array_key_exists('script', $part))
+            }
+            if (! array_key_exists('script', $part)) {
                 continue;
-            if (key_exists('stage', $part) && ! in_array($part['stage'], $this->stages))
-                $this->stages[] = $part["stage"];
+            }
+            if (array_key_exists('stage', $part) && ! in_array($part['stage'], $this->stages)) {
+                $this->stages[] = $part['stage'];
+            }
 
-            $this->tasks[] = new CITask(key_exists('stage', $part) ? $part["stage"] : null, $key);
+            $this->tasks[] = new CITask(array_key_exists('stage', $part) ? $part['stage'] : null, $key);
         }
     }
 
     /**
      * @return CITask[]
      */
-    public function tasks() : array
+    public function tasks(): array
     {
         return $this->tasks;
     }
@@ -41,17 +42,17 @@ class CIReader
     /**
      * @return string[]
      */
-    public function stages() : array
+    public function stages(): array
     {
         return $this->stages;
     }
 
     /**
-     * @param string $name
+     * @param  string  $name
      * @return CITask[]
      */
-    public function stage(string $name) : array
+    public function stage(string $name): array
     {
-        return array_filter($this->tasks, fn(CITask $task) => $task->getStage() == $name);
+        return array_filter($this->tasks, fn (CITask $task) => $task->getStage() == $name);
     }
 }

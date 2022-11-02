@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use function Pest\Laravel\get;
 
 class ProjectPush extends Model
 {
@@ -29,7 +27,7 @@ class ProjectPush extends Model
     }
 
     /**
-     * @param Builder<ProjectPush> $builder
+     * @param  Builder<ProjectPush>  $builder
      * @return Builder<ProjectPush>
      */
     public function scopeIsValid(Builder $builder): Builder
@@ -38,8 +36,8 @@ class ProjectPush extends Model
     }
 
     /**
-     * @param Builder<ProjectPush> $builder
-     * @param Task $task
+     * @param  Builder<ProjectPush>  $builder
+     * @param  Task  $task
      * @return Builder<ProjectPush>
      */
     public function scopeIsAccepted(Builder $builder, Task $task): Builder

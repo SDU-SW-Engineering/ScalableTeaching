@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Course;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CourseRoleSeeder extends Seeder
@@ -15,10 +14,10 @@ class CourseRoleSeeder extends Seeder
      */
     public function run()
     {
-        Course::has('roles', '=', 0)->each(function(Course $course) {
+        Course::has('roles', '=', 0)->each(function (Course $course) {
             $course->roles()->createMany([
                 [
-                    'name'    => 'Student',
+                    'name' => 'Student',
                     'default' => true,
                 ],
                 [

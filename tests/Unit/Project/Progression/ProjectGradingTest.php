@@ -14,10 +14,10 @@ use function Pest\Laravel\assertDatabaseHas;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function() {
+beforeEach(function () {
     $this->project = Project::factory()->for(Task::factory([
         'correction_type' => CorrectionType::AllTasks,
-        'sub_tasks'       => [
+        'sub_tasks' => [
             new SubTask('11 Equals [10, 1]', 'test 11 equals [10, 1]'),
             new SubTask('9 Equals [5,2,2]', 'test 9 equals [5,2,2]'),
             new SubTask('2 Equals [2]', 'test 2 equals [2]'),
@@ -25,7 +25,7 @@ beforeEach(function() {
     ])->for(Course::factory()))->createQuietly();
 });
 
-it('ensures a finished project creates gradings', function() {
+it('ensures a finished project creates gradings', function () {
     /** @var User $user */
     $user = User::factory()->create();
     $user->projects()->save($this->project);
@@ -33,17 +33,17 @@ it('ensures a finished project creates gradings', function() {
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 2,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 3,
         ],
     ]);
@@ -51,14 +51,14 @@ it('ensures a finished project creates gradings', function() {
 
     assertDatabaseCount('grades', 1);
     assertDatabaseHas('grades', [
-        'user_id'     => $user->id,
-        'task_id'     => $this->project->task_id,
+        'user_id' => $user->id,
+        'task_id' => $this->project->task_id,
         'source_type' => Project::class,
-        'source_id'   => $this->project->id,
+        'source_id' => $this->project->id,
     ]);
 });
 
-it('ensures a finished project creates gradings for group members', function() {
+it('ensures a finished project creates gradings for group members', function () {
     $group = Group::factory()->create([
         'course_id' => $this->project->task->course_id,
     ]);
@@ -70,17 +70,17 @@ it('ensures a finished project creates gradings for group members', function() {
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 2,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 3,
         ],
     ]);
@@ -88,20 +88,20 @@ it('ensures a finished project creates gradings for group members', function() {
 
     assertDatabaseCount('grades', 2);
     assertDatabaseHas('grades', [
-        'user_id'     => $users[0]->id,
-        'task_id'     => $this->project->task_id,
+        'user_id' => $users[0]->id,
+        'task_id' => $this->project->task_id,
         'source_type' => Project::class,
-        'source_id'   => $this->project->id,
+        'source_id' => $this->project->id,
     ]);
     assertDatabaseHas('grades', [
-        'user_id'     => $users[1]->id,
-        'task_id'     => $this->project->task_id,
+        'user_id' => $users[1]->id,
+        'task_id' => $this->project->task_id,
         'source_type' => Project::class,
-        'source_id'   => $this->project->id,
+        'source_id' => $this->project->id,
     ]);
 });
 
-it('ensures a finished project can\'t be graded twice', function() {
+it('ensures a finished project can\'t be graded twice', function () {
     /** @var User $user */
     $user = User::factory()->create();
     $user->projects()->save($this->project);
@@ -109,17 +109,17 @@ it('ensures a finished project can\'t be graded twice', function() {
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 2,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 3,
         ],
     ]);
@@ -128,26 +128,26 @@ it('ensures a finished project can\'t be graded twice', function() {
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 2,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
             'sub_task_id' => 3,
         ],
     ]);
 
     assertDatabaseCount('grades', 1);
     assertDatabaseHas('grades', [
-        'user_id'     => $user->id,
-        'task_id'     => $this->project->task_id,
+        'user_id' => $user->id,
+        'task_id' => $this->project->task_id,
         'source_type' => Project::class,
-        'source_id'   => $this->project->id,
+        'source_id' => $this->project->id,
     ]);
 });

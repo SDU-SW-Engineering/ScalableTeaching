@@ -17,22 +17,23 @@ class DailyQuery
      * @var Builder<TModel>
      */
     private Builder $query;
+
     /**
      * @var string
      */
     private string $column;
 
     /**
-     * @param Builder<TModel> $query
-     * @param string $column
+     * @param  Builder<TModel>  $query
+     * @param  string  $column
      */
-    public function __construct(Builder $query, string $column = "created_at")
+    public function __construct(Builder $query, string $column = 'created_at')
     {
         $this->query = $query;
         $this->column = $column;
     }
 
-    public function daily(Carbon $start, Carbon $end) : DailyResults
+    public function daily(Carbon $start, Carbon $end): DailyResults
     {
         $start = $start->startOfDay();
         $end = $end->endOfDay();
@@ -47,7 +48,7 @@ class DailyQuery
         return new DailyResults($this->fillGaps($occurrencesPerDay, $start, $end));
     }
 
-    private function selection() : array
+    private function selection(): array
     {
         return [
             DB::raw('count(*) as count'),
@@ -56,19 +57,19 @@ class DailyQuery
     }
 
     /**
-     * @param Collection<string, int> $occurrencesPerDay
-     * @param Carbon $start
-     * @param Carbon $end
+     * @param  Collection<string, int>  $occurrencesPerDay
+     * @param  Carbon  $start
+     * @param  Carbon  $end
      * @return Collection<string, int>
      */
-    private function fillGaps(Collection $occurrencesPerDay, Carbon $start, Carbon $end) : Collection
+    private function fillGaps(Collection $occurrencesPerDay, Carbon $start, Carbon $end): Collection
     {
         $dates = CarbonPeriod::create($start, $end)->toArray();
-        foreach ($dates as $date)
-        {
+        foreach ($dates as $date) {
             $dateString = $date->format('Y-m-d');
-            if ($occurrencesPerDay->has($dateString))
+            if ($occurrencesPerDay->has($dateString)) {
                 continue;
+            }
             $occurrencesPerDay[$dateString] = 0;
         }
 
