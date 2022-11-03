@@ -106,10 +106,11 @@ class GradingController extends Controller
         ));
     }
 
-    public function showFeedbackModeration(Course $course, Task $task)
+    public function showFeedbackModeration(Course $course, Task $task) : View
     {
         $commentsQuery = ProjectFeedbackComment::query();
-        if (\request('filter', '-1') != '-1') {
+        if (\request('filter', '-1') != '-1')
+        {
             $commentsQuery->whereHas('feedback', fn($query) => $query->where('project_id', \request('filter')));
         }
 
@@ -117,20 +118,23 @@ class GradingController extends Controller
             ->where('status', 'pending')->paginate(20);
 
         $projectNames = $task->projects->mapWithKeys(fn(Project $project) => [$project->id => $project->ownable->name])->sort();
+
         return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments)->with('overlay', true)->with('projectNames', $projectNames);
     }
 
     public function showFeedbackModerationHistory(Course $course, Task $task): View
     {
         $commentsQuery = ProjectFeedbackComment::query();
-        if (\request('filter', '-1') != '-1') {
+        if (\request('filter', '-1') != '-1')
+        {
             $commentsQuery->whereHas('feedback', fn($query) => $query->where('project_id', \request('filter')));
         }
 
         $comments = $commentsQuery->whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))
-            ->whereIn('status',  ['approved', 'rejected'])->paginate(20);
+            ->whereIn('status', ['approved', 'rejected'])->paginate(20);
 
         $projectNames = $task->projects->mapWithKeys(fn(Project $project) => [$project->id => $project->ownable->name])->sort();
+
         return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments)->with('overlay', false)->with('projectNames', $projectNames);
     }
 
