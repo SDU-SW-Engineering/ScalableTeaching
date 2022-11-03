@@ -44,7 +44,7 @@
                                         <img class="h-6 w-6 rounded-full mr-1" alt="avatar"
                                              :src="comment.reviewer.avatar"/>
                                         <span class="font-medium dark:text-yellow-400">{{
-                                                comment.feedback.user.name
+                                                comment.reviewer.name
                                             }}:</span>
                                     </div>
                                     <div class="flex items-center my-0.5"
