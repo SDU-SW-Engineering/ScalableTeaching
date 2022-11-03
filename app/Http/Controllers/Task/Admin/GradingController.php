@@ -16,6 +16,7 @@ use App\Models\Task;
 use App\Models\TaskDelegation;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -105,20 +106,32 @@ class GradingController extends Controller
         ));
     }
 
-    public function showFeedbackModeration(Course $course, Task $task): View
+    public function showFeedbackModeration(Course $course, Task $task)
     {
-        $comments = ProjectFeedbackComment::whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))
+        $commentsQuery = ProjectFeedbackComment::query();
+        if (\request('filter', '-1') != '-1') {
+            $commentsQuery->whereHas('feedback', fn($query) => $query->where('project_id', \request('filter')));
+        }
+
+        $comments = $commentsQuery->whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))
             ->where('status', 'pending')->paginate(20);
 
-        return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments)->with('overlay', true);
+        $projectNames = $task->projects->mapWithKeys(fn(Project $project) => [$project->id => $project->ownable->name])->sort();
+        return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments)->with('overlay', true)->with('projectNames', $projectNames);
     }
 
     public function showFeedbackModerationHistory(Course $course, Task $task): View
     {
-        $comments = ProjectFeedbackComment::whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))
-            ->whereIn('status', ['approved', 'rejected'])->paginate(20);
+        $commentsQuery = ProjectFeedbackComment::query();
+        if (\request('filter', '-1') != '-1') {
+            $commentsQuery->whereHas('feedback', fn($query) => $query->where('project_id', \request('filter')));
+        }
 
-        return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments)->with('overlay', false);
+        $comments = $commentsQuery->whereIn('project_feedback_id', $task->feedbacks()->pluck('project_feedback.id'))
+            ->whereIn('status',  ['approved', 'rejected'])->paginate(20);
+
+        $projectNames = $task->projects->mapWithKeys(fn(Project $project) => [$project->id => $project->ownable->name])->sort();
+        return view('tasks.admin.grading.showFeedbackModeration')->with('comments', $comments)->with('overlay', false)->with('projectNames', $projectNames);
     }
 
     public function showComment(Course $course, Task $task, ProjectFeedbackComment $comment): ProjectFeedbackComment
