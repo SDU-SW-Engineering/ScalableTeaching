@@ -7,7 +7,7 @@
                     d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"/>
             </svg>
         </button>
-        <input @keydown.enter="save" v-if="editing"  type="text" v-model="title" value="" :placeholder="name" class="disabled:bg-gray-200 dark:disabled:bg-gray-700 bg-gray-50
+        <input @keydown.enter="save" v-if="editing"  type="text" v-model="title" :placeholder="name" class="disabled:bg-gray-200 dark:disabled:bg-gray-700 bg-gray-50
                            border border-gray-300 text-gray-900 sm:text-sm rounded-l-md focus:outline-none p-2.5 dark:bg-gray-700 dark:border-gray-700 dark:text-gray-200">
         <button v-if="editing && !saving" @click="this.cancel"
                 class="bg-red-500 hover:bg-red-600 transition-colors items-center text-white flex p-2">
@@ -25,7 +25,36 @@
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import {onMounted, ref} from "vue";
+import axios from "axios";
+
+const props = defineProps<{
+    name: string,
+    renameRoute: string
+}>()
+
+const editing = ref<boolean>(false)
+const saving = ref<boolean>(false)
+const title = ref<string>('')
+
+async function save()
+{
+    saving.value = true;
+    await axios.put(props.renameRoute, {
+        name: title.value
+    })
+    location.reload()
+}
+
+function cancel()
+{
+    editing.value = false;
+    title.value = props.name;
+}
+
+onMounted(() => title.value = props.name)
+/*
 import axios from "axios";
 
 export default {
@@ -53,5 +82,5 @@ export default {
     mounted() {
         this.title = this.name;
     }
-}
+}*/
 </script>

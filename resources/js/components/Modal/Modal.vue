@@ -53,22 +53,23 @@
 </template>
 
 
-<script>
-import ModalButton from "./ModalButton";
-export default {
-    components: {ModalButton},
-    props: ['type', 'title', 'isLoading'],
-    data: function () {
-        return {
-            loading: false
-        }
-    },
-    methods: {
-        confirm: async function () {
-            this.loading = true;
-            await axios.get(this.url)
-            location.reload();
-        }
-    }
+<script setup lang="ts">
+import {ref} from "vue";
+import axios from "axios";
+
+const props = withDefaults(defineProps<{
+    type?: 'info' | 'success' | 'danger',
+    title: string,
+    isLoading: boolean
+}>(), {
+   type: 'info'
+});
+
+const loading = ref<boolean>(false)
+
+async function confirm() {
+    loading.value = true;
+    await axios.get(this.url)
+    location.reload();
 }
 </script>

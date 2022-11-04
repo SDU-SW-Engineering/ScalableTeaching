@@ -42,6 +42,20 @@ app.component(
         import("./components/Course/Management/Enrolled.vue")
     )
 );
+
+app.component(
+    "group-rename",
+    defineAsyncComponent(() =>
+        import("./components/Course/Management/GroupRename.vue")
+    )
+);
+
+app.component(
+    "group-settings",
+    defineAsyncComponent(() =>
+        import("./components/Course/Management/GroupSettings.vue")
+    )
+);
 /**
  *
  * The following block of code may be used to automatically register your

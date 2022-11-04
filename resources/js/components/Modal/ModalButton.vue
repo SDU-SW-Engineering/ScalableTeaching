@@ -1,5 +1,5 @@
 <template>
-    <button @click="$emit('click')" :disabled="isLoading" v-else-if="type === 'info'" type="button"
+    <button @click="$emit('click')" :disabled="isLoading" type="button"
             :class="{
                 'bg-blue-600  hover:bg-blue-700 focus:ring-blue-500': type == null || type === 'info',
                 'bg-lime-green-600 hover:bg-lime-green-700 focus:ring-lime-green-500': type === 'success',
@@ -17,8 +17,11 @@
     </button>
 </template>
 
-<script>
-export default {
-    props: ["type", 'isLoading']
-}
+<script setup lang="ts">
+import {} from "vue";
+
+const props = defineProps<{
+    type: string,
+    isLoading: boolean
+}>()
 </script>
