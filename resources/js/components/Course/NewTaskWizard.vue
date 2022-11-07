@@ -45,7 +45,7 @@
                            :class="[ this.backedBy === 'repo' ? 'text-gray-100' : 'text-gray-700 font-thin dark:text-gray-300']">
                             A task that allows the student to clone a repo. Allows for automated grading through
                             pipelines.</p>
-                        <repo-selection @changed="setRepo" v-show="backedBy === 'repo'"></repo-selection>
+                        <repo-selection name="test" @changed="setRepo"></repo-selection>
                     </div>
                 </div>
                 <button v-if="canContinueToStep3" @click="goToStep3()"
@@ -77,59 +77,60 @@
     </div>
 </template>
 
-<script>
-import RepoSelection from "./RepoSelection";
+<script setup lang="ts">
+import RepoSelection from "./RepoSelection.vue"
+import {computed, ref} from "vue";
+import {Course} from "../../Interfaces/Models/Course";
 import axios from "axios";
 
-export default {
-    components: {RepoSelection},
-    props: ['course'],
-    data() {
-        return {
-            step: 1,
-            type: null,
-            name: '',
-            backedBy: null,
-            repoId: null,
-            loading: false
-        }
-    },
-    methods: {
-        save: async function() {
-            this.loading = true;
-            let resp = await axios.post(`/courses/${this.course.id}/manage/tasks`, {
-                type: this.type,
-                name: this.name,
-                'repo-id': this.repoId
-            });
-            window.location = resp.data.route;
-        },
-        setRepo: function (repo) {
-            this.repoId = repo;
-        },
-        goToStep1: function () {
-            this.type = null;
-            this.name = '';
-            this.step = 1;
-            this.repoId = null;
-            this.backedBy = null;
-        },
-        goToStep2: function (type) {
-            this.step = 2;
-            this.type = type;
-        },
-        goToStep3: function () {
-            this.step = 3;
-        }
-    },
-    computed: {
-        canContinueToStep3: function () {
-            if (this.backedBy === 'text')
-                return true;
-            if (this.backedBy === 'repo' && this.repoId !== null)
-                return true;
-            return false;
-        }
-    }
+const props = defineProps<{
+    course: Course
+}>()
+
+const step = ref<number>(1)
+const type = ref<string | null>()
+const name = ref<string>('')
+const backedBy = ref<'repo' | 'text' | null>()
+const repoId = ref<number | null>();
+const loading = ref<boolean>(false)
+
+const canContinueToStep3 = computed<boolean>(() => {
+    if (backedBy.value === 'text')
+        return true;
+    if (backedBy.value === 'repo' && repoId.value !== null)
+        return true;
+    return false;
+})
+
+async function save() {
+    loading.value = true;
+    let resp = await axios.post(`/courses/${props.course.id}/manage/tasks`, {
+        type: type.value,
+        name: name.value,
+        'repo-id': repoId.value
+    });
+    window.location = resp.data.route;
+}
+
+function setRepo(repo : number)
+{
+    repoId.value = repo;
+}
+
+function goToStep1() {
+    type.value = null;
+    name.value = '';
+    step.value = 1;
+    repoId.value = null;
+    backedBy.value = null;
+}
+
+function goToStep2(t : string | null) {
+    step.value = 2;
+    type.value = t;
+}
+
+function goToStep3() {
+    step.value = 3
 }
 </script>

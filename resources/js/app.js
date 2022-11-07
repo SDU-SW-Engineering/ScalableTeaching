@@ -56,6 +56,11 @@ app.component(
         import("./components/Course/Management/GroupSettings.vue")
     )
 );
+
+app.component(
+    "new-task-wizard",
+    defineAsyncComponent(() => import("./components/Course/NewTaskWizard.vue"))
+);
 /**
  *
  * The following block of code may be used to automatically register your
