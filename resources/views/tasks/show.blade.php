@@ -4,10 +4,8 @@
     <task :task="{{ $task }}"
           @if(auth()->user()->is_admin ==  1)
               edit-route="{{  route('courses.tasks.admin.preferences', [$course, $task]) }}"
-              analytics="{{  route('courses.tasks.admin.index', [$course, $task]) }}"
           @elseif(auth()->user()->is_admin == 0)
               edit-route="{{  null }}"
-              analytics="{{  null }}"
           @endif
           code-route="{{ $codeRoute }}"
           :grade="{{ $task->grade(auth()->user()) ?? 'null' }}"
