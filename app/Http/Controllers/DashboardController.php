@@ -20,7 +20,7 @@ class DashboardController extends Controller
     {
         $awaitingFeedback = auth()->user()->feedback()->with(['taskDelegation', 'project.task.course'])->unreviewed()->get()
             ->filter(fn(ProjectFeedback $feedback) => $feedback->taskDelegation->deadline_at->isFuture());
-        $courses = auth()->user()->courses()->orderBy('created_at', 'asc')->get();
+        $courses = auth()->user()->courses()->orderBy('created_at', 'desc')->get();
         $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->assignments()->orderBy('ends_at', 'asc')->visible()->get();
         $nextAssignment = $tasks->first();
         $courseAssignments = Task::assignments()->whereIn('course_id', $courses->pluck('id'))->get();
