@@ -111,13 +111,17 @@
                             @foreach($awaitingFeedback as $feedback)
                                 @if($feedback->download() != null)
                                     <tr>
-                                        <td class="text-lime-green-600 dark:text-lime-green-300 font-medium text-sm"><a
+                                        <td class="text-lime-green-600 dark:text-lime-green-300 font-medium text-xs pr-2"><a
                                                 href="{{ route('courses.tasks.show-editor', [$feedback->project->task->course, $feedback->project->task, $feedback->project, $feedback->download()]) }}"
                                                 target="_blank">{{ $feedback->pseudonym }}</a></td>
-                                        <td class="text-gray-800 dark:text-gray-300 text-sm">{{ $feedback->project->task->course->name }}
+                                        <td class="text-gray-800 dark:text-gray-300 text-xs">{{ $feedback->project->task->course->name }}
                                             , {{ $feedback->project->task->name }}</td>
-                                        <td class="text-gray-900 dark:text-gray-400 text-sm text-right">Due
-                                            in {{ $feedback->taskDelegation->deadline_at->diffForHumans() }}</td>
+                                        @if($feedback->taskDelegation->deadline_at->isPast())
+                                            <td class="text-gray-900 dark:text-gray-400 text-xs text-right">{{ $feedback->taskDelegation->deadline_at->diffForHumans() }}</td>
+                                        @else
+                                            <td class="text-gray-900 dark:text-gray-400 text-xs text-right">Due
+                                                in {{ $feedback->taskDelegation->deadline_at->diffForHumans() }}</td>
+                                        @endif
                                     </tr>
                                 @endif
                             @endforeach
