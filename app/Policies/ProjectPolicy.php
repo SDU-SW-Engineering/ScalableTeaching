@@ -10,6 +10,7 @@ use App\Models\ProjectFeedback;
 use App\Models\ProjectFeedbackComment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class ProjectPolicy
 {
@@ -70,10 +71,13 @@ class ProjectPolicy
         return false;
     }
 
-    public function accessCode(User $user, Project $project, ProjectDownload $projectDownload) : bool
+    public function accessCode(User $user, Project $project, ProjectDownload $projectDownload) : bool | Response
     {
         if($this->view($user, $project))
             return true;
+
+        if ($project->isNot($projectDownload->project))
+            return $this->deny('Project and associated files mismatch');
 
         if(ProjectFeedback::where('sha', $projectDownload->ref)
             ->where('user_id', $user->id)
