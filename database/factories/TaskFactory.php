@@ -23,6 +23,7 @@ class TaskFactory extends Factory
             'correction_type'   => CorrectionType::None,
             'starts_at'         => $starts_at,
             'ends_at'           => $ends_at,
+            'created_at'        => $this->faker->dateTimeBetween('-1 week', 'now'),
             'is_visible'        => true,
         ];
     }
