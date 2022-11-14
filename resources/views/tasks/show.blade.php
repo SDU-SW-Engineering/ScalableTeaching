@@ -2,9 +2,9 @@
 
 @section('content')
     <task :task="{{ $task }}"
-          @if(auth()->user()->is_admin ==  1)
+          @if(auth()->user()->can('editExercise', $task))
               edit-route="{{  route('courses.tasks.admin.preferences', [$course, $task]) }}"
-          @elseif(auth()->user()->is_admin == 0)
+          @else
               edit-route="{{  null }}"
           @endif
           code-route="{{ $codeRoute }}"
