@@ -15,13 +15,12 @@ use App\Http\Controllers\VSCodeController;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
-Route::redirect('/home', '/')->name('home');
+
+Route::get('/', [DashboardController::class, 'index'])->name('home');
 
 Route::get('start', [HomeController::class, 'start'])->middleware('auth')->name('start');
 
 Route::get('status', [HomeController::class, 'status'])->middleware('auth')->name('status');
-
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 
 Route::prefix('surveys')->as('surveys.')->controller(SurveyController::class)->group(function() {
     Route::get('/', 'index')->name('index');
