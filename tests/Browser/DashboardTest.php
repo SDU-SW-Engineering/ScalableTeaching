@@ -23,7 +23,7 @@ class DashboardTest extends DuskTestCase
         $this->courses = Course::factory(2)->create();
         $this->browse(function (Browser $browser) {
             $browser->loginAs(User::factory()->hasAttached($this->courses)->create())
-                ->visit('/dashboard')
+                ->visit('/')
                 ->assertSee($this->courses[0]->name)
                 ->assertSee($this->courses[1]->name);
         });
@@ -38,7 +38,7 @@ class DashboardTest extends DuskTestCase
         ]);
         $this->browse(function (Browser $browser) {
             $browser->loginAs($this->user)
-                ->visit('/dashboard')
+                ->visit('/')
                 ->assertSee($this->tasks->name);
         });
     }
