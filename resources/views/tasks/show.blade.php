@@ -2,11 +2,11 @@
 
 @section('content')
     <task :task="{{ $task }}"
-          @if(auth()->user()->can('editExercise', $task))
-              edit-route="{{  route('courses.tasks.admin.preferences', [$course, $task]) }}"
+          @can('viewAnalytics', $task)
+              edit-route="{{ route('courses.tasks.admin.preferences', [$course, $task]) }}"
           @else
-              edit-route="{{  null }}"
-          @endif
+              edit-route="{{ null }}"
+          @endcan
           code-route="{{ $codeRoute }}"
           :grade="{{ $task->grade(auth()->user()) ?? 'null' }}"
           :survey="{{ json_encode($survey) }}"
