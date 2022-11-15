@@ -63,5 +63,5 @@ it('tests assignments are ordered by nearest deadline', function () {
     actingAs($student);
 
     $this->get(route('home'))
-        ->assertSeeInOrder(['nearest assignment', 'furthest assignment1']);
+        ->assertSeeInOrder(['nearest assignment', 'furthest assignment']);
 });
