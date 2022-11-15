@@ -46,19 +46,22 @@ it('tests courses are ordered by desc', function () {
     $student = User::factory()->hasAttached([$this->oldCourse, $this->newCourse])->create();
     actingAs($student);
 
-    $this->assertEquals('new course', $student->courses()->orderBy('created_at', 'desc')->first()->name);
+    $this->get(route('home'))
+        ->assertSeeInOrder(['new course', 'old course']);
 });
 
 it('tests exercises are ordered by desc', function () {
-    $student = User::factory()->hasAttached($this->oldCourse)->create();
+    $student = User::factory()->hasAttached([$this->oldCourse, $this->newCourse])->create();
     actingAs($student);
 
-    $this->assertEquals('new exercise', Task::exercises()->whereIn('course_id', $this->oldCourse->pluck('id'))->orderBy('created_at', 'desc')->visible()->first()->name);
+    $this->get(route('home'))
+        ->assertSeeInOrder(['new exercise', 'old exercise']);
 });
 
 it('tests assignments are ordered by nearest deadline', function () {
-    $student = User::factory()->hasAttached($this->oldCourse)->create();
+    $student = User::factory()->hasAttached([$this->oldCourse, $this->newCourse])->create();
     actingAs($student);
 
-    $this->assertEquals('nearest assignment', Task::assignments()->whereIn('course_id', $this->oldCourse->pluck('id'))->orderBy('ends_at', 'asc')->visible()->first()->name);
+    $this->get(route('home'))
+        ->assertSeeInOrder(['nearest assignment', 'furthest assignment1']);
 });
