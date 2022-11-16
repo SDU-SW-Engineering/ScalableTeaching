@@ -4,8 +4,6 @@
     <task :task="{{ $task }}"
           @can('viewAnalytics', $task)
               edit-route="{{ route('courses.tasks.admin.preferences', [$course, $task]) }}"
-          @else
-              edit-route="{{ null }}"
           @endcan
           code-route="{{ $codeRoute }}"
           :grade="{{ $task->grade(auth()->user()) ?? 'null' }}"

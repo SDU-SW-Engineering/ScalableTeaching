@@ -61,7 +61,7 @@
                             Code
                         </span>
                     </a>
-                    <a class="text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300 py-2 px-3 rounded-md font-semibold flex" target="_blank" :href="editRoute" v-if="editRoute !== ''">
+                    <a class="text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300 py-2 px-3 rounded-md font-semibold flex" target="_blank" :href="editRoute" v-if="editRoute != null">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-1" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
