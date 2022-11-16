@@ -57,11 +57,11 @@ class DashboardController extends Controller
     public function authIndex() :view
     {
         $awaitingFeedback = auth()->user()->feedback()->with(['taskDelegation', 'project.task.course'])->get();
-        $courses = auth()->user()->courses()->get();
+        $courses = auth()->user()->courses()->orderBy('created_at', 'desc')->get();
         $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->assignments()->orderBy('ends_at', 'asc')->visible()->get();
         $nextAssignment = $tasks->first();
         $courseAssignments = Task::assignments()->whereIn('course_id', $courses->pluck('id'))->get();
-        $exercises = Task::exercises()->whereIn('course_id', $courses->pluck('id'))->orderBy('starts_at', 'asc')->take(5)->visible()->get();
+        $exercises = Task::exercises()->whereIn('course_id', $courses->pluck('id'))->orderBy('created_at', 'desc')->take(5)->visible()->get();
 
         return view('dashboard', [
             'courses'           => $courses,
