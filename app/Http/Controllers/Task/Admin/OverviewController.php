@@ -22,7 +22,9 @@ class OverviewController extends Controller
         $failedCount = $task->projects()->where('status', 'failed')->count();
         $failedPercent = $projectCount == 0 ? 0 : $failedCount / $projectCount * 100;
         $buildCount = $task->jobs()->count();
-        $buildsToday = $task->jobs()->whereRaw("date(pipelines.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
+        $buildsToday = $task->jobs()->whereRaw('date(pipelines.created_at) = ?', now()->toDateString())->withTrashedParents()->count();
+        $visitorCount = $task->visitors()->whereRaw('task_id = ?', $task->id)->count();
+        $visitorsToday = $task->visitors()->whereRaw('date(created_at) = ? and task_id = ?', [now()->toDateString(), $task->id])->count();
 
         $projectQuery = $task->projects()
             ->select('*', \DB::raw('TIMESTAMPDIFF(second,created_at, finished_at) as duration'))
@@ -44,12 +46,37 @@ class OverviewController extends Controller
             new LineDataSet("Completed", $projectsCompletedPerDay->values(), "#7BB026", true)
         );
 
+        /** @var Collection<string,int> $totalVisitorsPerDay */
+        $totalVisitorsPerDay = $task->totalVisitorsPerDay;
+        $totalVisitsPerDayGraph = $totalVisitorsPerDay == null ? null : new Graph(
+            $totalVisitorsPerDay->keys(),
+            new LineDataSet("Visits", $totalVisitorsPerDay->values(), "#266ab0", true)
+        );
+
         /** @var Collection<string,int> $dailyBuilds */
         $dailyBuilds = $task->dailyBuilds(true, true);
         $dailyBuildsGraph = $dailyBuilds == null ? null : new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
 
+        if ($task->type == 'assignment')
+        {
+            return view('tasks.admin.index', compact(
+                'course',
+                'task',
+                'projectCount',
+                'projectsToday',
+                'finishedCount',
+                'finishedPercent',
+                'failedCount',
+                'failedPercent',
+                'buildCount',
+                'buildsToday',
+                'totalProjectsPerDayGraph',
+                'dailyBuildsGraph',
+                'projects'
+            ));
+        }
 
-        return view('tasks.admin.index', compact(
+        return view('tasks.admin.indexExercise', compact(
             'course',
             'task',
             'projectCount',
@@ -62,7 +89,10 @@ class OverviewController extends Controller
             'buildsToday',
             'totalProjectsPerDayGraph',
             'dailyBuildsGraph',
-            'projects'
+            'projects',
+            'visitorCount',
+            'visitorsToday',
+            'totalVisitsPerDayGraph'
         ));
     }
 }

@@ -14,6 +14,7 @@ use App\Models\Project;
 use App\Models\ProjectSubTaskComment;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\Visitor;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -42,7 +44,7 @@ class TaskController extends Controller
     {
         abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
-
+        $this->addVisitor(auth()->user(), $task);
         return $this->showProject($course, $task, $project);
     }
 
@@ -186,6 +188,15 @@ class TaskController extends Controller
         ]);
 
         return $dbProject;
+    }
+
+    private function addVisitor(User $user, Task $task)
+    {
+        $visitor = new Visitor;
+        $visitor->user_id = $user->id;
+        $visitor->task_id = $task->id;
+        $visitor->username = $user->name;
+        $visitor->save();
     }
 
     /**

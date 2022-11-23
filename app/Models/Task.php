@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Collection|TaskDelegation[] $delegations
  * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
+ * @property-read \Illuminate\Support\Collection<string,int> $totalVisitorsPerDay
  * @property-read Collection<TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
  * @property-read int|null $source_project_id
@@ -202,6 +203,14 @@ class Task extends Model
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
+    }
+
+    /**
+     * @return HasMany<Visitor>
+     */
+    public function visitors(): HasMany
+    {
+        return $this->hasMany(Visitor::class);
     }
 
     /**
