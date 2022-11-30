@@ -196,9 +196,6 @@ class Course extends Model
         return Attribute::make(get: function($value, $attributes) {
             $exerciseIds = $this->tasks()->exercises()->orderBy('order')->pluck('id');
 
-            if($exerciseIds->count() == 0)
-                return null;
-
             $enrolledCount = $this->students()->count();
             $teachers = $this->teachers()->pluck('users.id');
 
