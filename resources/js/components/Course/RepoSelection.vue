@@ -7,8 +7,8 @@
                 >
                     <ComboboxInput
                         class="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
-                        :displayValue="(person) => person.name"
-                        @change="query = $event.target.value"
+                        :displayValue="(person) => person === null ? 'Type to get started' : person.name"
+                        @change="queryUpdate"
                     />
                     <ComboboxButton
                         class="absolute inset-y-0 right-0 flex items-center pr-2"
@@ -43,9 +43,9 @@
                             v-slot="{ selected, active }"
                         >
                             <li
-                                class="relative cursor-default select-none py-2 pl-10 pr-4"
+                                class="relative cursor-pointer select-none py-2 pl-10 pr-4"
                                 :class="{
-                  'bg-teal-600 text-white': active,
+                  'bg-teal-600 text-lime-green-400': active,
                   'text-gray-900': !active,
                 }"
                             >
@@ -58,7 +58,7 @@
                                 <span
                                     v-if="selected"
                                     class="absolute inset-y-0 left-0 flex items-center pl-3"
-                                    :class="{ 'text-white': active, 'text-teal-600': !active }"
+                                    :class="{ 'text-lime-green-600': active, 'text-teal-600': !active }"
                                 >
                                     <CheckIcon class="h-5 w-5" aria-hidden="true" />
                                 </span>
@@ -81,7 +81,7 @@ import {
     TransitionRoot,
 } from '@headlessui/vue'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 
 const people = [
     { id: 1, name: 'Wade Cooper' },
@@ -92,7 +92,7 @@ const people = [
     { id: 6, name: 'Hellen Schmidt' },
 ]
 
-let selected = ref(people[0])
+let selected = ref(null)
 let query = ref('')
 
 let filteredPeople = computed(() =>
@@ -105,15 +105,23 @@ let filteredPeople = computed(() =>
                 .includes(query.value.toLowerCase().replace(/\s+/g, ''))
         )
 )
-
 const props = defineProps<{
     name: string
 }>()
 
 const value = ref<null|string>()
 
+function queryUpdate(event)
+{
+    query.value = event.target.value;
+}
+
 async function fetchOptions(q : string) {
     let response = await fetch(`/api/user/repositories?q=${q}`);
     return {results: await response.json()};
 }
+
+onMounted(() => {
+   // fetchOptions()
+})
 </script>

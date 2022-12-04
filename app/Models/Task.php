@@ -78,7 +78,7 @@ class Task extends Model
         $gitlabManager = app(GitLabManager::class);
         $project = $gitlabManager->projects()->show($this->source_project_id);
         $branch = $project['default_branch'];
-        $readme = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, 'readme.md', $branch)['content']);
+        $readme = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, 'README.md', $branch)['content']);
         $parseDown = new \Parsedown();
         $htmlReadme = $parseDown->parse($readme);
 
