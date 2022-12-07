@@ -83,7 +83,7 @@ class Project extends Model
         'validated_at'      => 'datetime'
     ];
 
-    protected $hidden = ['final_commit_sha', 'validation_errors', 'validated_at'];
+    protected $hidden = ['final_commit_sha'];
 
     protected $fillable = [
         'project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
@@ -337,12 +337,12 @@ class Project extends Model
         $rules = [new ProtectedFilesUntouched()];
         foreach($rules as $rule) {
             $errors = $rule->validate($this->task, $this);
-            if (count($errors) > 0);
-            {
-                $this->validation_errors = $errors;
-                $this->save();
-                return false;
-            }
+            if ($errors->isEmpty())
+                continue;
+
+            $this->validation_errors = $errors;
+            $this->save();
+            return false;
         }
 
         $this->save();
