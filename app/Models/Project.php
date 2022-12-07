@@ -5,8 +5,11 @@ namespace App\Models;
 use App\Events\ProjectCreated;
 use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
+use App\Tasks\Validation\ProtectedFilesUntouched;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Domain\SourceControl\Directory;
+use Domain\SourceControl\DirectoryCollection;
 use Domain\SourceControl\SourceControl;
 use Exception;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -22,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Str;
 
 /**
  * App\Models\Project
@@ -63,6 +67,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Query\Builder|Project withoutTrashed()
  * @property Grade $grade
  * @property-read bool $isMissed
+ * @property string $validation_errors
+ * @property Carbon $validated_at
  */
 class Project extends Model
 {
@@ -74,6 +80,7 @@ class Project extends Model
     protected $casts = [
         'validation_errors' => 'array',
         'status'            => ProjectStatus::class,
+        'validated_at'      => 'datetime'
     ];
 
     protected $hidden = ['final_commit_sha', 'validation_errors', 'validated_at'];
@@ -154,7 +161,7 @@ class Project extends Model
     /**
      * @return HasMany<ProjectDiffIndex>
      */
-    public function changes() : HasMany
+    public function changes(): HasMany
     {
         return $this->hasMany(ProjectDiffIndex::class);
     }
@@ -195,7 +202,7 @@ class Project extends Model
      */
     public function dailyBuilds(bool $withToday = false): \Illuminate\Support\Collection
     {
-        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate( ! $withToday))->get();
+        return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(!$withToday))->get();
     }
 
     /**
@@ -225,10 +232,9 @@ class Project extends Model
 
     public function progress(): int
     {
-        return match ($this->task->correction_type)
-        {
+        return match ($this->task->correction_type) {
             CorrectionType::PointsRequired => $this->pointProgress(),
-            default                        => $this->plainProgress()
+            default => $this->plainProgress()
         };
     }
 
@@ -246,7 +252,7 @@ class Project extends Model
 
     private function plainProgress(): int
     {
-        if($this->status == ProjectStatus::Finished && ! in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
+        if($this->status == ProjectStatus::Finished && !in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
             return 100;
 
         $subTasks = $this->task->sub_tasks;
@@ -264,7 +270,7 @@ class Project extends Model
     public function isMissed(): Attribute
     {
         return Attribute::make(get: function($value, $attributes) {
-            if( ! $this->task->hasEnded)
+            if(!$this->task->hasEnded)
                 return false;
             if(in_array($this->task->correction_type, [CorrectionType::None, CorrectionType::Manual]))
                 return $this->pushes()->where('created_at', '<', $this->task->ends_at)->count() == 0;
@@ -295,11 +301,10 @@ class Project extends Model
             'source_type' => $ownableType,
             'source_id'   => $ownableId,
             'user_id'     => $user->id,
-            'value'       => match ($status)
-            {
-                ProjectStatus::Overdue  => 'failed',
+            'value'       => match ($status) {
+                ProjectStatus::Overdue => 'failed',
                 ProjectStatus::Finished => 'passed',
-                default                 => throw new Exception("Passes status must be a final value.")
+                default => throw new Exception("Passes status must be a final value.")
             },
             'value_raw'   => $gradeMeta,
             'started_at'  => $startedAt,
@@ -323,5 +328,24 @@ class Project extends Model
         $sourceControl = app(SourceControl::class);
 
         return $sourceControl->showProject((string)$this->project_id);
+    }
+
+    public function validateSubmission() : bool
+    {
+        $this->validation_errors = [];
+        $this->validated_at = now();
+        $rules = [new ProtectedFilesUntouched()];
+        foreach($rules as $rule) {
+            $errors = $rule->validate($this->task, $this);
+            if (count($errors) > 0);
+            {
+                $this->validation_errors = $errors;
+                $this->save();
+                return false;
+            }
+        }
+
+        $this->save();
+        return true;
     }
 }

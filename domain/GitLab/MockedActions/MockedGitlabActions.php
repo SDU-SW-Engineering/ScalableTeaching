@@ -2,6 +2,9 @@
 
 namespace Domain\GitLab\MockedActions;
 
+use Domain\SourceControl\Directory;
+use Domain\SourceControl\DirectoryCollection;
+use Domain\SourceControl\File;
 use Domain\SourceControl\Group;
 use Domain\SourceControl\Project;
 use Domain\SourceControl\SourceControl;
@@ -18,10 +21,15 @@ use Illuminate\Support\Str;
 class MockedGitlabActions implements SourceControl
 {
     private Generator $factory;
+    /**
+     * @var Collection<File>
+     */
+    private Collection $files;
 
     public function __construct()
     {
         $this->factory = Factory::create();
+        $this->files = new Collection();
     }
 
     public function showProject(string $id, string $user = 'default'): ?Project
@@ -42,5 +50,53 @@ class MockedGitlabActions implements SourceControl
     public function createGroup(string $name, array $params): ?Group
     {
         return new Group($this->factory->randomNumber(4));
+    }
+
+    /**
+     * @param string $projectId
+     * @param string|null $path
+     * @param bool $recursive
+     * @param string|null $ref
+     * @return Collection<File>
+     */
+    public function getFiles(string $projectId, string $path = null, bool $recursive = false, string $ref = null): Collection
+    {
+        return $this->files->filter(function(File $file) use ($path, $recursive) {
+            if ($recursive)
+                return Str::of($file->getPath())->startsWith($path);
+            return true;
+        });
+    }
+
+    /**
+     * @param Collection<File> $files
+     * @return void
+     */
+    public function fakePath(Collection $files): void
+    {
+        $this->files = $files;
+    }
+
+    /**
+     * Produces side-effects
+     * @param string $projectId
+     * @param DirectoryCollection $directoryCollection
+     * @param bool $recursive
+     * @param string|null $ref
+     * @return void
+     */
+    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, bool $recursive = false, string $ref = null): void
+    {
+        $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) {
+            if ($directory->path == "/")
+            {
+                $directory->files = $this->files->filter(fn(File $file) => $file->getPath() == "/");
+                $directory->fetched = true;
+                return true;
+            }
+            $filesForDir = $this->files->filter(fn(File $file) => $file->getPath() == $directory->path);
+            $directory->files = $filesForDir;
+            $directory->fetched = true;
+        });
     }
 }

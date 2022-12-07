@@ -2,10 +2,12 @@
 
 namespace Domain\GitLab\Actions;
 
+use Domain\SourceControl\File;
 use Domain\SourceControl\Group;
 use Domain\SourceControl\Project;
 use Domain\SourceControl\SourceControl;
 use Domain\SourceControl\User;
+use Exception;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
@@ -93,5 +95,18 @@ class GitLabActions implements SourceControl
             ]);
         $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->post('/groups', $params->toArray());
         return new Group($response->json('id'));
+    }
+
+    public function getFiles(string $projectId, string $path = null, bool $recursive = false, string $ref = null): Collection
+    {
+        // TODO: Implement getFiles() method.
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function fakePath(Collection $files): void
+    {
+        throw new Exception("Can't fake prod ready file.");
     }
 }
