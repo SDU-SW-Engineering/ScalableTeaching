@@ -22,7 +22,7 @@ class MockedGitlabActions implements SourceControl
 {
     private Generator $factory;
     /**
-     * @var Collection<File>
+     * @var Collection<int,File>
      */
     private Collection $files;
 
@@ -57,7 +57,7 @@ class MockedGitlabActions implements SourceControl
      * @param string|null $path
      * @param bool $recursive
      * @param string|null $ref
-     * @return Collection<File>
+     * @return Collection<int,File>
      */
     public function getFiles(string $projectId, string $path = null, bool $recursive = false, string $ref = null): Collection
     {
@@ -69,7 +69,7 @@ class MockedGitlabActions implements SourceControl
     }
 
     /**
-     * @param Collection<File> $files
+     * @param Collection<int,File> $files
      * @return void
      */
     public function fakePath(Collection $files): void
@@ -81,11 +81,10 @@ class MockedGitlabActions implements SourceControl
      * Produces side-effects
      * @param string $projectId
      * @param DirectoryCollection $directoryCollection
-     * @param bool $recursive
      * @param string|null $ref
      * @return void
      */
-    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, bool $recursive = false, string $ref = null): void
+    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, string $ref = null): void
     {
         $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) {
             if ($directory->path == "/")

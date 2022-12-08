@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 interface SourceControl
 {
     /**
-     * @param Collection<File> $files
+     * @param Collection<int,File> $files
      * @return void
      */
     public function fakePath(Collection $files): void;
@@ -23,9 +23,8 @@ interface SourceControl
     /**
      * @param string $projectId
      * @param DirectoryCollection $directoryCollection
-     * @param bool $recursive
      * @param string|null $ref
      * @return void
      */
-    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, bool $recursive = false, string $ref = null) : void;
+    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, string $ref = null) : void;
 }

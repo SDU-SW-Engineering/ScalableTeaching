@@ -16,6 +16,7 @@ class ProtectedFilesUntouched implements SubmissionValidation
 
     public function validate(Task $task, Project $project): Collection
     {
+        /** @var Collection<int,string> $errors */
         $errors = new Collection();
         $protectedFiles = $task->protectedFiles;
         $directories = $this->loadFiles($protectedFiles, $project);
@@ -30,13 +31,14 @@ class ProtectedFilesUntouched implements SubmissionValidation
     }
 
     /**
-     * @param $protectedFiles
+     * @param Collection<int,TaskProtectedFile> $protectedFiles
+     * @param Project $project
      * @return DirectoryCollection
      */
-    private function loadFiles($protectedFiles, Project $project): DirectoryCollection
+    private function loadFiles(Collection $protectedFiles, Project $project): DirectoryCollection
     {
+        /** @var Collection<int,string> $directories */
         $directories = new Collection();
-        /** @var TaskProtectedFile $protectedFile */
         foreach($protectedFiles as $protectedFile) { // todo: need more work
             $path = Str::of($protectedFile->path);
             if(!$path->contains('/')) {
@@ -49,7 +51,7 @@ class ProtectedFilesUntouched implements SubmissionValidation
             $directories[] = $pathParts->join("/");
         }
         $directories = new DirectoryCollection($directories->mapInto(Directory::class));
-        app(SourceControl::class)->getFilesFromDirectories($project->project_id, $directories);
+        app(SourceControl::class)->getFilesFromDirectories("$project->project_id", $directories);
         return $directories;
     }
 }

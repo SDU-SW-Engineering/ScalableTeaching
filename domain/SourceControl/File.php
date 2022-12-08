@@ -2,6 +2,9 @@
 
 namespace Domain\SourceControl;
 
+use Illuminate\Support\Stringable;
+use Str;
+
 class File
 {
     private string $path;
@@ -66,5 +69,10 @@ class File
     public function setSha(string $sha): void
     {
         $this->sha = $sha;
+    }
+
+    public function fullPath() : Stringable
+    {
+        return Str::of($this->path)->append(Str::of($this->path)->endsWith("/") ? "" : "/", $this->name);
     }
 }

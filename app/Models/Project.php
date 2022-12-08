@@ -7,25 +7,18 @@ use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use App\Tasks\Validation\ProtectedFilesUntouched;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
-use Domain\SourceControl\Directory;
-use Domain\SourceControl\DirectoryCollection;
 use Domain\SourceControl\SourceControl;
 use Exception;
-use GrahamCampbell\GitLab\GitLabManager;
-use Illuminate\Contracts\Auth\Access\Authorizable;
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Str;
+use Illuminate\Support\Collection;
 
 /**
  * App\Models\Project
@@ -67,7 +60,7 @@ use Str;
  * @method static \Illuminate\Database\Query\Builder|Project withoutTrashed()
  * @property Grade $grade
  * @property-read bool $isMissed
- * @property string $validation_errors
+ * @property Collection<int,string> $validation_errors
  * @property Carbon $validated_at
  */
 class Project extends Model
@@ -78,7 +71,7 @@ class Project extends Model
     protected $dates = ['finished_at'];
 
     protected $casts = [
-        'validation_errors' => 'array',
+        'validation_errors' => 'collection',
         'status'            => ProjectStatus::class,
         'validated_at'      => 'datetime'
     ];
@@ -177,15 +170,15 @@ class Project extends Model
 
     /**
      * returns a collection of users that own the project
-     * @return Collection<int,User>
+     * @return EloquentCollection<int,User>
      */
-    public function owners(): Collection
+    public function owners(): EloquentCollection
     {
         if($this->ownable_type == User::class)
             // @phpstan-ignore-next-line
-            return Collection::wrap([$this->ownable]);
+            return EloquentCollection::wrap([$this->ownable]);
 
-        return $this->ownable->members ?? new Collection();
+        return $this->ownable->members ?? new EloquentCollection();
     }
 
     /**
@@ -198,9 +191,9 @@ class Project extends Model
 
     /**
      * @param bool $withToday
-     * @return \Illuminate\Support\Collection<int|string,int>
+     * @return Collection<int|string,int>
      */
-    public function dailyBuilds(bool $withToday = false): \Illuminate\Support\Collection
+    public function dailyBuilds(bool $withToday = false): Collection
     {
         return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(!$withToday))->get();
     }
@@ -332,7 +325,6 @@ class Project extends Model
 
     public function validateSubmission() : bool
     {
-        $this->validation_errors = [];
         $this->validated_at = now();
         $rules = [new ProtectedFilesUntouched()];
         foreach($rules as $rule) {
@@ -345,6 +337,7 @@ class Project extends Model
             return false;
         }
 
+        $this->validation_errors = new Collection();
         $this->save();
         return true;
     }

@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 interface SubmissionValidation
 {
     /**
-     * @return Collection<string>
+     * @return Collection<int,string>
      */
     public function validate(Task $task, Project $project) : Collection;
 }
