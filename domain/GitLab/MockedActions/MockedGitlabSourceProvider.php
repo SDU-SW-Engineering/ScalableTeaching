@@ -11,6 +11,6 @@ class MockedGitlabSourceProvider extends ServiceProvider
 {
     public function boot(Kernel $kernel) : void
     {
-        $this->app->bind(SourceControl::class, MockedGitlabActions::class);
+        $this->app->scoped(SourceControl::class, MockedGitlabActions::class);
     }
 }
