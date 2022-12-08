@@ -28,35 +28,39 @@ class DirectoryCollection
      * @param Collection<int,string> $files
      * @return DirectoryCollection
      */
-    public static function fromFiles(Collection $files) : DirectoryCollection {
+    public static function fromFiles(Collection $files): DirectoryCollection
+    {
         return new DirectoryCollection((new Collection($files))->map(function($file) {
-            return new Directory(pathinfo($file)['dirname']);
+            $dirName = pathinfo($file)['dirname'];
+            if ($dirName == ".")
+                $dirName = "/";
+            return new Directory($dirName);
         }));
     }
 
-    public function getFile(string $path) : ?File
+    public function getFile(string $path): ?File
     {
         $path = trim($path, "/");
         $file = pathinfo($path);
-        if ($file['dirname'] == '.')
+        if($file['dirname'] == '.')
             $file['dirname'] = "/";
-        if (!$this->directories->has($file['dirname']))
+        $directory = $this->directories->firstWhere(fn(Directory $directory, string $keyPath) => ($keyPath == "/" ? "/" : trim($keyPath, '/')) == $file['dirname']);
+        if($directory == null)
             return null;
 
         /** @var Directory $directory */
-        $directory = $this->directories->get($file['dirname']);
         return $directory->files->firstWhere(fn(File $f) => $f->getName() == $file['basename']);
     }
 
     /**
      * @return Collection<int,File>
      */
-    public function files() : Collection
+    public function files(): Collection
     {
         /** @var Collection<int,File> $files */
         $files = new Collection();
         $this->directories->each(function(Directory $directory) use ($files) {
-            foreach ($directory->files as $file) {
+            foreach($directory->files as $file) {
                 $files[] = $file;
             }
         });

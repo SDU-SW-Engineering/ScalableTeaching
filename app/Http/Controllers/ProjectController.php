@@ -168,7 +168,7 @@ class ProjectController extends Controller
                 $shaValues = new Collection($file->sha_values);
                 $shaIntact = $shaValues->contains($found->sha);
                 if( ! $shaIntact)
-                    $errors[] = "The file \"{$file->path}\" has been altered! Expected one of [{$shaValues->join(', ')}] but got $found->sha.";
+                    $errors[] = "The file \"{$file->path}\" has been altered! Expected file to have sha value one of [{$shaValues->join(', ')}] but got $found->sha.";
             }
         }
 

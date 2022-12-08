@@ -326,6 +326,8 @@ class Task extends Model
     {
         if (count($files) == 0)
             $files = $this->protectedFiles->map(fn(TaskProtectedFile $protectedFile) => $protectedFile->path); // @phpstan-ignore-line
+        if ($files->count() == 0)
+            return;
         $directories = DirectoryCollection::fromFiles($files);
         app(SourceControl::class)->getFilesFromDirectories("$this->source_project_id", $directories);
         $relevantFiles = $directories->files()->filter(fn(File $file) => $files->contains($file->fullPath()));

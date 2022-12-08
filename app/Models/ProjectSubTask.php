@@ -30,10 +30,10 @@ class ProjectSubTask extends Model
 
             $project = $projectSubTask->project;
             $isFinished = static::isFinished($project);
-            if(!$isFinished)
+            if( ! $isFinished)
                 return;
 
-            if(!$project->validateSubmission())
+            if( ! $project->validateSubmission())
                 return;
 
             $project->setProjectStatus(ProjectStatus::Finished);
@@ -50,12 +50,13 @@ class ProjectSubTask extends Model
         $completedSubTasks = $project->subTasks->pluck('sub_task_id');
         $task = $project->task;
 
-        return match ($task->correction_type) {
-            CorrectionType::AllTasks => !$task->sub_tasks->isMissingAny($completedSubTasks),
-            CorrectionType::RequiredTasks => !$task->sub_tasks->isMissingAnyRequired($completedSubTasks),
-            CorrectionType::NumberOfTasks => $completedSubTasks->count() >= $task->correction_tasks_required,
+        return match ($task->correction_type)
+        {
+            CorrectionType::AllTasks       => ! $task->sub_tasks->isMissingAny($completedSubTasks),
+            CorrectionType::RequiredTasks  => ! $task->sub_tasks->isMissingAnyRequired($completedSubTasks),
+            CorrectionType::NumberOfTasks  => $completedSubTasks->count() >= $task->correction_tasks_required,
             CorrectionType::PointsRequired => $task->sub_tasks->points($completedSubTasks) >= $task->correction_points_required,
-            default => false
+            default                        => false
         };
     }
 

@@ -24,24 +24,24 @@ beforeEach(function() {
 
     $this->project->task->protectedFiles()->createMany([
         [
-            'path' => '.gitlab-ci.yml',
-            'sha_values' => ['d470caf7cdb76a728911f4934adc1ba17aff6be9']
+            'path'       => '.gitlab-ci.yml',
+            'sha_values' => ['d470caf7cdb76a728911f4934adc1ba17aff6be9'],
         ],
         [
-            'path' => 'src/test/java/task1/Task1Test.java',
-            'sha_values' => ['9faefc1a0c1c371e1f274975aab675ef29f4ac5f']
+            'path'       => 'src/test/java/task1/Task1Test.java',
+            'sha_values' => ['9faefc1a0c1c371e1f274975aab675ef29f4ac5f'],
         ],
         [
-            'path' => 'src/test/java/task2/Task2Test.java',
-            'sha_values' => ['0eec204f6515fa3b005bf7735f33d1b5508712c9']
+            'path'       => 'src/test/java/task2/Task2Test.java',
+            'sha_values' => ['0eec204f6515fa3b005bf7735f33d1b5508712c9'],
         ],
         [
-            'path' => 'src/test/java/task3/Task3Test.java',
-            'sha_values' => ['fd63e2e589d03e2f52cbd0b9b6c32d0fcf95fde0']
+            'path'       => 'src/test/java/task3/Task3Test.java',
+            'sha_values' => ['fd63e2e589d03e2f52cbd0b9b6c32d0fcf95fde0'],
         ],
         [
-            'path' => 'src/test/java/task4/Task4Test.java',
-            'sha_values' => ['925098a56f12008148878a49166888d075925f4e']
+            'path'       => 'src/test/java/task4/Task4Test.java',
+            'sha_values' => ['925098a56f12008148878a49166888d075925f4e'],
         ],
     ]);
 });
