@@ -46,11 +46,11 @@ class OverviewController extends Controller
             new LineDataSet("Completed", $projectsCompletedPerDay->values(), "#7BB026", true)
         );
 
-        /** @var Collection<string,int> $totalVisitorsPerDay */
-        $totalVisitorsPerDay = $task->totalVisitorsPerDay;
-        $totalVisitsPerDayGraph = $totalVisitorsPerDay == null ? null : new Graph(
-            $totalVisitorsPerDay->keys(),
-            new LineDataSet("Visits", $totalVisitorsPerDay->values(), "#266ab0", true)
+        /** @var Collection<string,int> $totalVisitsPerDay */
+        $totalVisitsPerDay = $task->totalVisitsPerDay;
+        $totalVisitsPerDayGraph = $totalVisitsPerDay == null ? null : new Graph(
+            $totalVisitsPerDay->keys(),
+            new LineDataSet("Visits", $totalVisitsPerDay->values(), "#266ab0", true)
         );
 
         /** @var Collection<string,int> $dailyBuilds */

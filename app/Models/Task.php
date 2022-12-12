@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Collection|TaskDelegation[] $delegations
  * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
- * @property-read \Illuminate\Support\Collection<string,int> $totalVisitorsPerDay
+ * @property-read \Illuminate\Support\Collection<string,int> $totalVisitsPerDay
  * @property-read Collection<TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
  * @property-read int|null $source_project_id
