@@ -2,11 +2,16 @@
 
 namespace Domain\GitLab\Actions;
 
+use Domain\SourceControl\Directory;
+use Domain\SourceControl\DirectoryCollection;
+use Domain\SourceControl\File;
 use Domain\SourceControl\Group;
 use Domain\SourceControl\Project;
 use Domain\SourceControl\SourceControl;
 use Domain\SourceControl\User;
+use Exception;
 use GraphQL\Client;
+use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Http;
@@ -93,5 +98,44 @@ class GitLabActions implements SourceControl
             ]);
         $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->post('/groups', $params->toArray());
         return new Group($response->json('id'));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function fakePath(Collection $files): void
+    {
+        throw new Exception("Can't fake prod ready file.");
+    }
+
+    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, string $ref = null): void
+    {
+        $rootObject = new RootQueryObject();
+        $repository = $rootObject->selectProjects((new RootProjectsArgumentsObject())
+            ->setIds([self::idToGid($projectId)])
+            ->setFirst(1))
+            ->selectNodes()
+            ->selectRepository();
+
+        $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) use ($repository) {
+            $path = $directory->graphQlSanitized()->toString();
+            $repository
+                ->selectTree(
+                    (new RepositoryTreeArgumentsObject())->setPath($path)
+                )->setAlias($directory->graphQlSanitized()->replace('/', '_'))
+                ->selectBlobs()
+                ->selectNodes()
+                ->selectName()
+                ->selectSha();
+        });
+        $client = new Client(getenv('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
+        $directoryAndFiles = (array) $client->runQuery($rootObject)->getResults()->data->projects->nodes[0]->repository; // @phpstan-ignore-line
+        $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) use ($directoryAndFiles) {
+            $queryPath = $directory->graphQlSanitized()->replace("/", "_")->toString();
+            foreach($directoryAndFiles[$queryPath]->blobs->nodes as $file) {
+                $directory->files[] = new File($directory->path, $file->name, $file->sha);
+                $directory->fetched = true;
+            }
+        });
     }
 }

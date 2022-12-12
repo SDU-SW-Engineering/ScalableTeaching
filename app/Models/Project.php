@@ -5,23 +5,20 @@ namespace App\Models;
 use App\Events\ProjectCreated;
 use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
+use App\Tasks\Validation\ProtectedFilesUntouched;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
 use Domain\SourceControl\SourceControl;
 use Exception;
-use GrahamCampbell\GitLab\GitLabManager;
-use Illuminate\Contracts\Auth\Access\Authorizable;
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 /**
  * App\Models\Project
@@ -63,6 +60,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Query\Builder|Project withoutTrashed()
  * @property Grade $grade
  * @property-read bool $isMissed
+ * @property Collection<int,string> $validation_errors
+ * @property Carbon $validated_at
  */
 class Project extends Model
 {
@@ -72,11 +71,12 @@ class Project extends Model
     protected $dates = ['finished_at'];
 
     protected $casts = [
-        'validation_errors' => 'array',
+        'validation_errors' => 'collection',
         'status'            => ProjectStatus::class,
+        'validated_at'      => 'datetime',
     ];
 
-    protected $hidden = ['final_commit_sha', 'validation_errors', 'validated_at'];
+    protected $hidden = ['final_commit_sha'];
 
     protected $fillable = [
         'project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
@@ -154,7 +154,7 @@ class Project extends Model
     /**
      * @return HasMany<ProjectDiffIndex>
      */
-    public function changes() : HasMany
+    public function changes(): HasMany
     {
         return $this->hasMany(ProjectDiffIndex::class);
     }
@@ -170,15 +170,15 @@ class Project extends Model
 
     /**
      * returns a collection of users that own the project
-     * @return Collection<int,User>
+     * @return EloquentCollection<int,User>
      */
-    public function owners(): Collection
+    public function owners(): EloquentCollection
     {
         if($this->ownable_type == User::class)
             // @phpstan-ignore-next-line
-            return Collection::wrap([$this->ownable]);
+            return EloquentCollection::wrap([$this->ownable]);
 
-        return $this->ownable->members ?? new Collection();
+        return $this->ownable->members ?? new EloquentCollection();
     }
 
     /**
@@ -191,9 +191,9 @@ class Project extends Model
 
     /**
      * @param bool $withToday
-     * @return \Illuminate\Support\Collection<int|string,int>
+     * @return Collection<int|string,int>
      */
-    public function dailyBuilds(bool $withToday = false): \Illuminate\Support\Collection
+    public function dailyBuilds(bool $withToday = false): Collection
     {
         return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate( ! $withToday))->get();
     }
@@ -323,5 +323,27 @@ class Project extends Model
         $sourceControl = app(SourceControl::class);
 
         return $sourceControl->showProject((string)$this->project_id);
+    }
+
+    public function validateSubmission() : bool
+    {
+        $this->validated_at = now();
+        $rules = [new ProtectedFilesUntouched()];
+        foreach($rules as $rule)
+        {
+            $errors = $rule->validate($this->task, $this);
+            if ($errors->isEmpty())
+                continue;
+
+            $this->validation_errors = $errors;
+            $this->save();
+
+            return false;
+        }
+
+        $this->validation_errors = new Collection();
+        $this->save();
+
+        return true;
     }
 }

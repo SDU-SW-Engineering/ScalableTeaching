@@ -7,6 +7,8 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
 use App\ProjectStatus;
 use Carbon\Carbon;
+use Domain\SourceControl\DirectoryCollection;
+use Domain\SourceControl\File;
 use Domain\SourceControl\SourceControl;
 use Eloquent;
 use GrahamCampbell\GitLab\GitLabManager;
@@ -18,7 +20,7 @@ use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -26,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Collection;
 
 /**
  * @throws ModelNotFoundException<Task>
@@ -41,11 +44,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read CourseTrack|null $track
  * @property-read SurveyTask|null $pivot
  * @property-read bool $hasEnded
- * @property-read Collection|TaskDelegation[] $delegations
+ * @property-read EloquentCollection|TaskDelegation[] $delegations
  * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
- * @property-read \Illuminate\Support\Collection<string,int> $totalVisitsPerDay
- * @property-read Collection<TaskProtectedFile> $protectedFiles
+ * @property-read EloquentCollection<TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
  * @property-read int|null $source_project_id
  * @property Carbon $starts_at
@@ -206,14 +208,6 @@ class Task extends Model
     }
 
     /**
-     * @return HasMany<Visitor>
-     */
-    public function visitors(): HasMany
-    {
-        return $this->hasMany(Visitor::class);
-    }
-
-    /**
      * @return HasMany<TaskProtectedFile>
      */
     public function protectedFiles(): HasMany
@@ -296,10 +290,10 @@ class Task extends Model
     }
 
     /**
-     * @param Collection<int,User> $users
-     * @return Collection<int,User>
+     * @param EloquentCollection<int,User> $users
+     * @return EloquentCollection<int,User>
      */
-    public function progressStatus(Collection $users): Collection
+    public function progressStatus(EloquentCollection $users): EloquentCollection
     {
         return $users->filter(function(User $user) {
             return $this->currentProjectForUser($user) != null;
@@ -307,13 +301,13 @@ class Task extends Model
     }
 
     /**
-     * @param Collection<int,User> $users
-     * @return Collection<int,Project>
+     * @param EloquentCollection<int,User> $users
+     * @return EloquentCollection<int,Project>
      */
-    public function projectsForUsers(Collection $users): Collection
+    public function projectsForUsers(EloquentCollection $users): EloquentCollection
     {
-        /** @var Collection<int, Project> $projects */
-        $projects = new Collection();
+        /** @var EloquentCollection<int, Project> $projects */
+        $projects = new EloquentCollection();
         $users->each(function(User $user) use ($projects) {
             $project = $this->currentProjectForUser($user);
             if($project == null)
@@ -324,35 +318,26 @@ class Task extends Model
         return $projects;
     }
 
-    public function loadShaValuesFromDirectory(string $dir = "", ?string $selectFile = null): void
+    /**
+     * @param Collection<int,string> $files
+     * @return void
+     */
+    public function loadShaValuesFromDirectory(Collection $files = new Collection()): void
     {
-        $rootObject = new RootQueryObject();
-        $rootObject->selectProjects((new RootProjectsArgumentsObject())
-            ->setIds(["gid://gitlab/Project/$this->source_project_id"])
-            ->setFirst(1))
-            ->selectNodes()
-            ->selectRepository()
-            ->selectTree((new RepositoryTreeArgumentsObject())->setPath($dir))
-            ->selectBlobs()
-            ->selectNodes()
-            ->selectName()
-            ->selectSha();
-        $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
-        $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
-        if(count($projects) == 0)
+        if (count($files) == 0)
+            $files = $this->protectedFiles->map(fn(TaskProtectedFile $protectedFile) => $protectedFile->path); // @phpstan-ignore-line
+        if ($files->count() == 0)
             return;
-
-        // @phpstan-ignore-next-line
-        collect($projects[0]->repository->tree->blobs->nodes)->each(function($repoFile) use ($selectFile, $dir) {
-            if($selectFile != null && $repoFile->name != $selectFile)
-                return;
-            $fileName = "/" . trim("$dir/$repoFile->name", " /");
+        $directories = DirectoryCollection::fromFiles($files);
+        app(SourceControl::class)->getFilesFromDirectories("$this->source_project_id", $directories);
+        $relevantFiles = $directories->files()->filter(fn(File $file) => $files->contains($file->fullPath()));
+        $relevantFiles->each(function(File $relevantFile) {
             $file = $this->protectedFiles()->firstOrNew([
-                'path' => $fileName,
+                'path' => $relevantFile->fullPath(),
             ]);
-            $shaValues = is_array($file->sha_values) ? $file->sha_values : [];
-            $shaValues[] = $repoFile->sha;
-            $file->sha_values = array_unique($shaValues);
+            $shaValues = $file->sha_values ?? new Collection();
+            $shaValues[] = $relevantFile->getSha();
+            $file->sha_values = $shaValues->unique();
             $file->save();
         });
     }
@@ -423,7 +408,7 @@ class Task extends Model
             return false;
         }
 
-        $groups = $entity instanceof Group ? Collection::wrap([$entity]) : $entity->groups()->where('course_id', $this->course_id)->get();
+        $groups = $entity instanceof Group ? EloquentCollection::wrap([$entity]) : $entity->groups()->where('course_id', $this->course_id)->get();
         $usersInGroups = $groups->pluck('members')
             ->flatten()
             ->unique('id');
@@ -492,12 +477,12 @@ class Task extends Model
     /**
      * @param array|int|Arrayable<int, int> $userIds
      * @param array|int|Arrayable<int, int> $taskIds
-     * @return Collection<int, Project>
+     * @return EloquentCollection<int, Project>
      */
-    private static function usersHaveBegunTasks(array|int|Arrayable $userIds, array|int|Arrayable $taskIds): Collection
+    private static function usersHaveBegunTasks(array|int|Arrayable $userIds, array|int|Arrayable $taskIds): EloquentCollection
     {
-        $userIds = Collection::wrap($userIds);
-        $taskIds = Collection::wrap($taskIds);
+        $userIds = EloquentCollection::wrap($userIds);
+        $taskIds = EloquentCollection::wrap($taskIds);
 
         return Project::whereIn('task_id', $taskIds)->whereHasMorph(
             'ownable',
@@ -509,12 +494,12 @@ class Task extends Model
     /**
      * @param array|int|Arrayable<int, int> $groupIds
      * @param array|int|Arrayable<int, int> $taskIds
-     * @return Collection<int, Project>
+     * @return EloquentCollection<int, Project>
      */
-    private static function groupsHaveBegunTasks(array|int|Arrayable $groupIds, array|int|Arrayable $taskIds): Collection
+    private static function groupsHaveBegunTasks(array|int|Arrayable $groupIds, array|int|Arrayable $taskIds): EloquentCollection
     {
-        $groupIds = Collection::wrap($groupIds);
-        $taskIds = Collection::wrap($taskIds);
+        $groupIds = EloquentCollection::wrap($groupIds);
+        $taskIds = EloquentCollection::wrap($taskIds);
 
         return Project::whereIn('task_id', $taskIds)->whereHasMorph(
             'ownable',
@@ -569,7 +554,7 @@ class Task extends Model
      * Key corresponds to the user id
      * Value corresponds to their associated project
      * Users that haven't created a project won't be in the dictionary
-     * @return Collection|\Illuminate\Support\Collection<int, int>
+     * @return EloquentCollection|\Illuminate\Support\Collection<int, int>
      */
     public function userProjectDictionary()
     {

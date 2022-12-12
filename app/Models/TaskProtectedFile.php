@@ -4,14 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
+/**
+ * @property string $path
+ * @property Collection<string> $sha_values
+ */
 class TaskProtectedFile extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['path'];
+    protected $fillable = ['path', 'sha_values'];
 
-    protected $casts = ['sha_values' => 'array'];
+    protected $casts = ['sha_values' => 'collection'];
 
     public function getBaseNameAttribute() : string
     {

@@ -24,13 +24,16 @@ class ProjectSubTask extends Model
 
     protected static function booted()
     {
-        static::created(function (ProjectSubTask $projectSubTask) {
-            if ($projectSubTask->project->status == ProjectStatus::Finished)
+        static::created(function(ProjectSubTask $projectSubTask) {
+            if($projectSubTask->project->status == ProjectStatus::Finished)
                 return;
 
             $project = $projectSubTask->project;
             $isFinished = static::isFinished($project);
-            if ( ! $isFinished)
+            if( ! $isFinished)
+                return;
+
+            if( ! $project->validateSubmission())
                 return;
 
             $project->setProjectStatus(ProjectStatus::Finished);
@@ -42,18 +45,18 @@ class ProjectSubTask extends Model
      * @return bool
      * @throws \Exception
      */
-    protected static function isFinished(Project $project) : bool
+    protected static function isFinished(Project $project): bool
     {
         $completedSubTasks = $project->subTasks->pluck('sub_task_id');
         $task = $project->task;
 
         return match ($task->correction_type)
         {
-            CorrectionType::AllTasks                              => ! $task->sub_tasks->isMissingAny($completedSubTasks),
-            CorrectionType::RequiredTasks                         => ! $task->sub_tasks->isMissingAnyRequired($completedSubTasks),
-            CorrectionType::NumberOfTasks                         => $completedSubTasks->count() >= $task->correction_tasks_required,
-            CorrectionType::PointsRequired                        => $task->sub_tasks->points($completedSubTasks) >= $task->correction_points_required,
-            default                                               => false
+            CorrectionType::AllTasks       => ! $task->sub_tasks->isMissingAny($completedSubTasks),
+            CorrectionType::RequiredTasks  => ! $task->sub_tasks->isMissingAnyRequired($completedSubTasks),
+            CorrectionType::NumberOfTasks  => $completedSubTasks->count() >= $task->correction_tasks_required,
+            CorrectionType::PointsRequired => $task->sub_tasks->points($completedSubTasks) >= $task->correction_points_required,
+            default                        => false
         };
     }
 

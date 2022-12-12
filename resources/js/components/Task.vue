@@ -170,6 +170,7 @@
                     </div>
                 </div>
                 <div v-if="task.source_project_id !== null">
+                    <validation-failed v-if="project != null && project.validation_errors != null && project.validation_errors.length > 0" :errors="project.validation_errors"></validation-failed>
                     <warning :message="warning" v-if="warning.length > 0"></warning>
                     <part-of-track v-if="task.track != null" :track="task.track"
                                    :is-started="project != null"></part-of-track>
@@ -218,9 +219,11 @@ import PartOfTrack from "./Widgets/PartOfTrack";
 import Waiting from "./Widgets/Waiting";
 import Survey from "./Task/Tabs/Survey";
 import MarkCompleted from "./Widgets/MarkCompleted";
+import ValidationFailed from "./Widgets/ValidationFailed.vue";
 
 export default {
     components: {
+        ValidationFailed,
         MarkCompleted,
         Survey,
         PartOfTrack,
