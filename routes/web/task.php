@@ -12,6 +12,7 @@ Route::prefix('{task}')->group(function() {
         Route::get('/', [OverviewController::class, 'index'])->name('index');
 
         Route::controller(StudentController::class)->group(function() {
+            Route::get('students-exercise', 'studentsExercise')->name('studentsExercise');
             Route::get('students', 'students')->name('students');
             Route::get('builds', 'builds')->name('builds');
             Route::get('pushes', 'pushes')->name('pushes');

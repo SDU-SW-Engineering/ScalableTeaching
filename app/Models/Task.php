@@ -47,6 +47,7 @@ use Illuminate\Support\Collection;
  * @property-read EloquentCollection|TaskDelegation[] $delegations
  * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
+ * @property-read \Illuminate\Support\Collection<string,int> $totalVisitsPerDay
  * @property-read EloquentCollection<TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
  * @property-read int|null $source_project_id
@@ -153,6 +154,30 @@ class Task extends Model
     {
         return $this->hasMany(TaskDelegation::class);
     }
+
+    /**
+     * @return HasMany<Visitor>
+     */
+    public function visitors(): HasMany
+    {
+        return $this->hasMany(Visitor::class);
+    }
+
+    /**
+     * @return HasMany<Project>
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    /**
+     * @return HasMany<TaskProtectedFile>
+     */
+    public function protectedFiles(): HasMany
+    {
+        return $this->hasMany(TaskProtectedFile::class);
+    }
     // endregion
 
     /**
@@ -200,19 +225,15 @@ class Task extends Model
     }
 
     /**
-     * @return HasMany<Project>
+     * @param bool $withToday
+     * @return \Illuminate\Support\Collection<string,int>|null
      */
-    public function projects(): HasMany
+    public function dailyVisits(bool $withToday = false): \Illuminate\Support\Collection|null
     {
-        return $this->hasMany(Project::class);
-    }
-
-    /**
-     * @return HasMany<TaskProtectedFile>
-     */
-    public function protectedFiles(): HasMany
-    {
-        return $this->hasMany(TaskProtectedFile::class);
+        if( ! $this->is_publishable)
+            return null;
+        $query = $this->visitors();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
     }
 
     /**
