@@ -20,6 +20,7 @@ class StudentController extends Controller
     {
         $students = $course->students()->get();
         $visitors = $task->visitors()->get();
+
         return view('tasks.admin.studentsExercise', compact('course', 'task', 'students', 'visitors'));
     }
 

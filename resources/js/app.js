@@ -22,6 +22,7 @@ Vue.component(
     require("./components/Elements/DateRangePicker").default
 );
 Vue.component("grading", require("./components/Grading").default);
+Vue.component("visitors-list", require("./components/VisitorsList").default);
 Vue.component("subtasks", require("./components/Tasks/Subtasks").default);
 Vue.component(
     "subtask-list",
