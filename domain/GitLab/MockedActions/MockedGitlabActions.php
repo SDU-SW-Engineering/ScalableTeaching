@@ -98,4 +98,15 @@ class MockedGitlabActions implements SourceControl
             $directory->fetched = true;
         });
     }
+
+    public function addUserToProjectAs(string $projectId, string $userId, string $accessToken): void
+    {
+        // TODO: Implement addUserToProjectAs() method.
+    }
+
+    public function forkProject(string $sourceId, string $groupId, string $newName): ?Project
+    {
+        // TODO: Implement forkProject() method.
+        return new Project($this->factory->randomNumber(5));
+    }
 }

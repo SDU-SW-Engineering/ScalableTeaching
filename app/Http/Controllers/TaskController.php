@@ -256,7 +256,8 @@ class TaskController extends Controller
                 ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
                 ->withInput();
 
-        $sourceControl->addUserToProjectAs($project->id, $sourceControl->currentUser()->id, auth()->user()->access_token);
+        if(auth()->user()->access_token != null)
+            $sourceControl->addUserToProjectAs($project->id, $sourceControl->currentUser()->id, auth()->user()->access_token);
         $params = [
             'visibility'                => 'private',
             'parent_id'                 => $course->gitlab_group_id,
