@@ -41,7 +41,10 @@
                         <h2 class="text-2xl"
                             :class="[ this.backedBy === 'repo' ? 'text-white' : 'text-lime-green-500 dark:text-lime-green-400']">
                             Repo backed</h2>
-                        <p class="font-thin"
+                        <p v-if="type === 'exercise'" class="font-thin"
+                           :class="[ this.backedBy === 'repo' ? 'text-gray-100' : 'text-gray-700 font-thin dark:text-gray-300']">
+                            A simple task that can be accessed as a repository that can then be cloned by students.</p>
+                        <p v-else class="font-thin"
                            :class="[ this.backedBy === 'repo' ? 'text-gray-100' : 'text-gray-700 font-thin dark:text-gray-300']">
                             A task that allows the student to clone a repo. Allows for automated grading through
                             pipelines.</p>
@@ -100,7 +103,7 @@ export default {
             let resp = await axios.post(`/courses/${this.course.id}/manage/tasks`, {
                 type: this.type,
                 name: this.name,
-                'repo-id': this.repoId
+                'repo-id': this.repoId,
             });
             window.location = resp.data.route;
         },

@@ -85,15 +85,14 @@ class CourseController extends Controller
             'course-name' => 'required|max:255',
         ]);
 
-        $snakeName = Str::snake($validated['course-name']);
-
-        $currentGroup = $manager->groups()->subgroups(getenv('GITLAB_GROUP'), ['search' => $snakeName]);
+        $pathName = Str::slug($validated['course-name']);
+        $currentGroup = $manager->groups()->subgroups(getenv('GITLAB_GROUP'), ['search' => $pathName]);
         if (count($currentGroup) > 0)
             return redirect()->back()->withErrors(['course-name' => 'A course with that name already exists in GitLab.'])->withInput();
 
         $gitlabGroup = [
             'name'       => $validated['course-name'],
-            'path'       => $snakeName,
+            'path'       => $pathName,
             'visibility' => 'private',
             'parent_id'  => getenv('GITLAB_GROUP'),
         ];

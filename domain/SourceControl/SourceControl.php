@@ -18,7 +18,11 @@ interface SourceControl
 
     public function addUserToProject(string $projectId, string $userId) : void;
 
+    public function addUserToProjectAs(string $projectId, string $userId, string $accessToken) : void;
+
     public function createGroup(string $name, array $params) : ?Group;
+
+    public function forkProject(string $sourceId, string $groupId, string $newName) : ?Project;
 
     /**
      * @param string $projectId
