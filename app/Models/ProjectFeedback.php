@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Project $project
  * @property TaskDelegation $taskDelegation
  * @property string $sha
+ *
  * @mixin Eloquent
  */
 class ProjectFeedback extends Model

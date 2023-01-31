@@ -24,6 +24,7 @@ use ZipArchive;
  * @property string $ref
  * @property-read bool $isDownloaded
  * @property string|null $location
+ *
  * @mixin Eloquent
  */
 class ProjectDownload extends Model

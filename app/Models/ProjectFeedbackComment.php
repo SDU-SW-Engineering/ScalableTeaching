@@ -19,6 +19,7 @@ use Illuminate\Support\Collection;
  * @property string $filename
  * @property int $line
  * @property string $comment
+ *
  * @mixin Eloquent
  */
 class ProjectFeedbackComment extends Model

@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $value_raw
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
  * @mixin Eloquent
  */
 class Grade extends Model

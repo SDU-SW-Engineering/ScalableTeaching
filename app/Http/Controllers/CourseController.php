@@ -168,7 +168,7 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function showEnroll(Course $course): RedirectResponse | View
+    public function showEnroll(Course $course): RedirectResponse|View
     {
         if ($course->enroll_token != request('token')) {
             return redirect()->route('home')->withError('Invalid course token');
