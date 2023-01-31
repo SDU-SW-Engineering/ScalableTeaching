@@ -41,7 +41,6 @@ it('creates a repo-backed exercise task', closure: function() {
     assertDatabaseHas('tasks', [
         'type'              => 'exercise',
         'name'              => 'Test Assignment',
-        'source_project_id' => '123',
     ]);
 });
 

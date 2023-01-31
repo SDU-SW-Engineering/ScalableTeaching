@@ -169,7 +169,7 @@
                         <h3 class="font-bold text-xl dark:text-white text-center">Group Project</h3>
                     </div>
                 </div>
-                <div v-if="task.source_project_id !== null">
+                <div v-if="task.source_project_id !== null && task.type == 'assignment'">
                     <validation-failed v-if="project != null && project.validation_errors != null && project.validation_errors.length > 0" :errors="project.validation_errors"></validation-failed>
                     <warning :message="warning" v-if="warning.length > 0"></warning>
                     <part-of-track v-if="task.track != null" :track="task.track"
@@ -186,7 +186,8 @@
                                :validation="project.validationStatus"></completed>
                     <overdue v-else-if="project != null && project.isMissed"></overdue>
                 </div>
-                <mark-completed v-if="task.source_project_id === null && task.correction_type === 'self'" :csrf="this.csrf" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
+                <go-to-repo v-if="task.source_project_id != null && task.type === 'exercise'" :url="'https://gitlab.sdu.dk/projects/' + task.source_project_id"/>
+                <mark-completed v-if="task.correction_type === 'self'" :csrf="this.csrf" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
                 <div v-if="false" class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>
@@ -220,9 +221,11 @@ import Waiting from "./Widgets/Waiting";
 import Survey from "./Task/Tabs/Survey";
 import MarkCompleted from "./Widgets/MarkCompleted";
 import ValidationFailed from "./Widgets/ValidationFailed.vue";
+import GoToRepo from "./Widgets/GoToRepo.vue";
 
 export default {
     components: {
+        GoToRepo,
         ValidationFailed,
         MarkCompleted,
         Survey,
@@ -256,7 +259,7 @@ export default {
         return {
             tab: 'description',
             errorMessage: '',
-            hideMissingAssignmentWarning: this.task.source_project_id === null,
+            hideMissingAssignmentWarning: this.task.source_project_id === null || this.task.type === 'exercise',
             startingAssignment: false,
             labels: this.buildGraph.labels,
             datasets: this.buildGraph.datasets,

@@ -6,7 +6,6 @@ use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\GradeEnum;
-use App\Models\Enums\TaskTypeEnum;
 use App\Models\Grade;
 use App\Models\ProjectFeedback;
 use App\Models\Group;
@@ -18,17 +17,11 @@ use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
-use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
-use Domain\GitLab\CIReader;
-use Domain\GitLab\CITask;
 use Domain\SourceControl\SourceControl;
-use Gitlab\Exception\RuntimeException;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
-use GraphQL\SchemaObject\RootQueryObject;
 use Http\Client\Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
@@ -249,6 +242,7 @@ class TaskController extends Controller
                 'name'              => $validated['name'],
                 'type'              => $validated['type'],
                 'source_project_id' => null,
+                'correction_type'   => $validated['type'] == 'exercise' ? 'self' : null,
             ]);
 
             return [
@@ -263,7 +257,8 @@ class TaskController extends Controller
                 ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
                 ->withInput();
 
-        $sourceControl->addUserToProject($project->id, $sourceControl->currentUser()->id);
+        if(auth()->user()->access_token != null)
+            $sourceControl->addUserToProjectAs($project->id, $sourceControl->currentUser()->id, auth()->user()->access_token);
         $params = [
             'visibility'                => 'private',
             'parent_id'                 => $course->gitlab_group_id,
@@ -272,13 +267,28 @@ class TaskController extends Controller
             'auto_devops_enabled'       => false,
             'request_access_enabled'    => false,
         ];
-        $group = $sourceControl->createGroup($validated['name'], $params);
+
+        $groupId = null;
+
+        if($validated['type'] == 'exercise')
+        {
+            $forkFrom = Str::of($validated['repo-id'])->split('#/#')->last();
+            $project = $sourceControl->forkProject($forkFrom, $course->gitlab_group_id, $validated['name']);
+            $sourceId = $project->id;
+        } else
+        {
+            $group = $sourceControl->createGroup($validated['name'], $params);
+            $groupId = $group->id;
+            $sourceId = Str::of($validated['repo-id'])->split('#/#')->last();
+        }
+
         /** @var Task $task */
         $task = $course->tasks()->create([
-            'source_project_id' => Str::of($validated['repo-id'])->split('#/#')->last(),
+            'source_project_id' => $sourceId,
             'name'              => $validated['name'],
             'type'              => $validated['type'],
-            'gitlab_group_id'   => $group->id,
+            'gitlab_group_id'   => $groupId,
+            'correction_type'   => $validated['type'] == 'exercise' ? 'self' : null,
         ]);
 
         return [

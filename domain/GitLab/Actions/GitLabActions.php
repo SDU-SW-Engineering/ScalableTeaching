@@ -75,15 +75,29 @@ class GitLabActions implements SourceControl
         ]);
     }
 
+    /**
+     * @param string $projectId
+     * @param string $userId
+     * @param string $as Access token for the user to perform the action as
+     * @return void
+     */
+    public function addUserToProjectAs(string $projectId, string $userId, string $as): void
+    {
+        $response = Http::withToken($as)->baseUrl(config('sourcecontrol.url') . '/api/v4')->post('/projects/' . self::gidToId($projectId) . '/members', [
+            'user_id'      => self::gidToId($userId),
+            'access_level' => 40,
+        ]);
+    }
+
     private static function gidToId(string $id): string
     {
         return Str::of($id)->split('#/#')->last();
     }
 
-    private static function idToGid(string|int $id) : string
+    private static function idToGid(string|int $id): string
     {
         $id = Str::of($id);
-        if ($id->contains('gid://gitlab/Project/'))
+        if($id->contains('gid://gitlab/Project/'))
             return $id;
 
         return $id->prepend('gid://gitlab/Project/');
@@ -129,7 +143,7 @@ class GitLabActions implements SourceControl
                 ->selectSha();
         });
         $client = new Client(getenv('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
-        $directoryAndFiles = (array) $client->runQuery($rootObject)->getResults()->data->projects->nodes[0]->repository; // @phpstan-ignore-line
+        $directoryAndFiles = (array)$client->runQuery($rootObject)->getResults()->data->projects->nodes[0]->repository; // @phpstan-ignore-line
         $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) use ($directoryAndFiles) {
             $queryPath = $directory->graphQlSanitized()->replace("/", "_")->toString();
             foreach($directoryAndFiles[$queryPath]->blobs->nodes as $file) {
@@ -137,5 +151,15 @@ class GitLabActions implements SourceControl
                 $directory->fetched = true;
             }
         });
+    }
+
+    public function forkProject(string $sourceId, string $groupId, string $newName): ?Project
+    {
+        $params = [
+            'namespace_id' => $groupId,
+            'name'         => $newName
+        ];
+        $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->post("/projects/$sourceId/fork", $params);
+        return new Project($response->json('id'));
     }
 }
