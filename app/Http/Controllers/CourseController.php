@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\Course\AddMemberToCourseGroup;
 use App\Models\Course;
 use App\Models\Enums\TaskTypeEnum;
 use App\Models\Task;
@@ -178,6 +179,7 @@ class CourseController extends Controller
             return view('courses.enroll-dialog', compact('course'));
 
         $course->members()->attach(auth()->id(), ['role' => 'student']);
+        AddMemberToCourseGroup::dispatch(auth()->user()->gitlab_id, $course->gitlab_task_group_id, 20);
 
         return redirect()->route('courses.show', [$course->id]);
     }
