@@ -109,4 +109,9 @@ class MockedGitlabActions implements SourceControl
         // TODO: Implement forkProject() method.
         return new Project($this->factory->randomNumber(5));
     }
+
+    public function addUserToGroup(string|int $groupId, string|int $userId, int $level, array $options = []): void
+    {
+        return;
+    }
 }

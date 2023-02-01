@@ -162,4 +162,14 @@ class GitLabActions implements SourceControl
         $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->post("/projects/$sourceId/fork", $params);
         return new Project($response->json('id'));
     }
+
+    public function addUserToGroup(string|int $groupId, string|int $userId, int $level, array $options = []): void
+    {
+        if (!array_key_exists('access_level', $options))
+            $options['access_level'] = 20;
+        $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->post('/groups/' . self::gidToId($groupId) . '/members', [
+            'user_id'      => self::gidToId($userId),
+            ...$options
+        ]);
+    }
 }
