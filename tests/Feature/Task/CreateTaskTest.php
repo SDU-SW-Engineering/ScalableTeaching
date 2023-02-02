@@ -35,8 +35,8 @@ it('creates a repo-backed exercise task', closure: function () {
     ])->assertStatus(200);
 
     assertDatabaseHas('tasks', [
-        'type'              => 'exercise',
-        'name'              => 'Test Assignment',
+        'type' => 'exercise',
+        'name' => 'Test Assignment',
     ]);
 });
 

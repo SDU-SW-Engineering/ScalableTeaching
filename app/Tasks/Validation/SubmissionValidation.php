@@ -11,5 +11,5 @@ interface SubmissionValidation
     /**
      * @return Collection<int,string>
      */
-    public function validate(Task $task, Project $project) : Collection;
+    public function validate(Task $task, Project $project): Collection;
 }

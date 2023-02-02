@@ -2,21 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Casts\SubTask;
-use App\Models\Course;
-use App\Models\Enums\CorrectionType;
-use App\Models\Enums\TaskTypeEnum;
-use App\Models\Grade;
 use App\Models\Pipeline;
 use App\Models\Project;
-use App\Models\ProjectFeedback;
+use App\Models\Task;
 use Auth;
 use Cache;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
-use App\Models\Task;
-use App\Models\User;
 
 class DashboardController extends Controller
 {
@@ -45,16 +36,16 @@ class DashboardController extends Controller
         });
 
         return view('home', [
-            'hideHeader'      => true,
-            'avgQueue'        => $averageQueueTime,
-            'buildCount'      => $builds,
-            'buildAvg'        => $buildAverageTime,
-            'projectCount'    => $projectCount,
+            'hideHeader' => true,
+            'avgQueue' => $averageQueueTime,
+            'buildCount' => $builds,
+            'buildAvg' => $buildAverageTime,
+            'projectCount' => $projectCount,
             'assignmentCount' => $assignmentCount,
         ]);
     }
 
-    public function authIndex() :view
+    public function authIndex(): view
     {
         $awaitingFeedback = auth()->user()->feedback()->with(['taskDelegation', 'project.task.course'])->get();
         $courses = auth()->user()->courses()->orderBy('created_at', 'desc')->get();
@@ -64,19 +55,19 @@ class DashboardController extends Controller
         $exercises = Task::exercises()->whereIn('course_id', $courses->pluck('id'))->orderBy('created_at', 'desc')->take(5)->visible()->get();
 
         return view('dashboard', [
-            'courses'           => $courses,
-            'tasks'             => $tasks,
-            'exercises'         => $exercises,
+            'courses' => $courses,
+            'tasks' => $tasks,
+            'exercises' => $exercises,
             'courseAssignments' => $courseAssignments,
-            'nextAssignment'    => $nextAssignment,
-            'bg'                => 'bg-gray-100 dark:bg-gray-700',
-            'awaitingFeedback'  => $awaitingFeedback,
+            'nextAssignment' => $nextAssignment,
+            'bg' => 'bg-gray-100 dark:bg-gray-700',
+            'awaitingFeedback' => $awaitingFeedback,
         ]);
     }
+
     public function index(): view
     {
-        if (Auth::check())
-        {
+        if (Auth::check()) {
             return $this->authIndex();
         }
 

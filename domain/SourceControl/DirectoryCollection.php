@@ -10,13 +10,14 @@ class DirectoryCollection
     public Collection $directories;
 
     /**
-     * @param Collection<int,Directory> $directories
+     * @param  Collection<int,Directory>  $directories
      */
     public function __construct(Collection $directories)
     {
         $this->directories = new Collection();
-        foreach($directories as $directory)
+        foreach ($directories as $directory) {
             $this->add($directory);
+        }
     }
 
     public function add(Directory $directory): void
@@ -25,31 +26,35 @@ class DirectoryCollection
     }
 
     /**
-     * @param Collection<int,string> $files
+     * @param  Collection<int,string>  $files
      * @return DirectoryCollection
      */
     public static function fromFiles(Collection $files): DirectoryCollection
     {
-        return new DirectoryCollection((new Collection($files))->map(function($file) {
+        return new DirectoryCollection((new Collection($files))->map(function ($file) {
             $dirName = pathinfo($file)['dirname'];
-            if ($dirName == ".")
-                $dirName = "/";
+            if ($dirName == '.') {
+                $dirName = '/';
+            }
+
             return new Directory($dirName);
         }));
     }
 
     public function getFile(string $path): ?File
     {
-        $path = trim($path, "/");
+        $path = trim($path, '/');
         $file = pathinfo($path);
-        if($file['dirname'] == '.')
-            $file['dirname'] = "/";
-        $directory = $this->directories->firstWhere(fn(Directory $directory, string $keyPath) => ($keyPath == "/" ? "/" : trim($keyPath, '/')) == $file['dirname']);
-        if($directory == null)
+        if ($file['dirname'] == '.') {
+            $file['dirname'] = '/';
+        }
+        $directory = $this->directories->firstWhere(fn (Directory $directory, string $keyPath) => ($keyPath == '/' ? '/' : trim($keyPath, '/')) == $file['dirname']);
+        if ($directory == null) {
             return null;
+        }
 
         /** @var Directory $directory */
-        return $directory->files->firstWhere(fn(File $f) => $f->getName() == $file['basename']);
+        return $directory->files->firstWhere(fn (File $f) => $f->getName() == $file['basename']);
     }
 
     /**
@@ -59,11 +64,12 @@ class DirectoryCollection
     {
         /** @var Collection<int,File> $files */
         $files = new Collection();
-        $this->directories->each(function(Directory $directory) use ($files) {
-            foreach($directory->files as $file) {
+        $this->directories->each(function (Directory $directory) use ($files) {
+            foreach ($directory->files as $file) {
                 $files[] = $file;
             }
         });
+
         return $files;
     }
 }

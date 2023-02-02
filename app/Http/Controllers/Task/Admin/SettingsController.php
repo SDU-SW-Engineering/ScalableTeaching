@@ -44,8 +44,9 @@ class SettingsController extends Controller
 
     public function loadDescription(Course $course, Task $task): string
     {
-        if ( ! $task->reloadDescriptionFromRepo())
+        if (! $task->reloadDescriptionFromRepo()) {
             return redirect()->back()->with('error', 'No readme file to load.');
+        }
 
         return redirect()->back();
     }

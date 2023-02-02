@@ -9,6 +9,7 @@ use Illuminate\Support\Stringable;
 class Directory
 {
     public bool $fetched = false;
+
     /**
      * @var Collection<int,File>
      */
@@ -19,11 +20,12 @@ class Directory
         $this->files = new Collection();
     }
 
-    public function graphQlSanitized() : Stringable
+    public function graphQlSanitized(): Stringable
     {
-        if ($this->path == "/")
+        if ($this->path == '/') {
             return Str::of($this->path);
+        }
 
-        return Str::of($this->path)->trim("/");
+        return Str::of($this->path)->trim('/');
     }
 }

@@ -8,13 +8,15 @@ use Str;
 class File
 {
     private string $path;
+
     private string $name;
+
     private string $sha;
 
     /**
-     * @param string $path
-     * @param string $name
-     * @param string $sha
+     * @param  string  $path
+     * @param  string  $name
+     * @param  string  $sha
      */
     public function __construct(string $path, string $name, string $sha)
     {
@@ -32,7 +34,7 @@ class File
     }
 
     /**
-     * @param string $path
+     * @param  string  $path
      */
     public function setPath(string $path): void
     {
@@ -48,7 +50,7 @@ class File
     }
 
     /**
-     * @param string $name
+     * @param  string  $name
      */
     public function setName(string $name): void
     {
@@ -64,15 +66,15 @@ class File
     }
 
     /**
-     * @param string $sha
+     * @param  string  $sha
      */
     public function setSha(string $sha): void
     {
         $this->sha = $sha;
     }
 
-    public function fullPath() : Stringable
+    public function fullPath(): Stringable
     {
-        return Str::of($this->path)->append(Str::of($this->path)->endsWith("/") ? "" : "/", $this->name);
+        return Str::of($this->path)->append(Str::of($this->path)->endsWith('/') ? '' : '/', $this->name);
     }
 }

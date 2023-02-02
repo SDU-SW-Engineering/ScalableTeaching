@@ -15,6 +15,7 @@ use Faker\Generator;
 class MockedGitlabActions implements SourceControl
 {
     private Generator $factory;
+
     /**
      * @var Collection<int,File>
      */
@@ -46,23 +47,25 @@ class MockedGitlabActions implements SourceControl
     }
 
     /**
-     * @param string $projectId
-     * @param string|null $path
-     * @param bool $recursive
-     * @param string|null $ref
+     * @param  string  $projectId
+     * @param  string|null  $path
+     * @param  bool  $recursive
+     * @param  string|null  $ref
      * @return Collection<int,File>
      */
     public function getFiles(string $projectId, string $path = null, bool $recursive = false, string $ref = null): Collection
     {
-        return $this->files->filter(function(File $file) use ($path, $recursive) {
-            if ($recursive)
+        return $this->files->filter(function (File $file) use ($path, $recursive) {
+            if ($recursive) {
                 return Str::of($file->getPath())->startsWith($path);
+            }
+
             return true;
         });
     }
 
     /**
-     * @param Collection<int,File> $files
+     * @param  Collection<int,File>  $files
      * @return void
      */
     public function fakePath(Collection $files): void
@@ -72,21 +75,22 @@ class MockedGitlabActions implements SourceControl
 
     /**
      * Produces side-effects
-     * @param string $projectId
-     * @param DirectoryCollection $directoryCollection
-     * @param string|null $ref
+     *
+     * @param  string  $projectId
+     * @param  DirectoryCollection  $directoryCollection
+     * @param  string|null  $ref
      * @return void
      */
     public function getFilesFromDirectories(string|int $projectId, DirectoryCollection $directoryCollection, string $ref = null): void
     {
-        $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) {
-            if ($directory->path == "/")
-            {
-                $directory->files = $this->files->filter(fn(File $file) => $file->getPath() == "/");
+        $directoryCollection->directories->reject(fn (Directory $directory) => $directory->fetched)->each(function (Directory $directory) {
+            if ($directory->path == '/') {
+                $directory->files = $this->files->filter(fn (File $file) => $file->getPath() == '/');
                 $directory->fetched = true;
+
                 return true;
             }
-            $filesForDir = $this->files->filter(fn(File $file) => $file->getPath() == $directory->path);
+            $filesForDir = $this->files->filter(fn (File $file) => $file->getPath() == $directory->path);
             $directory->files = $filesForDir;
             $directory->fetched = true;
         });
@@ -105,6 +109,6 @@ class MockedGitlabActions implements SourceControl
 
     public function addUserToGroup(string|int $groupId, string|int $userId, int $level, array $options = []): void
     {
-        return;
+
     }
 }
