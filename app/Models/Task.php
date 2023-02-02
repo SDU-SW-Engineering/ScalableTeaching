@@ -82,8 +82,7 @@ class Task extends Model
         $gitlabManager = app(GitLabManager::class);
         $sourceControl = app(SourceControl::class);
         $root = new Directory('/');
-        $directories = new Collection();
-        $directories[] = $root;
+        $directories = new Collection([$root]);
         $directoryCollection = new DirectoryCollection($directories);
         $sourceControl->getFilesFromDirectories($this->source_project_id, $directoryCollection);
         $readmeFile = $root->files->firstWhere(fn(File $file) => Str::of($file->getName())->trim()->lower() == "readme.md");
@@ -100,6 +99,7 @@ class Task extends Model
             'description'          => $htmlReadme,
             'markdown_description' => $readme,
         ]);
+
         return true;
     }
 
