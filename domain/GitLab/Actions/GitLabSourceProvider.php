@@ -10,7 +10,7 @@ class GitLabSourceProvider extends ServiceProvider
 {
     public function boot(Kernel $kernel): void
     {
-        $this->app->bind(SourceControl::class, GitLabActions::class);
+        $this->app->scoped(SourceControl::class, GitLabActions::class);
         $kernel->appendMiddlewareToGroup('web', SetSourceControlUserAuthMiddleware::class);
     }
 }

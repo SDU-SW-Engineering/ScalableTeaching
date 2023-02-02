@@ -6,7 +6,7 @@
             <x-slot name="icon">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                     <path
-                            d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                        d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
                 </svg>
             </x-slot>
             <x-slot name="title">Projects</x-slot>
@@ -52,36 +52,36 @@
     </div>
 
     @if($task->is_publishable)
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-        <div class="bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
-            <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Total Projects Per
-                Day</h3>
-            <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+            <div class="bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
+                <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Total Projects Per
+                    Day</h3>
+                <div>
                     <line-chart :height="300" :labels="{{ $totalProjectsPerDayGraph->labels()  }}"
                                 :data="{{ $totalProjectsPerDayGraph->datasets()  }}"></line-chart>
 
+                </div>
+            </div>
+            <div class="bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold">Builds Per Day</h3>
+                    <a class="bg-lime-green-500 text-white text-sm px-2 py-0.5 hover:bg-lime-green-600 transition-colors rounded-md mr-2"
+                       href="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}">Details</a>
+                </div>
+                <div>
+                    <bar-chart :height="300" :labels="{{ $dailyBuildsGraph->labels() }}"
+                               :data="{{ $dailyBuildsGraph->datasets()  }}"
+                               route="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}"></bar-chart>
+                </div>
             </div>
         </div>
-        <div class="bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold">Builds Per Day</h3>
-                <a class="bg-lime-green-500 text-white text-sm px-2 py-0.5 hover:bg-lime-green-600 transition-colors rounded-md mr-2"
-                   href="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}">Details</a>
-            </div>
-            <div>
-                <bar-chart :height="300" :labels="{{ $dailyBuildsGraph->labels() }}"
-                           :data="{{ $dailyBuildsGraph->datasets()  }}"
-                           route="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}"></bar-chart>
-            </div>
-        </div>
-    </div>
     @endif
     <div class="flex flex-col">
         <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
                 <div class="overflow-hidden sm:rounded-md shadow-md">
                     <div
-                            class="bg-gray-100 dark:bg-gray-800 min-w-full py-2 pl-6 pr-3 flex justify-between items-center">
+                        class="bg-gray-100 dark:bg-gray-800 min-w-full py-2 pl-6 pr-3 flex justify-between items-center">
                         <h2 class="text-lg  dark:text-gray-200">Projects</h2>
                         <div class="flex items-center">
                             <!--<form>
@@ -90,24 +90,24 @@
                                        placeholder="Filter" required>
                             </form>-->
                             <a href="{{ request()->url() }}?status=finished"
-                                    @class([
-                                            'text-white text-sm bg-lime-green-400 px-2 py-0.5 rounded-md mr-2' => request()->get('status') == 'finished',
-                                            'text-gray-600 dark:text-white text-sm px-2 py-0.5 hover:bg-lime-green-200 dark:hover:bg-lime-green-800 rounded-md mr-2' => request()->get('status') != 'finished'
-                                        ])
+                                @class([
+                                        'text-white text-sm bg-lime-green-400 px-2 py-0.5 rounded-md mr-2' => request()->get('status') == 'finished',
+                                        'text-gray-600 dark:text-white text-sm px-2 py-0.5 hover:bg-lime-green-200 dark:hover:bg-lime-green-800 rounded-md mr-2' => request()->get('status') != 'finished'
+                                    ])
                             >Completed</a>
                             <a href="{{ request()->url() }}?status=active"
-                                    @class([
-                                            'text-white text-sm bg-lime-green-400 px-2 py-0.5 rounded-md mr-2' => request()->get('status') == 'active',
-                                            'text-gray-600 dark:text-white text-sm px-2 py-0.5 hover:bg-lime-green-200 dark:hover:bg-lime-green-800 rounded-md mr-2' => request()->get('status') != 'active'
-                                        ])
+                                @class([
+                                        'text-white text-sm bg-lime-green-400 px-2 py-0.5 rounded-md mr-2' => request()->get('status') == 'active',
+                                        'text-gray-600 dark:text-white text-sm px-2 py-0.5 hover:bg-lime-green-200 dark:hover:bg-lime-green-800 rounded-md mr-2' => request()->get('status') != 'active'
+                                    ])
                             >
                                 Active
                             </a>
                             <a href="{{ request()->url() }}"
-                                    @class([
-                                            'text-white text-sm bg-lime-green-400 px-2 py-0.5 rounded-md' => request()->get('status','all') == 'all',
-                                            'text-gray-600 dark:text-white text-sm px-2 py-0.5 hover:bg-lime-green-200 dark:hover:bg-lime-green-800 rounded-md mr-2' => request()->get('status', 'all') != 'all'
-                                        ])
+                                @class([
+                                        'text-white text-sm bg-lime-green-400 px-2 py-0.5 rounded-md' => request()->get('status','all') == 'all',
+                                        'text-gray-600 dark:text-white text-sm px-2 py-0.5 hover:bg-lime-green-200 dark:hover:bg-lime-green-800 rounded-md mr-2' => request()->get('status', 'all') != 'all'
+                                    ])
                             >
                                 All
                             </a>
@@ -129,7 +129,7 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
                                                  viewBox="0 0 20 20" fill="currentColor">
                                                 <path
-                                                        d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/>
+                                                    d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/>
                                             </svg>
                                         @else
                                             <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
@@ -144,10 +144,10 @@
                                 </a>
                             </th>
                             @if($task->sub_tasks != null)
-                            <th scope="col"
-                                class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
+                                <th scope="col"
+                                    class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
                                     <span>Progress</span>
-                            </th>
+                                </th>
                             @endif
                             <th scope="col"
                                 class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
@@ -166,7 +166,7 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
                                                      viewBox="0 0 20 20" fill="currentColor">
                                                     <path
-                                                            d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/>
+                                                        d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/>
                                                 </svg>
                                             @else
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
@@ -198,7 +198,7 @@
                                         {{ $project->ownable->name }}
                                     @elseif($project->ownable_type == \App\Models\Group::class)
                                         {{ $project->ownable->name }} <span
-                                                class="text-gray-400">({{ $project->ownable->memberString }})</span>
+                                            class="text-gray-400">({{ $project->ownable->memberString }})</span>
                                     @else
                                         {{ $project->repo_name }}
                                     @endif
@@ -209,51 +209,60 @@
                                 <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
                                     {{ $project->progress() }}%
                                 </td>
-                                <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap">
+                                <td class="text-sm flex text-gray-500 px-6 py-4 whitespace-nowrap">
                                     @if($project->status == \App\ProjectStatus::Active)
                                         <svg xmlns="http://www.w3.org/2000/svg"
-                                             class="h-6 w-6 active text-yellow-400" fill="none"
+                                             class="h-6 w-6 active text-yellow-400 mr-2" fill="none"
                                              viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                   stroke-width="2"
                                                   d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
                                     @else
-                                        <div class="flex">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                 class="h-6 w-6 text-lime-green-300 handed-in mr-2"
-                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      stroke-width="2"
-                                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            @if($project->validationStatus == 'pending')
+                                        @if($project->status == \App\ProjectStatus::Finished)
+                                            <div class="flex">
                                                 <svg xmlns="http://www.w3.org/2000/svg"
-                                                     class="h-6 w-6 waiting-for-verification" fill="none"
-                                                     viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                            @elseif($project->validationStatus == 'success')
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                     class="h-6 w-6 text-lime-green-400 validated-success"
-                                                     fill="none" viewBox="0 0 24 24"
-                                                     stroke="currentColor">
+                                                     class="h-6 w-6 text-lime-green-300 handed-in mr-2"
+                                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
                                                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                 </svg>
-                                            @else
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                     class="h-6 w-6 text-red-500 validated-failed" fill="none"
-                                                     viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </div>
+                                        @else
+                                            <div class="flex">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-red-300 handed-in mr-2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                            @endif
-                                        </div>
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    @if($project->validationStatus == 'pending')
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             class="h-6 w-6 waiting-for-verification" fill="none"
+                                             viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  stroke-width="2"
+                                                  d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    @elseif($project->validationStatus == 'success')
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             class="h-6 w-6 text-lime-green-400 validated-success"
+                                             fill="none" viewBox="0 0 24 24"
+                                             stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  stroke-width="2"
+                                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    @else
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             class="h-6 w-6 text-red-500 validated-failed" fill="none"
+                                             viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  stroke-width="2"
+                                                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
                                     @endif
                                 </td>
                                 @if(request('status') == 'finished')

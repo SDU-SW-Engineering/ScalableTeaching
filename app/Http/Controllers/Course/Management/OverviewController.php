@@ -16,7 +16,7 @@ class OverviewController extends Controller
     {
         /** @var Collection<string,int> $exerciseEngagement */
         $exerciseEngagement = $course->exercise_engagement;
-        $userEngagementGraph = new Graph(
+        $userEngagementGraph = $exerciseEngagement == null ? null : new Graph(
             $exerciseEngagement->keys(),
             new BarDataSet('Engagement %', $exerciseEngagement->values(), '#4F535B'),
         );

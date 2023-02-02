@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -13,8 +12,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('project_downloads', function (Blueprint $table) {
-            $table->unique(['project_id', 'ref']);
+        Schema::table('courses', function (Blueprint $table) {
+            $table->unsignedInteger('gitlab_task_group_id')->nullable()->after('gitlab_group_id');
         });
     }
 
@@ -25,9 +24,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('project_downloads', function (Blueprint $table) {
-            $table->dropForeign('project_downloads_project_id_foreign');
-            $table->dropUnique('project_downloads_project_id_ref_unique');
+        Schema::table('courses', function (Blueprint $table) {
+            $table->dropColumn('gitlab_task_group_id');
         });
     }
 };

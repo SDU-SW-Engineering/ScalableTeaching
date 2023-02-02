@@ -10,7 +10,7 @@ use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [DashboardController::class, 'index'])->name('home');
 
 Route::get('start', [HomeController::class, 'start'])->middleware('auth')->name('start');
 

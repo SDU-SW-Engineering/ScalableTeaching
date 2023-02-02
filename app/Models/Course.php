@@ -43,6 +43,7 @@ use Illuminate\Support\Str;
  * @property-read \Illuminate\Support\Collection<int|string,int>|null $exercise_engagement
  * @property-read \Illuminate\Support\Collection<int|string,int>|null $enrolment_per_day
  * @property string $gitlab_group_id
+ * @property int $gitlab_task_group_id
  */
 class Course extends Model
 {

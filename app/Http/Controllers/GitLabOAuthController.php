@@ -28,6 +28,7 @@ class GitLabOAuthController extends Controller
         $dbUser->username = $user->getNickname();
         $dbUser->access_token = $user->token;
         $dbUser->last_login = now();
+        $dbUser->gitlab_id = $user->getId();
 
         try {
             $avatarResponse = Http::withHeaders(['Authorization' => 'Bearer '.$user->token])->get($user->avatar);
