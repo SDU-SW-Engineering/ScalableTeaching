@@ -122,7 +122,7 @@ class GitLabActions implements SourceControl
         throw new Exception("Can't fake prod ready file.");
     }
 
-    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, string $ref = null): void
+    public function getFilesFromDirectories(string|int $projectId, DirectoryCollection $directoryCollection, string $ref = null): void
     {
         $rootObject = new RootQueryObject();
         $repository = $rootObject->selectProjects((new RootProjectsArgumentsObject())

@@ -32,5 +32,5 @@ interface SourceControl
      * @param string|null $ref
      * @return void
      */
-    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, string $ref = null) : void;
+    public function getFilesFromDirectories(string|int $projectId, DirectoryCollection $directoryCollection, string $ref = null) : void;
 }

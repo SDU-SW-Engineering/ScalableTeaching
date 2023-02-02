@@ -84,7 +84,7 @@ class MockedGitlabActions implements SourceControl
      * @param string|null $ref
      * @return void
      */
-    public function getFilesFromDirectories(string $projectId, DirectoryCollection $directoryCollection, string $ref = null): void
+    public function getFilesFromDirectories(string|int $projectId, DirectoryCollection $directoryCollection, string $ref = null): void
     {
         $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) {
             if ($directory->path == "/")

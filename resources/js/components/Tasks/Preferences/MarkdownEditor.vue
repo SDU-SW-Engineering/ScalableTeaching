@@ -2,11 +2,15 @@
     <div>
         <div v-show="!showEditor">
             <div class="mb-4 p-2 prose-sm dark:prose-light rounded dark:bg-gray-800" @dblclick="displayEditor()" v-html="task.description"></div>
-            <div>
+            <div class="flex gap-4">
                 <button @click="displayEditor()"
-                        class="bg-gray-300 flex items-center justify-center text-gray-600 py-2 px-4 rounded hover:bg-gray-400">
+                        class="bg-gray-400 flex items-center justify-center text-gray-600 py-2 px-4 rounded hover:bg-gray-500">
                     <span class="text-white">Change description</span>
                 </button>
+                <a :href="`/courses/${this.task.course_id}/tasks/${this.task.id}/admin/load-description-from-repo`"
+                        class="bg-gray-400 flex items-center justify-center text-gray-600 py-2 px-4 rounded hover:bg-gray-500">
+                    <span class="text-white">Load from repo</span>
+                </a>
             </div>
         </div>
         <div v-show="showEditor">

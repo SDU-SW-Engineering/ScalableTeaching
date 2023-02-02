@@ -12,8 +12,7 @@
                 </svg>
                 <div class="flex flex-col w-full justify-center">
                     <h3 class="font-bold text-lg dark:text-white">Open Repo</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Done with the task? You can mark the task completed
-                        here.</p>
+                    <p class="text-gray-600 dark:text-gray-300">Press the button below to go the task repository. If you encounter a 404 error ensure you are authenticated with GitLab.</p>
                     <div class="mt-2">
                         <a :href="url" target="_blank"
                            class="flex items-center px-2 py-2 tracking-wide text-white capitalize transition-colors duration-200 transform bg-lime-green-600 rounded-md hover:bg-lime-green-500 focus:outline-none focus:ring focus:ring-lime-green-300 focus:ring-opacity-80">
