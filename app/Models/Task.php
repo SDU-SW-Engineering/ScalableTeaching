@@ -7,6 +7,7 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
 use App\ProjectStatus;
 use Carbon\Carbon;
+use Domain\SourceControl\Directory;
 use Domain\SourceControl\DirectoryCollection;
 use Domain\SourceControl\File;
 use Domain\SourceControl\SourceControl;
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * @throws ModelNotFoundException<Task>
@@ -75,12 +77,22 @@ class Task extends Model
         'type'            => TaskTypeEnum::class,
     ];
 
-    public function reloadDescriptionFromRepo(): void
+    public function reloadDescriptionFromRepo(): bool
     {
         $gitlabManager = app(GitLabManager::class);
+        $sourceControl = app(SourceControl::class);
+        $root = new Directory('/');
+        $directories = new Collection();
+        $directories[] = $root;
+        $directoryCollection = new DirectoryCollection($directories);
+        $sourceControl->getFilesFromDirectories($this->source_project_id, $directoryCollection);
+        $readmeFile = $root->files->firstWhere(fn(File $file) => Str::of($file->getName())->trim()->lower() == "readme.md");
+        if ($readmeFile == null)
+            return false;
+
         $project = $gitlabManager->projects()->show($this->source_project_id);
         $branch = $project['default_branch'];
-        $readme = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, 'readme.md', $branch)['content']);
+        $readme = base64_decode($gitlabManager->repositoryFiles()->getFile($this->source_project_id, $readmeFile->getName(), $branch)['content']);
         $parseDown = new \Parsedown();
         $htmlReadme = $parseDown->parse($readme);
 
@@ -88,6 +100,7 @@ class Task extends Model
             'description'          => $htmlReadme,
             'markdown_description' => $readme,
         ]);
+        return true;
     }
 
     // region relationships

@@ -20,8 +20,7 @@ class SettingsController extends Controller
 {
     public function preferences(Course $course, Task $task): View
     {
-        if($task->type == TaskTypeEnum::Assignment)
-        {
+        if($task->type == TaskTypeEnum::Assignment) {
             $ciFile = $task->ciFile();
             $subTasks = $this->getSubTasks($ciFile, $task);
 
@@ -41,6 +40,13 @@ class SettingsController extends Controller
         $task->save();
 
         return "OK";
+    }
+
+    public function loadDescription(Course $course, Task $task): string
+    {
+        if (!$task->reloadDescriptionFromRepo())
+            return redirect()->back()->with('error', 'No readme file to load.');
+        return redirect()->back();
     }
 
     public function updateTitle(Course $course, Task $task): RedirectResponse
@@ -79,7 +85,7 @@ class SettingsController extends Controller
 
     public function toggleVisibility(Course $course, Task $task): string
     {
-        $task->is_visible = ! $task->is_visible;
+        $task->is_visible = !$task->is_visible;
         $task->save();
 
         return "ok";
@@ -131,8 +137,7 @@ class SettingsController extends Controller
 
 
         /** @var SubTask $subTask */
-        foreach($task->sub_tasks->all() as $subTask)
-        {
+        foreach($task->sub_tasks->all() as $subTask) {
             $found = collect($subTasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
             if($found === false)
                 continue;
