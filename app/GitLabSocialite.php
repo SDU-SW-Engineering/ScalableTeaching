@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\GitlabProvider;
-use Laravel\Socialite\Two\ProviderInterface;
 
 class GitLabSocialite extends GitlabProvider
 {

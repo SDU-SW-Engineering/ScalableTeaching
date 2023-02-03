@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -28,7 +27,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Sanctum\PersonalAccessToken[] $tokens
  * @property-read int|null $tokens_count
+ *
  * @mixin \Eloquent
+ *
  * @property string $guid
  * @property mixed $username
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Project[] $projects
@@ -79,8 +80,8 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'is_admin'          => 'bool',
-        'is_sys_admin'      => 'bool',
+        'is_admin' => 'bool',
+        'is_sys_admin' => 'bool',
     ];
 
     protected $dates = ['last_login'];
@@ -104,7 +105,7 @@ class User extends Authenticatable
         return $this->morphMany(Project::class, 'ownable');
     }
 
-    public function getProjectNameAttribute() : string
+    public function getProjectNameAttribute(): string
     {
         return \Str::kebab($this->username);
     }
@@ -146,9 +147,9 @@ class User extends Authenticatable
     /**
      * @return Attribute<string,null>
      */
-    public function avatar() : Attribute
+    public function avatar(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => $attributes['avatar'] ?? "data:image/jpeg;base64,".base64_encode(file_get_contents(storage_path('avatar.jpg'))));
+        return Attribute::make(get: fn ($value, $attributes) => $attributes['avatar'] ?? 'data:image/jpeg;base64,'.base64_encode(file_get_contents(storage_path('avatar.jpg'))));
     }
 
     /**
@@ -156,13 +157,14 @@ class User extends Authenticatable
      */
     public function avatarHtml(): Attribute
     {
-        return Attribute::make(get: function() {
-            if($this->avatar == null)
+        return Attribute::make(get: function () {
+            if ($this->avatar == null) {
                 return '<svg xmlns="http://www.w3.org/2000/svg" class="dark:text-lime-green-400 h-10 w-10" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>';
+            }
 
             return "<img style='border-width: 2px' class='rounded-full border h-10 w-10 border-lime-green-400' src=\"$this->avatar\" alt=\"avatar\"/>";
         });
@@ -173,11 +175,11 @@ class User extends Authenticatable
      */
     public function shortName(): Attribute
     {
-        return Attribute::make(get: function() {
+        return Attribute::make(get: function () {
             $names = collect(explode(' ', $this->name));
             $firstName = $names->first();
 
-            return $firstName . ' ' . mb_convert_encoding(substr($names->last(), 0, 1), 'UTF-8', 'UTF-8') . '.';
+            return $firstName.' '.mb_convert_encoding(substr($names->last(), 0, 1), 'UTF-8', 'UTF-8').'.';
         });
     }
 }

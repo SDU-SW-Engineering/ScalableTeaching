@@ -45,57 +45,38 @@
     </div>
 </template>
 
-<script>
-import RoleDropdown from "./RoleDropdown";
+<script setup lang="ts">
+import RoleDropdown from "./RoleDropdown.vue";
+import {ref} from "vue";
+import {User} from "../../../../Interfaces/Models/User";
+import axios from "axios";
+import {UserInfo} from "../Enrolled.vue"
 
-export default {
-    components: {RoleDropdown},
-    props: {
-        member: {
-            type: Object,
-            required: true
-        },
-        availableRoles: {
-            type: Object,
-            required: true
-        },
-        roleRoute: {
-            type: String,
-            required: true
-        },
-        kickRoute: {
-            type: String,
-            required: true
-        },
-        activityRoute: {
-            type: String,
-            required: true
+
+const props = defineProps<{
+    member: UserInfo
+    availableRoles: object,
+    roleRoute: string,
+    kickRoute: string,
+    activityRoute: string
+}>()
+
+const booted = ref<boolean>(true);
+const userInfo = ref<UserInfo>(props.member);
+
+function newRole(role : string) {
+    userInfo.value.role = role;
+}
+
+async function kick(user : User)
+{
+    if (confirm("Are you sure you want to kick " + user.name + " from the course?") !== true)
+        return;
+    await axios.delete(props.kickRoute, {
+        data: {
+            user: user.id
         }
-    },
-    methods: {
-        newRole: function (roleId) {
-            this.member.role = roleId;
-        },
-        kick: async function (user) {
-            if (confirm("Are you sure you wan't to kick " + user.name + " from the course?") !== true)
-                return;
-            await axios.delete(this.kickRoute, {
-                data: {
-                    user: user.id
-                }
-            })
-            location.reload()
-        }
-    },
-    mounted() {
-        this.userInfo = this.member
-        this.booted = true
-    },
-    data() {
-        return {
-            booted: false,
-            userInfo: {}
-        }
-    },
+    })
+    location.reload()
 }
 </script>

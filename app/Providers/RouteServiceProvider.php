@@ -19,7 +19,6 @@ class RouteServiceProvider extends ServiceProvider
      */
     public const HOME = '/';
 
-
     /**
      * Define your route model bindings, pattern filters, etc.
      *
@@ -31,7 +30,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $stagingMiddleware = app()->environment('staging') ? ['staging'] : [];
 
-        $this->routes(function() use ($stagingMiddleware) {
+        $this->routes(function () use ($stagingMiddleware) {
             Route::prefix('api')
                 ->middleware('api')
                 ->namespace($this->namespace)
@@ -41,8 +40,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web/web.php'));
 
-            if(app()->environment('staging', 'local'))
-            {
+            if (app()->environment('staging', 'local')) {
                 Route::prefix('staging')
                     ->middleware(['web'])
                     ->name($this->namespace)
@@ -70,7 +68,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting()
     {
-        RateLimiter::for('api', function(Request $request) {
+        RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
     }

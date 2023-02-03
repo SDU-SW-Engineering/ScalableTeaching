@@ -15,7 +15,6 @@ use Eloquent;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
-use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Contracts\Support\Arrayable;
@@ -35,13 +34,14 @@ use Illuminate\Support\Str;
 /**
  * @throws ModelNotFoundException<Task>
  *
- *
  * @property CorrectionType $correction_type
  * @property int $id
  * @property string $description
  * @property string $markdown_description
  * @property string $name
+ *
  * @method Task findOrFail($id, $columns = []) {
+ *
  * @property SubTaskCollection $sub_tasks
  * @property-read CourseTrack|null $track
  * @property-read SurveyTask|null $pivot
@@ -57,6 +57,7 @@ use Illuminate\Support\Str;
  * @property bool $is_visible
  * @property string|null $current_sha
  * @property-read bool $is_publishable
+ *
  * @mixin Eloquent
  */
 class Task extends Model
@@ -72,9 +73,9 @@ class Task extends Model
     protected $dates = ['ends_at', 'starts_at'];
 
     protected $casts = [
-        'sub_tasks'       => SubTaskCollection::class,
+        'sub_tasks' => SubTaskCollection::class,
         'correction_type' => CorrectionType::class,
-        'type'            => TaskTypeEnum::class,
+        'type' => TaskTypeEnum::class,
     ];
 
     public function reloadDescriptionFromRepo(): bool
@@ -85,9 +86,10 @@ class Task extends Model
         $directories = new Collection([$root]);
         $directoryCollection = new DirectoryCollection($directories);
         $sourceControl->getFilesFromDirectories($this->source_project_id, $directoryCollection);
-        $readmeFile = $root->files->firstWhere(fn(File $file) => Str::of($file->getName())->trim()->lower() == "readme.md");
-        if ($readmeFile == null)
+        $readmeFile = $root->files->firstWhere(fn (File $file) => Str::of($file->getName())->trim()->lower() == 'readme.md');
+        if ($readmeFile == null) {
             return false;
+        }
 
         $project = $gitlabManager->projects()->show($this->source_project_id);
         $branch = $project['default_branch'];
@@ -96,7 +98,7 @@ class Task extends Model
         $htmlReadme = $parseDown->parse($readme);
 
         $this->update([
-            'description'          => $htmlReadme,
+            'description' => $htmlReadme,
             'markdown_description' => $readme,
         ]);
 
@@ -128,6 +130,7 @@ class Task extends Model
     {
         return $this->hasManyThrough(ProjectFeedback::class, TaskDelegation::class);
     }
+
     /**
      * @return HasMany<Grade>
      */
@@ -169,7 +172,7 @@ class Task extends Model
     // endregion
 
     /**
-     * @param Builder<Task> $query
+     * @param  Builder<Task>  $query
      * @return Builder<Task>
      */
     public function scopeAssignments(Builder $query): Builder
@@ -178,7 +181,7 @@ class Task extends Model
     }
 
     /**
-     * @param Builder<Task> $query
+     * @param  Builder<Task>  $query
      * @return Builder<Task>
      */
     public function scopeExercises(Builder $query): Builder
@@ -187,7 +190,7 @@ class Task extends Model
     }
 
     /**
-     * @param Builder<Task> $query
+     * @param  Builder<Task>  $query
      * @return Builder<Task>
      */
     public function scopeVisible(Builder $query): Builder
@@ -195,21 +198,22 @@ class Task extends Model
         return $query->where('is_visible', true);
     }
 
-
     /**
-     * @param bool $withTrash
-     * @param bool $withToday
+     * @param  bool  $withTrash
+     * @param  bool  $withToday
      * @return \Illuminate\Support\Collection<string,int>|null
      */
-    public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection|null
+    public function dailyBuilds(bool $withTrash = false, bool $withToday = false): Collection|null
     {
-        if( ! $this->is_publishable)
+        if (! $this->is_publishable) {
             return null;
+        }
         $query = $this->jobs();
-        if($withTrash)
+        if ($withTrash) {
             $query->withTrashedParents();
+        }
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(! $withToday))->get();
     }
 
     /**
@@ -233,7 +237,7 @@ class Task extends Model
      */
     public function projectsPerDay(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => $this->projects()->daily($this->starts_at, $this->earliestEndDate())->get());
+        return Attribute::make(get: fn ($value, $attributes) => $this->projects()->daily($this->starts_at, $this->earliestEndDate())->get());
     }
 
     /**
@@ -241,7 +245,7 @@ class Task extends Model
      */
     public function totalProjectsPerDay(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => $this->is_publishable ?
+        return Attribute::make(get: fn ($value, $attributes) => $this->is_publishable ?
             $this->projects()->daily($this->starts_at, $this->earliestEndDate())->total()
             : null);
     }
@@ -252,7 +256,7 @@ class Task extends Model
     public function hasEnded(): Attribute
     {
         return Attribute::make(
-            get: fn($value, $attributes) => now()->isAfter($attributes['ends_at'])
+            get: fn ($value, $attributes) => now()->isAfter($attributes['ends_at'])
         );
     }
 
@@ -262,7 +266,7 @@ class Task extends Model
     public function totalCompletedTasksPerDay(): Attribute
     {
         return Attribute::make(
-            get: fn($value, $attributes) => $this->is_publishable ? $this->projects()
+            get: fn ($value, $attributes) => $this->is_publishable ? $this->projects()
                 ->withTrashed()
                 ->where('status', 'finished')
                 ->daily($this->starts_at, $this->earliestEndDate(), 'finished_at')
@@ -276,7 +280,7 @@ class Task extends Model
      */
     public function isPublishable(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => filled($this->starts_at) && filled($this->ends_at) && filled($this->description));
+        return Attribute::make(get: fn ($value, $attributes) => filled($this->starts_at) && filled($this->ends_at) && filled($this->description));
     }
 
     public function earliestEndDate(bool $excludeToday = false): Carbon
@@ -290,41 +294,43 @@ class Task extends Model
             ->whereRelation('members', 'user_id', $user->id)
             ->latest()
             ->pluck('name', 'id');
-        $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function(Builder $query) use ($myGroups) {
+        $groupProject = $this->projects()->whereHasMorph('ownable', Group::class, function (Builder $query) use ($myGroups) {
             $query->whereIn('id', $myGroups->keys());
         })->first();
 
-        if($groupProject != null)
+        if ($groupProject != null) {
             return $groupProject;
+        }
 
         return $this->projects()
-            ->whereHasMorph('ownable', User::class, fn(Builder $query) => $query->where('id', $user->id))
+            ->whereHasMorph('ownable', User::class, fn (Builder $query) => $query->where('id', $user->id))
             ->first();
     }
 
     /**
-     * @param EloquentCollection<int,User> $users
+     * @param  EloquentCollection<int,User>  $users
      * @return EloquentCollection<int,User>
      */
     public function progressStatus(EloquentCollection $users): EloquentCollection
     {
-        return $users->filter(function(User $user) {
+        return $users->filter(function (User $user) {
             return $this->currentProjectForUser($user) != null;
         });
     }
 
     /**
-     * @param EloquentCollection<int,User> $users
+     * @param  EloquentCollection<int,User>  $users
      * @return EloquentCollection<int,Project>
      */
     public function projectsForUsers(EloquentCollection $users): EloquentCollection
     {
         /** @var EloquentCollection<int, Project> $projects */
         $projects = new EloquentCollection();
-        $users->each(function(User $user) use ($projects) {
+        $users->each(function (User $user) use ($projects) {
             $project = $this->currentProjectForUser($user);
-            if($project == null)
+            if ($project == null) {
                 return;
+            }
             $projects[] = $project;
         });
 
@@ -332,19 +338,21 @@ class Task extends Model
     }
 
     /**
-     * @param Collection<int,string> $files
+     * @param  Collection<int,string>  $files
      * @return void
      */
     public function loadShaValuesFromDirectory(Collection $files = new Collection()): void
     {
-        if (count($files) == 0)
-            $files = $this->protectedFiles->map(fn(TaskProtectedFile $protectedFile) => $protectedFile->path); // @phpstan-ignore-line
-        if ($files->count() == 0)
+        if (count($files) == 0) {
+            $files = $this->protectedFiles->map(fn (TaskProtectedFile $protectedFile) => $protectedFile->path);
+        } // @phpstan-ignore-line
+        if ($files->count() == 0) {
             return;
+        }
         $directories = DirectoryCollection::fromFiles($files);
         app(SourceControl::class)->getFilesFromDirectories("$this->source_project_id", $directories);
-        $relevantFiles = $directories->files()->filter(fn(File $file) => $files->contains($file->fullPath()));
-        $relevantFiles->each(function(File $relevantFile) {
+        $relevantFiles = $directories->files()->filter(fn (File $file) => $files->contains($file->fullPath()));
+        $relevantFiles->each(function (File $relevantFile) {
             $file = $this->protectedFiles()->firstOrNew([
                 'path' => $relevantFile->fullPath(),
             ]);
@@ -355,31 +363,32 @@ class Task extends Model
         });
     }
 
-
     /**
      * @return \Illuminate\Support\Collection<int, ProjectStatus>
      */
-    public function participants(): \Illuminate\Support\Collection
+    public function participants(): Collection
     {
-        return $this->projects->reject(function(Project $project) {
+        return $this->projects->reject(function (Project $project) {
             return $project->ownable_type == null;
-        })->map(function(Project $project) {
-            return $project->owners()->map(fn(User $user) => [
+        })->map(function (Project $project) {
+            return $project->owners()->map(fn (User $user) => [
                 'project_status' => $project->status,
             ]);
         })->flatten();
     }
 
     /**
-     * @param User|null $user
+     * @param  User|null  $user
      * @return Grade|null
      */
     public function grade(User $user = null)
     {
-        if($user == null)
+        if ($user == null) {
             $user = auth()->user();
-        if($this->grades()->where('user_id', $user->id)->first() != null)
+        }
+        if ($this->grades()->where('user_id', $user->id)->first() != null) {
             return $this->grades()->where('user_id', $user->id)->first();
+        }
 
         return null;
     }
@@ -404,18 +413,18 @@ class Task extends Model
             ->selectNodes()
             ->selectName()
             ->selectRawBlob();
-        $client = new Client(config('scalable.gitlab_url') . '/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
+        $client = new Client(config('scalable.gitlab_url').'/api/graphql', ['Authorization' => 'Bearer '.config('scalable.gitlab_token')]);
         $files = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes[0]->repository->blobs->nodes; // @phpstan-ignore-line
-        if(count($files) == 0)
+        if (count($files) == 0) {
             return null;
+        }
 
         return $files[0]->rawBlob;
     }
 
     public function canStart(Group|User $entity, string &$message = null): bool
     {
-        if( ! now()->isBetween($this->starts_at, $this->ends_at))
-        {
+        if (! now()->isBetween($this->starts_at, $this->ends_at)) {
             $message = 'The task cannot be started outside of the task time frame';
 
             return false;
@@ -426,30 +435,27 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
-        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0)
-        {
-            $message = "You have already started this task";
+        if ($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
+            $message = 'You have already started this task';
 
             return false;
         }
 
-
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
-        {
+        if ($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
             $message = 'Another user in your group have already started this task';
 
             return false;
         }
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
-        {
-            $message = "Your group have already started this task";
+        if (self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
+            $message = 'Your group have already started this task';
 
             return false;
         }
 
-        if($this->track_id == null)
+        if ($this->track_id == null) {
             return true;
+        }
 
         $otherTrackHaveBeenPicked = $this->otherTrackHasBeenPicked(
             $entity instanceof Group
@@ -458,9 +464,8 @@ class Task extends Model
             $groups->pluck('id')
         );
 
-        if($otherTrackHaveBeenPicked)
-        {
-            $message = "A conflicting track have already been started, and thus this task cannot be started.";
+        if ($otherTrackHaveBeenPicked) {
+            $message = 'A conflicting track have already been started, and thus this task cannot be started.';
 
             return false;
         }
@@ -469,8 +474,8 @@ class Task extends Model
     }
 
     /**
-     * @param array|int|Arrayable<int, int> $users
-     * @param array|int|Arrayable<int, int> $groups
+     * @param  array|int|Arrayable<int, int>  $users
+     * @param  array|int|Arrayable<int, int>  $groups
      * @return bool
      */
     private function otherTrackHasBeenPicked(array|int|Arrayable $users, array|int|Arrayable $groups): bool
@@ -478,8 +483,9 @@ class Task extends Model
         $siblings = $this->track->rootChildrenNotInPath(false)->pluck('id');
         $siblingTasks = Task::whereIn('track_id', $siblings)->get();
 
-        if($siblingTasks->count() == 0)
+        if ($siblingTasks->count() == 0) {
             return false;
+        }
 
         $startedUserTasks = self::usersHaveBegunTasks($users, $siblingTasks->pluck('id'));
         $startedGroupTasks = self::groupsHaveBegunTasks($groups, $siblingTasks->pluck('id'));
@@ -488,8 +494,8 @@ class Task extends Model
     }
 
     /**
-     * @param array|int|Arrayable<int, int> $userIds
-     * @param array|int|Arrayable<int, int> $taskIds
+     * @param  array|int|Arrayable<int, int>  $userIds
+     * @param  array|int|Arrayable<int, int>  $taskIds
      * @return EloquentCollection<int, Project>
      */
     private static function usersHaveBegunTasks(array|int|Arrayable $userIds, array|int|Arrayable $taskIds): EloquentCollection
@@ -500,13 +506,13 @@ class Task extends Model
         return Project::whereIn('task_id', $taskIds)->whereHasMorph(
             'ownable',
             User::class,
-            fn(Builder $query) => $query->whereIn('id', $userIds)
+            fn (Builder $query) => $query->whereIn('id', $userIds)
         )->get();
     }
 
     /**
-     * @param array|int|Arrayable<int, int> $groupIds
-     * @param array|int|Arrayable<int, int> $taskIds
+     * @param  array|int|Arrayable<int, int>  $groupIds
+     * @param  array|int|Arrayable<int, int>  $taskIds
      * @return EloquentCollection<int, Project>
      */
     private static function groupsHaveBegunTasks(array|int|Arrayable $groupIds, array|int|Arrayable $taskIds): EloquentCollection
@@ -517,7 +523,7 @@ class Task extends Model
         return Project::whereIn('task_id', $taskIds)->whereHasMorph(
             'ownable',
             Group::class,
-            fn(Builder $query) => $query->whereIn('id', $groupIds)
+            fn (Builder $query) => $query->whereIn('id', $groupIds)
         )->get();
     }
 
@@ -526,14 +532,17 @@ class Task extends Model
      */
     public function missingFields(): Attribute
     {
-        return Attribute::make(get: function($value, $attributes) {
+        return Attribute::make(get: function ($value, $attributes) {
             $missing = [];
-            if( ! filled($attributes['description']))
+            if (! filled($attributes['description'])) {
                 $missing[] = 'description';
-            if( ! filled($attributes['starts_at']))
+            }
+            if (! filled($attributes['starts_at'])) {
                 $missing[] = 'starts at date';
-            if( ! filled($attributes['ends_at']))
+            }
+            if (! filled($attributes['ends_at'])) {
                 $missing[] = 'ends at date';
+            }
 
             return $missing;
         });
@@ -545,10 +554,11 @@ class Task extends Model
     public function isVisible(): Attribute
     {
         return Attribute::make(
-            get: fn($value, $attributes) => (bool)$value,
-            set: function($value, $attributes) {
-                if( ! $this->is_publishable)
-                    throw new \Exception("Task is not publishable.");
+            get: fn ($value, $attributes) => (bool) $value,
+            set: function ($value, $attributes) {
+                if (! $this->is_publishable) {
+                    throw new \Exception('Task is not publishable.');
+                }
 
                 return $value;
             }
@@ -557,9 +567,10 @@ class Task extends Model
 
     public function loadSha(): void
     {
-        $project = app(SourceControl::class)->showProject((string)$this->source_project_id);
-        if($project == null)
+        $project = app(SourceControl::class)->showProject((string) $this->source_project_id);
+        if ($project == null) {
             return;
+        }
         $this->update(['current_sha' => $project->lastSha]);
     }
 
@@ -567,12 +578,13 @@ class Task extends Model
      * Key corresponds to the user id
      * Value corresponds to their associated project
      * Users that haven't created a project won't be in the dictionary
+     *
      * @return EloquentCollection|\Illuminate\Support\Collection<int, int>
      */
     public function userProjectDictionary()
     {
         return $userProjects = $this->projects()->get() // @phpstan-ignore-line
-            ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
-            ->mapWithKeys(fn($userProject) => $userProject);
+            ->map(fn (Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn (int $id) => [$id => $project->id]))
+            ->mapWithKeys(fn ($userProject) => $userProject);
     }
 }

@@ -15,16 +15,16 @@ class PipelineFactory extends Factory
     public function definition()
     {
         return [
-            'pipeline_id'    => $this->faker->randomNumber(),
-            'status'         => $this->faker->randomElement([
+            'pipeline_id' => $this->faker->randomNumber(),
+            'status' => $this->faker->randomElement([
                 PipelineStatusEnum::Success,
                 PipelineStatusEnum::Failed,
                 PipelineStatusEnum::Running,
                 PipelineStatusEnum::Pending,
             ]),
-            'runners'        => [$this->faker->text(30)],
-            'user_name'      => $this->faker->bothify('?????##'),
-            'duration'       => $this->faker->randomFloat(1, 5, 30),
+            'runners' => [$this->faker->text(30)],
+            'user_name' => $this->faker->bothify('?????##'),
+            'duration' => $this->faker->randomFloat(1, 5, 30),
             'queue_duration' => $this->faker->randomFloat(1, 20, 120),
         ];
     }

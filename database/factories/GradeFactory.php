@@ -20,7 +20,7 @@ class GradeFactory extends Factory
 
     public function passed(): Factory
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'value' => 'passed',
             ];
@@ -29,7 +29,7 @@ class GradeFactory extends Factory
 
     public function failed(): Factory
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'value' => 'failed',
             ];

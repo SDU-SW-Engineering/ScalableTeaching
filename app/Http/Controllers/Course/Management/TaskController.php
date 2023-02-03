@@ -10,16 +10,16 @@ use Illuminate\View\View;
 
 class TaskController extends Controller
 {
-    public function exercises(Course $course) : View
+    public function exercises(Course $course): View
     {
-        $groups = $course->tasks()->exercises()->orderBy('order')->get()->groupBy('grouped_by')->map(fn($exercises, $groupName) => [
-            'name'      => $groupName == '' ? null : $groupName,
-            'editing'   => false,
-            'exercises' => $exercises->map(fn(Task $exercise) => [
-                'id'      => $exercise->id,
-                'name'    => $exercise->name,
+        $groups = $course->tasks()->exercises()->orderBy('order')->get()->groupBy('grouped_by')->map(fn ($exercises, $groupName) => [
+            'name' => $groupName == '' ? null : $groupName,
+            'editing' => false,
+            'exercises' => $exercises->map(fn (Task $exercise) => [
+                'id' => $exercise->id,
+                'name' => $exercise->name,
                 'visible' => $exercise->is_visible,
-                'manage'  => route('courses.tasks.admin.index', [$course, $exercise]),
+                'manage' => route('courses.tasks.admin.index', [$course, $exercise]),
             ]),
         ])->values();
 
@@ -28,30 +28,29 @@ class TaskController extends Controller
         return view('courses.manage.exercises', compact('groups', 'reorganizeRoute'));
     }
 
-    public function reorganizeExercises(Course $course) : string
+    public function reorganizeExercises(Course $course): string
     {
         $validated = request()->validate([
             '*.group' => ['string', 'nullable'],
-            '*.id'    => ['numeric', 'required'],
+            '*.id' => ['numeric', 'required'],
         ]);
 
         $course->tasks()->exercises()->update([
-            'order'      => null,
+            'order' => null,
             'grouped_by' => null,
         ]);
         $exercises = new Collection($validated);
         /** @var Collection<int,int> $allowedIds */
         $allowedIds = $course->tasks()->exercises()->pluck('id');
-        abort_if( $exercises->pluck('id')->diff($allowedIds)->count() > 0, 400);
+        abort_if($exercises->pluck('id')->diff($allowedIds)->count() > 0, 400);
 
-        foreach($exercises as $index => $exercise)
-        {
+        foreach ($exercises as $index => $exercise) {
             Task::where('id', $exercise['id'])->update([
                 'grouped_by' => $exercise['group'],
-                'order'      => $index + 1,
+                'order' => $index + 1,
             ]);
         }
 
-        return "ok";
+        return 'ok';
     }
 }

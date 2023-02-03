@@ -61,17 +61,6 @@
                             Code
                         </span>
                     </a>
-                    <a class="text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300 py-2 px-3 rounded-md font-semibold flex" target="_blank" :href="editRoute" v-if="editRoute != null">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-1" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        <span>
-                            Edit Exercise
-                        </span>
-                    </a>
                     <button v-if="project != null" @click="tab = 'settings'"
                             :class="[tab === 'settings' ? 'bg-lime-green-100 dark:bg-gray-400 text-lime-green-700 dark:text-gray-100 dark:hover:text-gray-100 hover:text-lime-green-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-500 dark:hover:text-gray-300']"
                             class="py-2 px-3 rounded-md font-semibold flex">
@@ -88,7 +77,7 @@
                     </button>
                 </div>
                 <div v-if="showSurvey" v-show="tab === 'survey'">
-                    <survey :project-id="project.id" :survey="survey"></survey>
+                    <survey-tab :project-id="project.id" :survey="survey"></survey-tab>
                 </div>
                 <div v-show="tab === 'description'" class="relative">
                     <div
@@ -149,17 +138,17 @@
                     </div>
                 </div>
                 <div v-if="subTasks != null" v-show="tab === 'tasks'">
-                    <sub-tasks :ended="(project != null && project.status !== 'active') || progress.ended"
+                    <SubtasksTab :ended="(project != null && project.status !== 'active') || progress.ended"
                                :tasks="subTasks" :tasks-required="task.correction_tasks_required"
                                :points-required="task.correction_points_required"
                                :correction-type="task.correction_type"
-                               :project-status="project == null ? null : project.status"></sub-tasks>
+                               :project-status="project == null ? null : project.status"></SubtasksTab>
                 </div>
                 <div v-show="tab === 'builds'">
-                    <build-table :project-id="project.id" v-if="project != null"></build-table>
+                    <BuildTableTab :project-id="project.id" v-if="project != null"></BuildTableTab>
                 </div>
                 <div v-show="tab === 'settings'">
-                    <settings :groups="groups" :project="project" v-if="project != null"></settings>
+                    <SettingsTab :groups="groups" :project="project" v-if="project != null"></SettingsTab>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
@@ -169,8 +158,7 @@
                         <h3 class="font-bold text-xl dark:text-white text-center">Group Project</h3>
                     </div>
                 </div>
-                <div v-if="task.source_project_id !== null && task.type == 'assignment'">
-                    <validation-failed v-if="project != null && project.validation_errors != null && project.validation_errors.length > 0" :errors="project.validation_errors"></validation-failed>
+                <div v-if="task.source_project_id !== null">
                     <warning :message="warning" v-if="warning.length > 0"></warning>
                     <part-of-track v-if="task.track != null" :track="task.track"
                                    :is-started="project != null"></part-of-track>
@@ -186,54 +174,107 @@
                                :validation="project.validationStatus"></completed>
                     <overdue v-else-if="project != null && project.isMissed"></overdue>
                 </div>
-                <go-to-repo v-if="task.source_project_id != null && task.type === 'exercise'" :url="'https://gitlab.sdu.dk/projects/' + task.source_project_id"/>
-                <mark-completed v-if="task.correction_type === 'self'" :csrf="this.csrf" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
-                <div v-if="false" class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
-                    <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
-                    <div>
-                        <bar-chart :height="200" :data="datasets" :labels="labels"></bar-chart>
-                    </div>
-                    <p class="dark:text-gray-300">A total of <b
-                        class="text-lime-green-400 dark:text-lime-green-500">{{ totalBuilds }}</b> builds have
-                        completed during the task, of which
-                        you account for <b class="text-lime-green-400 dark:text-lime-green-500">{{ totalMyBuilds }}</b>.
-                    </p>
-                </div>
+                <mark-completed v-if="task.source_project_id === null && task.correction_type === 'self'" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
             </div>
         </div>
     </div>
 </template>
 
-<script>
-import LineChart from "./LineChart";
-import BuildTable from "./BuildTable";
-import Settings from "./Settings";
-import NotStarted from "./Widgets/NotStarted";
-import Started from "./Widgets/Started";
-import Completed from "./Widgets/Completed";
-import Overdue from "./Widgets/Overdue";
-import Alert from "./Alert";
-import BarChart from "./BarChart";
-import Warning from "./Widgets/Warning";
-import SubTasks from "./SubTasks";
-import PartOfTrack from "./Widgets/PartOfTrack";
-import Waiting from "./Widgets/Waiting";
-import Survey from "./Task/Tabs/Survey";
-import MarkCompleted from "./Widgets/MarkCompleted";
-import ValidationFailed from "./Widgets/ValidationFailed.vue";
-import GoToRepo from "./Widgets/GoToRepo.vue";
+<script setup lang="ts">
+import {ref, onMounted, defineAsyncComponent, computed} from "vue";
+import axios from "axios";
+
+const SurveyTab = defineAsyncComponent(() => import('./Tabs/Survey.vue'))
+const SubtasksTab = defineAsyncComponent(() => import('./Tabs/SubTasks.vue'))
+const BuildTableTab = defineAsyncComponent(() => import('./Tabs/BuildTable.vue'))
+const SettingsTab = defineAsyncComponent(() => import('./Tabs/Settings.vue'))
+const Warning = defineAsyncComponent(() => import('./Widgets/Warning.vue'))
+const PartOfTrack = defineAsyncComponent(() => import('./Widgets/PartOfTrack.vue'))
+const NotStarted = defineAsyncComponent(() => import('./Widgets/NotStarted.vue'))
+const Started = defineAsyncComponent(() => import('./Widgets/Started.vue'))
+const Waiting = defineAsyncComponent(() => import('./Widgets/Waiting.vue'))
+const Completed = defineAsyncComponent(() => import('./Widgets/Completed.vue'))
+const Overdue = defineAsyncComponent(() => import('./Widgets/Overdue.vue'))
+const MarkCompleted = defineAsyncComponent(() => import('./Widgets/MarkCompleted.vue'))
+
+const props = defineProps<{
+    project?: {
+        id: number
+        status: 'finished' | 'active'
+    },
+    task: {
+        source_project_id?: number,
+        correction_type: 'self',
+        course_id: number,
+        correction_points_required?: number
+    },
+    grade?: {
+
+    },
+    survey: {
+        details: string,
+        can: {
+            view: boolean
+        }
+    },
+    pushes: {
+
+    },
+    progress: {
+
+    },
+    groups: {
+
+    },
+    subTasks: {
+
+    },
+    warning: string,
+    codeRoute: string,
+    userName: string,
+    newProjectUrl: string
+}>()
+
+const hideMissingAssignmentWarning = ref<boolean>(props.task.source_project_id === null)
+const errorMessage = ref<string>('');
+const tab = ref<'description'|'survey'>('description')
+const startAs = ref<'solo'>('solo')
+const startingAssignment = ref<boolean>(false)
+
+const showSurvey = computed(() => props.project != null && props.survey.details != null && props.survey.can.view)
+const showBuilds = computed(() => props.task.correction_type !== 'none')
+
+async function startAssignment(override : string) : Promise<void>
+{
+    let createAs = override == null ? startAs : override;
+    startingAssignment.value = true;
+    errorMessage.value = "";
+    try {
+        await axios.post(props.newProjectUrl, {
+            as: createAs
+        });
+        location.reload();
+    } catch (e) {
+        if (e.response.status === 404) {
+            location.reload();
+            return;
+        }
+        errorMessage.value = e.response.data.message;
+        startingAssignment.value = false;
+    }
+}
+/*import LineChart from "../LineChart.vue";
+
 
 export default {
     components: {
-        GoToRepo,
-        ValidationFailed,
         MarkCompleted,
         Survey,
         PartOfTrack,
         SubTasks,
         Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert, Waiting
     },
-    props: ['editRoute', 'task', 'grade', 'survey', 'pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks', 'codeRoute'],
+    props: ['task', 'grade', 'survey', 'pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks', 'codeRoute'],
     methods: {
         startAssignment: async function (startAs) {
             let createAs = startAs == null ? this.startAs : startAs;
@@ -259,7 +300,7 @@ export default {
         return {
             tab: 'description',
             errorMessage: '',
-            hideMissingAssignmentWarning: this.task.source_project_id === null || this.task.type === 'exercise',
+            hideMissingAssignmentWarning: this.task.source_project_id === null,
             startingAssignment: false,
             labels: this.buildGraph.labels,
             datasets: this.buildGraph.datasets,
@@ -278,7 +319,7 @@ export default {
         },
         completedTaskCount: function () {
             return this.subTasks.list.reduce((total, group) => total + group.tasks.filter(x => x.completed).length, 0);
-        }*/
+        }*//*
     },
     mounted() {
         if (this.task.track != null)
@@ -287,5 +328,5 @@ export default {
             this.tab = 'survey';
 
     }
-}
+}*/
 </script>

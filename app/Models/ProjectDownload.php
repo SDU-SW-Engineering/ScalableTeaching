@@ -12,10 +12,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\FilesystemException;
-use Spatie\ShikiPhp\Shiki;
 use Str;
 use ZipArchive;
 
@@ -26,6 +24,7 @@ use ZipArchive;
  * @property string $ref
  * @property-read bool $isDownloaded
  * @property string|null $location
+ *
  * @mixin Eloquent
  */
 class ProjectDownload extends Model
@@ -45,7 +44,7 @@ class ProjectDownload extends Model
     }
 
     /**
-     * @param Builder<ProjectDownload> $query
+     * @param  Builder<ProjectDownload>  $query
      * @return Builder<ProjectDownload>
      */
     public function scopeQueued(Builder $query): Builder
@@ -58,20 +57,18 @@ class ProjectDownload extends Model
      */
     public function isDownloaded(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => $attributes['downloaded_at'] != null);
+        return Attribute::make(get: fn ($value, $attributes) => $attributes['downloaded_at'] != null);
     }
 
-    public function queue() : void
+    public function queue(): void
     {
         DownloadProject::dispatch($this)->onQueue('downloads');
     }
 
     private function getZipFile(): ?string
     {
-        try
-        {
-            if( ! Storage::disk('local')->has($this->location))
-            {
+        try {
+            if (! Storage::disk('local')->has($this->location)) {
                 $this->location = null;
                 $this->downloaded_at = null;
                 $this->save();
@@ -81,8 +78,7 @@ class ProjectDownload extends Model
             }
 
             return Storage::disk('local')->path($this->location);
-        } catch(FilesystemException $exception)
-        {
+        } catch(FilesystemException $exception) {
             return null;
         }
     }
@@ -92,25 +88,24 @@ class ProjectDownload extends Model
         $file = $this->getZipFile();
         $zip = new ZipArchive();
         $zip->open($file, ZipArchive::RDONLY);
-        $root = new Directory(".");
+        $root = new Directory('.');
         $remove = Str::of($zip->getNameIndex(0))->trim('/');
-        for($i = 0; $i < $zip->numFiles; $i++)
-        {
+        for ($i = 0; $i < $zip->numFiles; $i++) {
             $fileName = $zip->getNameIndex($i);
             $path = explode('/', $fileName);
             $currentDir = $root;
-            for($j = 0; $j < count($path); $j++)
-            {
+            for ($j = 0; $j < count($path); $j++) {
                 $file = $path[$j];
-                if($j + 1 < count($path))
-                {
+                if ($j + 1 < count($path)) {
                     $nextDirectory = $currentDir->getDirectory($file) ?? $currentDir->addDirectory(new Directory($file, $i == 0 ? null : $currentDir));
                     $currentDir = $nextDirectory;
+
                     continue;
                 }
-                if($file == "")
+                if ($file == '') {
                     continue;
-                $currentDir->addFile(new File($fileName, $currentDir));;
+                }
+                $currentDir->addFile(new File($fileName, $currentDir));
             }
         }
 
@@ -118,7 +113,7 @@ class ProjectDownload extends Model
     }
 
     /**
-     * @param string $file
+     * @param  string  $file
      * @return string
      */
     public function file(string $file): string
@@ -128,8 +123,9 @@ class ProjectDownload extends Model
         $zip->open($fileOnDisk);
         $fp = $zip->getStream($file);
         $contents = null;
-        while( ! feof($fp))
+        while (! feof($fp)) {
             $contents .= fread($fp, 2);
+        }
         fclose($fp);
 
         return trim($contents);

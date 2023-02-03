@@ -2,15 +2,10 @@
 
 namespace App\Exports;
 
-use App\Models\ProjectFeedback;
 use App\Models\Project;
 use App\Models\Task;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -20,7 +15,6 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class TaskGradeExport implements WithTitle, FromQuery, WithMapping, WithHeadings, WithColumnFormatting
 {
-
     public function __construct(private readonly Task $task)
     {
     }
@@ -40,7 +34,7 @@ class TaskGradeExport implements WithTitle, FromQuery, WithMapping, WithHeadings
 
     public function map($row): array
     {
-        $gradedBy = $row->gradeDelegations()->with(['user' => function(BelongsTo $query) {
+        $gradedBy = $row->gradeDelegations()->with(['user' => function (BelongsTo $query) {
             $query->select('id', 'name');
         }])->get();
         $points = $row->subTasks->sum('points');
@@ -49,8 +43,8 @@ class TaskGradeExport implements WithTitle, FromQuery, WithMapping, WithHeadings
 
         return [
             $name,
-            (string)$points,
-            $gradedBy->pluck('user.name')->implode(", "),
+            (string) $points,
+            $gradedBy->pluck('user.name')->implode(', '),
         ];
     }
 

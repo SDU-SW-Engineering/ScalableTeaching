@@ -15,10 +15,10 @@ class SurveyTask extends Pivot
     /**
      * @return Attribute<bool, null>
      */
-    public function isPastDeadline() : Attribute
+    public function isPastDeadline(): Attribute
     {
         return Attribute::make(
-            get: fn($value, $attributes) => now()->isAfter($attributes['deadline'])
+            get: fn ($value, $attributes) => now()->isAfter($attributes['deadline'])
         );
     }
 }

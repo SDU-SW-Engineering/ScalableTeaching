@@ -2,10 +2,10 @@
 
 namespace App\Models\Enums;
 
-enum PipelineStatusEnum : string
+enum PipelineStatusEnum: string
 {
-    case Success = "success";
-    case Failed = "failed";
-    case Pending = "pending";
-    case Running = "running";
+    case Success = 'success';
+    case Failed = 'failed';
+    case Pending = 'pending';
+    case Running = 'running';
 }

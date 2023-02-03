@@ -30,12 +30,12 @@ class Survey extends Model
     /**
      * @return HasMany<SurveyResponse>
      */
-    public function responses() : HasMany
+    public function responses(): HasMany
     {
         return $this->hasMany(SurveyResponse::class);
     }
 
-    public function isAnswered(User $user, Task|int $task) : bool
+    public function isAnswered(User $user, Task|int $task): bool
     {
         return $this->responses()->task($task)->user($user)->exists();
     }
@@ -46,7 +46,7 @@ class Survey extends Model
     public function tasks(): BelongsToMany
     {
         return $this->belongsToMany(Task::class)->using(SurveyTask::class)
-            ->withPivot( 'deadline')
+            ->withPivot('deadline')
             ->withTimestamps();
     }
 

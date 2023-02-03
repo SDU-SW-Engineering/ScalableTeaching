@@ -3,13 +3,9 @@
 namespace App\Exports;
 
 use App\Models\Survey;
-use App\Models\SurveyField;
 use App\Models\SurveyResponse;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder;
-use JetBrains\PhpStorm\ArrayShape;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -37,38 +33,33 @@ class SurveyResp implements FromQuery, WithTitle, WithMapping, WithHeadings
 
     public function title(): string
     {
-        return "Responses";
+        return 'Responses';
     }
 
     public function map($row): array
     {
         $response = new Collection($row->response);
 
-        return [$row->user->name, ...$response->map(function($response) {
+        return [$row->user->name, ...$response->map(function ($response) {
             $values = new Collection($response['values']);
-            if($values->has('value'))
-            {
+            if ($values->has('value')) {
                 $value = $values['value'];
-                $text = match (true)
-                {
+                $text = match (true) {
                     is_int($value) => $this->items[$value], //@phpstan-ignore-line
-                    default        => $value
+                    default => $value
                 };
-            } else
-            {
-                $text = collect($values)->map(function($values) {
+            } else {
+                $text = collect($values)->map(function ($values) {
                     $partialResponse = $this->items[$values['value']];
-                    if (array_key_exists('extras', $values) && $values['extras'] != null) //@phpstan-ignore-line
-                    {
+                    if (array_key_exists('extras', $values) && $values['extras'] != null) { //@phpstan-ignore-line
                         $partialResponse .= " {$values['extras']}";
                     }
 
                     return $partialResponse;
-                })->implode(";");
+                })->implode(';');
             }
 
             return $text;
-
         })->toArray(), $row->created_at->toDateTimeString()];
     }
 

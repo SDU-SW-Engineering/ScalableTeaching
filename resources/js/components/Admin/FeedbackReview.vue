@@ -39,7 +39,7 @@
                                 <span class="italic bg-gray-200 dark:text-gray-300 dark:bg-gray-700 p-1 rounded my-1"
                                       v-text="comment.comment"></span>
                                 <span class="text-xs font-bold dark:text-gray-200">{{ comment.time_since }}</span>
-                                <div class="mt-3 flex flex-col" v-if="comment.reviewer != null && overlay == false">
+                                <div class="mt-3 flex flex-col" v-if="comment.reviewer != null && overlay === false">
                                     <div class="flex items-center">
                                         <img class="h-6 w-6 rounded-full mr-1" alt="avatar"
                                              :src="comment.reviewer.avatar"/>
@@ -126,83 +126,78 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        commentId: {
-            required: true,
-            type: Number
-        },
-        showOverlay: {
-            type: Boolean,
-            default: true
-        },
-        basePath: {
-           type: String,
-           required: true
-        }
-    },
-    data() {
-        return {
-            comment: null,
-            loading: true,
-            expanded: false,
-            overlay: false,
-            reviewing: false
-        }
-    },
-    methods: {
-        review: async function (status) {
-            let reason = prompt("Specify a reasoning? Leave empty for none");
-            if (reason == null)
-                return;
-            this.reviewing = true;
-            await axios.put(this.basePath, {
-                status,
-                reason: reason === "" ? null : reason
-            })
-            await this.refresh();
-            if (this.showOverlay)
-                this.overlay = true;
-            this.reviewing = false;
-        },
-        refresh: async function () {
-            this.comment = (await axios.get(this.basePath)).data;
-        }
-    },
-    computed: {
-        indentation: function () {
-            if (this.comment == null)
-                return 0;
+<script setup lang="ts">
+import {computed, onMounted, ref} from "vue";
+import {ProjectFeedbackComment} from "../../Interfaces/Models/ProjectFeedbackComment";
+import axios from "axios";
+import {CodeLine} from "../../Interfaces/CodeLine";
 
-            if (this.comment.code == null)
-                return 0;
+const props = withDefaults(defineProps<{
+    commentId: number,
+    showOverlay: boolean,
+    basePath: string
+}>(), {
+    showOverlay: true
+});
 
-            let comment = this.comment.code.filter(line => line.number === this.comment.line)[0];
-            let indentation = comment.line.match(/>(\s+)/);
-            if (indentation === null)
-                return 0;
-            return indentation[0].length - 1;
-        },
-        file: function () {
-            if (this.comment == null)
-                return "";
-            if (this.comment.filename == null)
-                return null;
-            let parts = this.comment.filename.split('/');
-            return parts.splice(1, parts.length).join("/");
-        },
-        lines: function () {
-            if (this.comment == null)
-                return [];
-            if (this.expanded)
-                return this.comment.code_all;
-            return this.comment.code;
-        }
-    },
-    async mounted() {
-        await this.refresh();
-        this.loading = false;
-    }
+const comment = ref<ProjectFeedbackComment | null>(null)
+const loading = ref<boolean>(true);
+const expanded = ref<boolean>(false);
+const overlay = ref<boolean>(false);
+const reviewing = ref<boolean>(false);
+
+async function review(status: 'approved' | 'rejected') {
+    let reason = prompt("Specify a reasoning? Leave empty for none");
+    if (reason == null)
+        return;
+    reviewing.value = true;
+    await axios.put(props.basePath, {
+        status,
+        reason: reason === "" ? null : reason
+    })
+    await refresh();
+    if (props.showOverlay)
+        overlay.value = true;
+    reviewing.value = false;
 }
+
+async function refresh(): Promise<void> {
+    comment.value = (await axios.get(props.basePath)).data as ProjectFeedbackComment;
+}
+
+const lines = computed<CodeLine[]>(() => {
+    if (comment == null)
+        return [];
+    if (expanded.value)
+        return comment.value.code_all;
+    return comment.value.code;
+});
+
+const indentation = computed<number>(() => {
+    if (comment.value == null)
+        return 0;
+
+    if (comment.value.code == null)
+        return 0;
+
+    let c = comment.value.code.filter(line => line.number === comment.value.line)[0];
+    let indentation = c.line.match(/>(\s+)/);
+    if (indentation === null)
+        return 0;
+    return indentation[0].length - 1;
+});
+
+const file = computed<string | null>(() => {
+    if (comment.value == null)
+        return "";
+    if (comment.value.filename == null)
+        return null;
+    let parts = comment.value.filename.split('/');
+    return parts.splice(1, parts.length).join("/");
+});
+
+onMounted(async () => {
+    await refresh();
+    loading.value = false;
+})
 </script>

@@ -2,13 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Project;
 use App\Models\Task;
 use Carbon\Carbon;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Console\Command;
-use function Clue\StreamFilter\fun;
 
 class LoadCurrentProjects extends Command
 {
@@ -53,7 +51,7 @@ class LoadCurrentProjects extends Command
             $task->projects()->updateOrCreate([
                 'project_id' => $project['id'],
             ], [
-                'repo_name'  => $project['name'],
+                'repo_name' => $project['name'],
                 'created_at' => Carbon::parse($project['created_at'])->setTimezone(config('app.timezone')),
             ]);
         });

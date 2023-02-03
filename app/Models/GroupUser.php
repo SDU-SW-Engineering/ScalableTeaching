@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Domain\ActivityLogging\Course\CourseActivityLogging;
 use Domain\ActivityLogging\Course\CourseActivityMessage;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
@@ -20,7 +19,7 @@ class GroupUser extends Pivot
     /**
      * @return BelongsTo<Group,GroupUser>
      */
-    public function group() : BelongsTo
+    public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
     }

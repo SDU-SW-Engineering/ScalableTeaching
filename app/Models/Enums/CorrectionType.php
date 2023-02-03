@@ -11,5 +11,5 @@ enum CorrectionType: string
     case RequiredTasks = 'required_tasks';
     case NumberOfTasks = 'number_of_tasks';
     case PointsRequired = 'points_required';
-    case Self = "self";
+    case self = 'self';
 }

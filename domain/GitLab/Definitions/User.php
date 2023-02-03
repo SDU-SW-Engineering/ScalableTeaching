@@ -5,23 +5,27 @@ namespace Domain\GitLab\Definitions;
 class User
 {
     private int $id;
+
     private string $name;
+
     private string $username;
+
     private string $avatarUrl;
+
     private string $email;
 
     /**
      * @return int
      */
-    public function getId() : int
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * @param int $id
+     * @param  int  $id
      */
-    public function setId(int $id) : void
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
@@ -29,15 +33,15 @@ class User
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param string $name
+     * @param  string  $name
      */
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
@@ -45,15 +49,15 @@ class User
     /**
      * @return string
      */
-    public function getUsername() : string
+    public function getUsername(): string
     {
         return $this->username;
     }
 
     /**
-     * @param string $username
+     * @param  string  $username
      */
-    public function setUsername(string $username) : void
+    public function setUsername(string $username): void
     {
         $this->username = $username;
     }
@@ -61,15 +65,15 @@ class User
     /**
      * @return string
      */
-    public function getAvatarUrl() : string
+    public function getAvatarUrl(): string
     {
         return $this->avatarUrl;
     }
 
     /**
-     * @param string $avatarUrl
+     * @param  string  $avatarUrl
      */
-    public function setAvatarUrl(string $avatarUrl) : void
+    public function setAvatarUrl(string $avatarUrl): void
     {
         $this->avatarUrl = $avatarUrl;
     }
@@ -77,15 +81,15 @@ class User
     /**
      * @return string
      */
-    public function getEmail() : string
+    public function getEmail(): string
     {
         return $this->email;
     }
 
     /**
-     * @param string $email
+     * @param  string  $email
      */
-    public function setEmail(string $email) : void
+    public function setEmail(string $email): void
     {
         $this->email = $email;
     }

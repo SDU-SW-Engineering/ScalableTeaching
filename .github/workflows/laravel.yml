@@ -36,7 +36,7 @@ jobs:
       - name: Install NPM Dependencies
         run: yarn
       - name: Generate static files
-        run: yarn prod
+        run: yarn build
       - name: Generate key
         run: php artisan key:generate
       - name: Set directory permissions

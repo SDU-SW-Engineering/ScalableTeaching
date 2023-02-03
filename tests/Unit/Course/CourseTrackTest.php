@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function() {
+beforeEach(function () {
     $this->course = Course::factory()->create();
     /** @var CourseTrack base */
     $this->base = CourseTrack::factory()->for($this->course)->create();
@@ -19,46 +19,44 @@ beforeEach(function() {
     $this->task = Task::factory()->for($this->track1, 'track')->for($this->course)->create();
 });
 
-test('creating a child track automatically populates the course_id from parent track', function() {
+test('creating a child track automatically populates the course_id from parent track', function () {
     $track = $this->base->immediateChildren()->create([
-        'name'        => 'test',
+        'name' => 'test',
         'description' => 'testing',
     ]);
 
     expect($track->course_id)->toBe($this->base->course_id);
 });
 
-it('has siblings', function() {
+it('has siblings', function () {
     expect($this->track1->siblings()->pluck('id'))->toContain($this->track2->id);
     expect($this->track1->siblings()->pluck('id'))->not()->toContain($this->track1->id);
     expect($this->track2->siblings()->pluck('id'))->toContain($this->track1->id);
     expect($this->track2->siblings()->pluck('id'))->not()->toContain($this->track2->id);
 });
 
-it('ensures root nodes don\'t have siblings', function() {
+it('ensures root nodes don\'t have siblings', function () {
     CourseTrack::factory()->for($this->course)->create();
 
     expect($this->base->siblings()->count())->toBe(0);
 });
 
-it('has a parent', function() {
+it('has a parent', function () {
     expect($this->track1->parent->id)->toBe($this->base->id);
 });
 
-it('has children', function() {
-
+it('has children', function () {
     $track3 = CourseTrack::factory()->for($this->course)->create();
 
     expect($this->base->immediateChildren->pluck('id'))->toContain($this->track1->id, $this->track2->id);
     expect($this->base->immediateChildren->pluck('id'))->not()->toContain($track3->id);
 });
 
-it('belongs to a course', function() {
+it('belongs to a course', function () {
     expect($this->base->course->id)->toBe($this->course->id);
 });
 
-it('has a root', function() {
-
+it('has a root', function () {
     /** @var CourseTrack $track2 */
     $track2 = $this->track1->immediateChildren()->create([
         'name' => 'track 2',
@@ -67,7 +65,7 @@ it('has a root', function() {
     expect($track2->root()->id)->toBe($this->base->id);
 });
 
-it('has children that can be traversed', function() {
+it('has children that can be traversed', function () {
     $track3 = CourseTrack::factory()->for($this->track1, 'parent')->create();
     $track4 = CourseTrack::factory()->for($this->track1, 'parent')->create();
     $track5 = CourseTrack::factory()->for($this->track2, 'parent')->create();
@@ -84,7 +82,7 @@ it('has children that can be traversed', function() {
         $track7->id,
     ]);
 
-   expect($this->track1->children()->pluck('id')->toArray())->toEqualCanonicalizing([
+    expect($this->track1->children()->pluck('id')->toArray())->toEqualCanonicalizing([
         $track3->id,
         $track4->id,
     ]);
@@ -96,7 +94,7 @@ it('has children that can be traversed', function() {
     ]);
 });
 
-it('traverses nodes that are part of the tree but not part of the path', function() {
+it('traverses nodes that are part of the tree but not part of the path', function () {
     $track3 = CourseTrack::factory()->for($this->track1, 'parent')->create();
     $track4 = CourseTrack::factory()->for($this->track1, 'parent')->create();
     $track5 = CourseTrack::factory()->for($this->track2, 'parent')->create();
@@ -135,33 +133,33 @@ it('traverses nodes that are part of the tree but not part of the path', functio
     ]);
 });
 
-it('has a path', function() {
+it('has a path', function () {
     $track3 = CourseTrack::factory()->for($this->track1, 'parent')->create();
 
     expect($track3->path())->toBeCollection();
     expect($track3->path()->pluck('id')->toArray())->toBe([$track3->id, $this->track1->id, $this->base->id]);
 });
 
-test('isOn should return false if on the root node', function() {
+test('isOn should return false if on the root node', function () {
     $user = User::factory()->hasAttached($this->course)->create();
 
     expect($this->base->isOn($user))->toBeFalse();
 });
 
-test('isOn returns true if the user has started a project on the current track', function() {
+test('isOn returns true if the user has started a project on the current track', function () {
     $user = User::factory()->hasAttached($this->course)->create();
     Project::factory()->for($this->task)->for($user, 'ownable')->createQuietly();
 
     expect($this->track1->isOn($user))->toBeTrue();
 });
 
-test('isOn returns false if the user has not started a project on the current track', function() {
+test('isOn returns false if the user has not started a project on the current track', function () {
     $user = User::factory()->hasAttached($this->course)->create();
 
     expect($this->track1->isOn($user))->toBeFalse();
 });
 
-test('isOn returns true if the user belongs to a group that has started a project on the current track', function() {
+test('isOn returns true if the user belongs to a group that has started a project on the current track', function () {
     $user = User::factory()->hasAttached($this->course)->create();
     $group = Group::factory()->hasAttached($user, [], 'members')->for($this->course);
     Project::factory()->for($this->task)->for($group, 'ownable')->createQuietly();
@@ -169,7 +167,7 @@ test('isOn returns true if the user belongs to a group that has started a projec
     expect($this->track1->isOn($user))->toBeTrue();
 });
 
-test('isOn returns false if the user belongs to a group that has not started a project on the current track', function() {
+test('isOn returns false if the user belongs to a group that has not started a project on the current track', function () {
     $user = User::factory()->hasAttached($this->course)->create();
     Group::factory()->hasAttached($user)->for($this->course);
 

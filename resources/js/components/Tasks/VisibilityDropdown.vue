@@ -1,5 +1,5 @@
 <template>
-    <div class="relative">
+    <div ref="bounds" class="relative">
         <button :disabled="loading" @click="showDropdown = !showDropdown" id="dropdownDefault" data-dropdown-toggle="dropdown"
                 :class="[visible ? 'bg-lime-green-400 hover:bg-lime-green-500 focus:ring-lime-green-300 text-white' : 'bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 focus:ring-gray-200 focus:ring-gray-600 text-gray-500 dark:text-gray-200']"
                 class="justify-between w-44 flex transition-colors duration-200 focus:ring-4 focus:outline-none border dark:border-gray-700 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center"
@@ -65,49 +65,41 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        isPublishable: {
-            required: true,
-            type: Boolean
-        },
-        isVisible: {
-            required: true,
-            type: Boolean
-        },
-        route: {
-            required: true,
-            type: String
-        }
-    },
-    data() {
-        return {
-            showDropdown: false,
-            visible: false,
-            loading: false
-        }
-    },
-    methods: {
-        setVisibility: async function(visibility) {
-            this.loading = true;
-            this.showDropdown = false;
-            await axios.post(this.route);
-            this.visible = visibility;
-            this.loading = false;
-        },
-        close: function (e) {
-            if (!this.$el.contains(e.target)) {
-                this.showDropdown = false
-            }
-        }
-    },
-    mounted() {
-        document.addEventListener('click', this.close)
-        this.visible = this.isVisible
-    },
-    beforeDestroy() {
-        document.removeEventListener('click', this.close)
+<script setup lang="ts">
+import {onBeforeUnmount, onMounted, ref} from "vue";
+import axios from "axios";
+
+const props = defineProps<{
+    isPublishable: boolean,
+    isVisible: boolean,
+    route: string
+}>();
+
+const showDropdown = ref<boolean>(false)
+const visible = ref<boolean>(false)
+const loading = ref<boolean>(false)
+const bounds = ref<Element>(null)
+
+async function setVisibility(visibility : boolean) {
+    loading.value = true;
+    showDropdown.value = false;
+    await axios.post(props.route);
+    visible.value = visibility;
+    loading.value = false;
+}
+
+function close(e) {
+    if (!bounds.value.contains(e.target)) {
+        showDropdown.value = false;
     }
 }
+
+onMounted(() => {
+    document.addEventListener('click', close)
+    visible.value = props.isVisible
+})
+
+onBeforeUnmount(() => {
+    document.removeEventListener('click', close)
+})
 </script>

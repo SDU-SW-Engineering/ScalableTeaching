@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Project $project
  * @property TaskDelegation $taskDelegation
  * @property string $sha
+ *
  * @mixin Eloquent
  */
 class ProjectFeedback extends Model
@@ -24,6 +25,7 @@ class ProjectFeedback extends Model
     use HasFactory;
 
     protected $table = 'project_feedback';
+
     protected $fillable = ['project_id', 'user_id', 'pseudonym', 'task_delegation_id', 'sha', 'reviewed'];
 
     protected $casts = [
@@ -33,40 +35,40 @@ class ProjectFeedback extends Model
     public static function booted()
     {
         static::creating(function (ProjectFeedback $gradeDelegation) {
-            do
-            {
+            do {
                 $pseudonym = PhraseGenerator::generate(2);
-            } while(static::where('pseudonym', $pseudonym)->where('user_id', $gradeDelegation->user_id)->exists());
+            } while (static::where('pseudonym', $pseudonym)->where('user_id', $gradeDelegation->user_id)->exists());
             $gradeDelegation->pseudonym = $pseudonym;
         });
     }
 
-    public function download() : ?ProjectDownload
+    public function download(): ?ProjectDownload
     {
         return ProjectDownload::where('ref', $this->sha)->first();
     }
 
     /**
-     * @param Builder<ProjectFeedback> $query
+     * @param  Builder<ProjectFeedback>  $query
      * @return Builder<ProjectFeedback>
      */
-    public function scopeUnreviewed(Builder $query) : Builder
+    public function scopeUnreviewed(Builder $query): Builder
     {
         return $query->where('reviewed', false);
     }
 
     /**
-     * @param Builder<ProjectFeedback> $query
+     * @param  Builder<ProjectFeedback>  $query
      * @return Builder<ProjectFeedback>
      */
-    public function scopeReviewed(Builder $query) : Builder
+    public function scopeReviewed(Builder $query): Builder
     {
         return $query->where('reviewed', true);
     }
+
     /**
      * @return BelongsTo<User,ProjectFeedback>
      */
-    public function user() : BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -74,7 +76,7 @@ class ProjectFeedback extends Model
     /**
      * @return BelongsTo<Project,ProjectFeedback>
      */
-    public function project() : BelongsTo
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
@@ -82,7 +84,7 @@ class ProjectFeedback extends Model
     /**
      * @return HasMany<ProjectFeedbackComment>
      */
-    public function comments() : HasMany
+    public function comments(): HasMany
     {
         return $this->hasMany(ProjectFeedbackComment::class);
     }
@@ -90,7 +92,7 @@ class ProjectFeedback extends Model
     /**
      * @return BelongsTo<TaskDelegation,ProjectFeedback>
      */
-    public function taskDelegation() : BelongsTo
+    public function taskDelegation(): BelongsTo
     {
         return $this->belongsTo(TaskDelegation::class);
     }

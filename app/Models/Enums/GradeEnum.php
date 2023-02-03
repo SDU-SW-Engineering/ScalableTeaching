@@ -2,8 +2,8 @@
 
 namespace App\Models\Enums;
 
-enum GradeEnum : string
+enum GradeEnum: string
 {
-    case Passed = "passed";
-    case Failed = "failed";
+    case Passed = 'passed';
+    case Failed = 'failed';
 }

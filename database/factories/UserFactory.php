@@ -23,18 +23,18 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'name'           => $this->faker->name(),
-            'email'          => $this->faker->unique()->safeEmail(),
-            'gitlab_id'      => $this->faker->unique()->randomNumber(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'gitlab_id' => $this->faker->unique()->randomNumber(),
             'remember_token' => Str::random(10),
-            'username'       => $this->faker->userName,
-            'last_login'     => now(),
+            'username' => $this->faker->userName,
+            'last_login' => now(),
         ];
     }
 
     public function admin()
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'is_admin' => true,
             ];
@@ -48,7 +48,7 @@ class UserFactory extends Factory
      */
     public function unverified()
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function (array $attributes) {
             return [
                 'email_verified_at' => null,
             ];

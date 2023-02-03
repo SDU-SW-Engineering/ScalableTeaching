@@ -6,11 +6,11 @@ use App\Models\Course;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\GradeEnum;
 use App\Models\Grade;
-use App\Models\ProjectFeedback;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\ProjectDownload;
+use App\Models\ProjectFeedback;
 use App\Models\ProjectPush;
 use App\Models\Task;
 use App\Models\User;
@@ -20,7 +20,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('has downloads', function() {
+it('has downloads', function () {
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])
             ->for(Course::factory()))
@@ -30,7 +30,7 @@ it('has downloads', function() {
     expect($project->downloads)->toHaveLength(3);
 });
 
-it('has projectFeedback', function() {
+it('has projectFeedback', function () {
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])
             ->for(Course::factory()))
@@ -43,11 +43,11 @@ it('has projectFeedback', function() {
     expect($project->feedback)->toHaveLength(3);
 });
 
-test('owners returns the user when project is user ownable', function() {
+test('owners returns the user when project is user ownable', function () {
     $user = User::factory()->create();
     $project = Project::factory()
         ->for(Task::factory([
-            'ends_at'         => Carbon::now()->subMonth(),
+            'ends_at' => Carbon::now()->subMonth(),
             'correction_type' => CorrectionType::Manual,
         ])->for(Course::factory()))
         ->for($user, 'ownable')
@@ -58,11 +58,11 @@ test('owners returns the user when project is user ownable', function() {
         ->and($owners->first()->id)->toBe($user->id);
 });
 
-test('owners returns all the group members when project is group ownable', function() {
+test('owners returns all the group members when project is group ownable', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
     $task = Task::factory([
-        'ends_at'         => Carbon::now()->subMonth(),
+        'ends_at' => Carbon::now()->subMonth(),
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory())->create();
 
@@ -77,20 +77,20 @@ test('owners returns all the group members when project is group ownable', funct
         ->and($owners->pluck('id')->toArray())->toEqualCanonicalizing([$user1->id, $user2->id]);
 });
 
-test('duration returns null if the task is not done', function() {
+test('duration returns null if the task is not done', function () {
     /** @var Project $project */
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
     expect($project->duration)->toBeNull();
 });
 
-test('duration returns 2 if the task has been completed two days ago', function() {
+test('duration returns 2 if the task has been completed two days ago', function () {
     $source = Carbon::now()->addMonth();
     /** @var Project $project */
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => $source])->for(Course::factory()))->createQuietly(
             [
-                'created_at'  => $source->clone(),
+                'created_at' => $source->clone(),
                 'finished_at' => $source->clone()->addDays(2),
             ]
         );
@@ -98,43 +98,43 @@ test('duration returns 2 if the task has been completed two days ago', function(
     expect($project->duration)->toBe('2.00');
 });
 
-test('dailyBuilds returns an array of days between start date and day before now', function() {
+test('dailyBuilds returns an array of days between start date and day before now', function () {
     $start = Carbon::now()->subMonth();
     $end = Carbon::now()->addMonth();
     /** @var Project $project */
     $project = Project::factory()->for(Task::factory([
         'starts_at' => $start,
-        'ends_at'   => $end,
+        'ends_at' => $end,
     ])->for(Course::factory()))->createQuietly();
 
     $dailyBuilds = $project->dailyBuilds();
-    $days = $dailyBuilds->map(fn($v, $k) => $k)->values();
+    $days = $dailyBuilds->map(fn ($v, $k) => $k)->values();
     expect($days[0])->toBe($start->format('Y-m-d'))
         ->and($days[count($days) - 1])->toBe(now()->subDay()->format('Y-m-d'))
         ->and($dailyBuilds)->toHaveLength($start->diff(now())->days);
 });
 
-test('dailyBuilds returns an array of days between start date and now', function() {
+test('dailyBuilds returns an array of days between start date and now', function () {
     $start = Carbon::now()->subMonth();
     $end = Carbon::now()->addMonth();
     $project = Project::factory()->for(Task::factory([
         'starts_at' => $start,
-        'ends_at'   => $end,
+        'ends_at' => $end,
     ])->for(Course::factory()))->createQuietly();
 
     $dailyBuilds = $project->dailyBuilds(true);
-    $days = $dailyBuilds->map(fn($v, $k) => $k)->values();
+    $days = $dailyBuilds->map(fn ($v, $k) => $k)->values();
     expect($days[0])->toBe($start->format('Y-m-d'));
     expect($days[count($days) - 1])->toBe(now()->format('Y-m-d'));
     expect($dailyBuilds)->toHaveLength($start->diff(now())->days + 1);
 });
 
-test('dailyBuilds returns an array with appropriate count of builds', function() {
+test('dailyBuilds returns an array with appropriate count of builds', function () {
     $start = Carbon::now()->subMonth();
     $end = Carbon::now()->addMonth();
     $project = Project::factory()->for(Task::factory([
         'starts_at' => $start,
-        'ends_at'   => $end,
+        'ends_at' => $end,
     ])->for(Course::factory()))
         ->has(Pipeline::factory(3, [
             'created_at' => $start->clone()->addDays(3),
@@ -150,118 +150,117 @@ test('dailyBuilds returns an array with appropriate count of builds', function()
     expect($dailyBuilds[$start->clone()->addDays(13)->format('Y-m-d')])->toBe(4);
 });
 
-test('progress returns 0 when correction type is PointsRequired and no subtasks are completed', function() {
+test('progress returns 0 when correction type is PointsRequired and no subtasks are completed', function () {
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->addMonth(),
+        'ends_at' => Carbon::now()->addMonth(),
         'correction_type' => CorrectionType::PointsRequired,
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add((new SubTask('Test 1'))->setPoints(30));
+    $subTasks->add((new SubTask('Test 2'))->setPoints(40));
+    $subTasks->add((new SubTask('Test 3'))->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 
     expect($project->progress())->toBe(0);
 });
 
-test('progress returns 25 when correction type is PointsRequired and one of three subtasks are completed', function() {
+test('progress returns 25 when correction type is PointsRequired and one of three subtasks are completed', function () {
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->addMonth(),
+        'ends_at' => Carbon::now()->addMonth(),
         'correction_type' => CorrectionType::PointsRequired,
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add((new SubTask('Test 1'))->setPoints(30));
+    $subTasks->add((new SubTask('Test 2'))->setPoints(40));
+    $subTasks->add((new SubTask('Test 3'))->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 
     $project->subTasks()->create([
         'sub_task_id' => 1,
         'source_type' => Project::class,
-        'source_id'   => $project->id,
+        'source_id' => $project->id,
     ]);
 
     expect($project->progress())->toBe(25);
 });
 
-test('progress returns 0 when correction type is not PointsRequired and no subtasks are completed', function() {
+test('progress returns 0 when correction type is not PointsRequired and no subtasks are completed', function () {
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->addMonth(),
+        'ends_at' => Carbon::now()->addMonth(),
         'correction_type' => CorrectionType::AllTasks,
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add((new SubTask('Test 1'))->setPoints(30));
+    $subTasks->add((new SubTask('Test 2'))->setPoints(40));
+    $subTasks->add((new SubTask('Test 3'))->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 
     expect($project->progress())->toBe(0);
 });
 
-test('progress returns 25 when correction type is not PointsRequired and one of three subtasks are completed', function() {
+test('progress returns 25 when correction type is not PointsRequired and one of three subtasks are completed', function () {
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->addMonth(),
+        'ends_at' => Carbon::now()->addMonth(),
         'correction_type' => CorrectionType::AllTasks,
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add((new SubTask('Test 1'))->setPoints(30));
+    $subTasks->add((new SubTask('Test 2'))->setPoints(40));
+    $subTasks->add((new SubTask('Test 3'))->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 
     $project->subTasks()->create([
         'sub_task_id' => 1,
         'source_type' => Project::class,
-        'source_id'   => $project->id,
+        'source_id' => $project->id,
     ]);
 
     expect($project->progress())->toBe(33);
 });
 
-test('progress returns 100 when correction type is not manual or required tasks and the project is finished', function() {
+test('progress returns 100 when correction type is not manual or required tasks and the project is finished', function () {
     $project = Project::factory([
         'status' => ProjectStatus::Finished,
     ])->for(Task::factory([
-        'ends_at'         => Carbon::now()->addMonth(),
+        'ends_at' => Carbon::now()->addMonth(),
         'correction_type' => CorrectionType::AllTasks,
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add((new SubTask('Test 1'))->setPoints(30));
+    $subTasks->add((new SubTask('Test 2'))->setPoints(40));
+    $subTasks->add((new SubTask('Test 3'))->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 
     $project->subTasks()->create([
         'sub_task_id' => 1,
         'source_type' => Project::class,
-        'source_id'   => $project->id,
+        'source_id' => $project->id,
     ]);
 
     expect($project->progress())->toBe(100);
 });
 
-test('progress returns 0 when correction type is manual and there are no subtaks', function() {
+test('progress returns 0 when correction type is manual and there are no subtaks', function () {
     $project = Project::factory([
         'status' => ProjectStatus::Finished,
     ])->for(Task::factory([
-        'ends_at'         => Carbon::now()->addMonth(),
+        'ends_at' => Carbon::now()->addMonth(),
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory()))->createQuietly();
     expect($project->progress())->toBe(0);
 });
 
-
-test('validationStatus returns pending when validated_at is null', function() {
+test('validationStatus returns pending when validated_at is null', function () {
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly([
             'validated_at' => null,
@@ -270,62 +269,60 @@ test('validationStatus returns pending when validated_at is null', function() {
     expect($project->validationStatus)->toBe('pending');
 });
 
-test('validationStatus returns failed when validation_errors length is larger than 0', function() {
+test('validationStatus returns failed when validation_errors length is larger than 0', function () {
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly([
             'validation_errors' => [1, 2, 3],
-            'validated_at'      => now(),
+            'validated_at' => now(),
         ]);
 
     expect($project->validationStatus)->toBe('failed');
 });
 
-test('validationStatus returns success when validation_errors length is 0', function() {
+test('validationStatus returns success when validation_errors length is 0', function () {
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly([
             'validation_errors' => [],
-            'validated_at'      => now(),
+            'validated_at' => now(),
         ]);
 
     expect($project->validationStatus)->toBe('success');
 });
 
-test('static isCorrectToken returns true if token matches the project', function() {
+test('static isCorrectToken returns true if token matches the project', function () {
     $secret = 'testing-scalable';
     Config::set('scalable.webhook_secret', $secret);
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
-    expect(Project::isCorrectToken($project, md5(strtolower($project->project_id) . $secret)))->toBeTrue();
+    expect(Project::isCorrectToken($project, md5(strtolower($project->project_id).$secret)))->toBeTrue();
 });
 
-test('static isCorrectToken returns false if token does not match the project', function() {
+test('static isCorrectToken returns false if token does not match the project', function () {
     $secret = 'testing-scalable';
     Config::set('scalable.webhook_secret', $secret);
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
-    expect(Project::isCorrectToken($project, "hello-world"))->toBeFalse();
+    expect(Project::isCorrectToken($project, 'hello-world'))->toBeFalse();
 });
 
-
-test('static token returns the passed projects token', function() {
+test('static token returns the passed projects token', function () {
     $secret = 'testing-scalable';
     Config::set('scalable.webhook_secret', $secret);
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
-    expect(Project::token($project))->toBe(md5(strtolower($project->project_id) . $secret));
-    expect(Project::token(11))->toBe(md5(11 . $secret));
+    expect(Project::token($project))->toBe(md5(strtolower($project->project_id).$secret));
+    expect(Project::token(11))->toBe(md5(11 .$secret));
 });
 
-
-test('isMissed returns false when the task hasn\'t ended', function() {
+test('isMissed returns false when the task hasn\'t ended', function () {
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
     expect($project->isMissed)->toBeFalse();
 });
 
-test('isMissed returns true when project is overdue and CorrectionType is not manual or none', function() {
+test('isMissed returns true when project is overdue and CorrectionType is not manual or none', function () {
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->subMonth(),
+        'ends_at' => Carbon::now()->subMonth(),
         'correction_type' => CorrectionType::PipelineSuccess,
     ])->for(Course::factory()))->createQuietly([
         'status' => ProjectStatus::Overdue,
@@ -334,9 +331,9 @@ test('isMissed returns true when project is overdue and CorrectionType is not ma
     expect($project->isMissed)->toBeTrue();
 });
 
-test('isMissed returns false when project is finished and CorrectionType is not manual or none', function() {
+test('isMissed returns false when project is finished and CorrectionType is not manual or none', function () {
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->subMonth(),
+        'ends_at' => Carbon::now()->subMonth(),
         'correction_type' => CorrectionType::PipelineSuccess,
     ])->for(Course::factory()))->createQuietly([
         'status' => ProjectStatus::Finished,
@@ -345,19 +342,19 @@ test('isMissed returns false when project is finished and CorrectionType is not 
     expect($project->isMissed)->toBeFalse();
 });
 
-test('isMissed returns true when task has ended and is manual and the project has no pushes', function() {
+test('isMissed returns true when task has ended and is manual and the project has no pushes', function () {
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->subMonth(),
+        'ends_at' => Carbon::now()->subMonth(),
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory()))->createQuietly();
 
     expect($project->isMissed)->toBeTrue();
 });
 
-test('isMissed returns true when task has ended and is manual and the project\'s pushes are after the deadline', function() {
+test('isMissed returns true when task has ended and is manual and the project\'s pushes are after the deadline', function () {
     $deadline = Carbon::now()->subMonth();
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => $deadline,
+        'ends_at' => $deadline,
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory()))->has(ProjectPush::factory([
         'created_at' => $deadline->clone()->addHour(),
@@ -366,10 +363,10 @@ test('isMissed returns true when task has ended and is manual and the project\'s
     expect($project->isMissed)->toBeTrue();
 });
 
-test('isMissed returns false when task has ended and is manual and the project\'s pushes are before the deadline', function() {
+test('isMissed returns false when task has ended and is manual and the project\'s pushes are before the deadline', function () {
     $deadline = Carbon::now()->subMonth();
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => $deadline,
+        'ends_at' => $deadline,
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory()))->has(ProjectPush::factory([
         'created_at' => $deadline->clone()->subHour(),
@@ -378,19 +375,19 @@ test('isMissed returns false when task has ended and is manual and the project\'
     expect($project->isMissed)->toBeFalse();
 });
 
-test('latestDownload returns null when the project has no pushes', function() {
+test('latestDownload returns null when the project has no pushes', function () {
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->subMonth(),
+        'ends_at' => Carbon::now()->subMonth(),
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory()))->createQuietly();
 
     expect($project->latestDownload())->toBeNull();
 });
 
-test('latestDownload returns null when the project\'s pushes are after the deadline', function() {
+test('latestDownload returns null when the project\'s pushes are after the deadline', function () {
     $deadline = Carbon::now()->subMonth();
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => $deadline,
+        'ends_at' => $deadline,
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory()))->has(ProjectPush::factory([
         'created_at' => $deadline->clone()->addHour(),
@@ -399,10 +396,10 @@ test('latestDownload returns null when the project\'s pushes are after the deadl
     expect($project->latestDownload())->toBeNull();
 });
 
-test('latestDownload returns an instance of ProjectDownload when the project\'s pushes are before the deadline and a download has been requested', function() {
+test('latestDownload returns an instance of ProjectDownload when the project\'s pushes are before the deadline and a download has been requested', function () {
     $deadline = Carbon::now()->subMonth();
     $project = Project::factory()->for(Task::factory([
-        'ends_at'         => $deadline,
+        'ends_at' => $deadline,
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory()))
         ->createQuietly();
@@ -417,11 +414,11 @@ test('latestDownload returns an instance of ProjectDownload when the project\'s 
     expect($project->latestDownload())->toBeInstanceOf(ProjectDownload::class);
 });
 
-test('latestDownload returns null when the project\'s pushes are before the deadline and a download has not been requested', function() {
+test('latestDownload returns null when the project\'s pushes are before the deadline and a download has not been requested', function () {
     $deadline = Carbon::now()->subMonth();
     $project = Project::factory()
         ->for(Task::factory([
-            'ends_at'         => $deadline,
+            'ends_at' => $deadline,
             'correction_type' => CorrectionType::Manual,
         ])->for(Course::factory()))->has(ProjectPush::factory([
             'created_at' => $deadline->clone()->subHour(),
@@ -431,10 +428,10 @@ test('latestDownload returns null when the project\'s pushes are before the dead
     expect($project->latestDownload())->toBeNull();
 });
 
-test('setProjectStatusFor updates the status and creates grades for all users', function() {
+test('setProjectStatusFor updates the status and creates grades for all users', function () {
     $user = User::factory()->create();
     $task = Task::factory([
-        'ends_at'         => Carbon::now()->subMonth(),
+        'ends_at' => Carbon::now()->subMonth(),
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory())->create();
     $project = Project::factory()
@@ -452,10 +449,10 @@ test('setProjectStatusFor updates the status and creates grades for all users', 
     expect($grade->value)->toBe(GradeEnum::Passed);
 });
 
-test('setProjectStatus updates the status and creates grades for all users', function() {
+test('setProjectStatus updates the status and creates grades for all users', function () {
     $user = User::factory()->create();
     $task = Task::factory([
-        'ends_at'         => Carbon::now()->subMonth(),
+        'ends_at' => Carbon::now()->subMonth(),
         'correction_type' => CorrectionType::Manual,
     ])->for(Course::factory())->create();
     $project = Project::factory()

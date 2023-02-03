@@ -7,13 +7,11 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\PipelineStatusEnum;
 use App\ProjectStatus;
 use Carbon\CarbonInterval;
-use GrahamCampbell\ResultType\Success;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 
@@ -34,9 +32,12 @@ use Illuminate\Support\Collection;
  * @property array $log
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ *
  * @mixin \Eloquent
+ *
  * @property string $user_name
  * @property-read Collection<int,array{name:string,completed:bool}> $pretty_sub_tasks
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereUserEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereUserName($value)
  */
@@ -47,7 +48,7 @@ class Pipeline extends Model
     protected $fillable = ['project_id', 'pipeline_id', 'status', 'sha', 'user_name', 'runners', 'duration', 'queue_duration', 'created_at'];
 
     protected $casts = [
-        'status'  => PipelineStatusEnum::class,
+        'status' => PipelineStatusEnum::class,
         'runners' => 'json',
     ];
 
@@ -56,19 +57,21 @@ class Pipeline extends Model
      */
     public static array $upgradable = [
         'pending' => [PipelineStatusEnum::Running, PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
-        'failed'  => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
+        'failed' => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
         'success' => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
         'running' => [PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
     ];
 
     protected static function booted()
     {
-        static::created(function(Pipeline $pipeline) {
-            if($pipeline->project->task->correction_type != CorrectionType::PipelineSuccess)
+        static::created(function (Pipeline $pipeline) {
+            if ($pipeline->project->task->correction_type != CorrectionType::PipelineSuccess) {
                 return;
+            }
 
-            if($pipeline->status != PipelineStatusEnum::Success)
+            if ($pipeline->status != PipelineStatusEnum::Success) {
                 return;
+            }
 
             $pipeline->project->update([
                 'status' => ProjectStatus::Finished,
@@ -78,14 +81,15 @@ class Pipeline extends Model
 
     public function isUpgradable(PipelineStatusEnum $to): bool
     {
-        if( ! array_key_exists($this->status->value, static::$upgradable))
+        if (! array_key_exists($this->status->value, static::$upgradable)) {
             return false;
+        }
 
         return in_array($to, static::$upgradable[$this->status->value]);
     }
 
     /**
-     * @param Builder<Pipeline> $query
+     * @param  Builder<Pipeline>  $query
      * @return Builder<Pipeline>
      */
     public function scopeFinished(Builder $query): Builder
@@ -114,12 +118,12 @@ class Pipeline extends Model
      */
     public function prettySubTasks(): Attribute
     {
-        return Attribute::make(get: function($value, $attributes) {
+        return Attribute::make(get: function ($value, $attributes) {
             $availableSubTasks = $this->project->task->sub_tasks;
             $completedSubTasks = $this->subTasks->pluck('sub_task_id');
 
-            return $availableSubTasks->all()->map(fn(SubTask $subTask) => [
-                'name'      => $subTask->getDisplayName(),
+            return $availableSubTasks->all()->map(fn (SubTask $subTask) => [
+                'name' => $subTask->getDisplayName(),
                 'completed' => $completedSubTasks->contains($subTask->getId()),
             ]);
         });
@@ -130,7 +134,7 @@ class Pipeline extends Model
      */
     public function runTime(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => CarbonInterval::seconds($attributes['duration'])->forHumans());
+        return Attribute::make(get: fn ($value, $attributes) => CarbonInterval::seconds($attributes['duration'])->forHumans());
     }
 
     /**
@@ -138,6 +142,6 @@ class Pipeline extends Model
      */
     public function queuedFor(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => CarbonInterval::seconds($attributes['queue_duration'])->forHumans());
+        return Attribute::make(get: fn ($value, $attributes) => CarbonInterval::seconds($attributes['queue_duration'])->forHumans());
     }
 }

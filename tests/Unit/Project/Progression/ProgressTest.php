@@ -23,11 +23,10 @@ it('returns 0 when 0 of 3 subtasks are complete', function () {
     expect($this->project->progress())->toBe(0);
 });
 
-
 it('returns 33 when 1 of 3 subtasks are complete', function () {
     $this->project->subTasks()->create([
         'source_type' => Pipeline::class,
-        'source_id'   => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
+        'source_id' => Pipeline::factory()->succeeding()->for($this->project)->create()->id,
         'sub_task_id' => 1,
     ]);
     $this->project->refresh();
@@ -38,12 +37,12 @@ it('returns 67 when 2 of 3 subtasks are complete', function () {
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2,
         ],
     ]);
@@ -55,17 +54,17 @@ it('returns 100 when 3 of 3 subtasks are complete', function () {
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 3,
         ],
     ]);
@@ -83,6 +82,6 @@ it('returns 0 when project is active and it has no sub-tasks', function () {
     expect($project->progress())->toBe(0);
 });
 
-# it('considers tasks complete when all subtasks are completed');
-# it('considers tasks complete when the required subtasks completed');
-# it('considers tasks complete when the percentage threshold is reached');
+// it('considers tasks complete when all subtasks are completed');
+// it('considers tasks complete when the required subtasks completed');
+// it('considers tasks complete when the percentage threshold is reached');

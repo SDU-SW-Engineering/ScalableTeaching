@@ -12,18 +12,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
-
 /**
  * @property int $id
  * @property int $task_id
  * @property int $user_id
  * @property string $source_type
  * @property int $source_id
- * @property boolean $selected
+ * @property bool $selected
  * @property Enums\GradeEnum $value
  * @property string|null $value_raw
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
  * @mixin Eloquent
  */
 class Grade extends Model
@@ -34,8 +34,8 @@ class Grade extends Model
     protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id', 'started_at', 'ended_at'];
 
     protected $casts = [
-        'value'     => Enums\GradeEnum::class,
-        'selected'  => 'boolean',
+        'value' => Enums\GradeEnum::class,
+        'selected' => 'boolean',
         'value_raw' => 'array',
     ];
 
@@ -64,16 +64,15 @@ class Grade extends Model
      */
     public function source(): MorphTo
     {
-        return $this->morphTo("source");
+        return $this->morphTo('source');
     }
 
     // endregion
 
     public static function booted()
     {
-        static::creating(function(Grade $grade) {
-            if($grade->selected == true)
-            {
+        static::creating(function (Grade $grade) {
+            if ($grade->selected == true) {
                 Grade::where('user_id', $grade->user_id)
                     ->where('task_id', $grade->task_id)
                     ->update(['selected' => false]);
@@ -84,8 +83,9 @@ class Grade extends Model
                 ->where('task_id', $grade->task_id)
                 ->where('source_type', User::class)->exists();
             $grade->selected = ! $userOverridden;
-            if($userOverridden)
+            if ($userOverridden) {
                 return;
+            }
             Grade::where('user_id', $grade->user_id)
                 ->where('task_id', $grade->task_id)
                 ->update(['selected' => false]);
@@ -103,21 +103,20 @@ class Grade extends Model
     protected function logCreated(Grade $created): ?CourseActivityMessage
     {
         $class = $created->value == GradeEnum::Passed ? 'text-lime-green-600 dark:text-lime-green-400' : 'text-red-600 dark:text-red-400';
-        $message = "<span class='$class'> " . $created->value->name . "</span> <a href='" . route('courses.tasks.show', [$created->task->course_id, $created->task_id]) . "'>{$created->task->name}</a>";
+        $message = "<span class='$class'> ".$created->value->name."</span> <a href='".route('courses.tasks.show', [$created->task->course_id, $created->task_id])."'>{$created->task->name}</a>";
 
-        $affectedBy = match ($created->source_type)
-        {
-            User::class            => $created->source_id,
+        $affectedBy = match ($created->source_type) {
+            User::class => $created->source_id,
             ProjectFeedback::class => $created->source->user_id,
-            default                => null
+            default => null
         };
-        if($affectedBy == $created->user_id)
-            $message .= " (self grading)";
-        else if($created->source_type == Task::class)
-            $message .= " (graded by system)";
+        if ($affectedBy == $created->user_id) {
+            $message .= ' (self grading)';
+        } elseif ($created->source_type == Task::class) {
+            $message .= ' (graded by system)';
+        }
 
         return new CourseActivityMessage($message, $created->task->course_id, $created->user_id, $affectedBy);
     }
     // endregion
 }
-

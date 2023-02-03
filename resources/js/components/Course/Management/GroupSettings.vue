@@ -7,8 +7,7 @@
             </svg>
             <span>Group Settings</span>
         </button>
-        <modal @cancel="showSettings = false" v-if="showSettings">
-            <h2 class="dark:text-white text-lg font-medium">Group settings</h2>
+        <modal :is-loading="false" @cancel="showSettings = false" v-if="showSettings" title="Group Settings">
             <div class="mt-2">
                 <label for="max" class="block text-sm font-medium text-gray-900 dark:text-gray-400">Max groups</label>
                 <p class="text-xs dark:text-gray-400 mb-1">The number of groups a user can be a member of</p>
@@ -39,54 +38,38 @@
         </modal>
     </div>
 </template>
-<script>
-import Modal from "../../Modal/Modal";
-import ModalButton from "../../Modal/ModalButton";
+<script setup lang="ts">
+import Modal from "../../Modal/Modal.vue"
+import ModalButton from "../../Modal/ModalButton.vue"
+import {onMounted, ref} from "vue";
+import axios from "axios";
 
-export default {
-    components: {ModalButton, Modal},
-    props: {
-        saveRoute: {
-            required: true,
-            type: String
-        },
-        maxGroupsInput: {
-            required: true,
-            type: String
-        },
-        maxGroupCustom: {
-            required: true,
-            type: Number
-        },
-        groupSizeInput: {
-            required: true,
-            type: Number
-        }
-    },
-    methods: {
-        save: async function () {
-            this.saving = true;
-            await axios.put(this.saveRoute, {
-                'max-groups': this.maxGroups,
-                'max-group-size': this.groupSize,
-                'max-groups-amount': this.custom
-            })
-            location.reload()
-        }
-    },
-    data() {
-        return {
-            showSettings: false,
-            maxGroups: 'same_as_assignments',
-            custom: 1,
-            groupSize: 1,
-            saving: false
-        }
-    },
-    mounted() {
-        this.maxGroups = this.maxGroupsInput;
-        this.custom = this.maxGroupCustom;
-        this.groupSize = this.groupSizeInput
-    }
+const props = defineProps<{
+    saveRoute: string,
+    maxGroupsInput: 'same_as_assignments',
+    maxGroupCustom: number,
+    groupSizeInput: number
+}>()
+
+const showSettings = ref<boolean>(false)
+const maxGroups = ref<'same_as_assignments'>('same_as_assignments')
+const custom = ref<number>(1);
+const groupSize = ref<number>(1);
+const saving = ref<boolean>(false);
+
+async function save() {
+    saving.value = true;
+    await axios.put(props.saveRoute, {
+        'max-groups': maxGroups.value,
+        'max-group-size': groupSize.value,
+        'max-groups-amount': custom.value
+    })
+    location.reload()
 }
+
+onMounted(() => {
+    maxGroups.value = props.maxGroupsInput;
+    custom.value = props.maxGroupCustom;
+    groupSize.value = props.groupSizeInput
+})
 </script>

@@ -8,7 +8,7 @@ use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function() {
+beforeEach(function () {
     $this->course = Course::factory()->create();
     $this->task = Task::factory()->exercise()->for($this->course)->create([
         'name' => 'visible task',
@@ -18,7 +18,7 @@ beforeEach(function() {
     ]);
 });
 
-it('allows teachers to view invisible tasks', function() {
+it('allows teachers to view invisible tasks', function () {
     $teacher = User::factory()->hasAttached($this->course, ['role' => 'teacher'])->create();
     actingAs($teacher);
 
@@ -26,7 +26,7 @@ it('allows teachers to view invisible tasks', function() {
         ->assertSee('invisible task');
 });
 
-it('disallows student from viewing invisible tasks', function() {
+it('disallows student from viewing invisible tasks', function () {
     $student = User::factory()->hasAttached($this->course)->create();
     actingAs($student);
 
@@ -35,8 +35,7 @@ it('disallows student from viewing invisible tasks', function() {
         ->assertDontSee('invisible task');
 });
 
-
-it('shows tasks visibility for teachers', function() {
+it('shows tasks visibility for teachers', function () {
     $teacher = User::factory()->hasAttached($this->course, ['role' => 'teacher'])->create();
     actingAs($teacher);
 
@@ -44,7 +43,7 @@ it('shows tasks visibility for teachers', function() {
         ->assertSee('task-visibility');
 });
 
-it('hides tasks visibility for studetns', function() {
+it('hides tasks visibility for studetns', function () {
     $student = User::factory()->hasAttached($this->course)->create();
     actingAs($student);
 

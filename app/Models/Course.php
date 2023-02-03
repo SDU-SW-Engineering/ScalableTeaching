@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Course newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Course newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Course query()
@@ -27,6 +28,7 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereUpdatedAt($value)
+ *
  * @property-read Collection|Task[] $tasks
  * @property-read Collection|CourseRole[] $roles
  * @property-read int|null $tasks_count
@@ -34,8 +36,10 @@ use Illuminate\Support\Str;
  * @property int $max_group_size
  * @property-read Collection|Group[] $groups
  * @property-read int|null $groups_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroupSize($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroups($value)
+ *
  * @property-read \Illuminate\Support\Collection<int|string,int>|null $exercise_engagement
  * @property-read \Illuminate\Support\Collection<int|string,int>|null $enrolment_per_day
  * @property string $gitlab_group_id
@@ -46,6 +50,7 @@ class Course extends Model
     use HasFactory;
 
     protected $fillable = ['max_groups_amount', 'max_groups', 'max_group_size', 'name', 'gitlab_group_id'];
+
     protected $hidden = ['enroll_token'];
 
     // region Relationships
@@ -137,7 +142,7 @@ class Course extends Model
     /**
      * @return HasMany<CourseActivity>
      */
-    public function activities() : HasMany
+    public function activities(): HasMany
     {
         return $this->hasMany(CourseActivity::class);
     }
@@ -145,13 +150,13 @@ class Course extends Model
 
     public static function booted()
     {
-        static::creating(function(Course $course) {
+        static::creating(function (Course $course) {
             $course->enroll_token = Str::random(32);
         });
     }
 
     /**
-     * @param User $user
+     * @param  User  $user
      * @return Collection<int,Group>
      */
     public function userGroups(User $user): Collection
@@ -167,11 +172,10 @@ class Course extends Model
     {
         $currentCount = $this->userGroups($user)->count();
 
-        $upperLimit = match ($this->max_groups)
-        {
+        $upperLimit = match ($this->max_groups) {
             'same_as_assignments' => $this->tasks()->count(),
-            'custom'              => $this->max_groups_amount,
-            default               => 0
+            'custom' => $this->max_groups_amount,
+            default => 0
         };
 
         return $currentCount >= $upperLimit;
@@ -194,11 +198,12 @@ class Course extends Model
      */
     public function exerciseEngagement(): Attribute
     {
-        return Attribute::make(get: function($value, $attributes) {
+        return Attribute::make(get: function ($value, $attributes) {
             $exerciseIds = $this->tasks()->exercises()->orderBy('order')->pluck('id');
 
-            if($exerciseIds->count() == 0)
+            if ($exerciseIds->count() == 0) {
                 return null;
+            }
 
             $enrolledCount = $this->students()->count();
             $teachers = $this->teachers()->pluck('users.id');
@@ -211,7 +216,7 @@ class Course extends Model
                 ->orderBy('tasks.starts_at')
                 ->orderBy('tasks.order')
                 ->get()
-                ->mapWithKeys(fn($result) => [$result->name . ";" . $result->grouped_by  => round($result->grade_count, 2)]); // @phpstan-ignore-line
+                ->mapWithKeys(fn ($result) => [$result->name.';'.$result->grouped_by => round($result->grade_count, 2)]); // @phpstan-ignore-line
         });
     }
 
@@ -220,7 +225,7 @@ class Course extends Model
      */
     public function enrolmentPerDay(): Attribute
     {
-        return Attribute::make(get: function($value, $attributes) {
+        return Attribute::make(get: function ($value, $attributes) {
             /** @var CourseUser|null $lastEnrolment */
             $lastEnrolment = CourseUser::where('course_id', $this->id)->orderBy('created_at', 'desc')->first();
 

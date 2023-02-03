@@ -28,7 +28,7 @@ class Group extends Model
     /**
      * @return BelongsToMany<User>
      */
-    public function members() : BelongsToMany
+    public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
             ->using(GroupUser::class)
@@ -39,7 +39,7 @@ class Group extends Model
     /**
      * @return HasMany<GroupInvitation>
      */
-    public function invitations() : HasMany
+    public function invitations(): HasMany
     {
         return $this->hasMany(GroupInvitation::class);
     }
@@ -47,7 +47,7 @@ class Group extends Model
     /**
      * @return BelongsTo<Course,Group>
      */
-    public function course() : BelongsTo
+    public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
@@ -55,24 +55,24 @@ class Group extends Model
     /**
      * @return MorphMany<Project>
      */
-    public function projects() : MorphMany
+    public function projects(): MorphMany
     {
         return $this->morphMany(Project::class, 'ownable');
     }
 
     /**
-     * @return Attribute<String,null>
+     * @return Attribute<string,null>
      */
-    public function projectName() : Attribute
+    public function projectName(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => Str::kebab($attributes['name']));
+        return Attribute::make(get: fn ($value, $attributes) => Str::kebab($attributes['name']));
     }
 
     /**
-     * @param User $user
+     * @param  User  $user
      * @return bool
      */
-    public function hasMember(User $user) : bool
+    public function hasMember(User $user): bool
     {
         return $this->members()->where('user_id', $user->id)->exists();
     }
@@ -80,9 +80,9 @@ class Group extends Model
     /**
      * @return Attribute<string,null>
      */
-    public function memberString() : Attribute
+    public function memberString(): Attribute
     {
-        return Attribute::make(get: fn($value, $attributes) => $this->members()->pluck('name')->sort()->join(', '));
+        return Attribute::make(get: fn ($value, $attributes) => $this->members()->pluck('name')->sort()->join(', '));
     }
 
     protected function logCreated(Group $created): ?CourseActivityMessage

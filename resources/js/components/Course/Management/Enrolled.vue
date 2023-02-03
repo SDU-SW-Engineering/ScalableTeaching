@@ -22,9 +22,36 @@
     </div>
 </template>
 
-<script>
-import EnrolledMember from "./Partials/EnrolledMember";
+<script setup lang="ts">
+import EnrolledMember from "./Partials/EnrolledMember.vue";
+import {User} from "../../../Interfaces/Models/User";
+import {computed, ref} from "vue";
 
+export interface UserInfo extends User{
+    role: string
+}
+
+const props = defineProps<{
+    users: UserInfo[],
+    roles: object,
+    roleRoute: string,
+    kickRoute: string,
+    activityRoute: string
+}>();
+
+const filter = ref<string>("");
+
+const filteredUsers = computed<UserInfo[]>(() => {
+    if (filter.value === "")
+        return props.users;
+
+    return props.users.filter(user => {
+        let lc = filter.value.toLowerCase();
+
+        return user.name.toLowerCase().includes(lc) || props.roles[user.role].toLowerCase().includes(lc)
+    });
+});
+/*
 export default {
     components: {EnrolledMember},
     props: {
@@ -66,5 +93,5 @@ export default {
             });
         }
     }
-}
+}*/
 </script>

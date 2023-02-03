@@ -12,12 +12,12 @@ use Tests\DuskTestCase;
 class DashboardTest extends DuskTestCase
 {
     use DatabaseMigrations;
+
     /**
      * A Dusk test example.
      *
      * @return void
      */
-
     public function test_a_user_can_see_courses(): void
     {
         $this->courses = Course::factory(2)->create();

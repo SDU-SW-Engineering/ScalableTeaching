@@ -10,50 +10,50 @@ use Illuminate\View\View;
 
 class AdminViewComposer
 {
-    public function compose(View $view) : void
+    public function compose(View $view): void
     {
-        if ( ! request()->route()->hasParameter('course') && request()->route()->hasParameter('task'))
+        if (! request()->route()->hasParameter('course') && request()->route()->hasParameter('task')) {
             return;
+        }
 
         /** @var Course $course */
         $course = request()->route('course');
         /** @var Task $task */
         $task = request()->route('task');
         $breadcrumbs = [
-            'Courses'     => route('courses.index'),
+            'Courses' => route('courses.index'),
             $course->name => route('courses.show', $course->id),
-            $task->name   => route('courses.tasks.show', [$course->id, $task->id]),
-            'Analytics'   => null,
+            $task->name => route('courses.tasks.show', [$course->id, $task->id]),
+            'Analytics' => null,
         ];
-
 
         $view->with(
             'commentCount',
             $task->delegations()
-                ->with(['comments' => function(HasManyThrough $query) {
+                ->with(['comments' => function (HasManyThrough $query) {
                     $query->whereIn('status', ['pending', 'approved', 'rejected']);
                 }])
-                ->get()->map(fn(TaskDelegation $taskDelegation) => $taskDelegation->comments)
+                ->get()->map(fn (TaskDelegation $taskDelegation) => $taskDelegation->comments)
             ->flatten()->count()
         );
 
         $view->with(
             'commentPendingCount',
             $task->delegations()
-                ->with(['comments' => function(HasManyThrough $query) {
+                ->with(['comments' => function (HasManyThrough $query) {
                     $query->where('status', 'pending');
                 }])
-                ->get()->map(fn(TaskDelegation $taskDelegation) => $taskDelegation->comments)
+                ->get()->map(fn (TaskDelegation $taskDelegation) => $taskDelegation->comments)
                 ->flatten()->count()
         );
 
         $view->with(
             'commentHistoryCount',
             $task->delegations()
-                ->with(['comments' => function(HasManyThrough $query) {
+                ->with(['comments' => function (HasManyThrough $query) {
                     $query->whereIn('status', ['approved', 'rejected']);
                 }])
-                ->get()->map(fn(TaskDelegation $taskDelegation) => $taskDelegation->comments)
+                ->get()->map(fn (TaskDelegation $taskDelegation) => $taskDelegation->comments)
                 ->flatten()->count()
         );
 

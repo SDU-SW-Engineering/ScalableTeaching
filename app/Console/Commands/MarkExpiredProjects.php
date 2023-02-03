@@ -35,16 +35,15 @@ class MarkExpiredProjects extends Command
     /**
      * Execute the console command.
      */
-    public function handle() : int
+    public function handle(): int
     {
-        foreach (Task::whereNotIn('correction_type', [CorrectionType::Manual, CorrectionType::None])->get() as $task)
-        {
+        foreach (Task::whereNotIn('correction_type', [CorrectionType::Manual, CorrectionType::None])->get() as $task) {
             $this->info("Marking tasks under [{$task->course->name}] $task->name");
             $overDueTime = $task->ends_at->addMinutes(5);
 
-            if ( ! now()->isAfter($overDueTime))
-            {
+            if (! now()->isAfter($overDueTime)) {
                 $this->info('Not expired yet.');
+
                 continue;
             }
 

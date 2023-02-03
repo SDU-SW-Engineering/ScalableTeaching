@@ -19,6 +19,7 @@ use Illuminate\Support\Collection;
  * @property string $filename
  * @property int $line
  * @property string $comment
+ *
  * @mixin Eloquent
  */
 class ProjectFeedbackComment extends Model
@@ -32,8 +33,8 @@ class ProjectFeedbackComment extends Model
     protected $appends = ['time_since'];
 
     protected $casts = [
-        'status'      => FeedbackCommentStatus::class,
-        'line'        => 'int',
+        'status' => FeedbackCommentStatus::class,
+        'line' => 'int',
         'reviewed_at' => 'datetime',
     ];
 
@@ -42,7 +43,7 @@ class ProjectFeedbackComment extends Model
      */
     public function timeSince(): Attribute
     {
-        return Attribute::make(get: fn() => $this->created_at->diffForHumans());
+        return Attribute::make(get: fn () => $this->created_at->diffForHumans());
     }
 
     /**
@@ -50,9 +51,8 @@ class ProjectFeedbackComment extends Model
      */
     public function reviewedTimeSince(): Attribute
     {
-        return Attribute::make(get: fn() => $this->reviewed_at?->diffForHumans());
+        return Attribute::make(get: fn () => $this->reviewed_at?->diffForHumans());
     }
-
 
     /**
      * @return BelongsTo<ProjectFeedback,ProjectFeedbackComment>
@@ -75,7 +75,7 @@ class ProjectFeedbackComment extends Model
      */
     public function author(): Attribute
     {
-        return Attribute::make(get: fn() => $this->feedback->user);
+        return Attribute::make(get: fn () => $this->feedback->user);
     }
 
     /**
@@ -91,11 +91,11 @@ class ProjectFeedbackComment extends Model
     }
 
     /**
-     * @param int $lines
+     * @param  int  $lines
      * @return Collection<int,HighlightedLine>|null
      */
     public function surroundingCode(int $lines = 5): ?Collection
     {
-        return $this->lines()->filter(fn(HighlightedLine $line) => $line->number > $this->line - $lines - 1 && $line->number < $this->line + $lines + 1);
+        return $this->lines()->filter(fn (HighlightedLine $line) => $line->number > $this->line - $lines - 1 && $line->number < $this->line + $lines + 1);
     }
 }

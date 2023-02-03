@@ -14,7 +14,7 @@ class File implements JsonSerializable, IsChangeable
 
     public function __construct(public string $fullPath, Directory $directory)
     {
-        $paths = explode("/", $this->fullPath);
+        $paths = explode('/', $this->fullPath);
         $this->name = $paths[count($paths) - 1];
         $this->directory = $directory;
     }
@@ -22,9 +22,9 @@ class File implements JsonSerializable, IsChangeable
     public function jsonSerialize(): array
     {
         return [
-            'name'    => $this->name,
-            'full'    => $this->fullPath,
-            'changed' => $this->changed
+            'name' => $this->name,
+            'full' => $this->fullPath,
+            'changed' => $this->changed,
         ];
     }
 
@@ -33,15 +33,15 @@ class File implements JsonSerializable, IsChangeable
         $this->changed = $isChanged;
     }
 
-
-    public function path() : string
+    public function path(): string
     {
         $parts = [$this->name];
 
         $next = $this->directory;
-        while($next != null) {
-            if($next->path !== "/")
+        while ($next != null) {
+            if ($next->path !== '/') {
                 $parts[] = $next->path;
+            }
             /** @var Directory $next */
             $next = $next->parent;
         }

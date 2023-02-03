@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property Carbon $last_try
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
  * @mixin Eloquent
  */
 class ProjectDiffIndex extends Model
@@ -26,6 +27,6 @@ class ProjectDiffIndex extends Model
 
     protected $casts = [
         'changes' => 'array',
-        'status'  => ProjectDiffIndexStatus::class,
+        'status' => ProjectDiffIndexStatus::class,
     ];
 }

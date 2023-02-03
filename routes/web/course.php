@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Course\Management\OverviewController;
+use App\Http\Controllers\Course\Management\TaskController as TaskManagementController;
 use App\Http\Controllers\Course\Management\UserManagementController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseTrackController;
@@ -8,7 +9,6 @@ use App\Http\Controllers\GradingController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
-use App\Http\Controllers\Course\Management\TaskController as TaskManagementController;
 use App\Models\Course;
 
 Route::get('/', [CourseController::class, 'index'])->name('index');
@@ -16,10 +16,10 @@ Route::get('{course}/enroll', [CourseController::class, 'showEnroll'])->name('en
 Route::get('create', [CourseController::class, 'create'])->name('create')->can('create', Course::class);
 Route::post('/', [CourseController::class, 'store'])->name('store')->can('store', Course::class);
 
-Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function() {
+Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function () {
     Route::get('/', [CourseController::class, 'show'])->name('show');
 
-    Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function() {
+    Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function () {
         Route::get('{task}', [TaskController::class, 'show'])->name('show');
         Route::post('{task}/mark-complete', [TaskController::class, 'markComplete'])->name('mark-complete');
         Route::get('{task}/next-exercise', [TaskController::class, 'nextExercise'])->name('next-exercise');
@@ -27,7 +27,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
         Route::get('{task}/projects/{project}/download', [ProjectController::class, 'download'])->name('downloadProject')->middleware('can:download,project');
         Route::get('{task}/projects/{project}/validate', [ProjectController::class, 'validateProject'])->name('validateProject')->middleware('can:validate,project');
 
-        Route::prefix('{task}/projects/{project}/editor')->controller(ProjectController::class)->group(function() {
+        Route::prefix('{task}/projects/{project}/editor')->controller(ProjectController::class)->group(function () {
             Route::get('{projectDownload}', 'showEditor')->name('show-editor')->can('accessCode', ['project', 'projectDownload']);
             Route::get('{projectDownload}/tree', 'showTree')->name('show-tree')->can('accessCode', ['project', 'projectDownload']);
             Route::get('{projectDownload}/file', 'showFile')->name('show-file')->can('accessCode', ['project', 'projectDownload']);
@@ -41,11 +41,11 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
     });
 
-    Route::prefix('tracks')->as('tracks.')->controller(CourseTrackController::class)->group(function() {
+    Route::prefix('tracks')->as('tracks.')->controller(CourseTrackController::class)->group(function () {
         Route::get('{track}', 'show')->name('show');
     });
 
-    Route::group(['prefix' => 'groups', 'as' => 'groups.'], function() {
+    Route::group(['prefix' => 'groups', 'as' => 'groups.'], function () {
         Route::get('/', [GroupController::class, 'index'])->name('index');
         Route::post('/', [GroupController::class, 'create'])->name('create')->middleware('can:createGroup,course');
         Route::delete('{group}', [GroupController::class, 'destroy'])->name('destroy')->middleware('can:delete,group');
@@ -60,11 +60,11 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             ->middleware('can:removeMember,group,user');
     });
 
-    Route::group(['prefix' => 'manage', 'as' => 'manage.'], function() {
+    Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
         Route::get('/', [OverviewController::class, 'index'])->name('index')->can('manage,course');
         Route::post('tasks', [TaskController::class, 'store'])->name('storeTask')->middleware('can:manage,course');
 
-        Route::controller(UserManagementController::class)->middleware('can:manage,course')->group(function() {
+        Route::controller(UserManagementController::class)->middleware('can:manage,course')->group(function () {
             Route::get('enrolment', 'enrolment')->name('enrolment.index');
             Route::put('update-role', 'updateRole')->name('update-role');
             Route::delete('kick-user', 'kickUser')->name('kick-user');
@@ -81,7 +81,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
             //Route::get('roles', [UserManagementController::class, 'roles'])->name('roles');
         });
 
-        Route::controller(TaskManagementController::class)->middleware('can:manage,course')->group(function() {
+        Route::controller(TaskManagementController::class)->middleware('can:manage,course')->group(function () {
             Route::get('exercises', 'exercises')->name('exercises.index');
             Route::put('exercises/reorganize', 'reorganizeExercises')->name('exercises.reorganize');
         });
@@ -94,7 +94,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
         Route::post('add-teacher', [CourseController::class, 'addTeacher'])->name('addTeacher')->middleware('can:manage,course');
         Route::get('teachers/{teacher}/remove', [CourseController::class, 'removeTeacher'])->name('removeTeacher')->middleware('can:manage,course');
 
-        Route::group(['prefix' => 'grading', 'as' => 'grading.', 'middleware' => 'can:grade,course'], function() {
+        Route::group(['prefix' => 'grading', 'as' => 'grading.', 'middleware' => 'can:grade,course'], function () {
             Route::get('/', [GradingController::class, 'index'])->name('index');
             Route::put('users/{user}', [GradingController::class, 'updateGrading'])->name('updateGrading');
             Route::get('tasks/{task}', [GradingController::class, 'taskInfo'])->name('task-info');

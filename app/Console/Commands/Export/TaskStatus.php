@@ -35,13 +35,13 @@ class TaskStatus extends Command
         parent::__construct();
     }
 
-    public function handle() : int
+    public function handle(): int
     {
         $task = Task::findOrFail($this->argument('task'));
-        $csvWriter = Writer::createFromPath(storage_path(date("Y-m-d H:i:s")  . " - $task->name status.csv"), 'w');
+        $csvWriter = Writer::createFromPath(storage_path(date('Y-m-d H:i:s')." - $task->name status.csv"), 'w');
         $csvWriter->insertOne(['name', 'email', 'task', 'group', 'status', 'validation_errors']);
-        $task->projects->each(function(Project $project) use ($task, $csvWriter) {
-            $project->owners()->each(function(User $user) use ($project, $task, $csvWriter) {
+        $task->projects->each(function (Project $project) use ($task, $csvWriter) {
+            $project->owners()->each(function (User $user) use ($project, $task, $csvWriter) {
                 $csvWriter->insertOne([
                     $user->name,
                     $user->email,

@@ -14,7 +14,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->project = Project::factory()->for(Task::factory([
         'correction_type' => CorrectionType::RequiredTasks,
-        'sub_tasks'       => [
+        'sub_tasks' => [
             (new SubTask('11 Equals [10, 1]', 'test 11 equals [10, 1]'))->setIsRequired(true),
             new SubTask('9 Equals [5,2,2]', 'test 9 equals [5,2,2]'),
             (new SubTask('2 Equals [2]', 'test 2 equals [2]'))->setIsRequired(true),
@@ -26,11 +26,10 @@ it('ensures projects to be active when no subtasks are complete', function () {
     expect($this->project->status)->toBe(ProjectStatus::Active);
 });
 
-
 it('ensures projects to be active when 1 of 2 required subtask are complete', function () {
     $this->project->subTasks()->create([
         'source_type' => Pipeline::class,
-        'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+        'source_id' => Pipeline::factory()->for($this->project)->create()->id,
         'sub_task_id' => 1,
     ]);
     expect($this->project->status)->toBe(ProjectStatus::Active);
@@ -40,12 +39,12 @@ it('ensures projects to be active when 1 required subtask is complete and 1 opti
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2,
         ],
     ]);
@@ -57,12 +56,12 @@ it('ensures projects to be active when 2 of 2 required subtask are complete', fu
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 3,
         ],
     ]);
@@ -74,17 +73,17 @@ it('ensures projects to be finished when 2 of 2 required subtask are complete an
     $this->project->subTasks()->createMany([
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 1,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 2,
         ],
         [
             'source_type' => Pipeline::class,
-            'source_id'   => Pipeline::factory()->for($this->project)->create()->id,
+            'source_id' => Pipeline::factory()->for($this->project)->create()->id,
             'sub_task_id' => 3,
         ],
     ]);

@@ -11,29 +11,28 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('ensures the ProjectCreated event is fired', function() {
+it('ensures the ProjectCreated event is fired', function () {
     Event::fake();
     Project::factory()->for(Task::factory()->for(Course::factory()))->create();
 
     Event::assertDispatched(ProjectCreated::class);
 });
 
-it('ensures the RefreshMemberAccess is fired when ProjectCreated', function() {
+it('ensures the RefreshMemberAccess is fired when ProjectCreated', function () {
     Event::fake();
     Project::factory()->for(Task::factory()->for(Course::factory()))->create();
 
     Event::assertListening(ProjectCreated::class, RefreshMemberAccess::class);
 });
 
-
-it('ensures the DisableForking event is fired when ProjectCreated', function() {
+it('ensures the DisableForking event is fired when ProjectCreated', function () {
     Event::fake();
     Project::factory()->for(Task::factory()->for(Course::factory()))->create();
 
     Event::assertListening(ProjectCreated::class, DisableForking::class);
 });
 
-it('ensures the RegisterWebhook event is fired when ProjectCreated', function() {
+it('ensures the RegisterWebhook event is fired when ProjectCreated', function () {
     Event::fake();
     Project::factory()->for(Task::factory()->for(Course::factory()))->create();
 

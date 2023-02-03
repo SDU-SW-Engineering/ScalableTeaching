@@ -9,11 +9,10 @@ class Highlight
 {
     public function __construct(public string $filename)
     {
-
     }
 
     /**
-     * @param string $code
+     * @param  string  $code
      * @return Collection<int,HighlightedLine> |null
      */
     public function code(string $code): ?Collection
@@ -33,8 +32,9 @@ class Highlight
         $lines = $xml->xpath('//span[@class="line"]');
         /** @var Collection<int,HighlightedLine> $processedLines */
         $processedLines = new Collection();
-        foreach($lines as $index => $line)
+        foreach ($lines as $index => $line) {
             $processedLines[] = new HighlightedLine($index + 1, $line->asXML());
+        }
 
         return $processedLines;
     }

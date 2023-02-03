@@ -41,21 +41,21 @@ return [
     'connections' => [
 
         'main' => [
-            'token'  => env('GITLAB_ACCESS_TOKEN'),
+            'token' => env('GITLAB_ACCESS_TOKEN'),
             'method' => 'token',
             // 'backoff' => false,
             // 'cache'   => false,
             // 'sudo'    => null,
-            'url'    => env('GITLAB_URL'),
+            'url' => env('GITLAB_URL'),
         ],
 
         'user' => [
-            'token'  => '95b17999fd7e41963d76880fd3fd0d00749bf1c00b80e6ddd82a01452fd6d8ff',
+            'token' => '95b17999fd7e41963d76880fd3fd0d00749bf1c00b80e6ddd82a01452fd6d8ff',
             'method' => 'token',
             // 'backoff' => false,
             // 'cache'   => false,
             // 'sudo'    => null,
-            'url'     => env('GITLAB_URL'),
+            'url' => env('GITLAB_URL'),
         ],
 
     ],
@@ -74,14 +74,14 @@ return [
     'cache' => [
 
         'main' => [
-            'driver'    => 'illuminate',
+            'driver' => 'illuminate',
             'connector' => null, // null means use default driver
             // 'min'       => 43200,
             // 'max'       => 172800
         ],
 
         'bar' => [
-            'driver'    => 'illuminate',
+            'driver' => 'illuminate',
             'connector' => 'redis', // config/cache.php
             // 'min'       => 43200,
             // 'max'       => 172800

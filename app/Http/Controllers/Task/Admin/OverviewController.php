@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class OverviewController extends Controller
 {
-    public function index(Course $course, Task $task) : View
+    public function index(Course $course, Task $task): View
     {
         $projectCount = $task->projects()->count();
         $projectsToday = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
@@ -22,15 +22,16 @@ class OverviewController extends Controller
         $failedCount = $task->projects()->where('status', 'failed')->count();
         $failedPercent = $projectCount == 0 ? 0 : $failedCount / $projectCount * 100;
         $buildCount = $task->jobs()->count();
-        $buildsToday = $task->jobs()->whereRaw("date(pipelines.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
+        $buildsToday = $task->jobs()->whereRaw('date(pipelines.created_at) = ?', now()->toDateString())->withTrashedParents()->count();
 
         $projectQuery = $task->projects()
             ->select('*', \DB::raw('TIMESTAMPDIFF(second,created_at, finished_at) as duration'))
             ->withCount('pipelines')
             ->orderBy(request('sort', 'created_at'), request('direction', 'desc'));
 
-        if(request('status', 'all') != 'all')
+        if (request('status', 'all') != 'all') {
             $projectQuery->where('status', request('status', 'active'));
+        }
 
         $projects = $projectQuery->paginate(10)->withQueryString();
 
@@ -40,14 +41,13 @@ class OverviewController extends Controller
         $projectsCompletedPerDay = $task->totalCompletedTasksPerDay;
         $totalProjectsPerDayGraph = $totalProjectsPerDay == null ? null : new Graph(
             $totalProjectsPerDay->keys(),
-            new LineDataSet("Projects", $totalProjectsPerDay->values(), "#266ab0", true),
-            new LineDataSet("Completed", $projectsCompletedPerDay->values(), "#7BB026", true)
+            new LineDataSet('Projects', $totalProjectsPerDay->values(), '#266ab0', true),
+            new LineDataSet('Completed', $projectsCompletedPerDay->values(), '#7BB026', true)
         );
 
         /** @var Collection<string,int> $dailyBuilds */
         $dailyBuilds = $task->dailyBuilds(true, true);
-        $dailyBuildsGraph = $dailyBuilds == null ? null : new Graph($dailyBuilds->keys(), new BarDataSet("Builds", $dailyBuilds->values(), "#4F535B"));
-
+        $dailyBuildsGraph = $dailyBuilds == null ? null : new Graph($dailyBuilds->keys(), new BarDataSet('Builds', $dailyBuilds->values(), '#4F535B'));
 
         return view('tasks.admin.index', compact(
             'course',

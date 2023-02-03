@@ -12,20 +12,19 @@ use App\Models\GroupUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\View;
 
 class UserManagementController extends Controller
 {
     public function enrolment(Course $course): View
     {
-        $members = $course->members()->orderBy('name')->get()->map(fn(User $user) => [
-            'id'          => $user->id,
-            'name'        => $user->name,
+        $members = $course->members()->orderBy('name')->get()->map(fn (User $user) => [
+            'id' => $user->id,
+            'name' => $user->name,
             'enrolled_at' => $user->courseMembership->created_at->diffForHumans(),
-            'avatar'      => $user->avatar,
-            'updatable'   => $user->id != auth()->id(),
-            'role'        => $user->courseMembership->role,
+            'avatar' => $user->avatar,
+            'updatable' => $user->id != auth()->id(),
+            'role' => $user->courseMembership->role,
         ]);
 
         $roles = [
@@ -49,7 +48,7 @@ class UserManagementController extends Controller
 
         $course->members()->updateExistingPivot($validated['user'], ['role' => $validated['role']]);
 
-        return "ok";
+        return 'ok';
     }
 
     public function kickUser(Course $course): string
@@ -60,7 +59,7 @@ class UserManagementController extends Controller
 
         $course->members()->detach($validated['user']);
 
-        return "ok";
+        return 'ok';
     }
 
     public function activity(Course $course): View
@@ -68,21 +67,20 @@ class UserManagementController extends Controller
         $activities = $course->activities();
 
         $searchFilter = request('user');
-        if(is_numeric($searchFilter))
+        if (is_numeric($searchFilter)) {
             $activities->where('affected_id', $searchFilter);
-        else if(is_string($searchFilter))
+        } elseif (is_string($searchFilter)) {
             $activities->whereRelation('affected', 'name', 'like', "%$searchFilter%");
+        }
 
-        if(filled(request('kind')))
-        {
-            $activities->where('resource_type', match (request('kind'))
-            {
-                'grade'            => Grade::class,
-                'membership'       => CourseUser::class,
-                'group'            => Group::class,
+        if (filled(request('kind'))) {
+            $activities->where('resource_type', match (request('kind')) {
+                'grade' => Grade::class,
+                'membership' => CourseUser::class,
+                'group' => Group::class,
                 'group-invitation' => GroupInvitation::class,
                 'group-membership' => GroupUser::class,
-                default            => null
+                default => null
             });
         }
 
@@ -91,16 +89,15 @@ class UserManagementController extends Controller
         return view('courses.manage.activity', compact('course', 'activities'));
     }
 
-    public function groups(Course $course) : View
+    public function groups(Course $course): View
     {
         $groups = $course->groups()->withCount('members')->withCount('projects')->orderBy('name');
 
-        if(request()->has('filter'))
-        {
-            $groups->whereHas('members', function(Builder $query) {
-                $query->where('name', 'like', '%' . request('filter') . '%');
-            })->orWhere(function(Builder $query) use ($course) { // @phpstan-ignore-line
-                $query->where('course_id', $course->id)->where('name', 'like', '%'. request('filter') . '%');
+        if (request()->has('filter')) {
+            $groups->whereHas('members', function (Builder $query) {
+                $query->where('name', 'like', '%'.request('filter').'%');
+            })->orWhere(function (Builder $query) use ($course) { // @phpstan-ignore-line
+            $query->where('course_id', $course->id)->where('name', 'like', '%'.request('filter').'%');
             });
         }
 
@@ -109,14 +106,14 @@ class UserManagementController extends Controller
         return view('courses.manage.groups', compact('course', 'groups'));
     }
 
-    public function showGroup(Course $course, Group $group) : View
+    public function showGroup(Course $course, Group $group): View
     {
         $members = $group->members()->orderBy('name')->get();
 
         return view('courses.manage.group', compact('course', 'group', 'members'));
     }
 
-    public function createGroup(Course $course) : RedirectResponse
+    public function createGroup(Course $course): RedirectResponse
     {
         $validated = request()->validate([
             'name' => 'required',
@@ -129,47 +126,50 @@ class UserManagementController extends Controller
         return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', 'Group created');
     }
 
-    public function deleteGroup(Course $course, Group $group) : RedirectResponse
+    public function deleteGroup(Course $course, Group $group): RedirectResponse
     {
         $group->delete();
 
         return redirect()->route('courses.manage.groups.index', $course)->with('success', 'Group deleted');
     }
 
-    public function addGroupMember(Course $course, Group $group) : RedirectResponse
+    public function addGroupMember(Course $course, Group $group): RedirectResponse
     {
         $validated = request()->validate([
             'email' => 'required|email',
         ]);
         $user = User::where('email', $validated['email'])->first();
-        if ($user == null)
+        if ($user == null) {
             return redirect()->route('courses.manage.groups.show', [$course, $group])->withErrors(['email' => 'This user doesn\'t exist.']);
+        }
 
         $userIsPartOfCourse = $course->members()->where('users.id', $user->id)->exists();
-        if( ! $userIsPartOfCourse)
+        if (! $userIsPartOfCourse) {
             return redirect()->route('courses.manage.groups.show', [$course, $group])->withErrors(['name' => 'User is not part of the course']);
+        }
 
         $group->members()->syncWithoutDetaching([$user->id]);
 
-        return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', $user->name . " added");
+        return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', $user->name.' added');
     }
 
-    public function removeGroupMember(Course $course, Group $group) : RedirectResponse
+    public function removeGroupMember(Course $course, Group $group): RedirectResponse
     {
         $validated = request()->validate([
             'user' => 'required|numeric',
         ]);
 
         $user = $group->members()->where('users.id', $validated['user'])->first();
-        if($user == null)
-            return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', "User removed");
+        if ($user == null) {
+            return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', 'User removed');
+        }
 
         $group->members()->detach($validated['user']);
 
-        return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', "User removed");
+        return redirect()->route('courses.manage.groups.show', [$course, $group])->with('success', 'User removed');
     }
 
-    public function updateGroup(Course $course, Group $group) : string
+    public function updateGroup(Course $course, Group $group): string
     {
         $validated = request()->validate([
             'name' => 'required',
@@ -179,31 +179,29 @@ class UserManagementController extends Controller
             'name' => $validated['name'],
         ]);
 
-        return "ok";
+        return 'ok';
     }
 
-    public function updateGroupSettings(Course $course) : string
+    public function updateGroupSettings(Course $course): string
     {
         $validated = request()->validate([
-            'max-group-size'    => ['required_without:max-groups', 'nullable', 'numeric'],
-            'max-groups'        => ['required_without:max-group-size'],
+            'max-group-size' => ['required_without:max-groups', 'nullable', 'numeric'],
+            'max-groups' => ['required_without:max-group-size'],
             'max-groups-amount' => ['required_if:max-groups,custom'],
         ]);
 
-        if(array_key_exists('max-group-size', $validated))
-        {
+        if (array_key_exists('max-group-size', $validated)) {
             $course->update(['max_group_size' => $validated['max-group-size']]);
         }
 
-        if (array_key_exists('max-groups', $validated))
-        {
+        if (array_key_exists('max-groups', $validated)) {
             $course->update([
-                'max_groups'        => $validated['max-groups'],
+                'max_groups' => $validated['max-groups'],
                 'max_groups_amount' => array_key_exists('max-groups-amount', $validated) ? $validated['max-groups-amount'] : null,
             ]);
         }
 
-        return "ok";
+        return 'ok';
     }
 
     public function roles(Course $course): View

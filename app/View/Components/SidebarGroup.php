@@ -8,6 +8,7 @@ use Illuminate\View\Component;
 class SidebarGroup extends Component
 {
     public string $name;
+
     /**
      * Create a new component instance.
      *

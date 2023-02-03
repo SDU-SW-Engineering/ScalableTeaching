@@ -4,7 +4,7 @@ use Domain\GitLab\CIReader;
 use function Pest\testDirectory;
 
 beforeEach(function () {
-    $this->reader = new CIReader(file_get_contents(testDirectory("Unit/GitLab/Stubs/tasks.yml")));
+    $this->reader = new CIReader(file_get_contents(testDirectory('Unit/GitLab/Stubs/tasks.yml')));
 });
 
 it('extracts three tasks from a ci file', function () {
@@ -19,8 +19,7 @@ it('extracts three tasks from a ci file', function () {
 
 it('extracts two stages from a ci file', function () {
     expect($this->reader->stages())->toHaveCount(2);
-    expect($this->reader->stages())->toMatchArray(["install", "test"]);
-    expect($this->reader->stage("install"))->toHaveCount(1);
-    expect($this->reader->stage("test"))->toHaveCount(2);
+    expect($this->reader->stages())->toMatchArray(['install', 'test']);
+    expect($this->reader->stage('install'))->toHaveCount(1);
+    expect($this->reader->stage('test'))->toHaveCount(2);
 });
-

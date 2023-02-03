@@ -35,58 +35,61 @@ class SurveyResponse extends Model
     }
 
     /**
-     * @param Builder<SurveyResponse> $query
+     * @param  Builder<SurveyResponse>  $query
      * @return Builder<SurveyResponse>
      */
-    public function scopeProjects(Builder $query) : Builder
+    public function scopeProjects(Builder $query): Builder
     {
         return $query->where('ownable_type', Project::class);
     }
 
     /**
-     * @param Builder<SurveyResponse> $query
-     * @param Project|int $project
+     * @param  Builder<SurveyResponse>  $query
+     * @param  Project|int  $project
      * @return Builder<SurveyResponse>
      */
-    public function scopeProject(Builder $query, Project|int $project) : Builder
+    public function scopeProject(Builder $query, Project|int $project): Builder
     {
-        if ($project instanceof Project)
+        if ($project instanceof Project) {
             $project = $project->id;
+        }
 
         return $query->where('ownable_type', Project::class)->where('ownable_id', $project);
     }
 
     /**
-     * @param Builder<SurveyResponse> $query
+     * @param  Builder<SurveyResponse>  $query
      * @return Builder<SurveyResponse>
      */
-    public function scopeTasks(Builder $query) : Builder
+    public function scopeTasks(Builder $query): Builder
     {
         return $query->where('ownable_type', Task::class);
     }
 
     /**
-     * @param Builder<SurveyResponse> $query
-     * @param Task|int $task
+     * @param  Builder<SurveyResponse>  $query
+     * @param  Task|int  $task
      * @return Builder<SurveyResponse>
      */
-    public function scopeTask(Builder $query, Task|int $task) : Builder
+    public function scopeTask(Builder $query, Task|int $task): Builder
     {
-        if ($task instanceof Task)
+        if ($task instanceof Task) {
             $task = $task->id;
+        }
 
         return $query->where('ownable_type', Task::class)->where('ownable_id', $task);
     }
 
     /**
-     * @param Builder<SurveyResponse> $query
-     * @param User|int $user
+     * @param  Builder<SurveyResponse>  $query
+     * @param  User|int  $user
      * @return Builder<SurveyResponse>
      */
-    public function scopeUser(Builder $query, User|int $user) : Builder
+    public function scopeUser(Builder $query, User|int $user): Builder
     {
-        if ($user instanceof User)
+        if ($user instanceof User) {
             $user = $user->id;
+        }
 
         return $query->where('user_id', $user);
     }

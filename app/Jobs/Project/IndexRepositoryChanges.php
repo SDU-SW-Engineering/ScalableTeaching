@@ -6,11 +6,9 @@ use App\Models\Enums\ProjectDiffIndexStatus;
 use App\Models\Project;
 use App\Models\ProjectDiffIndex;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
@@ -22,7 +20,7 @@ class IndexRepositoryChanges implements ShouldQueue
     public function middleware(): array
     {
         return [
-            (new WithoutOverlapping($this->project->id . '-' . $this->comparisonSha))->dontRelease(),
+            (new WithoutOverlapping($this->project->id.'-'.$this->comparisonSha))->dontRelease(),
         ];
     }
 
@@ -33,7 +31,6 @@ class IndexRepositoryChanges implements ShouldQueue
      */
     public function __construct(public Project $project, public string $comparisonSha)
     {
-
     }
 
     /**
@@ -43,16 +40,16 @@ class IndexRepositoryChanges implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->project->task->current_sha == null)
-        {
+        if ($this->project->task->current_sha == null) {
             $this->fail(new \Exception("Task has no sha and a comparison can't be done."));
 
             return;
         }
         /** @var ProjectDiffIndex|null $index */
         $index = $this->project->changes()->where('from', $this->project->task->current_sha)->where('to', $this->comparisonSha)->first();
-        if($index != null && $index->status == ProjectDiffIndexStatus::Success) // don't reindex if already successful
+        if ($index != null && $index->status == ProjectDiffIndexStatus::Success) { // don't reindex if already successful
             return;
+        }
 
         $accessToken = config('sourcecontrol.users.default.token');
         $sourceControlProject = $this->project->sourceControl();
@@ -64,14 +61,12 @@ class IndexRepositoryChanges implements ShouldQueue
         $index->last_try = now();
         $index->from = $this->project->task->current_sha;
         $index->to = $this->comparisonSha;
-        if($code != 0)
-        {
+        if ($code != 0) {
             $output = Str::of($output[0]);
             $index->status = ProjectDiffIndexStatus::Failure;
-            $index->message = match (true)
-            {
-                $output->contains('docker') => "Docker: " . $output,
-                default                     => "Unable to index: " . $output
+            $index->message = match (true) {
+                $output->contains('docker') => 'Docker: '.$output,
+                default => 'Unable to index: '.$output
             };
             $index->save();
 
@@ -80,20 +75,20 @@ class IndexRepositoryChanges implements ShouldQueue
 
         /** @var array{file: string, status: string, lines: int, proportion: string} $changes */
         $changes = [];
-        foreach($output as $line)
-        {
+        foreach ($output as $line) {
             $line = Str::of($line);
-            if(preg_match("/(.*)\|.*(\d+)\s*([+-]+)/", $line, $matches) !== 1)
+            if (preg_match("/(.*)\|.*(\d+)\s*([+-]+)/", $line, $matches) !== 1) {
                 continue;
+            }
 
             $fileInfo = $matches[1];
             preg_match('/(\S+)\s+(?:\((new|gone))?/', $fileInfo, $fileParts);
             $status = count($fileParts) == 3 ? $fileParts[2] : 'change';
 
             $changes[] = [
-                'file'       => $fileParts[1],
-                'status'     => $status,
-                'lines'      => $matches[2],
+                'file' => $fileParts[1],
+                'status' => $status,
+                'lines' => $matches[2],
                 'proportion' => $matches[3],
             ];
         }
