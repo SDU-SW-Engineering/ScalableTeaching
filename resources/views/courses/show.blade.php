@@ -76,10 +76,14 @@
                                                                       clip-rule="evenodd"/>
                                                             </svg>
                                                         @else
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                                <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l18 18a.75.75 0 101.06-1.06l-18-18zM22.676 12.553a11.249 11.249 0 01-2.631 4.31l-3.099-3.099a5.25 5.25 0 00-6.71-6.71L7.759 4.577a11.217 11.217 0 014.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113z" />
-                                                                <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0115.75 12zM12.53 15.713l-4.243-4.244a3.75 3.75 0 004.243 4.243z" />
-                                                                <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 00-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 016.75 12z" />
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                                 fill="currentColor" class="w-5 h-5">
+                                                                <path
+                                                                    d="M3.53 2.47a.75.75 0 00-1.06 1.06l18 18a.75.75 0 101.06-1.06l-18-18zM22.676 12.553a11.249 11.249 0 01-2.631 4.31l-3.099-3.099a5.25 5.25 0 00-6.71-6.71L7.759 4.577a11.217 11.217 0 014.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113z"/>
+                                                                <path
+                                                                    d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0115.75 12zM12.53 15.713l-4.243-4.244a3.75 3.75 0 004.243 4.243z"/>
+                                                                <path
+                                                                    d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 00-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 016.75 12z"/>
                                                             </svg>
                                                         @endif
                                                     </div>
@@ -92,6 +96,30 @@
                         </section>
                         <section class="w-1/3">
                             <h2 class="text-black dark:text-white font-semibold text-lg mb-2">Assignments</h2>
+                            @foreach($course->tracks()->whereNull('parent_id')->get() as $track)
+                                <a href="{{ route('courses.tracks.show', [$course->id, $track->id]) }}" class="bg-lime-green-400 shadow-lg text-white rounded-md px-4 py-2 flex">
+                                    <svg class="text-white flex-shrink-0 h-20 w-20 fill-current -ml-4"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 24 24">
+                                        <path
+                                            d="m12 3.879-7.061 7.06 2.122 2.122L12 8.121l4.939 4.94 2.122-2.122z"></path>
+                                        <path
+                                            d="m4.939 17.939 2.122 2.122L12 15.121l4.939 4.94 2.122-2.122L12 10.879z"></path>
+                                    </svg>
+                                    <div class="flex flex-col flex-grow justify-between">
+                                        <div class="flex flex-row my-1 justify-between w-full">
+                                            <div class="flex flex-col">
+                                                <h1 class="font-light text-xl">Track</h1>
+                                                <h2 class="font-bold text-2xl -mt-2">{{ $track->name }}</h2>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <span>{{ $track->immediateChildren->count() }} paths </span>
+                                            </div>
+                                        </div>
+                                        <span class="text-gray-100 text-sm">{{ $track->description }}</span>
+                                    </div>
+                                </a>
+                            @endforeach
                             <div class="flex flex-col">
                                 @foreach($assignments as $assignment)
                                     @include('courses.partials.task', ['task' => $assignment])

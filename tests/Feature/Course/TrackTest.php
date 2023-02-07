@@ -30,7 +30,7 @@ it('allows a student to inspect tracks', function() {
     get("/courses/{$this->course->id}/tracks/{$this->track1->id}")
         ->assertStatus(200)->assertSee('Hello World')
         ->assertDontSee('Hello Miguel');
-})->skip();
+});
 
 it('responds with 404 if navigating to a task that don\'t exist', function() {
     actingAs($this->user);
