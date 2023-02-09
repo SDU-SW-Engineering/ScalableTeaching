@@ -21,7 +21,7 @@ use Illuminate\View\View;
 
 class CourseController extends Controller
 {
-    public function index() : View
+    public function index(): View
     {
         $courses = auth()->user()->courses->map(function($course) {
 
@@ -70,7 +70,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function create() : View
+    public function create(): View
     {
         return view('courses.create', [
             'breadcrumbs' => [
@@ -80,7 +80,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function store(Request $request, GitLabManager $manager) : RedirectResponse
+    public function store(Request $request, GitLabManager $manager): RedirectResponse
     {
         $validated = $request->validate([
             'course-name' => 'required|max:255',
@@ -88,7 +88,7 @@ class CourseController extends Controller
 
         $pathName = Str::slug($validated['course-name']);
         $currentGroup = $manager->groups()->subgroups(getenv('GITLAB_GROUP'), ['search' => $pathName]);
-        if (count($currentGroup) > 0)
+        if(count($currentGroup) > 0)
             return redirect()->back()->withErrors(['course-name' => 'A course with that name already exists in GitLab.'])->withInput();
 
         $gitlabGroup = [
@@ -115,10 +115,10 @@ class CourseController extends Controller
         return redirect()->route("courses.index");
     }
 
-    public function show(Course $course) : View
+    public function show(Course $course): View
     {
         $tasksQuery = $course->tasks()->whereNull('track_id');
-        if (auth()->user()->cannot('viewInvisible', $course))
+        if(auth()->user()->cannot('viewInvisible', $course))
             $tasksQuery->where('is_visible', true);
 
         $tasks = $tasksQuery->orderBy('order')->get()->map(fn(Task $task) => [
@@ -145,7 +145,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function addTeacher(Course $course) : RedirectResponse
+    public function addTeacher(Course $course): RedirectResponse
     {
         $validated = \Validator::make(\request()->all(), [
             'teacher' => ['required', 'exists:users,id'],
@@ -157,7 +157,7 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function removeTeacher(Course $course, User $teacher) : RedirectResponse
+    public function removeTeacher(Course $course, User $teacher): RedirectResponse
     {
         if($teacher->id == auth()->id())
             return redirect()->back()->withErrors('You can\'t remove yourself.', 'teachers');
@@ -167,7 +167,7 @@ class CourseController extends Controller
         return redirect()->back();
     }
 
-    public function showEnroll(Course $course) : RedirectResponse | View
+    public function showEnroll(Course $course): RedirectResponse|View
     {
         if($course->enroll_token != request('token'))
             return redirect()->route('home')->withError('Invalid course token');
@@ -179,7 +179,8 @@ class CourseController extends Controller
             return view('courses.enroll-dialog', compact('course'));
 
         $course->members()->attach(auth()->id(), ['role' => 'student']);
-        AddMemberToCourseGroup::dispatch(auth()->user()->gitlab_id, $course->gitlab_task_group_id, 20);
+        if($course->gitlab_task_group_id != null)
+            AddMemberToCourseGroup::dispatch(auth()->user()->gitlab_id, $course->gitlab_task_group_id, 20);
 
         return redirect()->route('courses.show', [$course->id]);
     }

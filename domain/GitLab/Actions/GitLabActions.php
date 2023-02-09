@@ -110,6 +110,7 @@ class GitLabActions implements SourceControl
                 'name' => $name,
                 'path' => Str::snake($name),
             ]);
+
         $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->post('/groups', $params->toArray());
         return new Group($response->json('id'));
     }
