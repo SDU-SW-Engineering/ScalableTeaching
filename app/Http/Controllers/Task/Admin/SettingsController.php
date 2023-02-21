@@ -23,7 +23,7 @@ class SettingsController extends Controller
         if($task->type == TaskTypeEnum::Assignment)
         {
             $ciFile = $task->ciFile();
-            $subTasks = $this->getSubTasks($ciFile, $task);
+            $subTasks = $ciFile == null ? null : $this->getSubTasks($ciFile, $task);
 
             return view('tasks.admin.preferences', compact('subTasks', 'task'));
         }
