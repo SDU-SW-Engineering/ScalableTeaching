@@ -273,7 +273,7 @@ class TaskController extends Controller
         if($validated['type'] == 'exercise')
         {
             $forkFrom = Str::of($validated['repo-id'])->split('#/#')->last();
-            $project = $sourceControl->forkProject($forkFrom, $course->gitlab_group_id, $validated['name']);
+            $project = $sourceControl->forkProject($forkFrom, "$course->gitlab_task_group_id", $validated['name']);
             $sourceId = $project->id;
         } else
         {
