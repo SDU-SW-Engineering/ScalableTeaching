@@ -7,6 +7,7 @@ use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use App\Tasks\Validation\ProtectedFilesUntouched;
 use Carbon\Carbon;
+use Domain\GitLab\Definitions\Build;
 use Domain\SourceControl\SourceControl;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -169,6 +170,15 @@ class Project extends Model
     }
 
     /**
+     * @param Builder<Project> $query
+     * @return Builder<Project>
+     */
+    public function scopeUnclaimed(Builder $query): Builder
+    {
+        return $query->whereNull('ownable_id');
+    }
+
+    /**
      * returns a collection of users that own the project
      * @return EloquentCollection<int,User>
      */
@@ -325,14 +335,14 @@ class Project extends Model
         return $sourceControl->showProject((string)$this->project_id);
     }
 
-    public function validateSubmission() : bool
+    public function validateSubmission(): bool
     {
         $this->validated_at = now();
         $rules = [new ProtectedFilesUntouched()];
         foreach($rules as $rule)
         {
             $errors = $rule->validate($this->task, $this);
-            if ($errors->isEmpty())
+            if($errors->isEmpty())
                 continue;
 
             $this->validation_errors = $errors;
@@ -345,5 +355,15 @@ class Project extends Model
         $this->save();
 
         return true;
+    }
+
+    public function claim(User|Group $owner) : Project
+    {
+        $this->update([
+            'ownable_id'   => $owner->id,
+            'ownable_type' => $owner::class,
+        ]);
+
+        return $this;
     }
 }

@@ -149,59 +149,9 @@ class TaskController extends Controller
         abort_if( ! $task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
 
         $owner = $isSolo ? auth()->user() : $group;
-        $this->createProject($gitLabManager, $task, $owner->projectName, $owner);
+        $task->createProject($owner);
 
         return "OK";
-    }
-
-
-    /**
-     * @param GitLabManager $manager
-     * @param Task $task
-     * @param string $name
-     * @param Group|User $owner
-     * @return Project
-     * @throws Exception
-     */
-    private function createProject(GitLabManager $manager, Task $task, string $name, $owner): Project
-    {
-        $resultPager = new ResultPager($manager->connection());
-        $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$task->gitlab_group_id]));
-        $project = $projects->firstWhere('name', $name);
-        if($project == null)
-            $project = $this->forkProject($manager, $name, $task->source_project_id, $task->gitlab_group_id);
-
-        /** @var Project $dbProject */
-        $dbProject = $owner->projects()->updateOrCreate([
-            'project_id' => $project['id'],
-            'task_id'    => $task->id,
-            'repo_name'  => $project['name'],
-        ]);
-
-        return $dbProject;
-    }
-
-    /**
-     * @param GitLabManager $manager
-     * @param string $username
-     * @param int $sourceProjectId
-     * @param int $groupId
-     * @return array<string,string>
-     * @throws Exception
-     */
-    private function forkProject(GitLabManager $manager, string $username, int $sourceProjectId, int $groupId): array
-    {
-        $params = [
-            'name'                   => $username,
-            'path'                   => $username,
-            'namespace_id'           => $groupId,
-            'shared_runners_enabled' => false,
-        ];
-
-        $id = rawurlencode((string)$sourceProjectId);
-        $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
-
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     public function showCreate(Course $course): View
