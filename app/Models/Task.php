@@ -583,6 +583,7 @@ class Task extends Model
     public function preload(int $availability = 100): void
     {
         $preloadCount = $this->course->students()->count() * ((float)$availability / 100.0);
+        set_time_limit(0);
         for($i = 0; $i < $preloadCount; $i++)
         {
             $this->newProject(null);
@@ -591,7 +592,7 @@ class Task extends Model
         }
     }
 
-    public function createProject(User|Group $owner)
+    public function createProject(User|Group $owner) : void
     {
         $lock = Cache::lock('project_claim', 10);
         /** @var Project|null $nextUnclaimed */

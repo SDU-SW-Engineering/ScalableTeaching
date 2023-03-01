@@ -169,6 +169,10 @@ class Project extends Model
         return $query->whereIn('status', [ProjectStatus::Overdue, ProjectStatus::Finished]);
     }
 
+    /**
+     * @param Builder<Project> $query
+     * @return Builder<Project>
+     */
     public function scopeUnclaimed(Builder $query): Builder
     {
         return $query->whereNull('ownable_id');
@@ -350,7 +354,7 @@ class Project extends Model
         return true;
     }
 
-    public function claim(User|Group $owner)
+    public function claim(User|Group $owner) : Project
     {
         $this->update([
             'ownable_id'   => $owner->id,

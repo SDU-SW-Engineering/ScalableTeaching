@@ -26,9 +26,11 @@ class PreloadTask extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $task = Task::findOrFail($this->argument('task'));
         $task->preload();
+
+        return 0;
     }
 }
