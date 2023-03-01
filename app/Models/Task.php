@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
@@ -12,12 +13,14 @@ use Domain\SourceControl\DirectoryCollection;
 use Domain\SourceControl\File;
 use Domain\SourceControl\SourceControl;
 use Eloquent;
+use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
 use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
+use Http\Client\Exception;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -30,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 /**
@@ -86,7 +90,7 @@ class Task extends Model
         $directoryCollection = new DirectoryCollection($directories);
         $sourceControl->getFilesFromDirectories($this->source_project_id, $directoryCollection);
         $readmeFile = $root->files->firstWhere(fn(File $file) => Str::of($file->getName())->trim()->lower() == "readme.md");
-        if ($readmeFile == null)
+        if($readmeFile == null)
             return false;
 
         $project = $gitlabManager->projects()->show($this->source_project_id);
@@ -128,6 +132,7 @@ class Task extends Model
     {
         return $this->hasManyThrough(ProjectFeedback::class, TaskDelegation::class);
     }
+
     /**
      * @return HasMany<Grade>
      */
@@ -203,13 +208,13 @@ class Task extends Model
      */
     public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection|null
     {
-        if( ! $this->is_publishable)
+        if(!$this->is_publishable)
             return null;
         $query = $this->jobs();
         if($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
     }
 
     /**
@@ -337,9 +342,9 @@ class Task extends Model
      */
     public function loadShaValuesFromDirectory(Collection $files = new Collection()): void
     {
-        if (count($files) == 0)
+        if(count($files) == 0)
             $files = $this->protectedFiles->map(fn(TaskProtectedFile $protectedFile) => $protectedFile->path); // @phpstan-ignore-line
-        if ($files->count() == 0)
+        if($files->count() == 0)
             return;
         $directories = DirectoryCollection::fromFiles($files);
         app(SourceControl::class)->getFilesFromDirectories("$this->source_project_id", $directories);
@@ -414,8 +419,7 @@ class Task extends Model
 
     public function canStart(Group|User $entity, string &$message = null): bool
     {
-        if( ! now()->isBetween($this->starts_at, $this->ends_at))
-        {
+        if(!now()->isBetween($this->starts_at, $this->ends_at)) {
             $message = 'The task cannot be started outside of the task time frame';
 
             return false;
@@ -426,23 +430,20 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
-        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0)
-        {
+        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
             $message = "You have already started this task";
 
             return false;
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
-        {
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
             $message = 'Another user in your group have already started this task';
 
             return false;
         }
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
-        {
+        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
             $message = "Your group have already started this task";
 
             return false;
@@ -458,8 +459,7 @@ class Task extends Model
             $groups->pluck('id')
         );
 
-        if($otherTrackHaveBeenPicked)
-        {
+        if($otherTrackHaveBeenPicked) {
             $message = "A conflicting track have already been started, and thus this task cannot be started.";
 
             return false;
@@ -528,11 +528,11 @@ class Task extends Model
     {
         return Attribute::make(get: function($value, $attributes) {
             $missing = [];
-            if( ! filled($attributes['description']))
+            if(!filled($attributes['description']))
                 $missing[] = 'description';
-            if( ! filled($attributes['starts_at']))
+            if(!filled($attributes['starts_at']))
                 $missing[] = 'starts at date';
-            if( ! filled($attributes['ends_at']))
+            if(!filled($attributes['ends_at']))
                 $missing[] = 'ends at date';
 
             return $missing;
@@ -547,7 +547,7 @@ class Task extends Model
         return Attribute::make(
             get: fn($value, $attributes) => (bool)$value,
             set: function($value, $attributes) {
-                if( ! $this->is_publishable)
+                if(!$this->is_publishable)
                     throw new \Exception("Task is not publishable.");
 
                 return $value;
@@ -572,7 +572,87 @@ class Task extends Model
     public function userProjectDictionary()
     {
         return $userProjects = $this->projects()->get() // @phpstan-ignore-line
-            ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
+        ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
             ->mapWithKeys(fn($userProject) => $userProject);
+    }
+
+    /**
+     * @param int $availability indicates the percentage of repos that should be created based on the number of students enrolled.
+     * @return void
+     */
+    public function preload(int $availability = 100): void
+    {
+        $preloadCount = $this->course()->students()->count() * ((float)$availability / 100.0);
+        for($i = 0; $i < $preloadCount; $i++)
+        {
+            $this->newProject(null);
+            sleep(3);
+        }
+    }
+
+    public function createProject(User|Group $owner)
+    {
+        $lock = Cache::lock('project_claim', 10);
+        $nextUnclaimed = $this->projects()->unclaimed()->first();
+        if($nextUnclaimed != null) {
+            $claimedProject = $nextUnclaimed->claim($owner);
+            $lock->release();
+            RefreshMemberAccess::dispatch($$claimedProject->project);
+            return;
+        }
+        $lock->release();
+
+        $this->newProject($owner);
+    }
+
+    /**
+     * @param Group|User $owner
+     * @return Project
+     * @throws Exception
+     */
+    private function newProject(User|Group|null $owner): Project
+    {
+        $manager = app(GitLabManager::class);
+        $resultPager = new ResultPager($manager->connection());
+        $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
+        $projectName = $owner == null ? "$this->name-" . Str::random(8) : $owner->projectName;
+        $project = $projects->firstWhere('name', $projectName);
+        if($project == null)
+            $project = $this->forkProject($manager, $projectName, $this->source_project_id, $this->gitlab_group_id);
+
+        /** @var Project $dbProject */
+        $dbProject = $owner == null ? $this->projects()->create([
+            'project_id' => $project['id'],
+            'repo_name' => $project['name']
+        ]) : $owner->projects()->updateOrCreate([
+            'project_id' => $project['id'],
+            'task_id'    => $this->id,
+            'repo_name'  => $project['name'],
+        ]);
+
+        return $dbProject;
+    }
+
+    /**
+     * @param GitLabManager $manager
+     * @param string $username
+     * @param int $sourceProjectId
+     * @param int $groupId
+     * @return array<string,string>
+     * @throws Exception
+     */
+    private function forkProject(GitLabManager $manager, string $username, int $sourceProjectId, int $groupId): array
+    {
+        $params = [
+            'name'                   => $username,
+            'path'                   => $username,
+            'namespace_id'           => $groupId,
+            'shared_runners_enabled' => false,
+        ];
+
+        $id = rawurlencode((string)$sourceProjectId);
+        $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
+
+        return json_decode($response->getBody()->getContents(), true);
     }
 }

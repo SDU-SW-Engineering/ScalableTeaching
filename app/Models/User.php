@@ -43,6 +43,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $avatar
  * @property string $avatar_html
  * @property-read CourseUser $courseMembership
+ * @property-read string $projectName
  */
 class User extends Authenticatable
 {
