@@ -582,22 +582,24 @@ class Task extends Model
      */
     public function preload(int $availability = 100): void
     {
-        $preloadCount = $this->course()->students()->count() * ((float)$availability / 100.0);
+        $preloadCount = $this->course->students()->count() * ((float)$availability / 100.0);
         for($i = 0; $i < $preloadCount; $i++)
         {
             $this->newProject(null);
             sleep(3);
+            break;
         }
     }
 
     public function createProject(User|Group $owner)
     {
         $lock = Cache::lock('project_claim', 10);
+        /** @var Project|null $nextUnclaimed */
         $nextUnclaimed = $this->projects()->unclaimed()->first();
         if($nextUnclaimed != null) {
             $claimedProject = $nextUnclaimed->claim($owner);
             $lock->release();
-            RefreshMemberAccess::dispatch($$claimedProject->project);
+            RefreshMemberAccess::dispatch($claimedProject);
             return;
         }
         $lock->release();
