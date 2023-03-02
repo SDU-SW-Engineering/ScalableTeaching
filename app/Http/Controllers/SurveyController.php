@@ -18,7 +18,7 @@ class SurveyController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('can:edit,survey')->except('index', 'all');
+        $this->middleware('can:edit,survey')->except('index', 'all', 'projectSurvey');
     }
 
     public function index() : View
