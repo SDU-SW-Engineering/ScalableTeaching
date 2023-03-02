@@ -593,7 +593,6 @@ class Task extends Model
         {
             $this->newProject(null);
             sleep(3);
-            break;
         }
     }
 
