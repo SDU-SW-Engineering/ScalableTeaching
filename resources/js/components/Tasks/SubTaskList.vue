@@ -74,7 +74,7 @@ export default {
         },
         saveChanges: async function()
         {
-            await axios.post(`/courses/${this.task.course_id}/tasks/${this.task.id}/analytics/sub-tasks`, this.groups);
+            await axios.post(`/courses/${this.task.course_id}/tasks/${this.task.id}/admin/sub-tasks`, this.groups);
         }
     },
     data() {

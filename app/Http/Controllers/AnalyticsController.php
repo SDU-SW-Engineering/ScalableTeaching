@@ -63,37 +63,6 @@ class AnalyticsController extends Controller
         return view('tasks.admin.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
     }
 
-    public function subTasks(Course $course, Task $task) : View
-    {
-        $subTasks = $task->sub_tasks->all()->groupBy("group")->map(fn($tasks, $group) => [
-            'name'    => $group,
-            'editing' => false,
-            'tasks'   => $tasks->map(fn(SubTask $t) => [
-                'id'      => $t->id,
-                'name'    => $t->getName(),
-                'editing' => false,
-                'points'  => $t->points,
-            ]),
-        ])->values();
-
-        return view('tasks.admin.subtasks', [
-            'subTasks' => $subTasks,
-        ]);
-    }
-
-    public function saveSubTasks(Course $course, Task $task) : string
-    {
-        $subTaskCollection = new SubTaskCollection();
-        (new Collection(request()->json()))->map(fn($group) => [
-            ...(new Collection($group['tasks']))->map(fn($task) => (new SubTask($task['name'], null, $group['name']))->setPoints($task['points'])),
-        ])->flatten()
-            ->each(fn(SubTask $subTask) => $subTaskCollection->add($subTask));
-        $task->sub_tasks = $subTaskCollection;
-        $task->save();
-
-        return "OK";
-    }
-
     public function gradingOverview(Course $course, Task $task) : View
     {
         return view('tasks.admin.gradingOverview');
