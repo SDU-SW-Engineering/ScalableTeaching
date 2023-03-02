@@ -624,7 +624,7 @@ class Task extends Model
         $manager = app(GitLabManager::class);
         $resultPager = new ResultPager($manager->connection());
         $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
-        $projectName = $owner == null ? "$this->name-" . Str::random(8) : $owner->projectName;
+        $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
         $project = $projects->firstWhere('name', $projectName);
         if($project == null)
             $project = $this->forkProject($manager, $projectName, $this->source_project_id, $this->gitlab_group_id);
