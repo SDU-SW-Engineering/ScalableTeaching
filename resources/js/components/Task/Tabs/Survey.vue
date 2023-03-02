@@ -15,7 +15,7 @@
                         <div class="ml-2">
                             <label :for="item.id" class="text-gray-900 dark:text-gray-300" v-text="item.name"></label>
                         </div>
-                        <div class="ml-2 mt-2" v-if="item.allow_input && Array.isArray(fields['v'+field.id]) && fields['v'+field.id].includes(item.id)">
+                        <div class="ml-2 mt-2" v-if="item.allow_input">
                             <textarea v-model="extras['v'+item.id]" class="block text-sm w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-lime-green-500 focus:border-lime-green-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500"></textarea>
                         </div>
                     </div>
@@ -97,9 +97,9 @@ export default {
                             this.validated['v' + field.id] = "You need to enter some additional input.";
                             continue;
                         }
-                        if (extraVal.trim().length < 10 || extraVal.trim().length >= 300)
+                        if (extraVal.trim().length < 10 || extraVal.trim().length >= 3000)
                         {
-                            this.validated['v' + field.id] = "Your input needs to be between 10 and 300 characters";
+                            this.validated['v' + field.id] = "Your input needs to be between 10 and 3000 characters";
                             continue;
                         }
                     }
@@ -127,8 +127,6 @@ export default {
 
             if (Array.isArray(field.items)){
                 field.items.filter(item => item.allow_input).forEach(item => extras["v" + item.id] = null);
-
-
             }
         }
         this.fields = obj;

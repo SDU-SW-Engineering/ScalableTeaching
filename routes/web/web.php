@@ -36,7 +36,7 @@ Route::group(['prefix' => 'projects/{project}', 'as' => 'projects.', 'middleware
     Route::post('refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
 
     Route::controller(SurveyController::class)->prefix('surveys/{survey}')->group(function() {
-        Route::post('/', 'projectSurvey');
+        Route::post('/', 'projectSurvey')->can('answer,survey,project');
     });
 });
 
