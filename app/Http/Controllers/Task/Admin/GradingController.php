@@ -49,7 +49,7 @@ class GradingController extends Controller
             'options.feedback'   => [],
             'options.moderation' => [],
             'options.grade'      => [],
-            'pool'               => 'in:user,role'
+            'pool'               => 'in:user,role',
         ]);
 
         $deadline = Carbon::parse($validated['deadline_date'] . " " . $validated['deadline_hour']);
@@ -85,7 +85,7 @@ class GradingController extends Controller
     {
         $taskDelegation->load('feedback.user');
 
-        if(!$taskDelegation->delegated)
+        if( ! $taskDelegation->delegated)
             return view('tasks.admin.grading.showFeedbackDelegation', compact('task', 'course', 'taskDelegation'));
 
         $groupedByUser = $taskDelegation->getRelation('feedback')->groupBy(function(ProjectFeedback $feedback) {
@@ -118,7 +118,8 @@ class GradingController extends Controller
     public function showFeedbackModeration(Course $course, Task $task): View
     {
         $commentsQuery = ProjectFeedbackComment::query();
-        if(\request('filter', '-1') != '-1') {
+        if(\request('filter', '-1') != '-1')
+        {
             $commentsQuery->whereHas('feedback', fn($query) => $query->where('project_id', \request('filter')));
         }
 
@@ -133,7 +134,8 @@ class GradingController extends Controller
     public function showFeedbackModerationHistory(Course $course, Task $task): View
     {
         $commentsQuery = ProjectFeedbackComment::query();
-        if(\request('filter', '-1') != '-1') {
+        if(\request('filter', '-1') != '-1')
+        {
             $commentsQuery->whereHas('feedback', fn($query) => $query->where('project_id', \request('filter')));
         }
 

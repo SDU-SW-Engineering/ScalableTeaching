@@ -209,13 +209,13 @@ class Task extends Model
      */
     public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection|null
     {
-        if(!$this->is_publishable)
+        if( ! $this->is_publishable)
             return null;
         $query = $this->jobs();
         if($withTrash)
             $query->withTrashedParents();
 
-        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate(!$withToday))->get();
+        return $query->daily($this->starts_at->startOfDay(), $this->earliestEndDate( ! $withToday))->get();
     }
 
     /**
@@ -420,7 +420,8 @@ class Task extends Model
 
     public function canStart(Group|User $entity, string &$message = null): bool
     {
-        if(!now()->isBetween($this->starts_at, $this->ends_at)) {
+        if( ! now()->isBetween($this->starts_at, $this->ends_at))
+        {
             $message = 'The task cannot be started outside of the task time frame';
 
             return false;
@@ -431,20 +432,23 @@ class Task extends Model
             ->flatten()
             ->unique('id');
 
-        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0) {
+        if($entity instanceof User && self::usersHaveBegunTasks($entity->id, $this->id)->count() > 0)
+        {
             $message = "You have already started this task";
 
             return false;
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) {
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
+        {
             $message = 'Another user in your group have already started this task';
 
             return false;
         }
 
-        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0) {
+        if(self::groupsHaveBegunTasks($groups->pluck('id'), $this->id)->count() > 0)
+        {
             $message = "Your group have already started this task";
 
             return false;
@@ -460,7 +464,8 @@ class Task extends Model
             $groups->pluck('id')
         );
 
-        if($otherTrackHaveBeenPicked) {
+        if($otherTrackHaveBeenPicked)
+        {
             $message = "A conflicting track have already been started, and thus this task cannot be started.";
 
             return false;
@@ -529,11 +534,11 @@ class Task extends Model
     {
         return Attribute::make(get: function($value, $attributes) {
             $missing = [];
-            if(!filled($attributes['description']))
+            if( ! filled($attributes['description']))
                 $missing[] = 'description';
-            if(!filled($attributes['starts_at']))
+            if( ! filled($attributes['starts_at']))
                 $missing[] = 'starts at date';
-            if(!filled($attributes['ends_at']))
+            if( ! filled($attributes['ends_at']))
                 $missing[] = 'ends at date';
 
             return $missing;
@@ -548,7 +553,7 @@ class Task extends Model
         return Attribute::make(
             get: fn($value, $attributes) => (bool)$value,
             set: function($value, $attributes) {
-                if(!$this->is_publishable)
+                if( ! $this->is_publishable)
                     throw new \Exception("Task is not publishable.");
 
                 return $value;
@@ -585,7 +590,8 @@ class Task extends Model
     {
         $preloadCount = $this->course->students()->count() * ((float)$availability / 100.0);
         set_time_limit(0);
-        for($i = 0; $i < $preloadCount; $i++) {
+        for($i = 0; $i < $preloadCount; $i++)
+        {
             $this->newProject(null);
             sleep(3);
         }
@@ -597,11 +603,13 @@ class Task extends Model
     public function createProject(User|Group $owner): void
     {
         $lock = Cache::lock('project_claim', 10);
-        try {
+        try
+        {
             $lock->block(10);
             /** @var Project|null $nextUnclaimed */
             $nextUnclaimed = $this->projects()->unclaimed()->first();
-            if($nextUnclaimed != null) {
+            if($nextUnclaimed != null)
+            {
                 $claimedProject = $nextUnclaimed->claim($owner);
                 $lock->release();
                 RefreshMemberAccess::dispatch($claimedProject);
@@ -611,10 +619,12 @@ class Task extends Model
             $lock->release();
 
             $this->newProject($owner);
-        } catch(LockTimeoutException $exception) {
+        } catch(LockTimeoutException $exception)
+        {
             throw new \Exception("Unable to acquire lock.");
-        } finally {
-            $lock?->release();
+        } finally
+        {
+            $lock->release();
         }
     }
 

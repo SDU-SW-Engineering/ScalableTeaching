@@ -35,6 +35,7 @@ it('creates a task delegation', function() {
         'deadline_hour' => "23:59",
         'type'          => 'last_pushes',
         'role'          => 'student',
+        'pool'          => 'role',
     ])->assertStatus(302);
 
     assertDatabaseCount('task_delegations', 1);

@@ -70,9 +70,11 @@ class ProjectController extends Controller
         abort_unless($project->status == ProjectStatus::Active, 400);
         \DB::transaction(function() use ($gitLabManager, $project) {
             $found = true;
-            try {
+            try
+            {
                 $gitLabManager->projects()->show($project->project_id);
-            } catch(RuntimeException $runtimeException) {
+            } catch(RuntimeException $runtimeException)
+            {
                 $found = $runtimeException->getCode() != 404;
             }
 
@@ -134,7 +136,8 @@ class ProjectController extends Controller
         $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
         $errors = [];
-        foreach($directories as $directory => $files) {
+        foreach($directories as $directory => $files)
+        {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
                 ->setIds(["gid://gitlab/Project/$project->project_id"])
@@ -149,22 +152,25 @@ class ProjectController extends Controller
             $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . getenv('GITLAB_ACCESS_TOKEN')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
-            if(count($projects) == 0) {
+            if(count($projects) == 0)
+            {
                 throw new \Exception("Project with id $project->id wasn't found.");
             }
 
             $repoFiles = collect($projects[0]->repository->tree->blobs->nodes); //@phpstan-ignore-line
-            foreach($files as $file) {
+            foreach($files as $file)
+            {
                 $lookFor = $file->baseName;
                 $found = $repoFiles->firstWhere('name', $lookFor);
-                if($found == null) {
+                if($found == null)
+                {
                     $errors[] = "The file \"{$file->path}\" is missing.";
                     continue;
                 }
 
                 $shaValues = new Collection($file->sha_values);
                 $shaIntact = $shaValues->contains($found->sha);
-                if(!$shaIntact)
+                if( ! $shaIntact)
                     $errors[] = "The file \"{$file->path}\" has been altered! Expected file to have sha value one of [{$shaValues->join(', ')}] but got $found->sha.";
             }
         }
@@ -182,10 +188,11 @@ class ProjectController extends Controller
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->orWhere('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
 
-        $context = match (true) {
+        $context = match (true)
+        {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
-            $feedback->reviewed == false => 'pre-submission',
-            $feedback->reviewed => 'submitted'
+            $feedback->reviewed == false                                              => 'pre-submission',
+            $feedback->reviewed                                                       => 'submitted'
         };
         $delegation = $feedback->taskDelegation;
 
@@ -196,14 +203,17 @@ class ProjectController extends Controller
     {
         $tree = $projectDownload->fileTree()->trim();
         $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
-        if($changes != null) {
+        if($changes != null)
+        {
             $filesChanged = array_column($changes, 'file');
             $tree->traverse(function(IsChangeable $item) use ($filesChanged) {
                 $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
 
-                foreach($filesChanged as $file) {
-                    $pathMatches = !($path == '') && preg_match("/^$path/i", $file) === 1;
-                    if($pathMatches) {
+                foreach($filesChanged as $file)
+                {
+                    $pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
+                    if($pathMatches)
+                    {
 
                         $item->setChanged(true);
                         break;
@@ -248,10 +258,12 @@ class ProjectController extends Controller
         if(\request()->has('file'))
             $query->where('filename', \request('file'));
 
-        if($isOwner) {
+        if($isOwner)
+        {
             $query->where('status', FeedbackCommentStatus::Approved);
             $query->select(['id', 'project_feedback_id', 'filename', 'line', 'marked_as', 'comment', 'created_at', 'updated_at']);
-        } else {
+        } else
+        {
             $query->select(['id', 'project_feedback_id', 'filename', 'line', 'status', 'reviewer_feedback', 'comment', 'created_at', 'updated_at']);
         }
 
@@ -299,7 +311,7 @@ class ProjectController extends Controller
     {
         $validated = \request()->validate([
             'general' => ['required', 'filled'],
-            'grade'   => []
+            'grade'   => [],
         ]);
         /** @var ?ProjectFeedback $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
@@ -313,14 +325,15 @@ class ProjectController extends Controller
         ]);
         $feedback->update(['reviewed' => true]);
 
-        if($feedback->taskDelegation->grading) {
+        if($feedback->taskDelegation->grading)
+        {
             $feedback->project->owners()->each(function(User $user) use ($feedback, $validated, $task) {
                 Grade::create([
                     'task_id'     => $task->id,
                     'value'       => $validated['grade'] == 'approve' ? GradeEnum::Passed : GradeEnum::Failed,
                     'source_type' => $feedback::class,
                     'source_id'   => $feedback->id,
-                    'user_id'     => $user->id
+                    'user_id'     => $user->id,
                 ]);
             });
 
