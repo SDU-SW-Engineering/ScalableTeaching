@@ -73,6 +73,9 @@ class ProjectPolicy
 
     public function accessCode(User $user, Project $project, ProjectDownload $projectDownload) : bool | Response
     {
+        if ($projectDownload->project->id != $project->id)
+            return false;
+
         if($this->view($user, $project))
             return true;
 

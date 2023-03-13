@@ -7,7 +7,9 @@ use App\Listeners\GitLab\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\FeedbackCommentStatus;
+use App\Models\Enums\GradeEnum;
 use App\Models\Enums\PipelineStatusEnum;
+use App\Models\Grade;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
@@ -16,6 +18,7 @@ use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
 use App\Models\ProjectFeedbackComment;
 use App\Models\Task;
+use App\Models\TaskDelegation;
 use App\Models\User;
 use App\ProjectStatus;
 use Carbon\Carbon;
@@ -183,15 +186,17 @@ class ProjectController extends Controller
     public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
     {
         /** @var ProjectFeedback|null $feedback */
-        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
+        $feedback = $project->feedback()->where('user_id', auth()->id())->orWhere('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
+
         $context = match (true)
         {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
             $feedback->reviewed == false                                              => 'pre-submission',
             $feedback->reviewed                                                       => 'submitted'
         };
+        $delegation = $feedback->taskDelegation;
 
-        return view('tasks.editor')->with('context', $context);
+        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation);
     }
 
     public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Directory
@@ -306,18 +311,34 @@ class ProjectController extends Controller
     {
         $validated = \request()->validate([
             'general' => ['required', 'filled'],
+            'grade'   => [],
         ]);
         /** @var ?ProjectFeedback $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
         abort_if($feedback == null, 400, 'This user is not able to make feedback on this project.');
         $feedback->comments()->update([
-            'status' => FeedbackCommentStatus::Pending,
+            'status' => $feedback->taskDelegation->is_moderated ? FeedbackCommentStatus::Pending : FeedbackCommentStatus::Approved,
         ]);
         $feedback->comments()->create([
             'comment' => Str::of($validated['general'])->trim(),
-            'status'  => FeedbackCommentStatus::Pending,
+            'status'  => $feedback->taskDelegation->is_moderated ? FeedbackCommentStatus::Pending : FeedbackCommentStatus::Approved,
         ]);
         $feedback->update(['reviewed' => true]);
+
+        if($feedback->taskDelegation->grading)
+        {
+            $feedback->project->owners()->each(function(User $user) use ($feedback, $validated, $task) {
+                Grade::create([
+                    'task_id'     => $task->id,
+                    'value'       => $validated['grade'] == 'approve' ? GradeEnum::Passed : GradeEnum::Failed,
+                    'source_type' => $feedback::class,
+                    'source_id'   => $feedback->id,
+                    'user_id'     => $user->id,
+                ]);
+            });
+
+            $feedback->project->update(['status' => ProjectStatus::Finished]);
+        }
 
         return "ok";
     }

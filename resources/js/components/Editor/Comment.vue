@@ -25,7 +25,7 @@
                 <span v-text="comment.comment"></span>
             </div>
         </div>
-        <div v-if="actions" class="flex bg-black rounded-b-md border-b border-r border-l border-gray-600">
+        <div v-if="actions && isModerated" class="flex bg-black rounded-b-md border-b border-r border-l border-gray-600">
             <button @click="edit" v-if="perspective === 'sender'"
                     class="w-full flex flex-col items-center py-2 first:rounded-bl-md hover:bg-gray-900">
                 <div class="h-5 w-5 flex items-center justify-center">
@@ -68,6 +68,7 @@
 
 <script>
 import axios from "axios";
+import { bus } from "./Editor"
 
 export default {
     props: {
@@ -90,7 +91,8 @@ export default {
     },
     data() {
         return {
-            markedAs: null
+            markedAs: null,
+            isModerated: false
         }
     },
     methods: {
@@ -110,6 +112,7 @@ export default {
     },
     mounted() {
         this.markedAs = this.comment.marked_as;
+        this.isModerated = bus.delegation.is_moderated;
     }
 }
 </script>

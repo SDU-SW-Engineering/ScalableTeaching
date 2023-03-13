@@ -38,35 +38,44 @@ class GradingController extends Controller
 
     public function addDelegation(Request $request, Course $course, Task $task): RedirectResponse
     {
+        //  dd($request->all());
         $validated = $request->validate([
-            'role'               => ['required'/*Rule::in($course->roles->pluck('id')), Rule::notIn($task->delegations->pluck('course_role_id'))*/], // todo: enable when roles are better defined
+            'role'               => ['required_if:pool,role'/*Rule::in($course->roles->pluck('id')), Rule::notIn($task->delegations->pluck('course_role_id'))*/], // todo: enable when roles are better defined
+            'users'              => ['required_if:pool,user'],
             'tasks'              => ['required', 'numeric'],
             'type'               => ['required', Rule::in('last_pushes', 'succeeding_pushes', 'succeed_last_pushes')],
             'deadline_date'      => ['required', 'date'],
             'deadline_hour'      => ['required', 'date_format:H:i'],
-            'options.feedback'   => ['required_without:options.grading'],
-            'options.moderation' => ['required_with:options.feedback'],
+            'options.feedback'   => [],
+            'options.moderation' => [],
+            'options.grade'      => [],
+            'pool'               => 'in:user,role',
         ]);
 
         $deadline = Carbon::parse($validated['deadline_date'] . " " . $validated['deadline_hour']);
         if($deadline->isBefore($task->ends_at))
             return back()->withInput()->withErrors('The deadline must occur after the end of the task.');
 
-        $task->delegations()->create([
-            'course_role_id'  => $validated['role'] == 'student' ? 1 : 2, // 1 = student, 2 = teahcer, todo: should reflect actual roles.
+        /** @var TaskDelegation $delegation */
+        $delegation = $task->delegations()->create([
+            'course_role_id'  => $validated['pool'] == 'role' ? ($validated['role'] == 'student' ? 1 : 2) : null, // 1 = student, 2 = teahcer, todo: should reflect actual roles.
             'number_of_tasks' => $validated['tasks'],
             'type'            => $validated['type'],
             'is_moderated'    => $request->has('options.moderation'),
             'deadline_at'     => $deadline,
             'feedback'        => $request->has('options.feedback'),
-            'grading'         => $request->has('options.grading'),
+            'grading'         => $request->has('options.grade'),
         ]);
+
+        if($validated['pool'] == 'user')
+            $delegation->userPool()->attach($validated['users']);
 
         return redirect()->back();
     }
 
     public function removeDelegation(Request $request, Course $course, Task $task, TaskDelegation $taskDelegation): RedirectResponse
     {
+        $taskDelegation->userPool()->detach();
         $taskDelegation->delete();
 
         return redirect()->back();
@@ -106,10 +115,10 @@ class GradingController extends Controller
         ));
     }
 
-    public function showFeedbackModeration(Course $course, Task $task) : View
+    public function showFeedbackModeration(Course $course, Task $task): View
     {
         $commentsQuery = ProjectFeedbackComment::query();
-        if (\request('filter', '-1') != '-1')
+        if(\request('filter', '-1') != '-1')
         {
             $commentsQuery->whereHas('feedback', fn($query) => $query->where('project_id', \request('filter')));
         }
@@ -125,7 +134,7 @@ class GradingController extends Controller
     public function showFeedbackModerationHistory(Course $course, Task $task): View
     {
         $commentsQuery = ProjectFeedbackComment::query();
-        if (\request('filter', '-1') != '-1')
+        if(\request('filter', '-1') != '-1')
         {
             $commentsQuery->whereHas('feedback', fn($query) => $query->where('project_id', \request('filter')));
         }

@@ -11,7 +11,7 @@
                 <code-viewer :context="context" :file="openedFile" :scrollTo="goToLine" v-else/>
             </div>
             <div class="flex vh80">
-                <feedback-list :context="context" @openFile="openFile" @close="showFeedbackList = false"
+                <feedback-list :should-grade="delegation.grading" :context="context" @openFile="openFile" @close="showFeedbackList = false"
                                v-if="showFeedbackList"/>
             </div>
         </div>
@@ -51,6 +51,10 @@ export default {
         context: {
             type: String,
             required: true
+        },
+        delegation: {
+            type: Object,
+            required: true
         }
     },
     data() {
@@ -63,7 +67,8 @@ export default {
             showSendFeedbackDialog: false,
             generalFeedback: "",
             dialogError: "",
-            dialogLoading: false
+            dialogLoading: false,
+            grade: null,
         }
     },
     methods: {
@@ -91,7 +96,8 @@ export default {
             this.dialogError = "";
             this.dialogLoading = true;
             await axios.post(this.currentPath() + '/feedback', {
-                general: this.generalFeedback
+                general: this.generalFeedback,
+                grade: this.grade
             });
             location.reload();
         }
@@ -99,7 +105,11 @@ export default {
     async mounted() {
         this.fileTree = (await axios.get(location.pathname + '/tree')).data;
         this.initialLoad = false;
-        bus.$on('submit-comments', () => this.showSendFeedbackDialog = true);
+        bus.$on('submit-comments', (grade) => {
+            this.showSendFeedbackDialog = true
+            this.grade = grade
+        });
+        bus.delegation = this.delegation;
     }
 }
 </script>

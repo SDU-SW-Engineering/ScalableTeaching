@@ -38,6 +38,35 @@
             </div>
         </div>
         <div v-if="context === 'pre-submission'">
+            <div v-if="shouldGrade" class="flex items-center justify-center gap-4 my-4 mx-auto">
+                <div>
+                    <input
+                        class="relative float-left mt-0.5 mr-1 -ml-[1.5rem] h-5 w-5 appearance-none rounded-full border-2 border-solid border-neutral-300 dark:border-neutral-600 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary dark:checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary dark:checked:after:border-primary dark:checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:border-primary dark:checked:focus:border-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s]"
+                        type="radio"
+                        name="flexRadioDefault"
+                        v-model="grade"
+                        value="reject"
+                        id="radioDefault01" />
+                    <label
+                        class="mt-px inline-block pl-[0.15rem] text-red-300 hover:cursor-pointer"
+                        for="radioDefault01">
+                        Reject
+                    </label>
+                </div>
+                <div>
+                    <input v-model="grade"
+                        class="relative float-left mt-0.5 mr-1 -ml-[1.5rem] h-5 w-5 appearance-none rounded-full border-2 border-solid border-neutral-300 dark:border-neutral-600 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary dark:checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary dark:checked:after:border-primary dark:checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:border-primary dark:checked:focus:border-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s]"
+                        type="radio"
+                           value="approve"
+                        name="flexRadioDefault"
+                        id="radioDefault02" />
+                    <label
+                        class="mt-px inline-block pl-[0.15rem] text-lime-green-300 hover:cursor-pointer"
+                        for="radioDefault02">
+                        Approve
+                    </label>
+                </div>
+            </div>
             <button @click="submitComments"
                 class="bg-lime-green-500 w-full flex items-center justify-center py-3 text-white hover:bg-lime-green-600 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-1">
@@ -58,12 +87,17 @@ export default {
         context: {
             type: String,
             required: true
+        },
+        shouldGrade: {
+            type: Boolean,
+            required: true
         }
     },
     data() {
         return {
             isLoading: true,
             comments: [],
+            grade: null
         }
     },
     methods: {
@@ -90,7 +124,12 @@ export default {
             this.$emit('openFile', comment.filename, comment.line);
         },
         submitComments: function() {
-            bus.$emit('submit-comments');
+            if (this.shouldGrade && this.grade == null)
+            {
+                alert("Please approve or reject!");
+                return;
+            }
+            bus.$emit('submit-comments', this.grade);
         }
     },
     computed: {
