@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property Carbon $deadline_at
  * @property int|null $course_role_id
  * @property int $number_of_tasks
+ * @property-read bool $is_moderated
  */
 class TaskDelegation extends Model
 {

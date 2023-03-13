@@ -1,5 +1,5 @@
 @extends('master')
 
 @section('content')
-    <editor context="{{ $context }}"></editor>
+    <editor context="{{ $context }}" :delegation="{{ $delegation }}"></editor>
 @endsection
