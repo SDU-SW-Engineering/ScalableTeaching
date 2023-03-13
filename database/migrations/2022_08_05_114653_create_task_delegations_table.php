@@ -15,7 +15,7 @@ return new class extends Migration {
         Schema::create('task_delegations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('task_id');
-            $table->unsignedBigInteger('course_role_id');
+            $table->unsignedBigInteger('course_role_id')->nullable();
             $table->unsignedInteger('number_of_tasks');
             $table->timestamps();
 

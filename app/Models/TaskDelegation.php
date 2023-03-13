@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
@@ -21,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property bool $delegated
  * @property bool $is_anonymous
  * @property Carbon $deadline_at
+ * @property int|null $course_role_id
+ * @property int $number_of_tasks
  */
 class TaskDelegation extends Model
 {
@@ -50,6 +53,14 @@ class TaskDelegation extends Model
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);
+    }
+
+    /**
+     * @return BelongsToMany<User>
+     */
+    public function userPool(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
     }
 
     /**
@@ -89,7 +100,9 @@ class TaskDelegation extends Model
 
         $remainingTasks = $this->projectCounter($projects);
         $delayCounter = 0;
-        foreach($this->task->course->students as $user)
+
+
+        foreach($this->pool() as $user)
         {
             if($remainingTasks->count() == 0)
                 $remainingTasks = $this->projectCounter($projects); // out of tasks, replenish to start over
@@ -99,7 +112,8 @@ class TaskDelegation extends Model
             if($userProject != null)
                 $ineligibleTasks[] = $userProject;
 
-            for($i = 0; $i < $this->number_of_tasks; $i++)
+            $numberOfTasks = $this->number_of_tasks == 0 ? $this->task->projects->count() : $this->number_of_tasks;
+            for($i = 0; $i < $numberOfTasks; $i++)
             {
                 $project = null;
                 $projectPush = null;
@@ -213,5 +227,17 @@ class TaskDelegation extends Model
             TaskDelegationType::SucceedingPushes       => throw new \Exception('To be implemented'),
             TaskDelegationType::SucceedingOrLastPushes => throw new \Exception('To be implemented')
         };
+    }
+
+    /**
+     * @return array<User>
+     */
+    private function pool(): array
+    {
+        $pool = [];
+        if($this->course_role_id != null)
+            $pool = $this->task->course->students;
+
+        return [...$pool, ...$this->userPool];
     }
 }
