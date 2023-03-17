@@ -2,20 +2,24 @@
 
 namespace App\Models;
 
+use App\Exceptions\PipelineException;
 use App\Models\Casts\SubTask;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\PipelineStatusEnum;
 use App\ProjectStatus;
+use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use GrahamCampbell\ResultType\Success;
+use Domain\SourceControl\Job;
+use Domain\SourceControl\SourceControl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * App\Models\JobStatus
@@ -23,6 +27,7 @@ use Illuminate\Support\Collection;
  * @property int $id
  * @property int $build_id
  * @property int $project_id
+ * @property int $pipeline_id
  * @property PipelineStatusEnum $status
  * @property Project $project
  * @property string $repo_name
@@ -55,10 +60,10 @@ class Pipeline extends Model
      * @var array<string,array<int,PipelineStatusEnum>>
      */
     public static array $upgradable = [
-        'pending' => [PipelineStatusEnum::Running, PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
+        'pending' => [PipelineStatusEnum::Running, PipelineStatusEnum::Failed, PipelineStatusEnum::Success, PipelineStatusEnum::Canceled],
         'failed'  => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
         'success' => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
-        'running' => [PipelineStatusEnum::Failed, PipelineStatusEnum::Success],
+        'running' => [PipelineStatusEnum::Failed, PipelineStatusEnum::Success, PipelineStatusEnum::Canceled],
     ];
 
     protected static function booted()
@@ -84,6 +89,92 @@ class Pipeline extends Model
         return in_array($to, static::$upgradable[$this->status->value]);
     }
 
+    public static function isOutsideTimeFrame(Carbon $startedAt, Project $project): bool
+    {
+        return $startedAt->isAfter($project->task->ends_at) || $startedAt->isBefore($project->task->starts_at);
+    }
+
+    /**
+     * @param Carbon $startedAt At which time the pipeline was started, this is relevant as we don't care about those that are after the deadline
+     * @param PipelineStatusEnum $status The status of the pipeline
+     * @param float|null $duration How long it took for the pipeline to finish
+     * @param float|null $queueDuration How long the pipeline was queue for
+     * @param array $succeedingBuilds The list of builds that have succeeded
+     * @return void
+     * @throws Throwable
+     */
+    public function process(Carbon $startedAt, PipelineStatusEnum $status, float $duration = null, float $queueDuration = null, array $succeedingBuilds = [])
+    {
+        throw_if(self::isOutsideTimeFrame($startedAt, $this->project), PipelineException::class, "Past deadline");
+        if( ! $this->isUpgradable($status))
+            return;
+
+        DB::transaction(function() use ($succeedingBuilds, $queueDuration, $duration, $status) {
+            $this->update([
+                'status'         => $status->value,
+                'duration'       => $duration,
+                'queue_duration' => $queueDuration,
+            ]);
+            $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getName() => $task]);
+            $this->project->subTasks()->delete(); // reset subtasks
+            (new Collection($succeedingBuilds))->each(function($build) use ($tracking) {
+                /** @var SubTask $subTask */
+                $subTask = $tracking->get($build);
+                $this->project->subTasks()->firstOrCreate([
+                    'sub_task_id' => $subTask->getId(),
+                    'source_type' => Pipeline::class,
+                    'source_id'   => $this->id,
+                    'points'      => $subTask->getPoints(),
+                ]);
+            });
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function refreshPipeline(): void
+    {
+        $sourceControl = app(SourceControl::class);
+        if($this->project == null) // project is deleted
+        {
+            $this->update(['status' => PipelineStatusEnum::Canceled]);
+
+            return;
+        }
+        $pipeline = $sourceControl->getPipeline($this->project->project_id, $this->pipeline_id);
+        if($pipeline == null || $this->project->status == ProjectStatus::Finished)
+        {
+            // pipeline no longer exists -> failed
+            $this->update(['status' => PipelineStatusEnum::Canceled]);
+
+            return;
+        }
+        $jobs = $sourceControl->getPipelineJobs($this->project->project_id, $this->pipeline_id);
+        $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
+        $succeedingBuilds = array_filter($jobs, fn(Job $job) => $tracking->contains($job->name) && $job->status == 'success');
+        $this->process(
+            startedAt: Carbon::parse($pipeline->createdAt)->setTimezone(config('app.timezone')),
+            status: PipelineStatusEnum::tryFrom($pipeline->status),
+            duration: $pipeline->duration,
+            queueDuration: $pipeline->queueDuration,
+            succeedingBuilds: array_column($succeedingBuilds, 'name')
+        );
+    }
+
+    private static function createPipelineForProject(Project $project): Pipeline
+    {
+        return $project->pipelines()->create([
+            'pipeline_id'    => request('object_attributes.id'),
+            'status'         => request('object_attributes.status'),
+            'sha'            => request('object_attributes.sha') ?? null,
+            'user_name'      => request('user.username'),
+            'duration'       => request('object_attributes.duration') ?? null,
+            'queue_duration' => request('object_attributes.queued_duration') ?? null,
+            'created_at'     => Carbon::parse(request('object_attributes.created_at'))->setTimezone(config('app.timezone')),
+        ]);
+    }
+
     /**
      * @param Builder<Pipeline> $query
      * @return Builder<Pipeline>
@@ -91,6 +182,15 @@ class Pipeline extends Model
     public function scopeFinished(Builder $query): Builder
     {
         return $query->where('status', 'finished');
+    }
+
+    /**
+     * @param Builder<Pipeline> $query
+     * @return Builder<Pipeline>
+     */
+    public function scopeStale(Builder $query): Builder
+    {
+        return $query->whereIn('status', [PipelineStatusEnum::Running, PipelineStatusEnum::Pending])->where('created_at', '<', now()->subHours(2));
     }
 
     /**

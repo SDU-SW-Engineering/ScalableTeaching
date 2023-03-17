@@ -15,7 +15,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\postJson;
 use function Pest\testDirectory;
 
-uses(RefreshDatabase::class);
+//uses(RefreshDatabase::class);
 
 beforeEach(function() {
     $this->project = Project::factory()->for(Task::factory([

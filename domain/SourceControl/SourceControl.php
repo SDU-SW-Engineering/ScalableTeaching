@@ -26,6 +26,15 @@ interface SourceControl
 
     public function forkProject(string $sourceId, string $groupId, string $newName) : ?Project;
 
+    public function getPipeline(string|int $projectId, string|int $pipelineId) : ?Pipeline;
+
+    /**
+     * @param string $projectId
+     * @param string $pipelineId
+     * @return Job[]
+     */
+    public function getPipelineJobs(string|int $projectId, string|int $pipelineId) : array;
+
     /**
      * @param string $projectId
      * @param DirectoryCollection $directoryCollection

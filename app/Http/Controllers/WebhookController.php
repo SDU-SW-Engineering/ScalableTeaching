@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\PipelineException;
 use App\Models\Casts\SubTask;
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
@@ -35,33 +36,30 @@ class WebhookController extends Controller
     {
         /** @var Project|null $project */
         $project = Project::firstWhere('project_id', request('project.id'));
-        if($project->status == ProjectStatus::Finished)
-            return "OK";
+        abort_if($project == null, 400, "Project not found");
         $startedAt = Carbon::parse(\request('object_attributes.created_at'))->setTimezone(config('app.timezone'));
-        abort_if($startedAt->isAfter($project->task->ends_at) || $startedAt->isBefore($project->task->starts_at), 400, 'Pipeline could not be processed as it is overdue.');
+        abort_if(Pipeline::isOutsideTimeFrame($startedAt, $project), 400, 'Pipeline could not be processed as it is not within the timeframe of the task.');
 
         $pipeline = $project->pipelines()->firstWhere('pipeline_id', request('object_attributes.id'));
-        if($pipeline != null && ! $pipeline->isUpgradable(PipelineStatusEnum::tryFrom(request('object_attributes.status'))))
-            return "OK";
-
         if($pipeline == null)
             $pipeline = $this->createPipeline($project);
-        else
-            $pipeline->update([
-                'status'         => request('object_attributes.status'),
-                'duration'       => request('object_attributes.duration') ?? null,
-                'queue_duration' => request('object_attributes.queued_duration') ?? null,
-            ]);
 
         $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
         $builds = new Collection(request('builds'));
         $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains($build['name']) && $build['status'] == 'success');
-        $project->subTasks()->delete();
-        $succeedingBuilds->each(fn($build) => $project->subTasks()->firstOrCreate([
-            'sub_task_id' => $tracking->flip()->get($build['name']),
-            'source_type' => Pipeline::class,
-            'source_id'   => $pipeline->id,
-        ]));
+        try
+        {
+            $pipeline->process(
+                startedAt: $startedAt,
+                status: PipelineStatusEnum::tryFrom(request('object_attributes.status')),
+                duration: request('object_attributes.duration') ?? null,
+                queueDuration: request('object_attributes.queued_duration') ?? null,
+                succeedingBuilds: $succeedingBuilds->pluck('name')->toArray()
+            );
+        } catch(PipelineException $exception)
+        {
+            abort(400, 'Pipeline could not be processed as it is not within the timeframe of the task.');
+        }
 
         return "OK";
     }
