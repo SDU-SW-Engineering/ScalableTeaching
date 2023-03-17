@@ -24,10 +24,11 @@ class WebhookController extends Controller
         abort_unless(request()->has('project_id') || request()->has('project.id'), 400, 'Project ID missing');
         abort_unless(Project::isCorrectToken(request('project_id', request('project.id')), request()->header('X-Gitlab-Token')), 400, 'Token mismatch');
 
-        return match (WebhookTypes::tryFrom(request()->header('X-GitLab-Event'))) {
+        return match (WebhookTypes::tryFrom(request()->header('X-GitLab-Event')))
+        {
             WebhookTypes::Pipeline => $this->pipeline(),
-            WebhookTypes::Push => $this->push(),
-            default => "ignored",
+            WebhookTypes::Push     => $this->push(),
+            default                => "ignored",
         };
     }
 
@@ -46,7 +47,8 @@ class WebhookController extends Controller
         $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
         $builds = new Collection(request('builds'));
         $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains($build['name']) && $build['status'] == 'success');
-        try {
+        try
+        {
             $pipeline->process(
                 startedAt: $startedAt,
                 status: PipelineStatusEnum::tryFrom(request('object_attributes.status')),
@@ -54,7 +56,8 @@ class WebhookController extends Controller
                 queueDuration: request('object_attributes.queued_duration') ?? null,
                 succeedingBuilds: $succeedingBuilds->pluck('name')->toArray()
             );
-        } catch(PipelineException $exception) {
+        } catch(PipelineException $exception)
+        {
             abort(400, 'Pipeline could not be processed as it is not within the timeframe of the task.');
         }
 

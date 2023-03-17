@@ -83,7 +83,7 @@ class Pipeline extends Model
 
     public function isUpgradable(PipelineStatusEnum $to): bool
     {
-        if(!array_key_exists($this->status->value, static::$upgradable))
+        if( ! array_key_exists($this->status->value, static::$upgradable))
             return false;
 
         return in_array($to, static::$upgradable[$this->status->value]);
@@ -106,14 +106,14 @@ class Pipeline extends Model
     public function process(Carbon $startedAt, PipelineStatusEnum $status, float $duration = null, float $queueDuration = null, array $succeedingBuilds = [])
     {
         throw_if(self::isOutsideTimeFrame($startedAt, $this->project), PipelineException::class, "Past deadline");
-        if(!$this->isUpgradable($status))
+        if( ! $this->isUpgradable($status))
             return;
 
         DB::transaction(function() use ($succeedingBuilds, $queueDuration, $duration, $status) {
             $this->update([
                 'status'         => $status->value,
                 'duration'       => $duration,
-                'queue_duration' => $queueDuration
+                'queue_duration' => $queueDuration,
             ]);
             $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getName() => $task]);
             $this->project->subTasks()->delete(); // reset subtasks
@@ -124,7 +124,7 @@ class Pipeline extends Model
                     'sub_task_id' => $subTask->getId(),
                     'source_type' => Pipeline::class,
                     'source_id'   => $this->id,
-                    'points'      => $subTask->getPoints()
+                    'points'      => $subTask->getPoints(),
                 ]);
             });
         });
@@ -139,12 +139,15 @@ class Pipeline extends Model
         if($this->project == null) // project is deleted
         {
             $this->update(['status' => PipelineStatusEnum::Canceled]);
+
             return;
         }
         $pipeline = $sourceControl->getPipeline($this->project->project_id, $this->pipeline_id);
-        if($pipeline == null || $this->project->status == ProjectStatus::Finished) {
+        if($pipeline == null || $this->project->status == ProjectStatus::Finished)
+        {
             // pipeline no longer exists -> failed
             $this->update(['status' => PipelineStatusEnum::Canceled]);
+
             return;
         }
         $jobs = $sourceControl->getPipelineJobs($this->project->project_id, $this->pipeline_id);
@@ -159,8 +162,7 @@ class Pipeline extends Model
         );
     }
 
-    private
-    static function createPipelineForProject(Project $project): Pipeline
+    private static function createPipelineForProject(Project $project): Pipeline
     {
         return $project->pipelines()->create([
             'pipeline_id'    => request('object_attributes.id'),
@@ -202,8 +204,7 @@ class Pipeline extends Model
     /**
      * @return MorphMany<ProjectSubTask>
      */
-    public
-    function subTasks(): MorphMany
+    public function subTasks(): MorphMany
     {
         return $this->morphMany(ProjectSubTask::class, 'source');
     }
@@ -211,8 +212,7 @@ class Pipeline extends Model
     /**
      * @return Attribute<Collection<int,array{name:string,completed:bool}>,null>
      */
-    public
-    function prettySubTasks(): Attribute
+    public function prettySubTasks(): Attribute
     {
         return Attribute::make(get: function($value, $attributes) {
             $availableSubTasks = $this->project->task->sub_tasks;
@@ -228,8 +228,7 @@ class Pipeline extends Model
     /**
      * @return Attribute<string,null>
      */
-    public
-    function runTime(): Attribute
+    public function runTime(): Attribute
     {
         return Attribute::make(get: fn($value, $attributes) => CarbonInterval::seconds($attributes['duration'])->forHumans());
     }
@@ -237,8 +236,7 @@ class Pipeline extends Model
     /**
      * @return Attribute<string,null>
      */
-    public
-    function queuedFor(): Attribute
+    public function queuedFor(): Attribute
     {
         return Attribute::make(get: fn($value, $attributes) => CarbonInterval::seconds($attributes['queue_duration'])->forHumans());
     }

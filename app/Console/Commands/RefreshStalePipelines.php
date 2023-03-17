@@ -36,6 +36,7 @@ class RefreshStalePipelines extends Command
             RefreshPipeline::dispatch($pipeline)->delay(now()->addSeconds($index * 5));
         });
         $this->info('Stale pipelines have been queue for refresh.');
+
         return 0;
     }
 }
