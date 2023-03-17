@@ -6,6 +6,7 @@ use Domain\SourceControl\Directory;
 use Domain\SourceControl\DirectoryCollection;
 use Domain\SourceControl\File;
 use Domain\SourceControl\Group;
+use Domain\SourceControl\Pipeline;
 use Domain\SourceControl\Project;
 use Domain\SourceControl\SourceControl;
 use Domain\SourceControl\User;
@@ -113,5 +114,15 @@ class MockedGitlabActions implements SourceControl
     public function addUserToGroup(string|int $groupId, string|int $userId, int $level, array $options = []): void
     {
         return;
+    }
+
+    public function getPipeline(int|string $projectId, int|string $pipelineId): ?Pipeline
+    {
+        return null;
+    }
+
+    public function getPipelineJobs(int|string $projectId, int|string $pipelineId): array
+    {
+        return [];
     }
 }

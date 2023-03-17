@@ -8,4 +8,5 @@ enum PipelineStatusEnum : string
     case Failed = "failed";
     case Pending = "pending";
     case Running = "running";
+    case Canceled = "canceled";
 }

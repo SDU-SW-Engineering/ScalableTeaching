@@ -6,6 +6,8 @@ use Domain\SourceControl\Directory;
 use Domain\SourceControl\DirectoryCollection;
 use Domain\SourceControl\File;
 use Domain\SourceControl\Group;
+use Domain\SourceControl\Job;
+use Domain\SourceControl\Pipeline;
 use Domain\SourceControl\Project;
 use Domain\SourceControl\SourceControl;
 use Domain\SourceControl\User;
@@ -17,6 +19,7 @@ use GraphQL\SchemaObject\RootQueryObject;
 use Http;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use function Pest\Laravel\json;
 
 class GitLabActions implements SourceControl
 {
@@ -172,5 +175,28 @@ class GitLabActions implements SourceControl
             'user_id'      => self::gidToId($userId),
             ...$options
         ]);
+    }
+
+    public function getPipeline(string|int $projectId, string|int $pipelineId): ?Pipeline
+    {
+        $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->get("projects/$projectId/pipelines/$pipelineId");
+        if (!$response->ok())
+            return null;
+        $json = $response->json();
+        return new Pipeline(pipelineId: $json['id'], createdAt: $json['created_at'], status: $json['status'], queueDuration: $json['queued_duration'], duration: $json['duration']);
+    }
+
+    public function getPipelineJobs(string|int $projectId, string|int $pipelineId): array
+    {
+        $response = Http::withToken(User::token())->baseUrl(config('sourcecontrol.url') . '/api/v4')->get("projects/$projectId/pipelines/$pipelineId/jobs");
+        if (!$response->ok())
+            return [];
+
+        $jobs =  [];
+        foreach ($response->json() as $job)
+        {
+            $jobs[] = new Job(name: $job['name'], status: $job['status']);
+        }
+        return $jobs;
     }
 }
