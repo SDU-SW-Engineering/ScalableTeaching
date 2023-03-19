@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\ProjectCreated;
+use App\Models\Casts\SubTask;
 use App\Models\Enums\CorrectionType;
 use App\ProjectStatus;
 use App\Tasks\Validation\ProtectedFilesUntouched;
@@ -63,6 +64,8 @@ use Illuminate\Support\Collection;
  * @property-read bool $isMissed
  * @property Collection<int,string> $validation_errors
  * @property Carbon $validated_at
+ * @property EloquentCollection<ProjectSubTask> $subTasks
+ * @property EloquentCollection<ProjectSubTaskComment> $subTaskComments
  */
 class Project extends Model
 {

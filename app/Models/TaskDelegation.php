@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property TaskDelegationType $type
  * @property bool $delegated
  * @property bool $is_anonymous
+ * @property bool $grading
  * @property Carbon $deadline_at
  * @property int|null $course_role_id
  * @property int $number_of_tasks

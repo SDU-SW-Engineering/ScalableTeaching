@@ -183,7 +183,7 @@ class ProjectController extends Controller
         return redirect()->back();
     }
 
-    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
+    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : View
     {
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->orWhere('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
@@ -195,8 +195,25 @@ class ProjectController extends Controller
             $feedback->reviewed                                                       => 'submitted'
         };
         $delegation = $feedback->taskDelegation;
+        $subTaskStatus = null;
+        if($delegation->grading)
+        {
+            $achievedPoints = $project->subTasks->pluck('points', 'sub_task_id');
+            $comments = $project->subTaskComments->pluck('text', 'sub_task_id');
+            $subTaskStatus = $task->sub_tasks->all()->map(fn(SubTask $subTask) => [
+                'id'        => $subTask->getId(),
+                'name'      => $subTask->getName(),
+                'group'     => $subTask->getGroup(),
+                'maxPoints' => $subTask->getPoints(),
+                'comment'   => $comments->get($subTask->getId()),
+                'points'    => $achievedPoints->get($subTask->getId()) ?? null,
+            ])->groupBy('group')->map(fn($tasks, $groupName) => [
+                'group_name' => $groupName,
+                'tasks'      => $tasks,
+            ])->values(); // we convert to an ordinary array as we don't want JS to sort the output json based on keys
+        }
 
-        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation);
+        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus);
     }
 
     public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Directory
@@ -310,8 +327,9 @@ class ProjectController extends Controller
     public function submitFeedback(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): string
     {
         $validated = \request()->validate([
-            'general' => ['required', 'filled'],
+            'general' => [],
             'grade'   => [],
+            'tasks'   => [],
         ]);
         /** @var ?ProjectFeedback $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // todo, this should probably be based on SHA
@@ -319,10 +337,14 @@ class ProjectController extends Controller
         $feedback->comments()->update([
             'status' => $feedback->taskDelegation->is_moderated ? FeedbackCommentStatus::Pending : FeedbackCommentStatus::Approved,
         ]);
-        $feedback->comments()->create([
-            'comment' => Str::of($validated['general'])->trim(),
-            'status'  => $feedback->taskDelegation->is_moderated ? FeedbackCommentStatus::Pending : FeedbackCommentStatus::Approved,
-        ]);
+
+        if(\request()->has('general') && Str::of(\request('general'))->isNotEmpty())
+        {
+            $feedback->comments()->create([
+                'comment' => Str::of($validated['general'])->trim(),
+                'status'  => $feedback->taskDelegation->is_moderated ? FeedbackCommentStatus::Pending : FeedbackCommentStatus::Approved,
+            ]);
+        }
         $feedback->update(['reviewed' => true]);
 
         if($feedback->taskDelegation->grading)
@@ -336,6 +358,22 @@ class ProjectController extends Controller
                     'user_id'     => $user->id,
                 ]);
             });
+            $tasks = (new Collection(request('tasks')))->map(fn($group) => $group['tasks'])->flatten(1);
+            $tasksToCreate = $tasks->reject(fn($task) => $task['points'] == null)->map(fn($task) => [
+                'source_type' => $feedback::class,
+                'source_id'   => $feedback->id,
+                'points'      => $task['points'],
+                'sub_task_id' => $task['id'],
+            ]);
+            $commentsToCreate = $tasks->reject(fn($task) => $task['comment'] == null)->map(fn($task) => [
+                'text'        => $task['comment'],
+                'sub_task_id' => $task['id'],
+                'author_id'   => auth()->id(),
+            ]);
+            $feedback->project->subTasks()->delete();
+            $feedback->project->subTaskComments()->delete();
+            $feedback->project->subTasks()->createMany($tasksToCreate);
+            $feedback->project->subTaskComments()->createMany($commentsToCreate);
 
             $feedback->project->update(['status' => ProjectStatus::Finished]);
         }

@@ -76,6 +76,7 @@ class GradingController extends Controller
     public function removeDelegation(Request $request, Course $course, Task $task, TaskDelegation $taskDelegation): RedirectResponse
     {
         $taskDelegation->userPool()->detach();
+        $taskDelegation->feedback()->delete();
         $taskDelegation->delete();
 
         return redirect()->back();
