@@ -359,13 +359,13 @@ class ProjectController extends Controller
                 ]);
             });
             $tasks = (new Collection(request('tasks')))->map(fn($group) => $group['tasks'])->flatten(1);
-            $tasksToCreate = $tasks->reject(fn($task) => $task['points'] == null)->map(fn($task) => [
+            $tasksToCreate = $tasks->reject(fn($task) => $task['points'] === null)->map(fn($task) => [
                 'source_type' => $feedback::class,
                 'source_id'   => $feedback->id,
                 'points'      => $task['points'],
                 'sub_task_id' => $task['id'],
             ]);
-            $commentsToCreate = $tasks->reject(fn($task) => $task['comment'] == null)->map(fn($task) => [
+            $commentsToCreate = $tasks->reject(fn($task) => $task['comment'] === null)->map(fn($task) => [
                 'text'        => $task['comment'],
                 'sub_task_id' => $task['id'],
                 'author_id'   => auth()->id(),
