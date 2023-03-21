@@ -31,8 +31,7 @@ class ModuleService
         foreach($module->dependencies() as $dependency) {
             $name = class_basename($dependency);
             throw_unless(array_key_exists($dependency, $registeredModules), \Exception::class, "Module [{$module->name()}] depends on module [$name] which is not registered.");
-
-            if(!array_key_exists($name, $installed))
+            if(!in_array($name, $installed))
                 $unmet[] = $name;
         }
         return $unmet;
