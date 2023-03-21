@@ -178,6 +178,7 @@ return [
         App\Providers\GitLabServiceProvider::class,
         App\Providers\ViewServiceProvider::class,
         App\Providers\CourseActivityServiceProvider::class,
+        App\Providers\ModuleProvider::class,
 
 
         /*

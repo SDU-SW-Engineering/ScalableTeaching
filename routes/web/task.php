@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Task\Admin\GradingController;
+use App\Http\Controllers\Task\Admin\ModuleController;
 use App\Http\Controllers\Task\Admin\OverviewController;
 use App\Http\Controllers\Task\Admin\ProgressionController;
 use App\Http\Controllers\Task\Admin\SettingsController;
@@ -17,6 +18,11 @@ Route::prefix('{task}')->group(function() {
             Route::get('pushes', 'pushes')->name('pushes');
             Route::get('downloads', 'downloads')->name('downloads');
             Route::get('log', 'log')->name('log');
+        });
+
+        Route::controller(ModuleController::class)->prefix('modules')->as('modules.')->group(function() {
+            Route::get('/', 'index');
+            Route::get('install', 'install')->name('install');
         });
 
         Route::controller(ProgressionController::class)->group(function() {
