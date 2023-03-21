@@ -63,6 +63,7 @@ use Illuminate\Support\Str;
  * @property bool $is_visible
  * @property string|null $current_sha
  * @property-read bool $is_publishable
+ * @property-read ModuleConfiguration $module_configuration
  * @mixin Eloquent
  */
 class Task extends Model

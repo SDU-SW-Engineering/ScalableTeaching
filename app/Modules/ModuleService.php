@@ -3,10 +3,11 @@
 namespace App\Modules;
 
 use App\Http\Controllers\Task\Admin\ModuleController;
+use App\Models\Task;
 
 class ModuleService
 {
-    private $moduleNamespace = "\\App\\Modules";
+    private string $moduleNamespace = "\\App\\Modules";
 
     private array $registeredModules = [];
 
@@ -24,15 +25,14 @@ class ModuleService
      */
     public function unmetDependencies(Module $module, ModuleConfiguration $moduleConfiguration): array
     {
-        $installed = array_map(fn($moduleSettings, $moduleName) => dd($moduleSettings), $moduleConfiguration->installed);
+        $installed = array_keys($moduleConfiguration->installed());
         $unmet = [];
         $registeredModules = array_flip(array_map(fn($registeredModule) => $registeredModule::class, $this->registeredModules));
-        foreach ($module->dependencies() as $dependency)
-        {
+        foreach($module->dependencies() as $dependency) {
             $name = class_basename($dependency);
             throw_unless(array_key_exists($dependency, $registeredModules), \Exception::class, "Module [{$module->name()}] depends on module [$name] which is not registered.");
 
-            if (!array_key_exists($name, $installed))
+            if(!array_key_exists($name, $installed))
                 $unmet[] = $name;
         }
         return $unmet;
@@ -44,10 +44,8 @@ class ModuleService
     public function hasInstallProblems(Module $module, ModuleConfiguration $configuration): string|null
     {
         $unmetDependencies = $this->unmetDependencies($module, $configuration);
-        if (count($unmetDependencies) > 0)
+        if(count($unmetDependencies) > 0)
             return "Requires the \"${unmetDependencies[0]}\" module.";
-        if (count($this->unmetDependencies($module, $configuration)) > 0)
-            return [];
 
         // check dependencies
         // individual requiremnts for each module
@@ -60,5 +58,24 @@ class ModuleService
     public function modules(): array
     {
         return $this->registeredModules;
+    }
+
+    public function isInstalled(Module $module, ModuleConfiguration $configuration)
+    {
+        return $configuration->hasInstalled($module->identifier());
+    }
+
+    public function getById(string $identifier)
+    {
+        $found = array_values(array_filter($this->registeredModules, fn($registeredModule) => class_basename($registeredModule) == $identifier));
+        if(count($found) == 0)
+            return null;
+        return $found[0];
+    }
+
+    public function install(Module $module, Task $task)
+    {
+        $task->module_configuration->addModule($module);
+        $task->save();
     }
 }

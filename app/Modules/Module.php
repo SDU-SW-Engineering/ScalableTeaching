@@ -44,7 +44,7 @@ abstract class Module
      */
     public function identifier(): string
     {
-        return $this->identifier;
+        return class_basename($this);
     }
 
     /**
