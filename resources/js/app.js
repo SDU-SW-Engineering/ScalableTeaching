@@ -65,6 +65,11 @@ Vue.component(
     require("./components/Admin/FeedbackReview").default
 );
 
+Vue.component(
+    "repo-selection",
+    require("./components/Course/RepoSelection.vue").default
+);
+
 const settings = {
     "t-rich-select": {
         component: TRichSelect,

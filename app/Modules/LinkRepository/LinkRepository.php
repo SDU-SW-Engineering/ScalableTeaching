@@ -3,6 +3,7 @@
 namespace App\Modules\LinkRepository;
 
 use App\Modules\Module;
+use App\Modules\Settings;
 
 class LinkRepository extends Module
 {
@@ -14,4 +15,10 @@ class LinkRepository extends Module
                             </svg>';
     protected string $description = 'Links this repository to a GitLab repo. Enabling
                             this modules allows you to create.';
+
+    protected function loadSettings(): ?Settings
+    {
+        return new LinkRepositorySettings();
+    }
+
 }

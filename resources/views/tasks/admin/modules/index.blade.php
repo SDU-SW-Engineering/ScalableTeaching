@@ -15,7 +15,7 @@
             </h1>
             <div class="grid grid-cols-2 gap-8">
                 @foreach($moduleService->modules() as $module)
-                    <div @class(['bg-gray-700 shadow p-4 rounded-md flex flex-col justify-between  border-2', $moduleService->isInstalled($module, $task->module_configuration) ? 'border-lime-green-300' : 'border-gray-700'])>
+                    <div @class(['bg-gray-700 shadow p-4 rounded-md flex flex-col justify-between  border-2', $task->module_configuration->hasInstalled($module) ? 'border-lime-green-300' : 'border-gray-700'])>
                         <div class="mb-4">
                             <h2 class="text-gray-100 flex gap-2 text-lg items-center mb-4">
                                 {!! $module->icon() !!}
@@ -24,13 +24,19 @@
                             <p class="text-gray-200 font-light text-sm">{{ $module->description() }}</p>
                         </div>
                         <div class="flex gap-4 items-center">
-                            @if($moduleService->isInstalled($module, $task->module_configuration))
+                            @if($task->module_configuration->hasInstalled($module))
                                 <button
                                     class="bg-gray-600 px-3 py-2 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm cursor-not-allowed opacity-50">
                                     Installed
                                 </button>
+                                @if($module->settings() != null)
+                                    <a href="{{ route('courses.tasks.admin.modules.configure', [$course, $task, $module->identifier()]) }}"
+                                       class="bg-gray-600 px-3 py-2 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm hover:bg-gray-500">
+                                        Configure
+                                    </a>
+                                @endif
                             @else
-                                @if($missingDependency = $moduleService->hasInstallProblems($module, $task->module_configuration))
+                                @if($missingDependency = $moduleService->hasInstallProblems($module::class, $task->module_configuration))
                                     <button
                                         class="bg-gray-600 px-3 py-2 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm cursor-not-allowed opacity-50">
                                         Enable
@@ -44,12 +50,6 @@
                                         Enable
                                     </a>
                                 @endif
-                            @endif
-                            @if(false)
-                                <button
-                                    class="bg-gray-600 px-3 py-2 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm hover:bg-gray-500">
-                                    Configure
-                                </button>
                             @endif
                         </div>
                     </div>

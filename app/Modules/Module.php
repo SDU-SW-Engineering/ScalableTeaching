@@ -10,6 +10,13 @@ abstract class Module
 
     protected string $description;
 
+    private ?Settings $settings;
+
+    public function __construct()
+    {
+        $this->settings = $this->loadSettings();
+    }
+
     /**
      * @var array list of modules this module depends on
      */
@@ -53,5 +60,30 @@ abstract class Module
     public function dependencies(): array
     {
         return $this->dependencies;
+    }
+
+    /**
+     * Allows each module to have a settings
+     * @return Settings|null
+     */
+    protected function loadSettings() : ?Settings
+    {
+        return null;
+    }
+
+    public function settings() : ?Settings
+    {
+        return $this->settings;
+    }
+
+    public function setSettings(Settings $settings) : Module
+    {
+        $this->settings = $settings;
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->identifier();
     }
 }

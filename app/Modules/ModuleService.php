@@ -11,7 +11,7 @@ class ModuleService
 
     private array $registeredModules = [];
 
-    public function registerModule(Module $module): void
+    public function registerModule(string $module): void
     {
         $this->registeredModules[] = $module;
     }
@@ -27,7 +27,7 @@ class ModuleService
     {
         $installed = array_keys($moduleConfiguration->installed());
         $unmet = [];
-        $registeredModules = array_flip(array_map(fn($registeredModule) => $registeredModule::class, $this->registeredModules));
+        $registeredModules = array_flip($this->registeredModules);
         foreach($module->dependencies() as $dependency) {
             $name = class_basename($dependency);
             throw_unless(array_key_exists($dependency, $registeredModules), \Exception::class, "Module [{$module->name()}] depends on module [$name] which is not registered.");
@@ -40,9 +40,9 @@ class ModuleService
     /**
      * @throws \Throwable
      */
-    public function hasInstallProblems(Module $module, ModuleConfiguration $configuration): string|null
+    public function hasInstallProblems(string $module, ModuleConfiguration $configuration): string|null
     {
-        $unmetDependencies = $this->unmetDependencies($module, $configuration);
+        $unmetDependencies = $this->unmetDependencies((new $module), $configuration);
         if(count($unmetDependencies) > 0)
             return "Requires the \"${unmetDependencies[0]}\" module.";
 
@@ -56,12 +56,7 @@ class ModuleService
      */
     public function modules(): array
     {
-        return $this->registeredModules;
-    }
-
-    public function isInstalled(Module $module, ModuleConfiguration $configuration)
-    {
-        return $configuration->hasInstalled($module->identifier());
+        return array_map(fn($module) => (new $module), $this->registeredModules);
     }
 
     public function getById(string $identifier)
@@ -72,7 +67,7 @@ class ModuleService
         return $found[0];
     }
 
-    public function install(Module $module, Task $task)
+    public function install(string $module, Task $task)
     {
         $task->module_configuration->addModule($module);
         $task->save();

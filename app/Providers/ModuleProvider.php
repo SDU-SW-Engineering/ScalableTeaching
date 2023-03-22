@@ -22,7 +22,7 @@ class ModuleProvider extends ServiceProvider
         $moduleService = $this->app->get(ModuleService::class);
         $kernel = new Kernel;
         foreach($kernel->modules as $module) {
-            $module = app($module);
+            /** @var Module $module */
             $moduleService->registerModule($module);
         }
     }
@@ -34,6 +34,12 @@ class ModuleProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $kernel = new Kernel;
+        foreach($kernel->modules as $module) {
+            /** @var Module $module */
+            $module = new $module;
+            $id = $module->identifier();
+            $this->loadViewsFrom(app_path("Modules/$id/Views"), "module-$id");
+        }
     }
 }
