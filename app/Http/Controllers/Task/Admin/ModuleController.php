@@ -59,4 +59,12 @@ class ModuleController extends Controller
 
         return redirect()->back();
     }
+
+    public function uninstall(Course $course, Task $task, Module $module)
+    {
+        $task->module_configuration->uninstall($module);
+        $task->save();
+
+        return redirect()->back();
+    }
 }

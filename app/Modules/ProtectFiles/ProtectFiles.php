@@ -2,13 +2,13 @@
 
 namespace App\Modules\ProtectFiles;
 
-use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\Module;
+use App\Modules\Template\Template;
 
 class ProtectFiles extends Module
 {
     protected array $dependencies = [
-        LinkRepository::class
+        Template::class
     ];
 
     protected string $name = "Protect Files";

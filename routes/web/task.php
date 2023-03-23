@@ -23,6 +23,7 @@ Route::prefix('{task}')->group(function() {
         Route::controller(ModuleController::class)->prefix('modules')->as('modules.')->group(function() {
             Route::get('/', 'index')->name('index');
             Route::get('install', 'install')->name('install');
+            Route::get('{module}/uninstall', 'uninstall')->name('uninstall');
             Route::get('{module}/configure', 'configure')->name('configure');
             Route::post('{module}/configure', 'doConfigure')->name('do-configure');
         });

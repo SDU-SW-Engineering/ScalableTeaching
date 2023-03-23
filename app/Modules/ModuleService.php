@@ -23,7 +23,7 @@ class ModuleService
      * @return array returns an array of dependencies that are unmet, empty if all dependencies are met
      * @throws \Throwable
      */
-    public function unmetDependencies(Module $module, ModuleConfiguration $moduleConfiguration): array
+    private function unmetDependencies(Module $module, ModuleConfiguration $moduleConfiguration): array
     {
         $installed = array_keys($moduleConfiguration->installed());
         $unmet = [];
@@ -40,11 +40,32 @@ class ModuleService
     /**
      * @throws \Throwable
      */
+    private function conflictingInstallations(Module $module, ModuleConfiguration $moduleConfiguration)
+    {
+        $installed = array_keys($moduleConfiguration->installed());
+        $unmet = [];
+        $registeredModules = array_flip($this->registeredModules);
+
+        foreach($module->conflicts() as $conflict) {
+            $name = class_basename($conflict);
+            throw_unless(array_key_exists($conflict, $registeredModules), \Exception::class, "Module [{$module->name()}] conflicts with module [$name] which is not registered.");
+            if(in_array($name, $installed))
+                $unmet[] = $name;
+        }
+        return $unmet;
+    }
+
+    /**
+     * @throws \Throwable
+     */
     public function hasInstallProblems(string $module, ModuleConfiguration $configuration): string|null
     {
         $unmetDependencies = $this->unmetDependencies((new $module), $configuration);
         if(count($unmetDependencies) > 0)
             return "Requires the \"${unmetDependencies[0]}\" module.";
+        $conflictingInstallations = $this->conflictingInstallations((new $module), $configuration);
+        if (count($conflictingInstallations) > 0)
+            return "Conflicts with the \"${conflictingInstallations[0]}\" module.";
 
         // check dependencies
         // individual requiremnts for each module

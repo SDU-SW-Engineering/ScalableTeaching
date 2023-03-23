@@ -26,15 +26,35 @@ class ModuleConfiguration implements Castable
 
     public function resolveModule(string $identifier)
     {
-        if (!$this->hasInstalled($identifier))
+        if(!$this->hasInstalled($identifier))
             return null;
         $modulePath = app(ModuleService::class)->getById($identifier);
         /** @var Module $module */
         $module = new $modulePath;
         /** @var ModuleModel $installed */
         $installed = $this->installed[$identifier];
+        if($installed->settings == null)
+            return $module;
 
         return $module->setSettings($installed->settings);
+    }
+
+    public function canUninstall(string $identifier)
+    {
+        foreach($this->installed as $name => $moduleModel) {
+            if($identifier == $name)
+                continue; // we don't care about ourselves
+
+
+            $conflicts = array_filter($this->resolveModule($name)->dependencies(), fn(string $dependency) => class_basename($dependency) == $identifier);
+
+            if (count($conflicts) == 0)
+                continue;
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -56,6 +76,13 @@ class ModuleConfiguration implements Castable
         /** @var ModuleModel $moduleModel */
         $moduleModel = $this->installed[$module];
         $moduleModel->setSettings($settings);
+    }
+
+    public function uninstall(Module $module)
+    {
+        if (!$this->canUninstall($module->identifier()))
+            return;
+        unset($this->installed[$module->identifier()]);
     }
 
     public static function castUsing(array $arguments): CastsAttributes

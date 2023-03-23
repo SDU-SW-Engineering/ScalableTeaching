@@ -6,9 +6,9 @@ abstract class Module
 {
     protected string $name = "";
 
-    protected string $icon;
+    protected string $icon = "";
 
-    protected string $description;
+    protected string $description = "";
 
     private ?Settings $settings;
 
@@ -21,6 +21,11 @@ abstract class Module
      * @var array list of modules this module depends on
      */
     protected array $dependencies = [];
+
+    /**
+     * @var array list of modules that conflicts with this one
+     */
+    protected array $conflicts = [];
 
     /**
      * @return string
@@ -60,6 +65,11 @@ abstract class Module
     public function dependencies(): array
     {
         return $this->dependencies;
+    }
+
+    public function conflicts(): array
+    {
+        return $this->conflicts;
     }
 
     /**

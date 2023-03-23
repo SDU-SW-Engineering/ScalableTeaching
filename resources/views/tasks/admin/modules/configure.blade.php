@@ -17,7 +17,7 @@
             </h1>
             <div @class(['bg-gray-700 shadow p-4 rounded-md flex flex-col justify-between'])>
                 <div class="">
-                    <div class="flex justify-between">
+                    <div class="flex justify-between mb-4">
                         <div>
                             <h2 class="text-gray-100 flex gap-2 text-lg items-center mb-4">
                                 {!! $module->icon() !!}
