@@ -96,4 +96,12 @@ abstract class Module
     {
         return $this->identifier();
     }
+
+    public static function configRoutes() : void
+    {
+    }
+
+    public static function routes() : void
+    {
+    }
 }

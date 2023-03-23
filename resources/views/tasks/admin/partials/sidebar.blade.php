@@ -1,3 +1,5 @@
+@inject('moduleService', 'App\Modules\ModuleService')
+
 <aside class="w-56 shrink flex-shrink-0 mr-4">
     @unless($task->is_publishable)
         <div class="bg-red-400 text-white flex p-1 rounded mb-2">
@@ -25,17 +27,29 @@
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
         </svg>
     </x-sidebar-item>
+
+    @foreach($task->module_configuration->installed() as $identifier => $moduleModel)
+        {{ var_dump($moduleService->getById($identifier)) }}
+    @endforeach
+
     <x-sidebar-group name="Settings">
-        <x-sidebar-item name="Preferences" route="courses.tasks.admin.preferences" :route-params="[$course, $task]">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor" stroke-width="2">
+        <x-sidebar-item name="Basic Information" route="courses.tasks.admin.preferences"
+                        :route-params="[$course, $task]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor" class="w-5 h-5 text-gray-400">
                 <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
+            </svg>
+        </x-sidebar-item>
+        <x-sidebar-item name="Modules" route="courses.tasks.admin.modules.index" :route-params="[$course, $task]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                 stroke="currentColor" class="h-5 w-5 text-gray-400">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.15-.964m11.49-9.642l1.149-.964M7.501 19.795l.75-1.3m7.5-12.99l.75-1.3m-6.063 16.658l.26-1.477m2.605-14.772l.26-1.477m0 17.726l-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205L12 12m6.894 5.785l-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864l-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-3.75 6.495"/>
             </svg>
         </x-sidebar-item>
     </x-sidebar-group>
-    <x-sidebar-group name="Students">
+    <x-sidebar-group name="Misc">
         <x-sidebar-item name="Students" route="courses.tasks.admin.students" :route-params="[$course, $task]">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

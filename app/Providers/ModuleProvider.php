@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Modules\Kernel;
 use App\Modules\Module;
 use App\Modules\ModuleService;
+use App\Modules\Template\Template;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class ModuleProvider extends ServiceProvider
@@ -40,6 +42,11 @@ class ModuleProvider extends ServiceProvider
             $module = new $module;
             $id = $module->identifier();
             $this->loadViewsFrom(app_path("Modules/$id/Views"), "module-$id");
+            Route::prefix("courses/{course}/tasks/{task}/admin/modules/{$module->identifier()}")
+                ->middleware(['web', 'auth', 'can:viewDashboard,task', 'moduleInstalled'])
+                ->group(function() use ($module) {
+                    $module::configRoutes();
+                });
         }
     }
 }

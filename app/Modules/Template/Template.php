@@ -4,6 +4,7 @@ namespace App\Modules\Template;
 
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\Module;
+use Illuminate\Support\Facades\Route;
 
 class Template extends Module
 {
@@ -18,4 +19,9 @@ class Template extends Module
     protected array $dependencies = [
         LinkRepository::class
     ];
+
+    public static function configRoutes(): void
+    {
+        Route::get('pushes', [Controller::class, 'pushes']);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\BasicAuthForStaging;
+use App\Http\Middleware\EnsureModuleInstalled;
 use App\Http\Middleware\EnsureStaging;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -66,5 +67,6 @@ class Kernel extends HttpKernel
         'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'staging'          => BasicAuthForStaging::class,
+        'moduleInstalled'  => EnsureModuleInstalled::class
     ];
 }

@@ -12,6 +12,7 @@ class ModuleService
     public function registerModule(string $module): void
     {
         $this->registeredModules[] = $module;
+
     }
 
 
