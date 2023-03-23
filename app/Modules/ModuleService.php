@@ -7,8 +7,6 @@ use App\Models\Task;
 
 class ModuleService
 {
-    private string $moduleNamespace = "\\App\\Modules";
-
     private array $registeredModules = [];
 
     public function registerModule(string $module): void
@@ -40,7 +38,7 @@ class ModuleService
     /**
      * @throws \Throwable
      */
-    private function conflictingInstallations(Module $module, ModuleConfiguration $moduleConfiguration)
+    private function conflictingInstallations(Module $module, ModuleConfiguration $moduleConfiguration): array
     {
         $installed = array_keys($moduleConfiguration->installed());
         $unmet = [];
@@ -69,7 +67,7 @@ class ModuleService
 
         // check dependencies
         // individual requiremnts for each module
-        return false;
+        return null;
     }
 
     /**
@@ -80,7 +78,7 @@ class ModuleService
         return array_map(fn($module) => (new $module), $this->registeredModules);
     }
 
-    public function getById(string $identifier)
+    public function getById(string $identifier) : null|string
     {
         $found = array_values(array_filter($this->registeredModules, fn($registeredModule) => class_basename($registeredModule) == $identifier));
         if(count($found) == 0)
@@ -88,7 +86,7 @@ class ModuleService
         return $found[0];
     }
 
-    public function install(string $module, Task $task)
+    public function install(string $module, Task $task) : void
     {
         $task->module_configuration->addModule($module);
         $task->save();

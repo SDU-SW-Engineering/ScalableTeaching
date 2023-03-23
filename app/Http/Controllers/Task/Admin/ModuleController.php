@@ -7,11 +7,14 @@ use App\Models\Course;
 use App\Models\Task;
 use App\Modules\Module;
 use App\Modules\ModuleService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use ReflectionClass;
 
 class ModuleController extends Controller
 {
-    public function index(Course $course, Task $task)
+    public function index(Course $course, Task $task) : View
     {
         return view('tasks.admin.modules.index');
     }
@@ -19,7 +22,7 @@ class ModuleController extends Controller
     /**
      * @throws \Throwable
      */
-    public function install(Course $course, Task $task, ModuleService $moduleService)
+    public function install(Course $course, Task $task, ModuleService $moduleService) : RedirectResponse
     {
         $validated = request()->validate([
             'module' => ['string', 'required']
@@ -32,27 +35,32 @@ class ModuleController extends Controller
         return redirect()->back();
     }
 
-    public function configure(Course $course, Task $task, Module $module)
+    /**
+     * @throws \ReflectionException
+     */
+    public function configure(Course $course, Task $task, Module $module) : View
     {
         $variables = [];
-        foreach($module->settings() as $property => $value)
-            $variables[$property] = $value;
+        $reflect = new ReflectionClass($module->settings());
+        foreach($reflect->getProperties() as $property) {
+            $variables[$property->getName()]  = $property->getValue($module->settings());
+        }
 
         return view('tasks.admin.modules.configure', compact('module'))->with($variables);
     }
 
     /**
      */
-    public function doConfigure(Course $course, Task $task, Module $module, Request $request)
+    public function doConfigure(Course $course, Task $task, Module $module, Request $request) : RedirectResponse
     {
         $settings = $module->settings();
         if($settings == null)
             return redirect()->back();
         $request->validate($settings->validationRules());
-        //$task->module_configuration; // this step is important as it ensures that the correct module configuratin is loaded on the task before we save to it
-        foreach($settings as $property => $value) {
-            if($request->has($property))
-                $settings->$property = $request->get($property);
+        $reflect = new ReflectionClass($settings);
+        foreach($reflect->getProperties() as $property) {
+            if($request->has($property->getName()))
+                $property->setValue($settings, $request->get($property->getName()));
         }
         $task->module_configuration->update($module->identifier(), $settings);
         $task->save();
@@ -60,7 +68,7 @@ class ModuleController extends Controller
         return redirect()->back();
     }
 
-    public function uninstall(Course $course, Task $task, Module $module)
+    public function uninstall(Course $course, Task $task, Module $module) : RedirectResponse
     {
         $task->module_configuration->uninstall($module);
         $task->save();

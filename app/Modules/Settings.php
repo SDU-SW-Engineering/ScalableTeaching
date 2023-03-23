@@ -2,6 +2,8 @@
 
 namespace App\Modules;
 
+use ReflectionClass;
+
 abstract class Settings implements \JsonSerializable
 {
     /**
@@ -17,8 +19,9 @@ abstract class Settings implements \JsonSerializable
     public function jsonSerialize(): mixed
     {
         $values = [];
-        foreach($this as $attribute => $value) {
-            $values[$attribute] = $value;
+        $reflect = new ReflectionClass($this);
+        foreach($reflect->getProperties() as $property) {
+            $values[$property->getName()] = $property->getValue($this);
         }
         return $values;
     }

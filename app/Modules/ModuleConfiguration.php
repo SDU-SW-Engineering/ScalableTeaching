@@ -12,19 +12,22 @@ class ModuleConfiguration implements Castable
     private array $installed = [];
 
     /**
+     * @param bool $raw Specifies if all modules should be returned, also once that are no longer installed but have been in the past.
      * @return array
      */
-    public function installed(): array
+    public function installed(bool $raw = false): array
     {
-        return $this->installed;
+        if ($raw)
+            return $this->installed;
+        return array_filter($this->installed, fn(ModuleModel $model) => $model->installed);
     }
 
     public function hasInstalled(string $identifier): bool
     {
-        return array_key_exists($identifier, $this->installed);
+        return array_key_exists($identifier, $this->installed());
     }
 
-    public function resolveModule(string $identifier)
+    public function resolveModule(string $identifier) : Module|null
     {
         if(!$this->hasInstalled($identifier))
             return null;
@@ -39,15 +42,13 @@ class ModuleConfiguration implements Castable
         return $module->setSettings($installed->settings);
     }
 
-    public function canUninstall(string $identifier)
+    public function canUninstall(string $identifier) : bool
     {
-        foreach($this->installed as $name => $moduleModel) {
+        foreach($this->installed() as $name => $moduleModel) {
             if($identifier == $name)
                 continue; // we don't care about ourselves
 
-
             $conflicts = array_filter($this->resolveModule($name)->dependencies(), fn(string $dependency) => class_basename($dependency) == $identifier);
-
             if (count($conflicts) == 0)
                 continue;
 
@@ -65,24 +66,36 @@ class ModuleConfiguration implements Castable
         $this->installed = $installed;
     }
 
-    public function addModule(string $modulePath)
+    public function addModule(string $modulePath) : void
     {
         $module = new $modulePath;
-        $this->installed[class_basename($modulePath)] = new ModuleModel(false, $module->settings());
+        $baseName = class_basename($modulePath);
+        if (array_key_exists($baseName, $this->installed))
+        {
+            /** @var ModuleModel $model */
+            $model = $this->installed[$baseName];
+            $model->setInstalled(true);
+            return;
+        }
+        $model =  new ModuleModel(false, $module->settings());
+        $model->setInstalled(true);
+        $this->installed[$baseName] = $model;
     }
 
-    public function update(string $module, Settings $settings)
+    public function update(string $module, Settings $settings) : void
     {
         /** @var ModuleModel $moduleModel */
         $moduleModel = $this->installed[$module];
         $moduleModel->setSettings($settings);
     }
 
-    public function uninstall(Module $module)
+    public function uninstall(Module $module) : void
     {
         if (!$this->canUninstall($module->identifier()))
             return;
-        unset($this->installed[$module->identifier()]);
+        /** @var ModuleModel $model */
+        $model = $this->installed[$module->identifier()];
+        $model->setInstalled(false);
     }
 
     public static function castUsing(array $arguments): CastsAttributes
@@ -107,7 +120,7 @@ class ModuleConfiguration implements Castable
                 /** @var ModuleConfiguration $configuration */
                 $configuration = $value;
                 return [
-                    $key => json_encode($configuration->installed())
+                    $key => json_encode($configuration->installed(true))
                 ];
             }
         };
