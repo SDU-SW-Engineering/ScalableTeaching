@@ -24,4 +24,6 @@ class Template extends Module
     {
         Route::get('pushes', [Controller::class, 'pushes']);
     }
+
+    protected bool $sidebar = true;
 }

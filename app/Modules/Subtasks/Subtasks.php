@@ -16,4 +16,6 @@ class Subtasks extends Module
     protected string $description = "Specify smaller subtasks that participants can complete.";
 
     protected array $dependencies = [LinkRepository::class];
+
+    protected bool $sidebar = true;
 }

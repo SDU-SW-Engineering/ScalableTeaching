@@ -18,4 +18,6 @@ class BuildTracking extends Module
     protected string $description = "Monitors builds based on the .gitlab-ci.yml file in the repository. Creates subtasks that maps to the jobs defined.";
 
     protected array $dependencies = [Template::class];
+
+    protected bool $sidebar = true;
 }

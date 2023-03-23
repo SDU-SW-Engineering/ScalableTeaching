@@ -27,6 +27,9 @@ abstract class Module
      */
     protected array $conflicts = [];
 
+    /** @var bool Indicates whether this module has sidebar items. */
+    protected bool $sidebar = false;
+
     /**
      * @return string
      */
@@ -103,5 +106,13 @@ abstract class Module
 
     public static function routes() : void
     {
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSidebar(): bool
+    {
+        return $this->sidebar;
     }
 }

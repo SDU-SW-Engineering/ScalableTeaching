@@ -25,10 +25,10 @@ class EnsureModuleInstalled
         $parts = Str::of($request->route()->uri)->split('/\//');
         $index = $parts->filter(fn(string $part, int $index) => strtolower($part) == 'modules')->flip()->first();
         $module = $parts->slice($index)->values()->slice(1, 1)->first();
+        abort_if($module == null, 404, 'Module not installed');
         $resolvedModule = $task->module_configuration->resolveModule($module);
         $request->route()->setParameter('module', $resolvedModule);
 
-        abort_if($module == null, 404, 'Module not installed');
         return $next($request);
     }
 }
