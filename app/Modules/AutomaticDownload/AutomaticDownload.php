@@ -17,5 +17,4 @@ class AutomaticDownload extends Module
     protected string $description = "Will automatically download the last repository for every participant after the deadline of this task.";
 
     protected array $dependencies = [Template::class];
-    protected bool $sidebar = true;
 }

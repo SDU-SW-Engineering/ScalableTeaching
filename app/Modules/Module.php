@@ -2,6 +2,8 @@
 
 namespace App\Modules;
 
+use ReflectionClass;
+
 abstract class Module
 {
     protected string $name = "";
@@ -26,10 +28,7 @@ abstract class Module
      * @var array list of modules that conflicts with this one
      */
     protected array $conflicts = [];
-
-    /** @var bool Indicates whether this module has sidebar items. */
-    protected bool $sidebar = false;
-
+    
     /**
      * @return string
      */
@@ -113,11 +112,22 @@ abstract class Module
     {
     }
 
+    private function basePath() : string
+    {
+        $reflection = new ReflectionClass(get_class($this));
+        return dirname($reflection->getFileName());
+    }
+
+    private function viewPath(string $path = null) : string
+    {
+        return $this->basePath() . DIRECTORY_SEPARATOR . 'Views' . DIRECTORY_SEPARATOR . ($path == null ? '' : $path);
+    }
+
     /**
      * @return bool
      */
     public function hasSidebar(): bool
     {
-        return $this->sidebar;
+        return file_exists($this->viewPath("sidebar.blade.php")) | file_exists($this->viewPath('sidebar.php'));
     }
 }

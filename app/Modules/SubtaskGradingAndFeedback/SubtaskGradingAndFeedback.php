@@ -18,6 +18,4 @@ class SubtaskGradingAndFeedback extends Module
     protected string $description = "Enable manual grading of subtasks and feedback of handed in code. Can also be used for peer feedback. Can be combined with the Automatic Grading module.";
 
     protected array $dependencies = [Template::class, Subtasks::class];
-
-    protected bool $sidebar = true;
 }
