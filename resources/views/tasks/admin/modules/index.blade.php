@@ -15,7 +15,7 @@
             </h1>
             <div class="grid grid-cols-2 gap-8">
                 @foreach($moduleService->modules() as $module)
-                    <div @class(['bg-gray-700 shadow p-4 rounded-md flex flex-col justify-between  border-2', $task->module_configuration->hasInstalled($module) ? 'border-lime-green-300' : 'border-gray-700'])>
+                    <div @class(['bg-gray-700 shadow p-4 rounded-md flex flex-col justify-between  border-2', $task->module_configuration->hasInstalled($module) ? ($task->module_configuration->isEnabled($module) ? 'border-lime-green-300' : 'border-yellow-300') : 'border-gray-700'])>
                         <div class="mb-4">
                             <h2 class="text-gray-100 flex gap-2 text-lg items-center mb-4">
                                 {!! $module->icon() !!}
@@ -36,11 +36,15 @@
                                             Configure
                                         </a>
                                     @endif
+                                    @if(!$task->module_configuration->isEnabled($module))
+                                        <p class="text-yellow-500 font-light text-sm"><span class="mr-1 font-semibold">Configuration
+                                                required!</span><span>{{  $missingDependency }}</span></p>
+                                    @endif
                                 </div>
                                 <div>
                                     @if($task->module_configuration->canUninstall($module))
                                         <a href="{{ route('courses.tasks.admin.modules.uninstall', [$course, $task, $module]) }}"
-                                            class="bg-red-600 px-3 py-2 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm hover:bg-red-500">
+                                           class="bg-red-600 px-3 py-2 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm hover:bg-red-500">
                                             Uninstall
                                         </a>
                                     @else
@@ -55,7 +59,7 @@
                                     @if($missingDependency = $moduleService->hasInstallProblems($module::class, $task->module_configuration))
                                         <button
                                             class="bg-gray-600 px-3 py-2 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm cursor-not-allowed opacity-50">
-                                            Enable
+                                            Install
                                         </button>
                                         <p class="text-red-500 font-light text-sm"><span class="mr-1 font-semibold">Cannot
                                                 be
@@ -63,7 +67,7 @@
                                     @else
                                         <a href="{{ route('courses.tasks.admin.modules.install', [$course, $task, 'module' => $module->identifier()]) }}"
                                            class="bg-gray-600 px-3 py-2 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm hover:bg-gray-500">
-                                            Enable
+                                            Install
                                         </a>
                                     @endif
                                 </div>

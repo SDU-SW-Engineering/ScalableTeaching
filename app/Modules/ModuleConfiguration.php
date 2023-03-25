@@ -17,9 +17,14 @@ class ModuleConfiguration implements Castable
      */
     public function installed(bool $raw = false): array
     {
-        if ($raw)
+        if($raw)
             return $this->installed;
         return array_filter($this->installed, fn(ModuleModel $model) => $model->installed);
+    }
+
+    public function enabled(): array
+    {
+        return array_filter($this->installed(), fn(ModuleModel $model) => $model->enabled);
     }
 
     public function hasInstalled(string $identifier): bool
@@ -27,7 +32,16 @@ class ModuleConfiguration implements Castable
         return array_key_exists($identifier, $this->installed());
     }
 
-    public function resolveModule(string $identifier) : Module|null
+    public function isEnabled(Module|string $module): bool
+    {
+        if($module instanceof Module)
+            $module = $module->identifier();
+        if(!$this->hasInstalled($module))
+            return false;
+        return $this->installed[$module]->enabled;
+    }
+
+    public function resolveModule(string $identifier): Module|null
     {
         if(!$this->hasInstalled($identifier))
             return null;
@@ -42,14 +56,14 @@ class ModuleConfiguration implements Castable
         return $module->setSettings($installed->settings);
     }
 
-    public function canUninstall(string $identifier) : bool
+    public function canUninstall(string $identifier): bool
     {
         foreach($this->installed() as $name => $moduleModel) {
             if($identifier == $name)
                 continue; // we don't care about ourselves
 
             $conflicts = array_filter($this->resolveModule($name)->dependencies(), fn(string $dependency) => class_basename($dependency) == $identifier);
-            if (count($conflicts) == 0)
+            if(count($conflicts) == 0)
                 continue;
 
             return false;
@@ -66,32 +80,36 @@ class ModuleConfiguration implements Castable
         $this->installed = $installed;
     }
 
-    public function addModule(string $modulePath) : void
+    public function addModule(string $modulePath): void
     {
+        /** @var Module $module */
         $module = new $modulePath;
         $baseName = class_basename($modulePath);
-        if (array_key_exists($baseName, $this->installed))
-        {
+        if(array_key_exists($baseName, $this->installed)) {
             /** @var ModuleModel $model */
             $model = $this->installed[$baseName];
             $model->setInstalled(true);
+            $model->setEnabled($module->isEnabled($model->settings));
             return;
         }
-        $model =  new ModuleModel(false, $module->settings());
+        $model = new ModuleModel(false, $module->settings());
         $model->setInstalled(true);
+        $model->setEnabled($module->isEnabled($model->settings));
         $this->installed[$baseName] = $model;
     }
 
-    public function update(string $module, Settings $settings) : void
+    public function update(string $module, Settings $settings): void
     {
         /** @var ModuleModel $moduleModel */
         $moduleModel = $this->installed[$module];
+        $module = $this->resolveModule($module);
         $moduleModel->setSettings($settings);
+        $moduleModel->setEnabled($module->isEnabled($settings));
     }
 
-    public function uninstall(Module $module) : void
+    public function uninstall(Module $module): void
     {
-        if (!$this->canUninstall($module->identifier()))
+        if(!$this->canUninstall($module->identifier()))
             return;
         /** @var ModuleModel $model */
         $model = $this->installed[$module->identifier()];

@@ -100,6 +100,11 @@ abstract class Module
         return $this->identifier();
     }
 
+    public function isEnabled(Settings|null $settings) : bool
+    {
+        return true;
+    }
+
     public static function configRoutes() : void
     {
     }

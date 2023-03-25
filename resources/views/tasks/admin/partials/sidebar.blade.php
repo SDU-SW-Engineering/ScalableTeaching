@@ -53,7 +53,7 @@
         </svg>
     </x-sidebar-item>
     <hr class="dark:border-gray-500 my-4">
-    @foreach($task->module_configuration->installed() as $identifier => $moduleModel)
+    @foreach($task->module_configuration->enabled() as $identifier => $moduleModel)
             <?php $module = $task->module_configuration->resolveModule($identifier) ?>
         @if($module->hasSidebar())
             @include("module-$identifier::sidebar")

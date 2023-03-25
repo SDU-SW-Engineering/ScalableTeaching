@@ -20,4 +20,8 @@ class LinkRepository extends Module
         return new LinkRepositorySettings();
     }
 
+    public function isEnabled(LinkRepositorySettings|Settings|null $settings): bool
+    {
+        return !($settings->repo == null || $settings->repo == "");
+    }
 }

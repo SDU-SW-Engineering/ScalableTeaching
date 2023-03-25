@@ -24,7 +24,7 @@ class ModuleService
      */
     private function unmetDependencies(Module $module, ModuleConfiguration $moduleConfiguration): array
     {
-        $installed = array_keys($moduleConfiguration->installed());
+        $installed = array_keys($moduleConfiguration->enabled());
         $unmet = [];
         $registeredModules = array_flip($this->registeredModules);
         foreach($module->dependencies() as $dependency) {
