@@ -2,6 +2,7 @@
 
 namespace App\Modules;
 
+use Illuminate\Support\Str;
 use ReflectionClass;
 
 abstract class Module
@@ -28,7 +29,7 @@ abstract class Module
      * @var array list of modules that conflicts with this one
      */
     protected array $conflicts = [];
-    
+
     /**
      * @return string
      */
@@ -78,17 +79,17 @@ abstract class Module
      * Allows each module to have a settings
      * @return Settings|null
      */
-    protected function loadSettings() : ?Settings
+    protected function loadSettings(): ?Settings
     {
         return null;
     }
 
-    public function settings() : ?Settings
+    public function settings(): ?Settings
     {
         return $this->settings;
     }
 
-    public function setSettings(Settings $settings) : Module
+    public function setSettings(Settings $settings): Module
     {
         $this->settings = $settings;
         return $this;
@@ -99,28 +100,33 @@ abstract class Module
         return $this->identifier();
     }
 
-    public function isEnabled(Settings|null $settings) : bool
+    public function isEnabled(Settings|null $settings): bool
     {
         return true;
     }
 
-    public static function configRoutes() : void
+    public static function configRoutes(): void
     {
     }
 
-    public static function routes() : void
+    public static function routes(): void
     {
     }
 
-    private function basePath() : string
+    private function basePath(): string
     {
         $reflection = new ReflectionClass(get_class($this));
         return dirname($reflection->getFileName());
     }
 
-    private function viewPath(string $path = null) : string
+    private function viewPath(string $path = null): string
     {
         return $this->basePath() . DIRECTORY_SEPARATOR . 'Views' . DIRECTORY_SEPARATOR . ($path == null ? '' : $path);
+    }
+
+    private function widgetPath(string $path = null): string
+    {
+        return $this->viewPath('Widgets') . DIRECTORY_SEPARATOR . ($path == null ? '' : $path);
     }
 
     /**
@@ -129,5 +135,15 @@ abstract class Module
     public function hasSidebar(): bool
     {
         return file_exists($this->viewPath("sidebar.blade.php")) | file_exists($this->viewPath('sidebar.php'));
+    }
+
+    public function bigWidgets()
+    {
+        $path = $this->widgetPath('Big');
+        if (!file_exists($path))
+            return [];
+        $filtered = array_values(preg_filter('/(.)(?:\.blade)?\.php/', '${1}', scandir($path)));
+        dd($filtered, $this->basePath() . DIRECTORY_SEPARATOR . Str::studly($filtered[0]), __DIR__);
+        return $found;
     }
 }

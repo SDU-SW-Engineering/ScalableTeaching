@@ -62,18 +62,12 @@
 
                 </div>
             </div>
-            <div class="bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold">Builds Per Day</h3>
-                    <a class="bg-lime-green-500 text-white text-sm px-2 py-0.5 hover:bg-lime-green-600 transition-colors rounded-md mr-2"
-                       href="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}">Details</a>
-                </div>
-                <div>
-                    <bar-chart :height="300" :labels="{{ $dailyBuildsGraph->labels() }}"
-                               :data="{{ $dailyBuildsGraph->datasets()  }}"
-                               route="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}"></bar-chart>
-                </div>
-            </div>
+            @foreach($task->module_configuration->enabled() as $identifier => $moduleModel)
+                    <?php $module = $task->module_configuration->resolveModule($identifier) ?>
+                @foreach($module->bigWidgets() as $widget)
+                    @include("module-$identifier::Widgets/Big/$widget")
+                @endforeach
+            @endforeach
         </div>
     @endif
     <div class="flex flex-col">
@@ -231,8 +225,11 @@
                                             </div>
                                         @else
                                             <div class="flex">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-red-300 handed-in mr-2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                     stroke-width="1.5" stroke="currentColor"
+                                                     class="h-6 w-6 text-red-300 handed-in mr-2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                 </svg>
                                             </div>
                                         @endif
