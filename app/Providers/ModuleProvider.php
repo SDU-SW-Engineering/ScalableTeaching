@@ -45,7 +45,7 @@ class ModuleProvider extends ServiceProvider
             $this->loadViewsFrom(app_path("Modules/$id/Views"), "module-$id");
             Route::prefix("courses/{course}/tasks/{task}/admin/modules/{$module->identifier()}")
                 ->middleware(['web', 'auth', 'can:viewDashboard,task', 'moduleInstalled'])
-                ->as(strtolower("courses.tasks.admin.$groupName."))
+                ->as("courses.tasks.admin.$groupName.")
                 ->group(function() use ($module) {
                     $module::configRoutes();
                 });
