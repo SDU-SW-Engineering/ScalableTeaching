@@ -175,6 +175,14 @@ class Task extends Model
     {
         return $this->hasMany(TaskDelegation::class);
     }
+
+    /**
+     * @return HasManyThrough<ProjectDownload>
+     */
+    public function downloads()
+    {
+        return $this->hasManyThrough(ProjectDownload::class, Project::class);
+    }
     // endregion
 
     /**
