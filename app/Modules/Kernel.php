@@ -6,6 +6,7 @@ use App\Modules\AutomaticDownload\AutomaticDownload;
 use App\Modules\AutomaticGrading\AutomaticGrading;
 use App\Modules\BuildTracking\BuildTracking;
 use App\Modules\LinkRepository\LinkRepository;
+use App\Modules\PlagiarismDetection\PlagiarismDetection;
 use App\Modules\PreloadRepositories\PreloadRepositories;
 use App\Modules\SubtaskGradingAndFeedback\SubtaskGradingAndFeedback;
 use App\Modules\MarkAsDone\MarkAsDone;
@@ -25,6 +26,7 @@ class Kernel
         SubtaskGradingAndFeedback::class,
         AutomaticDownload::class,
         ProtectFiles::class,
+        PlagiarismDetection::class,
         PreloadRepositories::class
     ];
 }
