@@ -29,6 +29,7 @@ class ModuleConfiguration implements Castable
 
     public function hasInstalled(string $identifier): bool
     {
+        $identifier = $this->resolveIdentifier($identifier);
         return array_key_exists($identifier, $this->installed());
     }
 
@@ -40,9 +41,14 @@ class ModuleConfiguration implements Castable
             return false;
         return $this->installed[$module]->enabled;
     }
+    private function resolveIdentifier(string $identifier) : string
+    {
+        return last(explode('\\',$identifier));
+    }
 
     public function resolveModule(string $identifier): Module|null
     {
+        $identifier = $this->resolveIdentifier($identifier);
         if(!$this->hasInstalled($identifier))
             return null;
         $modulePath = app(ModuleService::class)->getById($identifier);
@@ -100,6 +106,7 @@ class ModuleConfiguration implements Castable
 
     public function update(string $module, Settings $settings): void
     {
+        $module = $this->resolveIdentifier($module);
         /** @var ModuleModel $moduleModel */
         $moduleModel = $this->installed[$module];
         $module = $this->resolveModule($module);

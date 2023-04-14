@@ -57,7 +57,7 @@ use Illuminate\Support\Str;
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
  * @property-read EloquentCollection<TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
- * @property-read int|null $source_project_id
+ * @property int|null $source_project_id
  * @property Carbon $starts_at
  * @property Carbon $ends_at
  * @property bool $is_visible
