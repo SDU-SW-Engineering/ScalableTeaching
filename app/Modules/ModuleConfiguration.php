@@ -129,6 +129,9 @@ class ModuleConfiguration implements Castable
                 array_walk($modules, function(&$moduleSettings, $moduleName) {
                     $moduleSettings = ModuleModel::fromConfiguration($moduleName, $moduleSettings);
                 });
+                $modules = array_filter($modules, function($module) {
+                    return $module != null;
+                });
                 $configuration->setInstalled($modules);
                 return $configuration;
             }
