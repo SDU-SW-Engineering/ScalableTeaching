@@ -103,7 +103,6 @@ class TaskDelegation extends Model
         $remainingTasks = $this->projectCounter($projects);
         $delayCounter = 0;
 
-
         foreach($this->pool() as $user)
         {
             if($remainingTasks->count() == 0)
@@ -239,7 +238,6 @@ class TaskDelegation extends Model
         $pool = [];
         if($this->course_role_id != null)
             $pool = $this->task->course->students;
-
         return [...$pool, ...$this->userPool];
     }
 }

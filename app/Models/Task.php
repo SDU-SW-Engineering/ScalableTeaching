@@ -183,6 +183,11 @@ class Task extends Model
     {
         return $this->hasManyThrough(ProjectDownload::class, Project::class);
     }
+
+    public function plagiarismAnalysis()
+    {
+        return $this->hasMany(PlagiarismAnalysis::class);
+    }
     // endregion
 
     /**
