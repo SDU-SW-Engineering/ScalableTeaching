@@ -9,8 +9,8 @@
                 <!--<span v-if="file!==null" class="text-gray-400 text-sm leading-5">/this/is/a/path</span>-->
                 <span v-if="file==null" class="text-white font-medium text-sm leading-3">No file open</span>
             </div>
-            <div class="flex">
-                <div v-if="context == 'pre-submissions'" class="h-full text-white px-4 flex items-center">
+            <div class="flex" v-if="context !== 'view'">
+                <div v-if="context === 'pre-submissions'" class="h-full text-white px-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="fill-current h-5 w-6 mr-2" viewBox="0 0 24 24"
                          style="transform: ;msFilter:;">
                         <path

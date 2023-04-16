@@ -59,6 +59,6 @@ class ViewServiceProvider extends ServiceProvider
             $view->with('breadcrumbs', $breadcrumbs);
         });
 
-        \View::composer('tasks.admin.*', AdminViewComposer::class);
+        \View::composer(['tasks.admin.*', 'module-*'], AdminViewComposer::class);
     }
 }

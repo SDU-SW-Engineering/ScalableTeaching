@@ -49,6 +49,8 @@ export default {
             immediate: true,
             async handler(to, from) {
                 this.comments = [];
+                if (this.context === 'view')
+                    return;
                 await this.refreshComments()
             }
         }

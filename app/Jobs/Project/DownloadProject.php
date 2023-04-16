@@ -10,6 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Storage;
+use ZipArchive;
 
 class DownloadProject implements ShouldQueue
 {
@@ -31,9 +32,9 @@ class DownloadProject implements ShouldQueue
     {
     }
 
-    public function handle() : void
+    public function handle(): void
     {
-        if ($this->download->downloaded_at != null)
+        if($this->download->downloaded_at != null && $this->download->queued_at == null)
             return;
 
         $gitLabManager = app(GitLabManager::class);
@@ -42,12 +43,23 @@ class DownloadProject implements ShouldQueue
             'sha' => $this->download->ref,
         ], 'zip');
 
-        $fileLocation = "tasks/{$this->download->project->task_id}/projects/{$this->download->project_id}_{$this->download->ref}.zip";
+        $tempName = "temp" . str()->random(4);
+        $basePath = "tasks/{$this->download->project->task_id}/projects";
+        $fileLocation = "$basePath/$tempName.zip";
         Storage::disk('local')->put($fileLocation, $archiveContent);
 
+        $zip = new ZipArchive();
+        $zip->open(Storage::path($fileLocation));
+        $zipBaseDir = $zip->getNameIndex(0);
+        $zip->extractTo(Storage::path("$basePath"));
+        $newPath = "$basePath/{$this->download->project_id}_{$this->download->ref}";
+        Storage::move("$basePath/$zipBaseDir", "$newPath");
+        Storage::delete($fileLocation);
+
         $this->download->update([
-            'location'      => $fileLocation,
+            'location'      => $newPath,
             'downloaded_at' => now(),
+            'queued_at'     => null
         ]);
     }
 }
