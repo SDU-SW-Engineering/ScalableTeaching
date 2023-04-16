@@ -9,6 +9,11 @@ use App\Models\Project;
 use App\Models\ProjectDownload;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
+use Storage;
+use ZipStream\Exception\FileNotFoundException;
+use ZipStream\Exception\FileNotReadableException;
+use ZipStream\Option\Archive;
+use ZipStream\ZipStream;
 
 class Controller extends BaseController
 {
@@ -25,9 +30,25 @@ class Controller extends BaseController
         return view('module-AutomaticDownload::index')->with('downloads', $downloads)->with('missing', $missingOnDisk)->with('enabledAfterDeadline', $enabledAfterDeadline);
     }
 
+    /**
+     * @throws FileNotFoundException
+     * @throws FileNotReadableException
+     */
     public function download(Course $course, Task $task, ProjectDownload $projectDownload)
     {
-        return \Storage::download($projectDownload->location, str($projectDownload->project->ownable->name)->slug()->append("-$projectDownload->ref")->append('.zip'));
+        $name = str($projectDownload->project->ownable->name)->slug()->append("-$projectDownload->ref")->append('.zip');
+        $options = new Archive();
+        $options->setSendHttpHeaders(true);
+        $zip = new ZipStream($name, $options);
+        $files = Storage::allFiles($projectDownload->location);
+        foreach($files as $file)
+        {
+            $internalPath = str($file)->remove($projectDownload->location)->ltrim('/')->toString();
+            $zip->addFileFromPath($internalPath, Storage::path($file));
+        }
+
+        $zip->finish();
+        //return Storage::download($projectDownload->location, str($projectDownload->project->ownable->name)->slug()->append("-$projectDownload->ref"));
     }
 
     public function queue(Course $course, Task $task, ProjectDownload $projectDownload)
