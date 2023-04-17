@@ -4,6 +4,7 @@ namespace App\Modules\AutomaticDownload;
 
 use App\Modules\Module;
 use App\Modules\Template\Template;
+use Illuminate\Support\Facades\Route;
 
 class AutomaticDownload extends Module
 {
@@ -17,4 +18,13 @@ class AutomaticDownload extends Module
     protected string $description = "Will automatically download the last repository for every participant after the deadline of this task.";
 
     protected array $dependencies = [Template::class];
+
+    public static function configRoutes(): void
+    {
+        Route::get('downloads', [Controller::class, 'index'])->name('index');
+        Route::get('download/queue-all', [Controller::class, 'queueAll'])->name('queue-all');
+        Route::get('download/create-all', [Controller::class, 'createDownloads'])->name('create-all');
+        Route::get('downloads/{projectDownload}', [Controller::class, 'download'])->name('download');
+        Route::get('download/{projectDownload}', [Controller::class, 'queue'])->name('queue');
+    }
 }

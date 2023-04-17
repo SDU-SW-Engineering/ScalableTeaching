@@ -11,7 +11,7 @@
                 <welcome v-if="openedFile === null"/>
                 <code-viewer :context="context" :file="openedFile" :scrollTo="goToLine" v-else/>
             </div>
-            <div v-if="delegation.grading && showSubtasks" class="flex" style="height: calc(100vh - 112px)">
+            <div v-if="delegation != null && delegation.grading && showSubtasks" class="flex" style="height: calc(100vh - 112px)">
                 <subtasks-grading-view :sub-tasks.sync="subTasks"></subtasks-grading-view>
             </div>
             <div class="flex" style="height: calc(100vh - 112px)">
@@ -92,11 +92,11 @@ export default {
         },
         delegation: {
             type: Object,
-            required: true
+            required: false
         },
         subTasks: {
             type: Array | null,
-            required: true
+            required: false
         }
     },
     data() {
@@ -154,10 +154,10 @@ export default {
             this.grade = grade
         });
         bus.delegation = this.delegation;
-        let currentPoints = this.subTasks.reduce((total, group) => {
+        let currentPoints = this.subTasks == null ? null : this.subTasks.reduce((total, group) => {
             return total + group.tasks.filter(t => t.points).reduce((total, c) => total + c.points, 0);
         }, 0)
-        let maxPoints = this.subTasks.reduce((total, group) => {
+        let maxPoints = this.subTasks == null ? null : this.subTasks.reduce((total, group) => {
             return total + group.tasks.reduce((total, c) => total + c.maxPoints, 0);
         }, 0)
         bus.$emit('currentPoints', currentPoints);

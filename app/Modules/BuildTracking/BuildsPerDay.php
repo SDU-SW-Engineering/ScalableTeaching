@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Template;
+namespace App\Modules\BuildTracking;
 
 class BuildsPerDay
 {

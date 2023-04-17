@@ -142,8 +142,6 @@ abstract class Module
         $path = $this->widgetPath('Big');
         if (!file_exists($path))
             return [];
-        $filtered = array_values(preg_filter('/(.)(?:\.blade)?\.php/', '${1}', scandir($path)));
-        dd($filtered, $this->basePath() . DIRECTORY_SEPARATOR . Str::studly($filtered[0]), __DIR__);
-        return $found;
+        return array_values(preg_filter('/(.)(?:\.blade)?\.php/', '${1}', scandir($path)));
     }
 }

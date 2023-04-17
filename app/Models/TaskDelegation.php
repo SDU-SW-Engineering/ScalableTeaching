@@ -217,17 +217,7 @@ class TaskDelegation extends Model
      */
     private function relevantPush(Project $project): ?ProjectPush
     {
-        return match ($this->type)
-        {
-            TaskDelegationType::LastPushes => $project
-                ->pushes()
-                ->isAccepted($project->task)
-                ->isValid()
-                ->latest()
-                ->first(),
-            TaskDelegationType::SucceedingPushes       => throw new \Exception('To be implemented'),
-            TaskDelegationType::SucceedingOrLastPushes => throw new \Exception('To be implemented')
-        };
+        return $project->relevantPushes()->first();
     }
 
     /**
