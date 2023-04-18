@@ -23,14 +23,13 @@ class Controller extends BaseController
         $files = [];
         $similarities = $analysis->similarities()->keyBy(fn(Similarity $similarity) => $similarity->getProjectId());
 
-        dd($analysis->filePercentiles());
         foreach($similarities as $similarity) {
             /** @var PlagiarismAnalysisFileComparison $file */
             foreach($similarity->files() as $file) {
                 $file = $file->perspective($similarity->getProjectId());
-
-                $files[$file['file']][$similarity->getProjectId()] = [
-                    'file_overlap'  => $file['overlap'],
+                /** @var SimilarFile $file */
+                $files[$file->getFile()][$similarity->getProjectId()] = [
+                    'file_overlap'  => $file->getOverlap(),
                     'total_overlap' => $similarity->getOverlap(),
                     'compared_with' => $similarity->getProjectId()
                 ];
@@ -50,18 +49,10 @@ class Controller extends BaseController
             ];
         })->values();
 
-        $quantiles = collect($scores)->map(function($score) {
-            $min = $score['data']->pluck('y')->min();
-            $max = $score['data']->pluck('y')->max();
-            $percentile25 = Descriptive::percentile($score['data']->pluck('y')->toArray(), 25);
-            $percentile50 = Descriptive::percentile($score['data']->pluck('y')->toArray(), 50);
-            $percentile75 = Descriptive::percentile($score['data']->pluck('y')->toArray(), 75);
-
-            return [
-                'x' => $score['name'],
-                'y' => [$min, $percentile25, $percentile50, $percentile75, $max]
-            ];
-        });
+        $quantiles = $analysis->filePercentiles()->map(fn(array $percentiles, string $file) => [
+            'x' => $file,
+            'y' => [$percentiles['min'] * 100, $percentiles[25] * 100, $percentiles[50] * 100, $percentiles[75] * 100, $percentiles['max'] * 100]
+        ])->values();
 
         return view("module-PlagiarismDetection::pages.dashboard")
             ->with('scores', $scores)
