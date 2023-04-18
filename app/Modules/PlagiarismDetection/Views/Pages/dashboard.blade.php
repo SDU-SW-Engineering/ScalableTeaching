@@ -39,8 +39,7 @@
     <script src="{{ asset('js/apexcharts.js') }}"></script>
     <script>
         let similarities = {!! json_encode($similarities) !!};
-        console.log(similarities);
-        let quantiles = {!! $quantiles !!};
+        let quantiles = {!! $quartiles !!};
         let scores = {!!  $scores !!};
         let lastHoveredId = "";
         let xAxisLabels = undefined;

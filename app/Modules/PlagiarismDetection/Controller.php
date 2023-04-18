@@ -49,7 +49,7 @@ class Controller extends BaseController
             ];
         })->values();
 
-        $quantiles = $analysis->filePercentiles()->map(fn(array $percentiles, string $file) => [
+        $quartiles = $analysis->filePercentiles()->map(fn(array $percentiles, string $file) => [
             'x' => $file,
             'y' => [$percentiles['min'] * 100, $percentiles[25] * 100, $percentiles[50] * 100, $percentiles[75] * 100, $percentiles['max'] * 100]
         ])->values();
@@ -58,19 +58,31 @@ class Controller extends BaseController
             ->with('scores', $scores)
             ->with('similarities', $similarities)
             ->with('nameMap', $names)
-            ->with('quantiles', $quantiles);
+            ->with('quartiles', $quartiles);
     }
 
     public function details(Course $course, Task $task, Project $project, int $overlapId = null)
     {
         /** @var PlagiarismAnalysis $analysis */
         $analysis = $task->plagiarismAnalysis()->first();
-        //   dd($analysis->fileComparisonsByProject($project->id)->get());
         $overlaps = $analysis->comparisonsByProjectId($project->id)->orderBy('overlap', 'desc')->get();
-
         /** @var PlagiarismAnalysisComparison $selectOverlap */
         $selectOverlap = $overlapId == null ? $overlaps->first() : $overlaps->firstWhere('id', $overlapId);
-        dd($selectOverlap->files()->get(), $selectOverlap->percentiles);
-        return view("module-PlagiarismDetection::pages.details")->with('overlap', $selectOverlap);
+
+        $userPlots = $selectOverlap->files()->get()->map(function(PlagiarismAnalysisFileComparison $file) use ($project) {
+            $overlapFileDetails = $file->perspective($project->id);
+            return [
+                'x' => $overlapFileDetails->getFile(),
+                'y' => round($overlapFileDetails->getOverlap() * 100)
+            ];
+        });
+        $userFiles = $userPlots->pluck('x');
+        $quartiles = ApexChartConverter::percentiles($analysis)->filter(fn($filePercentiles) => $userFiles->contains($filePercentiles['x']));
+        return view("module-PlagiarismDetection::pages.details")
+            ->with('project', $project)
+            ->with('overlap', $selectOverlap)
+            ->with('quartiles', $quartiles)
+            ->with('userPlots', $userPlots);
     }
+
 }

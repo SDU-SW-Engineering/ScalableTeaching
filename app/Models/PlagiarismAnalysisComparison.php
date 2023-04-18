@@ -34,11 +34,4 @@ class PlagiarismAnalysisComparison extends Model
                 ->where('project_2_id', $this->project_1_id);
         });
     }
-
-    public function percentiles() : Attribute
-    {
-        return Attribute::make(get: function() {
-            return 2;
-        });
-    }
 }
