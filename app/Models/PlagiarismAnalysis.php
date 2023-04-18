@@ -76,5 +76,9 @@ class PlagiarismAnalysis extends Model
             ->orWhere('project_2_id', $projectId);
     }
 
+    public function filePercentiles()
+    {
+        return PlagiarismAnalysisFileComparison::percentiles($this->id);
+    }
 
 }

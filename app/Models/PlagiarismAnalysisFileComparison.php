@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Modules\PlagiarismDetection\SimilarFile;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,31 +29,35 @@ class PlagiarismAnalysisFileComparison extends Model
         'meta'
     ];
 
-    public function percentiles(): Attribute
-    {
-        return Attribute::make(get: function() {
-            return 2;
-        });
-    }
-
     /**
      * Since this method contains pointers to two projects, it can be difficult to distinguish which is the origin.
      * This method normalizes to the passed projectId, and it becomes origin
      * @param $projectId
-     * @return array{file:string,overlap:double,lines:array,compared_with:array}
+     * @return SimilarFile
      */
-    public function perspective($projectId): array
+    public function perspective($projectId): SimilarFile
     {
+
         $index = $projectId == $this->project_1_id ? 1 : 2;
         $comparedIndex = $index == 1 ? 2 : 1;
-        return [
-            'file'          => $this["filename_$index"],
-            'overlap'       => $this->overlap,
-            'lines'         => $this->meta["file{$index}Overlap"],
-            'compared_with' => [
-                'file'  => $this["filename_$comparedIndex"],
-                'lines' => $this->meta["file{$comparedIndex}Overlap"],
-            ]
-        ];
+
+        return new SimilarFile($this["filename_$index"], $this->overlap, $this->meta["file{$index}Overlap"],  $this["filename_$comparedIndex"], $this->meta["file{$comparedIndex}Overlap"]);
+    }
+
+    public static function percentiles(int $analysisId)
+    {
+        $files = [];
+        foreach (PlagiarismAnalysisFileComparison::where('plagiarism_analysis_id', $analysisId)->get() as $file)
+        {
+            foreach (['filename_1', 'filename_2'] as $columnName)
+            {
+                $fileName = $file->$columnName;
+                if (!array_key_exists($fileName, $files))
+                    $files[$fileName] = [];
+                $files[$fileName][] = $file->overlap;
+            }
+        }
+        dd($files);
+        return 2;
     }
 }

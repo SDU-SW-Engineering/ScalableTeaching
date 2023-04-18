@@ -23,9 +23,12 @@ class Controller extends BaseController
         $files = [];
         $similarities = $analysis->similarities()->keyBy(fn(Similarity $similarity) => $similarity->getProjectId());
 
+        dd($analysis->filePercentiles());
         foreach($similarities as $similarity) {
+            /** @var PlagiarismAnalysisFileComparison $file */
             foreach($similarity->files() as $file) {
                 $file = $file->perspective($similarity->getProjectId());
+
                 $files[$file['file']][$similarity->getProjectId()] = [
                     'file_overlap'  => $file['overlap'],
                     'total_overlap' => $similarity->getOverlap(),
