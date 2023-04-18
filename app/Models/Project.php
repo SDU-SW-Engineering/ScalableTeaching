@@ -208,6 +208,11 @@ class Project extends Model
         return Attribute::make(fn($value, $attributes) => $this->finished_at == null ? null : number_format($this->created_at->diffInHours($this->finished_at) / 24, 2));
     }
 
+    public function ownerNames(): Attribute
+    {
+        return Attribute::make(get: fn() => $this->owners()->pluck('name')->join(', '));
+    }
+
     /**
      * @param bool $withToday
      * @return Collection<int|string,int>

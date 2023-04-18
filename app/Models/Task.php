@@ -61,6 +61,7 @@ use Illuminate\Support\Str;
  * @property Carbon $starts_at
  * @property Carbon $ends_at
  * @property bool $is_visible
+ * @property-read EloquentCollection|Project[] $projects
  * @property string|null $current_sha
  * @property-read bool $is_publishable
  * @property ModuleConfiguration $module_configuration

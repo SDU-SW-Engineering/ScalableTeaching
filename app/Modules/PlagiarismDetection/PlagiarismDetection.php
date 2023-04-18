@@ -30,5 +30,6 @@ class PlagiarismDetection extends Module
     public static function configRoutes(): void
     {
         Route::get('/', [Controller::class, 'dashboard'])->name('dashboard');
+        Route::get('project/{project}/{overlap?}', [Controller::class, 'details'])->name('details');
     }
 }

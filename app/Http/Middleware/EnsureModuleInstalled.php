@@ -29,8 +29,8 @@ class EnsureModuleInstalled
         $module = $parts->slice($index)->values()->slice(1, 1)->first();
         abort_if($module == null, 404, 'Module not installed');
         $resolvedModule = $task->module_configuration->resolveModule($module);
-
-        $request->route()->setParameter('module', $resolvedModule);
+        if(array_key_exists('module', $request->route()->parameters()))
+            $request->route()->setParameter('module', $resolvedModule);
 
         return $next($request);
     }

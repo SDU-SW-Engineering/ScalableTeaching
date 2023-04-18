@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\Task;
-use App\Modules\ModuleService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
