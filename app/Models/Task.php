@@ -6,7 +6,10 @@ use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
+use App\Modules\LinkRepository\LinkRepository;
+use App\Modules\LinkRepository\LinkRepositorySettings;
 use App\Modules\ModuleConfiguration;
+use App\Modules\Template\Template;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Domain\SourceControl\Directory;
@@ -641,8 +644,13 @@ class Task extends Model
         $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
         $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
         $project = $projects->firstWhere('name', $projectName);
+        abort_unless($this->module_configuration->isEnabled(Template::class), 400, 'The template module is not enabled.');
+
+        $linkRepositoryModule = $this->module_configuration->resolveModule(LinkRepository::class);
+        /** @var LinkRepositorySettings $settings */
+        $settings = $linkRepositoryModule->settings();
         if($project == null)
-            $project = $this->forkProject($manager, $projectName, $this->source_project_id, $this->gitlab_group_id);
+            $project = $this->forkProject($manager, $projectName, $settings->repo, $this->gitlab_group_id);
 
         /** @var Project $dbProject */
         $dbProject = $owner == null ? $this->projects()->create([

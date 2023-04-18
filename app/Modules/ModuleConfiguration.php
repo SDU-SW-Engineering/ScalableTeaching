@@ -37,6 +37,8 @@ class ModuleConfiguration implements Castable
     {
         if($module instanceof Module)
             $module = $module->identifier();
+        else
+            $module = $this->resolveIdentifier($module);
         if(!$this->hasInstalled($module))
             return false;
         return $this->installed[$module]->enabled;
