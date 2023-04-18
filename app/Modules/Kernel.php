@@ -12,6 +12,7 @@ use App\Modules\MarkAsDone\MarkAsDone;
 use App\Modules\ProtectFiles\ProtectFiles;
 use App\Modules\Subtasks\Subtasks;
 use App\Modules\Template\Template;
+use App\Modules\Visualizations\Visualizations;
 
 class Kernel
 {
@@ -25,6 +26,7 @@ class Kernel
         SubtaskGradingAndFeedback::class,
         AutomaticDownload::class,
         ProtectFiles::class,
-        PreloadRepositories::class
+        PreloadRepositories::class,
+        Visualizations::class,
     ];
 }
