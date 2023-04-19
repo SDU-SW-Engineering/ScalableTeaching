@@ -2,6 +2,7 @@
 
 @section('adminContent')
     <div class="bg-white border rounded p-4">
+        <div id="cy"></div>
         <div id="quantiles"></div>
         <div id="chart"></div>
         <div class="flex flex-col mt-4">
@@ -12,17 +13,17 @@
                     <div class="w-1/4">Compared with</div>
                     <div class="w-1/4">Overlap</div>
                 </div>
-                @foreach($similarities->sortByDesc(fn($similarity) => $similarity->getOverlap()) as $projectId => $entry)
+                @foreach($similarities->sortByDesc(fn($similarity) => $similarity->getOverlap()) as $entry)
                     <div class="flex text-sm hover:bg-gray-200 py-1">
                         <div class="w-2/4"><a
-                                href="{{ route('courses.tasks.admin.plagiarismDetection.details', [$course, $task, $projectId]) }}">{{ $entry->project()->owner_names }}</a>
+                                href="{{ route('courses.tasks.admin.plagiarismDetection.details', [$course, $task, $entry->getProjectId()]) }}">{{ $entry->project()->owner_names }}</a>
                         </div>
                         <div class="w-1/4">{{ $entry->comparedWith()->owner_names }}</div>
                         <div class="w-1/4 items-center flex relative">
                             <div class="h-5 bg-gray-400 text-sm rounded-lg text-center absolute w-full"></div>
                             <div class="h-5 {{ match(true){
     $entry->getOverlap() > 0.8 => 'bg-red-900',
-    $entry->getOverlap() > 0.5 => 'bg-yellow-900',
+    $entry->getOverlap() > 0.5 => 'bg-yellow-700',
     default => 'bg-lime-green-900'
 } }} text-sm rounded-lg text-white text-center absolute"
                                  style="width:{{$entry->getOverlap()*100}}%">{{ round($entry->getOverlap()*100,1) }}%
@@ -37,6 +38,7 @@
 
 @section('scripts')
     <script src="{{ asset('js/apexcharts.js') }}"></script>
+    <script src="{{ asset('js/cytoscape.min.js') }}"></script>
     <script>
         let similarities = {!! json_encode($similarities) !!};
         let quantiles = {!! $quartiles !!};
@@ -44,6 +46,37 @@
         let lastHoveredId = "";
         let xAxisLabels = undefined;
         let nameMap = {!! $nameMap->toJson() !!};
+
+        var cy = cytoscape({
+            container: document.getElementById('cy'), // container to render in
+            elements: {!! json_encode($network) !!},
+            layout: {
+                name: "cose",
+                nodeDimensionsIncludeLabels: true
+            },
+            style: [ // the stylesheet for the graph
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': '#666',
+                        'label': 'data(name)'
+                    }
+                },
+
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 3,
+                        'line-color': '#ccc',
+                        'target-arrow-color': '#ccc',
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'bezier',
+                        'label': 'data(overlap)'
+                    }
+                }
+            ],
+        });
+
         const options = {
             series: scores,
             chart: {
@@ -118,6 +151,9 @@
                 text: 'Quantiles',
                 align: 'left'
             },
+            xaxis: {
+                max: 100
+            },
             plotOptions: {
                 bar: {
                     horizontal: true,
@@ -141,4 +177,14 @@
         }).render();
 
     </script>
+@endsection
+
+@section('styles')
+    <style>
+        #cy {
+            width: 100%;
+            height: 500px;
+            display: block;
+        }
+    </style>
 @endsection

@@ -67,6 +67,7 @@ use Illuminate\Support\Collection;
  * @property Carbon $validated_at
  * @property EloquentCollection<ProjectSubTask> $subTasks
  * @property EloquentCollection<ProjectSubTaskComment> $subTaskComments
+ * @property string $owner_names
  */
 class Project extends Model
 {

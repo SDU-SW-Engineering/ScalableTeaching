@@ -8,6 +8,7 @@ use Http;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Stringable;
 use Laravel\Horizon\Horizon;
 use Laravel\Socialite\Contracts\Factory;
 use Laravel\Socialite\Facades\Socialite;
@@ -45,6 +46,15 @@ class AppServiceProvider extends ServiceProvider
 
         Http::macro('gitlab', function() {
             return Http::withToken(config('scalable.gitlab_token'))->baseUrl(config('scalable.gitlab_url') . '/api/v4');
+        });
+
+        Stringable::macro('shortName', function () {
+            $names = $this->explode(' ');
+            $name = [];
+            $name[] = $names[0];
+            if ($names->has(1))
+                $name[] = $names[1][0] . ".";
+            return mb_convert_encoding(implode(" ", $name), 'UTF-8', 'UTF-8');
         });
     }
 }

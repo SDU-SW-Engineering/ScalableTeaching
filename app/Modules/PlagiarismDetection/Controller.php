@@ -9,9 +9,8 @@ use App\Models\PlagiarismAnalysisComparison;
 use App\Models\PlagiarismAnalysisFileComparison;
 use App\Models\Project;
 use App\Models\Task;
-use Illuminate\Database\Eloquent\Builder;
-use MathPHP\Statistics\Descriptive;
-use function Pest\Laravel\options;
+use App\Modules\PlagiarismDetection\Visualization\ApexChartConverter;
+use App\Modules\PlagiarismDetection\Visualization\CytoscapeGraphConverter;
 
 class Controller extends BaseController
 {
@@ -20,17 +19,18 @@ class Controller extends BaseController
         /** @var PlagiarismAnalysis $analysis */
         $analysis = $task->plagiarismAnalysis()->first();
         $names = $task->projects->mapWithKeys(fn(Project $project) => [$project->id => $project->owner_names]);
-
         $scores = ApexChartConverter::heatMap($analysis, true);
-        $similarities = $analysis->similarities()->keyBy(fn(Similarity $similarity) => $similarity->getProjectId());
+        $similarities = $analysis->similarities();
 
         $quartiles = ApexChartConverter::percentiles($analysis, true);
+        $network = CytoscapeGraphConverter::network($similarities, $task);
 
         return view("module-PlagiarismDetection::pages.dashboard")
             ->with('scores', $scores)
             ->with('similarities', $similarities)
             ->with('nameMap', $names)
-            ->with('quartiles', $quartiles);
+            ->with('quartiles', $quartiles)
+            ->with('network', $network);
     }
 
     public function details(Course $course, Task $task, Project $project, int $overlapId = null)
@@ -40,7 +40,6 @@ class Controller extends BaseController
         $overlaps = $analysis->comparisonsByProjectId($project->id)->orderBy('overlap', 'desc')->get();
         /** @var PlagiarismAnalysisComparison $selectOverlap */
         $selectOverlap = $overlapId == null ? $overlaps->first() : $overlaps->firstWhere('id', $overlapId);
-
         $hiddenFiles = $analysis->hiddenFiles()->pluck('filename');
         $userPlots = $selectOverlap->files()->get()
             ->reject(fn(PlagiarismAnalysisFileComparison $file) => $hiddenFiles->contains($file->perspective($project->id)->getFile()))
@@ -53,6 +52,7 @@ class Controller extends BaseController
             })->values();
         $userFiles = $userPlots->pluck('x');
         $quartiles = ApexChartConverter::percentiles($analysis)->filter(fn($filePercentiles) => $userFiles->contains($filePercentiles['x']))->values();
+
 
         return view("module-PlagiarismDetection::pages.details")
             ->with('project', $project)

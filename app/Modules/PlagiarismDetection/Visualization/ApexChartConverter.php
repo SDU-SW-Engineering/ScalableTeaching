@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Modules\PlagiarismDetection;
+namespace App\Modules\PlagiarismDetection\Visualization;
 
 
 use App\Models\PlagiarismAnalysis;
 use App\Models\PlagiarismAnalysisFileComparison;
+use App\Modules\PlagiarismDetection\SimilarFile;
 use Illuminate\Support\Collection;
 
 class ApexChartConverter
