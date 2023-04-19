@@ -43,30 +43,29 @@ class PlagiarismAnalysisFileComparison extends Model
         $index = $projectId == $this->project_1_id ? 1 : 2;
         $comparedIndex = $index == 1 ? 2 : 1;
 
-        return new SimilarFile($this["filename_$index"], $this->overlap, $this->meta["file{$index}Overlap"],  $this["filename_$comparedIndex"], $this->meta["file{$comparedIndex}Overlap"]);
+        return new SimilarFile($this["filename_$index"], $this->overlap, $this->meta["file{$index}Overlap"], $this["filename_$comparedIndex"], $this->meta["file{$comparedIndex}Overlap"]);
     }
 
     public static function percentiles(int $analysisId, string $targetFile = null)
     {
         $files = [];
-        foreach (PlagiarismAnalysisFileComparison::where('plagiarism_analysis_id', $analysisId)->get() as $file)
-        {
-            foreach (['filename_1', 'filename_2'] as $columnName)
-            {
+        foreach(PlagiarismAnalysisFileComparison::where('plagiarism_analysis_id', $analysisId)->get() as $file) {
+            foreach(['filename_1', 'filename_2'] as $columnName) {
                 $fileName = $file->$columnName;
-                if ($targetFile != null && $fileName != $targetFile)
+                if($targetFile != null && $fileName != $targetFile)
                     continue;
-                if (!array_key_exists($fileName, $files))
+                if(!array_key_exists($fileName, $files))
                     $files[$fileName] = [];
                 $files[$fileName][] = $file->overlap;
             }
         }
         return (new Collection($files))->map(fn(array $overlaps, string $fileName) => [
-            'min' => min($overlaps),
-            '25' => Descriptive::percentile($overlaps, 25),
-            '50' => Descriptive::percentile($overlaps, 50),
-            '75' => Descriptive::percentile($overlaps, 75),
-            'max' => max($overlaps)
+            'observations' => round(count($overlaps) / 2),
+            'min'          => round(min($overlaps) * 100, 2),
+            '25'           => round(Descriptive::percentile($overlaps, 25) * 100, 2),
+            '50'           => round(Descriptive::percentile($overlaps, 50) * 100, 2),
+            '75'           => round(Descriptive::percentile($overlaps, 75) * 100, 2),
+            'max'          => round(max($overlaps) * 100, 2)
         ]);
     }
 }

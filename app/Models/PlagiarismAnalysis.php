@@ -38,6 +38,11 @@ class PlagiarismAnalysis extends Model
         return $this->hasMany(PlagiarismAnalysisComparison::class);
     }
 
+    public function hiddenFiles(): HasMany
+    {
+        return $this->hasMany(PlagiarismHiddenFile::class);
+    }
+
     /**
      * @param int $level
      * @return Collection<Similarity>
