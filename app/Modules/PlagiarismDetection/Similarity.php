@@ -44,10 +44,14 @@ class Similarity implements JsonSerializable
         return $this->overlap;
     }
 
-    /**
-     * @return mixed
-     */
-    public function files(): Collection
+    public function getSummarizedFileOverlap(array $omit = [])
+    {
+        return $this->fileQuery()->get()->reject(function(PlagiarismAnalysisFileComparison $file) use ($omit) {
+            return in_array($file->perspective($this->projectId)->getFile(), $omit);
+        })->average('overlap');
+    }
+
+    private function fileQuery()
     {
         return PlagiarismAnalysisFileComparison::where('plagiarism_analysis_id', $this->analysisId)
             ->where(function(Builder $query) {
@@ -56,15 +60,23 @@ class Similarity implements JsonSerializable
             })->orWhere(function(Builder $query) {
                 $query->where('project_1_id', $this->comparedWithProjectId)
                     ->where('project_2_id', $this->projectId);
-            })->get();
+            });
     }
 
-    public function project() : Project
+    /**
+     * @return mixed
+     */
+    public function files(): Collection
+    {
+        return $this->fileQuery()->get();
+    }
+
+    public function project(): Project
     {
         return Project::find($this->projectId);
     }
 
-    public function comparedWith() : Project
+    public function comparedWith(): Project
     {
         return Project::find($this->comparedWithProjectId);
     }

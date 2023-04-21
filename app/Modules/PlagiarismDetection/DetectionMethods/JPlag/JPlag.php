@@ -50,8 +50,10 @@ class JPlag
                 $jplagMatch = new JPlagMatch($match["file1"], $match["file2"]);
                 if(array_key_exists($jplagMatch->id(), $fileComparisons))
                     $jplagMatch = $fileComparisons[$jplagMatch->id()];
-                else
+                else {
                     $fileComparisons[$jplagMatch->id()] = $jplagMatch;
+                    $jplagMatch->fileSimilarity = ($match['tokens'] / ($match['file1Tokens'] + $match['file2Tokens'])) * 2;
+                }
                 $jplagMatch->addOverlap($match['start1'], $match['end1'], $match['start2'], $match['end2']);
             }
             foreach($fileComparisons as $comparison) {
@@ -62,7 +64,7 @@ class JPlag
                     'project_2_id' => str($file2Parts->shift())->explode("_")[0],
                     'filename_1'   => $file1Parts->join('/'),
                     'filename_2'   => $file2Parts->join('/'),
-                    'overlap'      => $comparison->calculatePercentage($baseDir),
+                    'overlap'      => $comparison->fileSimilarity,
                     'meta'         => [
                         'file1Overlap' => $comparison->file1Overlap,
                         'file2Overlap' => $comparison->file2Overlap

@@ -13,7 +13,7 @@
                     <div class="w-1/4">Compared with</div>
                     <div class="w-1/4">Overlap</div>
                 </div>
-                @foreach($similarities->sortByDesc(fn($similarity) => $similarity->getOverlap()) as $entry)
+                @foreach($similarities->sortByDesc(fn($similarity) => $similarity->getSummarizedFileOverlap($hiddenFiles->toArray())) as $entry)
                     <div class="flex text-sm hover:bg-gray-200 py-1">
                         <div class="w-2/4"><a
                                 href="{{ route('courses.tasks.admin.plagiarismDetection.details', [$course, $task, $entry->getProjectId()]) }}">{{ $entry->project()->owner_names }}</a>
@@ -22,11 +22,11 @@
                         <div class="w-1/4 items-center flex relative">
                             <div class="h-5 bg-gray-400 text-sm rounded-lg text-center absolute w-full"></div>
                             <div class="h-5 {{ match(true){
-    $entry->getOverlap() > 0.8 => 'bg-red-900',
-    $entry->getOverlap() > 0.5 => 'bg-yellow-700',
+    $entry->getSummarizedFileOverlap($hiddenFiles->toArray()) > 0.8 => 'bg-red-900',
+    $entry->getSummarizedFileOverlap($hiddenFiles->toArray()) > 0.5 => 'bg-yellow-700',
     default => 'bg-lime-green-900'
 } }} text-sm rounded-lg text-white text-center absolute"
-                                 style="width:{{$entry->getOverlap()*100}}%">{{ round($entry->getOverlap()*100,1) }}%
+                                 style="width:{{$entry->getSummarizedFileOverlap($hiddenFiles->toArray())*100}}%">{{ round($entry->getSummarizedFileOverlap($hiddenFiles->toArray())*100,1) }}%
                             </div>
                         </div>
                     </div>
@@ -42,7 +42,7 @@
     <script>
         let similarities = {!! json_encode($similarities) !!};
         let quantiles = {!! $quartiles !!};
-        let scores = {!!  $scores !!};
+        let scores = {!!  json_encode($scores, JSON_PRETTY_PRINT) !!};
         let lastHoveredId = "";
         let xAxisLabels = undefined;
         let nameMap = {!! $nameMap->toJson() !!};
@@ -80,7 +80,7 @@
         const options = {
             series: scores,
             chart: {
-                height: 600,
+                height: 800,
                 type: 'heatmap',
                 events: {
                     mouseMove: function (event, chartContext, config) {
@@ -129,7 +129,8 @@
             xaxis: {
                 labels: {
                     formatter: function (projectId) {
-                        return nameMap[projectId];
+                       // return projectId;
+                        return `${nameMap[projectId]}`;
                     }
                 }
             },

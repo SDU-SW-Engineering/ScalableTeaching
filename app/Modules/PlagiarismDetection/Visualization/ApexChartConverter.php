@@ -6,6 +6,7 @@ namespace App\Modules\PlagiarismDetection\Visualization;
 use App\Models\PlagiarismAnalysis;
 use App\Models\PlagiarismAnalysisFileComparison;
 use App\Modules\PlagiarismDetection\SimilarFile;
+use App\Modules\PlagiarismDetection\Similarity;
 use Illuminate\Support\Collection;
 
 class ApexChartConverter
@@ -19,6 +20,8 @@ class ApexChartConverter
             $files = $files->reject(fn($percentile, $fileName) => $hiddenFiles->contains($fileName));
         }
 
+        /** filter anything with only one occurrence $files */
+        $files = $files->reject(fn($percentiles, $path) => $percentiles['observations'] <= 2);
 
         $files = $files->map(fn(array $percentiles, string $file) => [
             'x' => $file,
@@ -52,17 +55,34 @@ class ApexChartConverter
             $files = $files->reject(fn($percentile, $fileName) => $hiddenFiles->contains($fileName));
         }
 
-        return $files->map(function($scores, $file) {
-            $data = collect($scores)->sortBy('total_overlap')->map(fn($score, $project) => [
-                'x'  => "$project",
-                'y'  => round($score['file_overlap'] * 100, 2),
-                'id' => $project
-            ])->values();
+        /** filter anything with only one occurrence $files */
+        $files = $files->reject(fn($entries, $path) => count($entries) == 1);
+        $final = [];
+        $sortedBySimilarity = $similarities->sortBy(fn(Similarity $similarity) =>  $similarity->getOverlap());
 
-            return [
+        foreach($files as $file => $scores) {
+            $data = [];
+            foreach($sortedBySimilarity as $comparison) {
+                if(!array_key_exists($comparison->getProjectId(), $scores)) {
+                    $data[] = [
+                        'x'  => "{$comparison->getProjectId()}",
+                        'y'  => 0,
+                        'id' => $comparison->getProjectId()
+                    ];
+                    continue;
+                }
+                $score = $scores[$comparison->getProjectId()];
+                $data[] = [
+                    'x'  => "{$comparison->getProjectId()}",
+                    'y'  => round($score['file_overlap'] * 100, 2),
+                    'id' => $comparison->getProjectId()
+                ];
+            }
+            $final[] = [
                 'name' => $file,
-                'data' => $data,
+                'data' => $data
             ];
-        })->values();
+        }
+        return $final;
     }
 }

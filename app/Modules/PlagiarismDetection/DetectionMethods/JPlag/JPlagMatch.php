@@ -16,6 +16,8 @@ class JPlagMatch
     public int $file1LineOverlap = 0;
     public int $file2LineOverlap = 0;
 
+    public float $fileSimilarity = 0;
+
     /**
      * @param string $file1
      * @param string $file2
