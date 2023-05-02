@@ -4,85 +4,71 @@ namespace App\Modules\Visualizations;
 
 use App\Http\Controllers\Controller as BaseController;
 use App\Models\Course;
+use App\Models\Enums\DownloadState;
 use App\Models\Project;
+use App\Models\ProjectDownload;
 use App\Models\Task;
+use App\Models\VisualizationServer;
 use App\Modules\Module;
 use Gitlab\Api\Jobs;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use ZipArchive;
 use function _PHPStan_9a6ded56a\React\Promise\Timer\timeout;
+use Exception;
 
 class Controller extends BaseController
 {
     public function visualizations(Course $course, Task $task, Module $module)
     {
-        $projectQuery = $task->projects()
-            ->select('*', \DB::raw('TIMESTAMPDIFF(second,created_at, finished_at) as duration'))
-            ->withCount('pipelines')
-            ->orderBy(request('sort', 'created_at'), request('direction', 'desc'));
-
-        $projects = $projectQuery->paginate(10)->withQueryString();
-
-        return view('module-Visualizations::Pages.visualizations', compact('task', 'projects', 'course'));
+        $projects = $task->projects()->claimed()->with('downloads', 'ownable')->get()->sort(fn(Project $a, Project $b) => strcmp($a->ownable->name, $b->ownable->name))->values();
+        $enabledAfterDeadline = $task->downloads()->count() == 0;
+        $downloads = $projects->map(fn(Project $project) => [
+            'project'  => $project,
+            'download' => $project->downloads()->first(),
+            'indexed'  => false
+        ]);
+        $missingOnDisk = $downloads->filter(fn($download) => $download['download']?->state == DownloadState::Downloaded && $download['download']->queued_at == null);
+        return view('module-Visualizations::Pages.visualizations')->with('downloads', $downloads)->with('missing', $missingOnDisk)->with('enabledAfterDeadline', $enabledAfterDeadline);
     }
 
-    public function showVisualization(Course $course, Task $task)
+
+    public function showVisualization(Course $course, Task $task, VisualizationServer $visualizationServer, ProjectDownload $projectDownload)
     {
-        $originalPath = $task->downloads()->pluck('location')->first();
-        $ref = $task->downloads()->pluck('ref')->first();
-        $repoName = Project::findOrFail($task->downloads()->pluck('project_downloads.project_id')->first())->repo_name;
-
-        if ( ! Storage::exists('newDir'))
-        {
-            Storage::makeDirectory('newDir');
-        }
-
-        $pathToP1 = Storage::path('newDir/') . $repoName . '-' . $ref . '-' . $ref . '/P1';
+        //$originalPath = Storage::path($task->downloads()->pluck('location')->last());
+        //dd($projectDownload->id);
+        $originalPath = Storage::path($task->downloads()->where('project_downloads.id', $projectDownload->id)->pluck('location'));
+        //dd($originalPath);
         $shinyPath = ':/srv/shiny-server/';
-        $zip = new ZipArchive;
-        if ($zip->open(Storage::path($originalPath)) === TRUE)
-        {
-            $zip->extractTo((Storage::path('newDir')));
-            $zip->close();
-            //Storage::move($originalPath, $baseDir);
-            //return redirect()->back();
-        } else
-        {
-            echo 'failed';
-        }
-
-        $process = new Process(['docker', 'run', '--rm', '-v', $pathToP1 . $shinyPath, '-d', '-p', '3838:3838', 'christen97/shiny-server:firsttry']);
-
-        //dd(str($process->getCommandLine())->remove('\''));
+        $process = new Process(['docker', 'run', '--rm', '-v', $originalPath . $shinyPath, '-d', '-p', '3838:3838', 'christen97/shiny-server:firsttry']);
+        //dd($process->getCommandLine());
         $process->run();
+        $projectID = $task->downloads()->where('project_downloads.id', $projectDownload->id)->pluck('project_downloads.project_id');
+        $visualizationServer = new VisualizationServer;
+        $visualizationServer->container_id = str($process->getOutput())->trim();
+        $visualizationServer->project_id = $projectID->first();
+        $visualizationServer->deadline = now()->addSeconds(30);
+        $visualizationServer->save();
 
-        /*if (!$process->isSuccessful()) {
-            dd($process->getExitCode());
-        }*/
-        //check if server is running and reload
-
-        //check if the user is on the page
-        /*if (\Route::currentRouteAction() == "App\Modules\Visualizations\Controller@showVisualization")
-        {
-            dd(123);
-        }*/
-        echo $process->getOutput();
         try
         {
-            $response = \Http::get('localhost:3838');
-            echo $response;
+            \Http::get('localhost:3838')->status();
         } catch (\Exception $e)
         {
-            echo $e;
-        }
-        //$response = \Http::get('localhost:3838')->failed();
-        /*if (!$response == 200) {
+            sleep(1);
             redirect()->back();
-        }*/
-        //dd($response);
-        return view('module-Visualizations::Pages.showVisualization', compact('task', 'course'));
+        }
+
+        return view('module-Visualizations::Pages.showVisualization', compact('task', 'course', 'visualizationServer', 'projectDownload'));
+    }
+
+    public function presence(Course $course, Task $task, VisualizationServer $visualizationServer)
+    {
+        $visualizationServer->update([
+            'deadline' => now()->addSeconds(30),
+        ]);
     }
 
 }

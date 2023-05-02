@@ -35,6 +35,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('tasks:mark-expired')->everyFiveMinutes();
         $schedule->command('tasks:delegate')->everyFifteenMinutes();
         $schedule->command('pipelines:refresh-stale')->everyThirtyMinutes();
+        $schedule->command('visualizations:kill-overdue-shiny-servers')->everyMinute();
     }
 
     /**

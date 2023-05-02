@@ -1,182 +1,116 @@
 @extends('tasks.admin.master')
+
 @section('adminContent')
-<table class="min-w-full">
-    <thead class="bg-gray-50 dark:bg-gray-800">
-    <tr>
-        <th scope="col"
-            class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-            Users
-        </th>
-        <th scope="col"
-            class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-            <a class="flex items-center"
-               href="{{ request()->fullUrlWithQuery(['sort' => 'pipelines_count', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">
-                @if (request('sort') == 'pipelines_count')
-                    @if (request('direction') == 'asc')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
-                             viewBox="0 0 20 20" fill="currentColor">
-                            <path
-                                d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/>
-                        </svg>
-                    @else
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/>
-                        </svg>
-                    @endif
-                @endif
-                <span>Builds</span>
-            </a>
-        </th>
-        @if($task->sub_tasks != null)
-            <th scope="col"
-                class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-                <span>Progress</span>
-            </th>
-        @endif
-        <th scope="col"
-            class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-            Status
-        </th>
-        @if(request('status') == 'finished')
-            <th class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-                Finished
-            </th>
-            <th scope="col"
-                class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-                <a class="flex items-center justify-end"
-                   href="{{ request()->fullUrlWithQuery(['sort' => 'duration', 'direction' => request('direction') == 'asc' ? 'desc' : 'asc']) }}">
-                    @if (request('sort') == 'duration')
-                        @if (request('direction') == 'asc')
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
-                                 viewBox="0 0 20 20" fill="currentColor">
-                                <path
-                                    d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/>
-                            </svg>
+    <div class="">
+        <h1 class="text-2xl font-semibold mb-4 dark:text-white">Visualizations</h1>
+    </div>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-600 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    Student / Group
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Downloaded
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Notes
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Actions
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach($downloads as $index => $download)
+                <tr class=" border-b {{ $index % 2 == 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800' }} dark:border-gray-700">
+                    <th class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $download['project']->ownable->name }} @if($download['project']->ownable_type == \App\Models\Group::class)
+                            <span class="text-gray-500">({{ $download['project']->owners()->pluck('name')->join(', ') }}
+                                )</span>
+                        @endif</th>
+                    @if($task->has_ended)
+                        @if($download['download'])
+                            @if($download['download']->state == \App\Models\Enums\DownloadState::OnDisk)
+                                <td class="flex items-center px-6 py-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                         stroke-width="1.5"
+                                         stroke="currentColor" class="w-6 h-6 text-lime-green-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </td>
+                                <td class="px-6">
+                                    Expire {{ $download['download']->expire_at->diffForHumans() }}.
+                                </td>
+                                <td class="flex items-center px-6 py-4">
+                                    <a type="button"
+                                       href="{{ route('courses.tasks.admin.visualizations.showVisualization', [$course->id, $task->id, $download['download']]) }}"
+                                       target="_blank"
+                                       class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium rounded-lg text-xs px-3 py-2 text-center">Show</a>
+                                </td>
+                            @else
+                                @if($download['download']->queued_at != null && $download['download']->queued_at->addMinutes(10)->isFuture())
+                                    <td class="flex items-center px-6 py-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                             stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-yellow-500">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </td>
+                                    <td class="px-6">
+                                        Project needs to be downloaded first
+                                    </td>
+                                    <td></td>
+                                @else
+                                    <td class="flex items-center px-6 py-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                             stroke-width="1.5"
+                                             stroke="currentColor" class="w-6 h-6 text-red-500">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        Project needs to be downloaded first
+                                    </td>
+                                    <td class="flex items-center px-6 py-4">
+                                        <a type="button"
+                                           class="text-white bg-gray-400 hover:bg-gray-300 cursor-not-allowed focus:ring-4 focus:ring-lime-green-300 font-medium rounded-lg text-xs px-3 py-2 text-center">Show</a>
+                                    </td>
+                                @endif
+                            @endif
                         @else
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4"
-                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2"
-                                      d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/>
-                            </svg>
+                            <td class="flex items-center px-6 py-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     stroke-width="1.5"
+                                     stroke="currentColor" class="w-6 h-6 text-red-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($download['project']->relevantPushes()->count() == 0)
+                                    No push within deadline.
+                                @else
+                                    Was never queued for download.
+                                @endif
+                            </td>
+                            <td class="">
+
+                            </td>
                         @endif
-                    @endif
-                    <span>Duration</span>
-                </a>
-            </th>
-        @endif
-        <th class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-            Created at
-        </th>
-        <th scope="col"
-            class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
-            Actions
-        </th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach($projects as $project)
-        <tr class="bg-white dark:bg-gray-600 border-b dark:border-gray-800">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                @if($project->ownable_type == \App\Models\User::class)
-                    {{ $project->ownable->name }}
-                @elseif($project->ownable_type == \App\Models\Group::class)
-                    {{ $project->ownable->name }} <span
-                        class="text-gray-400">({{ $project->ownable->memberString }})</span>
-                @else
-                    {{ $project->repo_name }}
-                @endif
-            </td>
-            <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
-                {{ $project->pipelines->count() }}
-            </td>
-            <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
-                {{ $project->progress() }}%
-            </td>
-            <td class="text-sm flex text-gray-500 px-6 py-4 whitespace-nowrap">
-                @if($project->status == \App\ProjectStatus::Active)
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-6 w-6 active text-yellow-400 mr-2" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                @else
-                    @if($project->status == \App\ProjectStatus::Finished)
-                        <div class="flex">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 class="h-6 w-6 text-lime-green-300 handed-in mr-2"
-                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2"
-                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
                     @else
-                        <div class="flex">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                 stroke-width="1.5" stroke="currentColor"
-                                 class="h-6 w-6 text-red-300 handed-in mr-2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
+                        <td class="flex items-center px-6 py-4">
+                            <span class="italic">Waiting for task to end...</span>
+                        </td>
+                        <td class="flex items-center px-6 py-4">
+
+                        </td>
                     @endif
-                @endif
-
-                @if($project->validationStatus == 'pending')
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-6 w-6 waiting-for-verification" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                @elseif($project->validationStatus == 'success')
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-6 w-6 text-lime-green-400 validated-success"
-                         fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                @else
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-6 w-6 text-red-500 validated-failed" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                @endif
-            </td>
-            @if(request('status') == 'finished')
-                <td class="text-sm text-gray-500 dark:text-gray-300 px-6 py-4 whitespace-nowrap">
-                    {{ $project->finished_at->diffForHumans() }}
-                </td>
-                <td class="text-sm text-gray-500 dark:text-gray-200 px-6 py-4 whitespace-nowrap text-right">
-                    {{ $project->duration }} days
-                </td>
-            @endif
-            <td class="text-sm text-gray-500 dark:text-gray-300 px-6 py-4 whitespace-nowrap">
-                {{ $project->created_at->diffForHumans() }}
-            </td>
-            <td class="w-px">
-                <div class="flex mr-3">
-                    <a type="button"
-                       href="{{ route('courses.tasks.admin.visualizations.showVisualization', [$course->id, $task->id]) }}"
-                       target="_blank"
-                       class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium rounded-lg text-xs px-3 py-2 text-center">Show</a>
-
-                </div>
-            </td>
-        </tr>
-    </tbody>
-    @endforeach
-</table>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
 @endsection

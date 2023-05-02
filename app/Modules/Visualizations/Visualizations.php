@@ -2,6 +2,7 @@
 
 namespace App\Modules\Visualizations;
 
+use App\Modules\AutomaticDownload\AutomaticDownload;
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\Module;
 use Illuminate\Support\Facades\Route;
@@ -17,13 +18,15 @@ class Visualizations extends Module
     protected string $description = "Makes the linked repository function as the starting point. When the assignment is started each participant will get their own forked version of the linked repo.";
 
     protected array $dependencies = [
-        LinkRepository::class
+        LinkRepository::class,
+        AutomaticDownload::class,
     ];
 
     public static function configRoutes(): void
     {
         Route::get('visualizations', [Controller::class, 'visualizations'])->name('visualizations');
-        Route::get('showVisualization', [Controller::class, 'showVisualization'])->name('showVisualization');
+        Route::get('showVisualization/{projectDownload}', [Controller::class, 'showVisualization'])->name('showVisualization');
+        Route::get('presence/{visualizationServer}', [Controller::class, 'presence'])->name('presence');
     }
 
     protected bool $sidebar = true;
