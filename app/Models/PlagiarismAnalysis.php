@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Modules\PlagiarismDetection\Similarity;
 use Carbon\Carbon;
 use Eloquent;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -55,7 +54,6 @@ class PlagiarismAnalysis extends Model
             ->where('plagiarism_analysis_id', $this->id)
             ->union($project2Base);
 
-
         $cte = \DB::table(\DB::raw("({$baseQuery->toSql()}) as base"))
             ->select('base.*', \DB::raw('ROW_NUMBER() over (PARTITION BY id ORDER BY overlap DESC) as rn'))
             ->mergeBindings($baseQuery->getQuery());
@@ -72,6 +70,17 @@ class PlagiarismAnalysis extends Model
         return $this->hasMany(PlagiarismAnalysisComparison::class)
             ->where('project_1_id', $projectId)
             ->orWhere('project_2_id', $projectId);
+    }
+
+    public function comparisonBetweenProjectIds(int $projectId1, int $projectId2): PlagiarismAnalysisComparison|null
+    {
+        return PlagiarismAnalysisComparison::where(function($query) use ($projectId2, $projectId1) {
+            $query->where('project_1_id', $projectId1)
+                ->where('project_2_id', $projectId2);
+        })->orWhere(function($query) use ($projectId1, $projectId2) {
+            $query->where('project_1_id', $projectId2)
+                ->where('project_2_id', $projectId1);
+        })->first();
     }
 
     public function fileComparisonsByProject(int $projectId): HasMany

@@ -66,6 +66,11 @@ Vue.component(
 );
 
 Vue.component(
+    "comparison-window",
+    require("./components/Editor/Comparison/ComparisonWindow.vue").default
+);
+
+Vue.component(
     "repo-selection",
     require("./components/Course/RepoSelection.vue").default
 );

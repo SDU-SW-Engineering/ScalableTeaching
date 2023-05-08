@@ -33,5 +33,7 @@ class PlagiarismDetection extends Module
         Route::get('project/{project}/{overlap?}', [Controller::class, 'details'])->name('details');
         Route::get('files', [Controller::class, 'files'])->name('files');
         Route::post('files', [Controller::class, 'hideFiles']);
+        Route::get('compare/{from}', [Controller::class, 'compare'])->name('compare');
+        Route::get('compare/{from}/details', [Controller::class, 'compareDetails'])->name('compareDetails');
     }
 }

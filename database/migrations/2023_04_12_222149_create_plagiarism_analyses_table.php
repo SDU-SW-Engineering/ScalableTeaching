@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('task_id')->constrained();
             $table->string('method');
             $table->dateTime('analyzed_at');
+            $table->enum('average_calculation', ['file_average', 'overall_average'])->comment('When a complete plagiarism overlap is calculated should either file_aver be used or the overall provided.')
+                ->default('overall_average');
             $table->longText('output')->nullable();
             $table->timestamps();
         });

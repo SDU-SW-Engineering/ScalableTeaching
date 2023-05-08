@@ -2,9 +2,41 @@
 
 @section('adminContent')
     <div class="bg-white border rounded p-4">
-        <div id="cy"></div>
+        <div
+            class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 mb-4">
+            <ul class="flex flex-wrap -mb-px">
+                <li class="mr-2">
+                    <button id="normal-tab" onclick="activateTab('normal')"
+                            class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300">
+                        Normal Distribution
+                    </button>
+                </li>
+                <li class="mr-2">
+                    <button id="graph-tab" onclick="activateTab('graph')"
+                            class="inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500"
+                            aria-current="page">Graph
+                    </button>
+                </li>
+                <li class="mr-2">
+                    <button id="quantiles-tab" onclick="activateTab('quantiles')"
+                            class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300">
+                        Quantiles
+                    </button>
+                </li>
+                <li class="mr-2">
+                    <button id="heatmap-tab" onclick="activateTab('heatmap')"
+                            class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300">
+                        HeatMap
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div id="normal" style="display:none"></div>
+        <div id="graph" style="display:none">
+            <div id="cy"></div>
+        </div>
         <div id="quantiles"></div>
-        <div id="chart"></div>
+        <div id="heatmap"></div>
         <div class="flex flex-col mt-4">
             <h1 class="text-xl font-medium mb-4">Comparisons</h1>
             <div class="flex flex-col gap-1">
@@ -21,13 +53,14 @@
                         <div class="w-1/4">{{ $entry->comparedWith()->owner_names }}</div>
                         <div class="w-1/4 items-center flex relative">
                             <div class="h-5 bg-gray-400 text-sm rounded-lg text-center absolute w-full"></div>
-                            <div class="h-5 {{ match(true){
+                            <a href="{{ route('courses.tasks.admin.plagiarismDetection.compare', [$course, $task, $entry->getProjectId(), 'with' => [$entry->comparedWith()->id]]) }}" class="h-5 {{ match(true){
     $entry->getSummarizedFileOverlap($hiddenFiles->toArray()) > 0.8 => 'bg-red-900',
     $entry->getSummarizedFileOverlap($hiddenFiles->toArray()) > 0.5 => 'bg-yellow-700',
     default => 'bg-lime-green-900'
 } }} text-sm rounded-lg text-white text-center absolute"
-                                 style="width:{{$entry->getSummarizedFileOverlap($hiddenFiles->toArray())*100}}%">{{ round($entry->getSummarizedFileOverlap($hiddenFiles->toArray())*100,1) }}%
-                            </div>
+                                 style="width:{{$entry->getSummarizedFileOverlap($hiddenFiles->toArray())*100}}%">{{ round($entry->getSummarizedFileOverlap($hiddenFiles->toArray())*100,1) }}
+                                %
+                            </a>
                         </div>
                     </div>
                 @endforeach
@@ -40,7 +73,45 @@
     <script src="{{ asset('js/apexcharts.js') }}"></script>
     <script src="{{ asset('js/cytoscape.min.js') }}"></script>
     <script>
+        let tabs = [{
+            name: 'Normal',
+            active: true,
+            id: "normal"
+        }, {
+            name: "Graph",
+            active: false,
+            id: "graph"
+        }, {
+            name: "Quantiles",
+            active: false,
+            id: "quantiles"
+        }, {
+            name: "Heatmap",
+            active: false,
+            id: "heatmap"
+        }];
+        let renderTabs = function () {
+            for (tab of tabs) {
+                if (tab.active) {
+                    document.getElementById(`${tab.id}-tab`).classList.remove(...document.getElementById(`${tab.id}-tab`).classList);
+                    document.getElementById(`${tab.id}-tab`).classList.add("inline-block", "p-4", "text-blue-600", "border-b-2", "border-blue-600", "rounded-t-lg", "active", "dark:text-blue-500", "dark:border-blue-500")
+                    document.getElementById(tab.id).style.display = 'block';
+                } else {
+                    document.getElementById(`${tab.id}-tab`).classList.remove(...document.getElementById(`${tab.id}-tab`).classList)
+                    document.getElementById(`${tab.id}-tab`).classList.add("inline-block", "p-4", "border-b-2", "border-transparent", "rounded-t-lg", "hover:text-gray-600", "hover:border-gray-300", "dark:hover:text-gray-300");
+                    document.getElementById(tab.id).style.display = 'none';
+                }
+            }
+        }
+        let activateTab = function (tabId) {
+            tabs.forEach(tab => {
+                tab.active = tab.id === tabId
+            })
+            renderTabs();
+        }
+        renderTabs();
         let similarities = {!! json_encode($similarities) !!};
+        let normalDist = {!! $normal !!};
         let quantiles = {!! $quartiles !!};
         let scores = {!!  json_encode($scores, JSON_PRETTY_PRINT) !!};
         let lastHoveredId = "";
@@ -129,19 +200,42 @@
             xaxis: {
                 labels: {
                     formatter: function (projectId) {
-                       // return projectId;
+                        // return projectId;
                         return `${nameMap[projectId]}`;
                     }
                 }
             },
             colors: ["#008FFB"],
             title: {
-                text: 'JPlag'
+                text: 'HeatMap'
             },
         };
 
-        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        var chart = new ApexCharts(document.querySelector("#heatmap"), options);
         chart.render();
+
+        var chart = new ApexCharts(document.querySelector("#normal"), {
+            chart: {
+                type: 'line'
+            },
+            xaxis: {
+                min: 1,
+                max: 100
+            },
+            series: [
+                {
+                    name: "Normal",
+                    data: normalDist
+                }
+            ],
+            yaxis: {
+                labels: {
+                    formatter: function (val) {
+                        return `${parseFloat(val*100).toFixed(2)}%`;
+                    }
+                }
+            },
+        }).render()
 
         var boxChart = new ApexCharts(document.querySelector("#quantiles"), {
             chart: {

@@ -26,12 +26,14 @@ class PlagiarismAnalysisComparison extends Model
      */
     public function files(): Builder
     {
-        return PlagiarismAnalysisFileComparison::where(function(Builder $query) {
-            $query->where('project_1_id', $this->project_1_id)
-                ->where('project_2_id', $this->project_2_id);
-        })->orWhere(function(Builder $query) {
-            $query->where('project_1_id', $this->project_2_id)
-                ->where('project_2_id', $this->project_1_id);
+        return PlagiarismAnalysisFileComparison::where(function($query) {
+            $query->where(function(Builder $query) {
+                $query->where('project_1_id', $this->project_1_id)
+                    ->where('project_2_id', $this->project_2_id);
+            })->orWhere(function(Builder $query) {
+                $query->where('project_1_id', $this->project_2_id)
+                    ->where('project_2_id', $this->project_1_id);
+            });
         });
     }
 }

@@ -39,7 +39,6 @@ class PlagiarismAnalysisFileComparison extends Model
      */
     public function perspective($projectId): SimilarFile
     {
-
         $index = $projectId == $this->project_1_id ? 1 : 2;
         $comparedIndex = $index == 1 ? 2 : 1;
 
