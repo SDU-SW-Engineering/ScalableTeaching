@@ -18,6 +18,16 @@ class JPlagMatch
 
     public float $fileSimilarity = 0;
 
+    public int $file1Tokens = 0;
+    public int $file2Tokens = 0;
+    public int $tokensMatch = 0;
+
+
+    public function fileSimilarity(): float
+    {
+        return ($this->tokensMatch / ($this->file1Tokens + $this->file2Tokens)) * 2;
+    }
+
     /**
      * @param string $file1
      * @param string $file2
@@ -52,14 +62,14 @@ class JPlagMatch
         $file2Path = Storage::path($basePath . '/' . $this->file2);
         $handle = fopen($file1Path, "r");
         $file1LineCount = 0;
-        while(!feof($handle)){
+        while(!feof($handle)) {
             fgets($handle);
             $file1LineCount++;
         }
 
         $handle = fopen($file2Path, "r");
         $file2LineCount = 0;
-        while(!feof($handle)){
+        while(!feof($handle)) {
             fgets($handle);
             $file2LineCount++;
         }

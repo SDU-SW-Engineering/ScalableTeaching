@@ -18,10 +18,17 @@
 </head>
 <body class="bg-gray-500">
 <div id="app">
-    <comparison-window :master="{{json_encode($master)}}" :map="{{json_encode($map)}}" :tree="{{ json_encode($tree) }}"
+    <comparison-window :tree="{{ json_encode($tree) }}"
                        :trees="{{ json_encode($treeMap) }}"
                        :from-id="{{ $from->id }}"
-                       :project-map="{{ json_encode($projectMap) }}"></comparison-window>
+                       :to-id="{{ $to }}"
+                       :name-map="{{ json_encode($nameMap) }}"
+                       :from-compared="{{ json_encode($fromCompared) }}"
+                       :to-compared="{{ json_encode($toCompared) }}"
+                       :dropdown="{{ json_encode($dropdown) }}"
+                       mark-route="{{ $markRoute }}"
+                       :is-suspicious="{{ $isSuspicious ? "true" : "false" }}"
+    ></comparison-window>
 </div>
 
 <script type="text/javascript" src="{{ mix('js/app.js') }}"></script>

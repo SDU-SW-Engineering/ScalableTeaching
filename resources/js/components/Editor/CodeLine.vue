@@ -1,10 +1,7 @@
 <template>
     <div class="">
         <div
-            :class="{
-                'bg-lime-green-900 hover:bg-lime-green-700': isMarked,
-                'hover:bg-gray-700': !isMarked,
-            }"
+            :class="[markColor == null ? 'hover:bg-gray-700' : markColor]"
             class="flex group"
             :id="'line-' + line.number"
         >
@@ -99,9 +96,9 @@ export default {
             type: String,
             required: true,
         },
-        isMarked: {
-            type: Boolean,
-            default: false,
+        markColor: {
+            type: String,
+            default: null,
         },
     },
     data() {

@@ -28,15 +28,17 @@
         <directory
             :overlapping-files="overlappingFiles"
             @open="open"
+            :selected="selected"
             :level="level + 1"
-            v-if="isOpen"
+            v-show="isOpen"
             :directory="directory"
             v-for="directory in directory.directories"
         ></directory>
         <file
+            :selected="selected"
             :overlapping-files="overlappingFiles"
             @open="open"
-            v-if="isOpen"
+            v-show="isOpen"
             :level="level + 1"
             :file="file"
             v-for="file in directory.files"
@@ -49,6 +51,10 @@ import File from "./File";
 export default {
     components: { File },
     props: {
+        selected: {
+            type: String,
+            default: null,
+        },
         directory: {
             type: Object,
             required: true,
@@ -71,6 +77,11 @@ export default {
         return {
             isOpen: false,
         };
+    },
+    watch: {
+        selected: function (val, oldVal) {
+            this.isOpen = val.startsWith(this.directory.full);
+        },
     },
 };
 </script>

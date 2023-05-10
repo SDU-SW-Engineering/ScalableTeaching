@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -383,7 +384,7 @@ class Project extends Model
      * Returns all pushes that have been made within the deadline of the project with a valid sha.
      * @return HasMany a list of pushes in descending order
      */
-    public function relevantPushes() : HasMany
+    public function relevantPushes(): HasMany
     {
         return $this
             ->pushes()

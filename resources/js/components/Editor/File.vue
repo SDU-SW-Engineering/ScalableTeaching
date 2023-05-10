@@ -2,8 +2,13 @@
     <div
         @click="open"
         :style="{ paddingLeft: level * 10 + 'px' }"
-        :class="[file.changed ? 'text-yellow-300' : 'text-white']"
-        class="flex w-full cursor-pointer justify-between relative py-0.5 items-center z-10 hover:bg-gray-800"
+        :class="[
+            file.changed ? 'text-yellow-300' : 'text-white',
+            selected === file.full
+                ? 'bg-lime-green-600 hover:bg-lime-green-800'
+                : 'hover:bg-gray-800',
+        ]"
+        class="flex w-full cursor-pointer justify-between relative py-0.5 items-center z-10"
     >
         <div
             v-if="overlap !== null"
@@ -26,7 +31,7 @@
             v-if="overlap !== null"
             class="z-10 text-sm text-blue-400 font-bold"
         >
-            {{ overlap }}%
+            {{ parseFloat(this.overlap).toFixed(1) }}%
         </div>
     </div>
 </template>
@@ -44,6 +49,10 @@ export default {
             type: Object,
             required: true,
         },
+        selected: {
+            type: String,
+            default: null,
+        },
         overlappingFiles: {
             type: Object,
             default: {},
@@ -57,7 +66,7 @@ export default {
             if (found === false) return null;
 
             let overlap = this.overlappingFiles[this.file.full];
-            return overlap["overlap"] * 100;
+            return overlap[0]["overlap"] * 100;
         },
     },
     methods: {

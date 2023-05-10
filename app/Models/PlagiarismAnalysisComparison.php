@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Modules\PlagiarismDetection\SimilarFile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,5 +36,16 @@ class PlagiarismAnalysisComparison extends Model
                     ->where('project_2_id', $this->project_1_id);
             });
         });
+    }
+
+    public function perspective($projectId): array
+    {
+        $index = $projectId == $this->project_1_id ? 1 : 2;
+        $comparedIndex = $index == 1 ? 2 : 1;
+
+        return [
+            'from' => $this["project_{$index}_id"],
+            'to' => $this["project_{$comparedIndex}_id"]
+        ];
     }
 }

@@ -15,7 +15,7 @@ class LinkRepository extends Module
                             </svg>';
     protected string $description = 'Links this repository to a GitLab repo.';
 
-    protected function loadSettings(): ?Settings
+    protected function loadSettings(): ?LinkRepositorySettings
     {
         return new LinkRepositorySettings();
     }

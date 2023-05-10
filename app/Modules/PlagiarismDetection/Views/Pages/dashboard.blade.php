@@ -5,12 +5,12 @@
         <div
             class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 mb-4">
             <ul class="flex flex-wrap -mb-px">
-                <li class="mr-2">
+                <!--<li class="mr-2">
                     <button id="normal-tab" onclick="activateTab('normal')"
                             class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300">
                         Normal Distribution
                     </button>
-                </li>
+                </li>-->
                 <li class="mr-2">
                     <button id="graph-tab" onclick="activateTab('graph')"
                             class="inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500"
@@ -41,26 +41,34 @@
             <h1 class="text-xl font-medium mb-4">Comparisons</h1>
             <div class="flex flex-col gap-1">
                 <div class="flex">
-                    <div class="w-2/4">Name</div>
-                    <div class="w-1/4">Compared with</div>
-                    <div class="w-1/4">Overlap</div>
+                    <div class="w-2/6">Name</div>
+                    <div class="w-2/6">Top Overlap</div>
+                    <div class="w-2/6">Overlap</div>
                 </div>
-                @foreach($similarities->sortByDesc(fn($similarity) => $similarity->getSummarizedFileOverlap($hiddenFiles->toArray())) as $entry)
-                    <div class="flex text-sm hover:bg-gray-200 py-1">
-                        <div class="w-2/4"><a
+                @foreach($similarities->sortByDesc(fn($similarity) => $similarity->getOverlap()) as $entry)
+                    <div class="flex items-center justify-center text-sm hover:bg-gray-200 py-1">
+                        <div class="w-2/6"><a
                                 href="{{ route('courses.tasks.admin.plagiarismDetection.details', [$course, $task, $entry->getProjectId()]) }}">{{ $entry->project()->owner_names }}</a>
                         </div>
-                        <div class="w-1/4">{{ $entry->comparedWith()->owner_names }}</div>
-                        <div class="w-1/4 items-center flex relative">
-                            <div class="h-5 bg-gray-400 text-sm rounded-lg text-center absolute w-full"></div>
-                            <a href="{{ route('courses.tasks.admin.plagiarismDetection.compare', [$course, $task, $entry->getProjectId(), 'with' => [$entry->comparedWith()->id]]) }}" class="h-5 {{ match(true){
-    $entry->getSummarizedFileOverlap($hiddenFiles->toArray()) > 0.8 => 'bg-red-900',
-    $entry->getSummarizedFileOverlap($hiddenFiles->toArray()) > 0.5 => 'bg-yellow-700',
+                        <div class="w-2/6">{{ $entry->comparedWith()->owner_names }}</div>
+                        <div class="w-2/6 items-center flex">
+                            <div class="relative w-1/2">
+                                <div class="h-5 bg-gray-400 text-sm rounded-lg text-center absolute w-full" style="margin-top:-10px"></div>
+                                <div class="h-5 {{ match(true){
+    $entry->getOverlap() > 0.8 => 'bg-red-900',
+    $entry->getOverlap() > 0.5 => 'bg-yellow-700',
     default => 'bg-lime-green-900'
 } }} text-sm rounded-lg text-white text-center absolute"
-                                 style="width:{{$entry->getSummarizedFileOverlap($hiddenFiles->toArray())*100}}%">{{ round($entry->getSummarizedFileOverlap($hiddenFiles->toArray())*100,1) }}
-                                %
-                            </a>
+                                   style="width:{{$entry->getOverlap()*100}}%;margin-top:-10px">{{ round($entry->getOverlap()*100,1) }}
+                                    %
+                                </div>
+                            </div>
+
+                            <div>
+                                <a class="underline text-lime-green-500 ml-2" href="{{ route('courses.tasks.admin.plagiarismDetection.details', [$course, $task, $entry->getProjectId()]) }}">Details</a>
+                                - <a class="underline text-lime-green-500" target="_blank" href="{{ route('courses.tasks.admin.plagiarismDetection.compare', [$course, $task, $entry->getProjectId() , 'with' => [$entry->comparedWith()->id]]) }}">Show Comparison</a>
+                            </div>
+
                         </div>
                     </div>
                 @endforeach
@@ -73,13 +81,9 @@
     <script src="{{ asset('js/apexcharts.js') }}"></script>
     <script src="{{ asset('js/cytoscape.min.js') }}"></script>
     <script>
-        let tabs = [{
-            name: 'Normal',
-            active: true,
-            id: "normal"
-        }, {
+        let tabs = [ {
             name: "Graph",
-            active: false,
+            active: true,
             id: "graph"
         }, {
             name: "Quantiles",
@@ -146,6 +150,12 @@
                     }
                 }
             ],
+        });
+
+        cy.bind('tapstart', 'edge', function(event) {
+            var connected = event.target.connectedNodes();
+            console.log(connected[0].data(), connected[1].data());
+            window.open( `${window.location.pathname}/compare/${connected[0].data().id}?with[]=${connected[1].data().id}`, '_blank').focus();
         });
 
         const options = {

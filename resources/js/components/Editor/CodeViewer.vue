@@ -9,7 +9,7 @@
             :line="line"
             :key="line.number + file.full"
             v-for="line in file.lines"
-            :is-marked="isMarked(line.number)"
+            :mark-color="isMarked(line.number)"
         ></code-line>
     </div>
 </template>
@@ -49,10 +49,27 @@ export default {
     },
     methods: {
         isMarked: function (line) {
-            for (let range of this.markLines) {
-                if (line >= range[0] && line <= range[1]) return true;
+            for (let [index, range] of this.markLines.entries()) {
+                if (line >= range[0] && line <= range[1])
+                    return this.markColors(index);
             }
-            return false;
+            return null;
+        },
+        markColors: function (index) {
+            switch (index) {
+                case 0:
+                    return "bg-lime-green-900 hover:bg-lime-green-800";
+                case 1:
+                    return "bg-yellow-900 hover:bg-yellow-800";
+                case 2:
+                    return "bg-red-900 hover:bg-red-800";
+                case 3:
+                    return "bg-indigo-900 hover:bg-indigo-800";
+                case 4:
+                    return "bg-purple-900 hover:bg-purple-800";
+                case 5:
+                    return "bg-teal-900 hover:bg-teal-800";
+            }
         },
         async refreshComments() {
             this.comments = (

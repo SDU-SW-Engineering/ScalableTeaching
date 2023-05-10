@@ -1,14 +1,15 @@
 <template>
-    <div style="height: 100vh">
+    <div style="height: calc(100vh - 304px)">
         <div class="flex flex-col">
             <comparison-file-explorer
-                @openFile="openFile"
-                :overlappingFiles="overlap"
+                @openFile="(path, against) => openFile(path, null, against)"
+                :overlappingFiles="overlaps"
                 :file-tree="tree"
+                :selected="file != null ? file.full : null"
             />
             <div
                 class="bg-gray-900 overflow-auto"
-                style="height: calc(100vh - 250px)"
+                style="height: calc(100vh - 304px)"
             >
                 <div v-if="file === null"></div>
                 <code-viewer
@@ -24,6 +25,7 @@
 <script>
 import ComparisonFileExplorer from "./ComparisonFileExplorer.vue";
 import CodeViewer from "../CodeViewer.vue";
+import axios from "axios";
 
 export default {
     props: ["tree", "channel", "overlap", "projectId", "masterId"],
@@ -35,9 +37,27 @@ export default {
         };
     },
     methods: {
-        openFile: async function (file, origin) {
-            let segements = location.pathname.split("/");
-            let url = segements.slice(0, segements.length - 1).join("/");
+        openFile: async function (file, origin, against) {
+            let segments = location.pathname.split("/");
+            let url = segments.slice(0, segments.length - 1).join("/");
+            if (origin === this.projectId) return;
+            if (!Object.keys(this.overlaps).includes(file)) {
+                if (origin == null) {
+                    this.channel.$emit(
+                        "slaveComparison",
+                        file,
+                        this.projectId,
+                        null
+                    );
+                }
+                let response = await axios.get(
+                    url + "/" + this.projectId + "/details" + "?file=" + file
+                );
+                this.file = response.data;
+                this.markLines = [];
+
+                return;
+            }
             let response = await axios.get(
                 url +
                     "/" +
@@ -45,18 +65,35 @@ export default {
                     "/details?compare_with=" +
                     this.masterId +
                     "&file=" +
-                    file
+                    file +
+                    "&against=" +
+                    against
             );
             this.file = response.data;
             this.markLines = response.data.mark;
             if (origin === "master") return;
 
-            //console.log(file, "slave");
             this.channel.$emit(
                 "slaveComparison",
-                this.overlap[file].file,
-                this.projectId
+                against,
+                this.projectId,
+                file
             );
+        },
+    },
+    computed: {
+        overlaps: function () {
+            let to = {};
+            for (let comparison of this.overlap) {
+                if (!to.hasOwnProperty(comparison.to)) {
+                    to[comparison.to] = [];
+                }
+                to[comparison.to].push({
+                    file: comparison.from,
+                    overlap: comparison.overlap,
+                });
+            }
+            return to;
         },
     },
     mounted() {

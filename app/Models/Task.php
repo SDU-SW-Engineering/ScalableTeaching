@@ -6,6 +6,7 @@ use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
+use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\ModuleConfiguration;
 use App\ProjectStatus;
 use Carbon\Carbon;
@@ -57,7 +58,6 @@ use Illuminate\Support\Str;
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
  * @property-read EloquentCollection<TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
- * @property int|null $source_project_id
  * @property Carbon $starts_at
  * @property Carbon $ends_at
  * @property bool $is_visible
@@ -684,5 +684,20 @@ class Task extends Model
         $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
 
         return json_decode($response->getBody()->getContents(), true);
+    }
+
+    public function sourceProjectId() : Attribute
+    {
+        return Attribute::make(get: function() {
+            /** @var LinkRepository $module */
+            $module = $this->module_configuration->resolveModule(LinkRepository::class);
+
+            return $module->settings()->repo;
+        });
+    }
+
+    public function plagiarismSuspicions()
+    {
+        return $this->hasMany(PlagiarismSuspicion::class);
     }
 }

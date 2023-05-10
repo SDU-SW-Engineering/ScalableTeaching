@@ -83,7 +83,7 @@ class Directory implements \JsonSerializable, IsChangeable
         return $this;
     }
 
-    public function traverse(\Closure $closure) : void
+    public function traverse(\Closure $closure): void
     {
         $closure($this);
         foreach($this->directories as $directory) {
@@ -107,6 +107,7 @@ class Directory implements \JsonSerializable, IsChangeable
     {
         return [
             'name'        => $this->path,
+            'full'        => $this->path(),
             'isRoot'      => $this->parent == null,
             'directories' => $this->directories,
             'files'       => $this->files,
@@ -119,7 +120,7 @@ class Directory implements \JsonSerializable, IsChangeable
         $this->changed = $isChanged;
     }
 
-    public function path() : string
+    public function path(): string
     {
         $parts = [$this->path];
 
@@ -130,6 +131,6 @@ class Directory implements \JsonSerializable, IsChangeable
             $next = $next->parent;
         }
 
-        return implode('/', array_reverse($parts));;
+        return implode('/', array_reverse($parts));
     }
 }

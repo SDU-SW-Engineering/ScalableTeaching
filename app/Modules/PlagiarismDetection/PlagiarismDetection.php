@@ -35,5 +35,9 @@ class PlagiarismDetection extends Module
         Route::post('files', [Controller::class, 'hideFiles']);
         Route::get('compare/{from}', [Controller::class, 'compare'])->name('compare');
         Route::get('compare/{from}/details', [Controller::class, 'compareDetails'])->name('compareDetails');
+        Route::get('suspicions', [Controller::class, 'suspicions'])->name('suspicions');
+        Route::get('suspicions/{from}/remove', [Controller::class, 'removeSuspicions'])->name('removeSuspicions');
+        Route::get('suspicions/{from}/add', [Controller::class, 'addSuspicions'])->name('addSuspicions');
+        Route::get('mark/{from}', [Controller::class, 'markSuspicion'])->name('markSuspicion');
     }
 }
