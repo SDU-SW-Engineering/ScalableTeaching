@@ -360,12 +360,12 @@
                         role="group"
                         aria-label="Basic example"
                     >
-                        <a
-                            :href="createTaskRoute + '?group=sidebar'"
+                        <button
+                            @click="createTask('sidebar')"
                             class="btn btn-secondary text-center block bg-lime-green-400 w-full text-white rounded py-1 hover:bg-lime-green-500 transition-colors mb-4"
                         >
                             Create task
-                        </a>
+                        </button>
                     </div>
                 </draggable>
             </div>
@@ -395,7 +395,20 @@ export default {
         },
     },
     methods: {
+        createTask: async function (group = null) {
+            var name = prompt("Enter the name of the task:");
+            if (name == null || name === "") return;
+            let response = await axios.post(this.createTaskRoute, {
+                name: name.trim(),
+                group: group,
+            });
+            window.location = response.data.route;
+        },
         saveGroup: async function (group) {
+            if (group.name.trim().toLowerCase() === "sidebar") {
+                alert("Illegal group name");
+                return;
+            }
             group.editing = false;
             await this.save();
         },

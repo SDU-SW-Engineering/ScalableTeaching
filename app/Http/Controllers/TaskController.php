@@ -33,7 +33,7 @@ class TaskController extends Controller
 {
     public function show(Course $course, Task $task): View
     {
-        abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
+        abort_if(!$task->is_visible && auth()->user()->cannot('manage', $course), 401);
         $project = $task->currentProjectForUser(auth()->user());
 
         return $this->showProject($course, $task, $project);
@@ -145,23 +145,13 @@ class TaskController extends Controller
         $isSolo = request('as', 'solo') == 'solo';
         $group = $isSolo ? null : Group::findOrFail(request('as'));
 
-        abort_if( ! $isSolo && ! auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
-        abort_if( ! $task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
+        abort_if(!$isSolo && !auth()->user()->can('canStartProject', $group), 401, "You don't have access to this project.");
+        abort_if(!$task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
 
         $owner = $isSolo ? auth()->user() : $group;
         $task->createProject($owner);
 
         return "OK";
-    }
-
-    public function showCreate(Course $course): View
-    {
-        $breadcrumbs = [
-            'Courses'     => route('courses.index'),
-            $course->name => null,
-        ];
-
-        return view('courses.manage.new-task', compact('course', 'breadcrumbs'));
     }
 
     public function edit(Course $course, Task $task): View
@@ -180,60 +170,24 @@ class TaskController extends Controller
     public function store(Course $course, SourceControl $sourceControl): array|RedirectResponse
     {
         $validated = request()->validate([
-            'name'    => 'required',
-            'type'    => 'required',
-            'repo-id' => ['required_if:type,assignment', 'string', 'nullable'],
+            'name'  => 'required',
+            'group' => 'string'
         ]);
 
-        if( ! array_key_exists('repo-id', $validated) || $validated['repo-id'] == null)
-        {
-            /** @var Task $task */
-            $task = $course->tasks()->create([
-                'name'              => $validated['name'],
-                'type'              => $validated['type'],
-                'source_project_id' => null,
-                'correction_type'   => $validated['type'] == 'exercise' ? 'self' : null,
-            ]);
-
-            return [
-                'id'    => $task->id,
-                'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
-            ];
-        }
-
-        $project = $sourceControl->showProject($validated['repo-id'], user: 'auth');
-        if($project == null)
-            return back()
-                ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
-                ->withInput();
-
-        if(auth()->user()->access_token != null)
-            $sourceControl->addUserToProjectAs($project->id, $sourceControl->currentUser()->id, auth()->user()->access_token);
-        $params = [
-            'visibility'                => 'private',
-            'parent_id'                 => $course->gitlab_group_id,
-            'default_branch_protection' => 0,
-            'lfs_enabled'               => false,
-            'auto_devops_enabled'       => false,
-            'request_access_enabled'    => false,
-        ];
-
-        $groupId = null;
-
-        if($validated['type'] == 'exercise')
-        {
-            $forkFrom = Str::of($validated['repo-id'])->split('#/#')->last();
-            $project = $sourceControl->forkProject($forkFrom, "$course->gitlab_task_group_id", $validated['name']);
-            $sourceId = $project->id;
-        } else
-        {
-            $group = $sourceControl->createGroup($validated['name'], $params);
-            $groupId = $group->id;
-            $sourceId = Str::of($validated['repo-id'])->split('#/#')->last();
-        }
 
         /** @var Task $task */
         $task = $course->tasks()->create([
+            'name'       => $validated['name'],
+            'grouped_by' => 'sidebar'
+        ]);
+
+        return [
+            'id'    => $task->id,
+            'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
+        ];
+
+        /** @var Task $task */
+        /*$task = $course->tasks()->create([
             'source_project_id' => $sourceId,
             'name'              => $validated['name'],
             'type'              => $validated['type'],
@@ -244,7 +198,7 @@ class TaskController extends Controller
         return [
             'id'    => $task->id,
             'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
-        ];
+        ];*/
     }
 
     public function update(Course $course, Task $task): RedirectResponse
@@ -270,7 +224,7 @@ class TaskController extends Controller
 
     public function toggleVisibility(Course $course, Task $task): RedirectResponse
     {
-        $task->is_visible = ! $task->is_visible;
+        $task->is_visible = !$task->is_visible;
         $task->save();
 
         return redirect()->back()->with('success-task', 'The visibility was updated.');
@@ -278,11 +232,9 @@ class TaskController extends Controller
 
     public function refreshReadme(Course $course, Task $task): RedirectResponse
     {
-        try
-        {
+        try {
             $task->reloadDescriptionFromRepo();
-        } catch(\Exception $exception)
-        {
+        } catch(\Exception $exception) {
         }
 
         return redirect()->back()->with('success-task', 'The readme was updated.');

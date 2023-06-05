@@ -28,10 +28,6 @@ Vue.component(
     require("./components/Tasks/SubTaskList").default
 );
 Vue.component(
-    "new-task-wizard",
-    require("./components/Course/NewTaskWizard").default
-);
-Vue.component(
     "markdown-editor",
     require("./components/Tasks/Preferences/MarkdownEditor").default
 );
