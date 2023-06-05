@@ -28,15 +28,15 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
         Route::get('{task}/projects/{project}/validate', [ProjectController::class, 'validateProject'])->name('validateProject')->middleware('can:validate,project');
 
         Route::prefix('{task}/projects/{project}/editor')->controller(ProjectController::class)->group(function() {
-            Route::get('{projectDownload}', 'showEditor')->name('show-editor')->can('accessCode', ['project', 'projectDownload']);
-            Route::get('{projectDownload}/tree', 'showTree')->name('show-tree')->can('accessCode', ['project', 'projectDownload']);
-            Route::get('{projectDownload}/file', 'showFile')->name('show-file')->can('accessCode', ['project', 'projectDownload']);
-            Route::get('{projectDownload}/comments', 'comments')->name('comments')->can('accessCode', ['project', 'projectDownload']);
-            Route::post('{projectDownload}/comments', 'storeComment')->name('store-comment')->can('createFeedbackComment', ['project', 'projectDownload']);
-            Route::put('{projectDownload}/comments/{projectFeedbackComment}', 'updateComment')->name('update-comment')->can('updateFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
-            Route::delete('{projectDownload}/comments/{projectFeedbackComment}', 'deleteComment')->name('delete-comment')->can('updateFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
-            Route::post('{projectDownload}/feedback', 'submitFeedback')->name('submit-feedback')->can('accessCode', ['project', 'projectDownload']);
-            Route::put('{projectDownload}/comments/{projectFeedbackComment}/mark-as', 'markComment')->name('mark-comment')->can('markFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
+            Route::get('/', 'showEditor')->name('show-editor')->can('accessCode', ['project', 'projectDownload']);
+            Route::get('tree', 'showTree')->name('show-tree')->can('accessCode', ['project', 'projectDownload']);
+            Route::get('file', 'showFile')->name('show-file')->can('accessCode', ['project', 'projectDownload']);
+            Route::get('comments', 'comments')->name('comments')->can('accessCode', ['project', 'projectDownload']);
+            Route::post('comments', 'storeComment')->name('store-comment')->can('createFeedbackComment', ['project', 'projectDownload']);
+            Route::put('comments/{projectFeedbackComment}', 'updateComment')->name('update-comment')->can('updateFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
+            Route::delete('comments/{projectFeedbackComment}', 'deleteComment')->name('delete-comment')->can('updateFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
+            Route::post('feedback', 'submitFeedback')->name('submit-feedback')->can('accessCode', ['project', 'projectDownload']);
+            Route::put('comments/{projectFeedbackComment}/mark-as', 'markComment')->name('mark-comment')->can('markFeedbackComment', ['project', 'projectDownload', 'projectFeedbackComment']);
         });
         Route::post('{task}/create-project', [TaskController::class, 'doCreateProject'])->name('createProject');
     });

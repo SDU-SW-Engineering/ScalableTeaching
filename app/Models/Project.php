@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -141,11 +142,11 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<ProjectDownload>
+     * @return HasOne
      */
-    public function downloads(): HasMany
+    public function download(): HasOne
     {
-        return $this->hasMany(ProjectDownload::class);
+        return $this->hasOne(ProjectDownload::class);
     }
 
     /**
