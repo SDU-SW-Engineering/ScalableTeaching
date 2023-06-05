@@ -43,16 +43,15 @@
                     v-text="error"
                     class="text-red-500 text-sm text-center mx-4"
                 ></p>
-                <button
-                    @click="save"
-                    v-text="saving ? 'Saving' : 'Save Changes'"
-                    class="bg-lime-green-400 hover:bg-lime-green-500 transition-colors items-center text-white flex p-2 rounded"
-                ></button>
             </div>
         </div>
         <div class="flex gap-8">
             <div class="w-2/3">
+                <div class="text-center font-semibold text-lg mb-2">
+                    Main List
+                </div>
                 <draggable
+                    @end="save"
                     :disabled="!canOrganize"
                     :list="groups"
                     group="outer"
@@ -84,7 +83,7 @@
                                 />
                                 <button
                                     :disabled="!canOrganize"
-                                    @click="group.editing = false"
+                                    @click="saveGroup(group)"
                                     v-if="group.name !== null"
                                     class="bg-lime-green-500 p-1 rounded-r hover:bg-lime-green-400 text-gray-100"
                                 >
@@ -222,6 +221,7 @@
                             </div>
                             <draggable
                                 v-else
+                                @end="save"
                                 :disabled="!canOrganize"
                                 :list="group.exercises"
                                 :class="[
@@ -281,14 +281,34 @@
                                         />
                                     </svg>
                                 </div>
+                                <div
+                                    slot="header"
+                                    class="btn-group list-group-item"
+                                    role="group"
+                                    aria-label="Basic example"
+                                >
+                                    <a
+                                        :href="
+                                            createTaskRoute +
+                                            '?group=' +
+                                            group.name
+                                        "
+                                        class="btn btn-secondary text-center block bg-lime-green-400 w-full text-white rounded py-1 hover:bg-lime-green-500 transition-colors mb-4"
+                                    >
+                                        Create task
+                                    </a>
+                                </div>
                             </draggable>
                         </div>
                     </div>
                 </draggable>
             </div>
             <div class="w-1/3">
-                <div>Sidebar</div>
+                <div class="text-center font-semibold text-lg mb-2">
+                    Sidebar
+                </div>
                 <draggable
+                    @end="save"
                     :list="sidebarGroup"
                     group="inner"
                     class="py-4 rounded-md bg-gray-300 px-3"
@@ -334,6 +354,19 @@
                             />
                         </svg>
                     </div>
+                    <div
+                        slot="header"
+                        class="btn-group list-group-item"
+                        role="group"
+                        aria-label="Basic example"
+                    >
+                        <a
+                            :href="createTaskRoute + '?group=sidebar'"
+                            class="btn btn-secondary text-center block bg-lime-green-400 w-full text-white rounded py-1 hover:bg-lime-green-500 transition-colors mb-4"
+                        >
+                            Create task
+                        </a>
+                    </div>
                 </draggable>
             </div>
         </div>
@@ -352,13 +385,21 @@ export default {
             type: Array,
             required: true,
         },
+        createTaskRoute: {
+            type: String,
+            required: true,
+        },
         reorganizeRoute: {
             type: String,
             required: true,
         },
     },
     methods: {
-        deleteGroup: function (index) {
+        saveGroup: async function (group) {
+            group.editing = false;
+            await this.save();
+        },
+        deleteGroup: async function (index) {
             let group = this.groups[index];
             if (group.exercises.length > 0) {
                 this.error = "Only empty groups can be deleted.";
@@ -366,6 +407,7 @@ export default {
                 return;
             }
             this.groups.splice(index, 1);
+            await this.save();
         },
         newGroup: function () {
             this.groups.unshift({
@@ -381,16 +423,6 @@ export default {
                 this.error = "Each group must have a unique name.";
                 setTimeout(() => (this.error = ""), 2000);
                 return;
-            }
-
-            let emptyGroup = this.groups.some((x) => x.exercises.length === 0);
-            if (emptyGroup) {
-                if (
-                    confirm(
-                        "Groups without exercises won't be persisted. Do you still want to save?"
-                    ) !== true
-                )
-                    return;
             }
 
             let exercises = [];
