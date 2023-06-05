@@ -20,15 +20,39 @@ class SettingsController extends Controller
 {
     public function preferences(Course $course, Task $task): View
     {
-        if($task->type == TaskTypeEnum::Assignment)
-        {
+        if($task->type == TaskTypeEnum::Assignment) {
             $ciFile = $task->ciFile();
             $subTasks = $ciFile == null ? null : $this->getSubTasks($ciFile, $task);
 
             return view('tasks.admin.preferences', compact('subTasks', 'task'));
         }
 
-        return view('tasks.admin.preferences');
+        $startsAt = $task->starts_at->toDateTimeLocalString();
+        $endsAt = $task->ends_at->toDateTimeLocalString();
+        return view('tasks.admin.preferences', compact('startsAt', 'endsAt'));
+    }
+
+    public function savePreferences(Course $course, Task $task)
+    {
+        $validated = request()->validateWithBag('duration', [
+            'title'    => ['max:255'],
+            'startsAt' => ['date', 'nullable', 'before_or_equal:endsAt'],
+            'endsAt'   => ['date', 'nullable', 'after_or_equal:startsAt'],
+            'markdown' => ['string', 'nullable']
+        ]);
+
+        $markdown = request('markdown');
+        if($markdown != "") {
+            $html = Http::post(getenv('FORMATTER_SERVICE_URL') . '/md', ['text' => $markdown])->json('html');
+            $task->markdown_description = $markdown;
+            $task->description = $html;
+        }
+
+        $task->starts_at = $validated['startsAt'];
+        $task->ends_at = $validated['endsAt'];
+        $task->save();
+
+        return "OK";
     }
 
     public function saveDescription(Course $course, Task $task): string
@@ -45,7 +69,7 @@ class SettingsController extends Controller
 
     public function loadDescription(Course $course, Task $task): string
     {
-        if ( ! $task->reloadDescriptionFromRepo())
+        if(!$task->reloadDescriptionFromRepo())
             return redirect()->back()->with('error', 'No readme file to load.');
 
         return redirect()->back();
@@ -87,7 +111,7 @@ class SettingsController extends Controller
 
     public function toggleVisibility(Course $course, Task $task): string
     {
-        $task->is_visible = ! $task->is_visible;
+        $task->is_visible = !$task->is_visible;
         $task->save();
 
         return "ok";
@@ -139,8 +163,7 @@ class SettingsController extends Controller
 
 
         /** @var SubTask $subTask */
-        foreach($task->sub_tasks->all() as $subTask)
-        {
+        foreach($task->sub_tasks->all() as $subTask) {
             $found = collect($subTasks)->search(fn($t) => $t['name'] == $subTask->getName() || $t['id'] == $subTask->getId());
             if($found === false)
                 continue;

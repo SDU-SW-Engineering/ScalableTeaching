@@ -71,6 +71,10 @@ Vue.component(
     require("./components/EnrollmentUrl.vue").default
 );
 
+Vue.component("admin-preferences", () =>
+    import("./components/Admin/Preferences/Preferences")
+);
+
 const settings = {
     "t-rich-select": {
         component: TRichSelect,
