@@ -11,9 +11,8 @@
                 @else
                     <div class="flex w-full mb-40 gap-16">
                         <section class="w-2/3 ">
-                            <h2 class="text-black dark:text-white font-semibold text-lg mb-2">Exercises</h2>
                             <div class="w-full">
-                                @foreach($exerciseGroups as $groupName => $group)
+                                @foreach($mainTasks as $groupName => $group)
                                     <div class="rounded-md shadow mb-4">
                                         @if($groupName != null)
                                             <div
@@ -95,9 +94,8 @@
                             </div>
                         </section>
                         <section class="w-1/3">
-                            <h2 class="text-black dark:text-white font-semibold text-lg mb-2">Assignments</h2>
                             @foreach($course->tracks()->whereNull('parent_id')->get() as $track)
-                                <a href="{{ route('courses.tracks.show', [$course->id, $track->id]) }}" class="bg-lime-green-400 shadow-lg text-white rounded-md px-4 py-2 flex">
+                                <a href="{{ route('courses.tracks.show', [$course->id, $track->id]) }}" class="bg-lime-green-400 shadow-lg text-white rounded-md px-4 py-2 flex mb-4">
                                     <svg class="text-white flex-shrink-0 h-20 w-20 fill-current -ml-4"
                                          xmlns="http://www.w3.org/2000/svg"
                                          viewBox="0 0 24 24">
@@ -121,7 +119,7 @@
                                 </a>
                             @endforeach
                             <div class="flex flex-col">
-                                @foreach($assignments as $assignment)
+                                @foreach($sidebarTasks as $assignment)
                                     @include('courses.partials.task', ['task' => $assignment])
                                 @endforeach
                             </div>

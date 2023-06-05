@@ -126,9 +126,9 @@ class CourseController extends Controller
             'project' => $task->currentProjectForUser(auth()->user()),
         ]);
 
-        $exerciseGroups = $tasks->filter(fn($task) => $task['details']->type == TaskTypeEnum::Exercise)
+        $mainTasks = $tasks->filter(fn($task) => $task['details']->grouped_by != 'sidebar')
             ->groupBy(fn($task) => $task['details']->grouped_by);
-        $assignments = $tasks->filter(fn($task) => $task['details']->type == TaskTypeEnum::Assignment);
+        $sidebarTasks = $tasks->filter(fn($task) => $task['details']->grouped_by == 'sidebar');
 
         $taskCount = $course->tasks()->count();
 
@@ -140,8 +140,8 @@ class CourseController extends Controller
                 'Courses'     => route('courses.index'),
                 $course->name => null,
             ],
-            'exerciseGroups' => $exerciseGroups,
-            'assignments'    => $assignments,
+            'mainTasks' => $mainTasks,
+            'sidebarTasks'    => $sidebarTasks,
         ]);
     }
 
