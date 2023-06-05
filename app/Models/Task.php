@@ -187,25 +187,7 @@ class Task extends Model
         return $this->hasManyThrough(ProjectDownload::class, Project::class);
     }
     // endregion
-
-    /**
-     * @param Builder<Task> $query
-     * @return Builder<Task>
-     */
-    public function scopeAssignments(Builder $query): Builder
-    {
-        return $query->where('type', 'assignment');
-    }
-
-    /**
-     * @param Builder<Task> $query
-     * @return Builder<Task>
-     */
-    public function scopeExercises(Builder $query): Builder
-    {
-        return $query->where('type', 'exercise');
-    }
-
+    
     /**
      * @param Builder<Task> $query
      * @return Builder<Task>

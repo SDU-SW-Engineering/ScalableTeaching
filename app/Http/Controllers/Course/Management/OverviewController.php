@@ -15,7 +15,7 @@ class OverviewController extends Controller
     public function index(Course $course): View
     {
         /** @var Collection<string,int> $exerciseEngagement */
-        $exerciseEngagement = $course->exercise_engagement;
+        $exerciseEngagement = $course->task_engagement;
         $userEngagementGraph = $exerciseEngagement == null ? null : new Graph(
             $exerciseEngagement->keys(),
             new BarDataSet("Engagement %", $exerciseEngagement->values(), "#4F535B"),

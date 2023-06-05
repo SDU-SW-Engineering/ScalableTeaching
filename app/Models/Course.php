@@ -36,7 +36,7 @@ use Illuminate\Support\Str;
  * @property-read int|null $groups_count
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroupSize($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Course whereMaxGroups($value)
- * @property-read \Illuminate\Support\Collection<int|string,int>|null $exercise_engagement
+ * @property-read \Illuminate\Support\Collection<int|string,int>|null $task_engagement
  * @property-read \Illuminate\Support\Collection<int|string,int>|null $enrolment_per_day
  * @property string $gitlab_group_id
  * @property int|null $gitlab_task_group_id
@@ -192,18 +192,18 @@ class Course extends Model
     /**
      * @return Attribute<\Illuminate\Support\Collection<int|string,int>|null,null>
      */
-    public function exerciseEngagement(): Attribute
+    public function taskEngagement(): Attribute
     {
         return Attribute::make(get: function($value, $attributes) {
-            $exerciseIds = $this->tasks()->exercises()->orderBy('order')->pluck('id');
+            $taskIds = $this->tasks()->orderBy('order')->pluck('id');
 
-            if($exerciseIds->count() == 0)
+            if($taskIds->count() == 0)
                 return null;
 
             $enrolledCount = $this->students()->count();
             $teachers = $this->teachers()->pluck('users.id');
 
-            return Grade::whereIn('task_id', $exerciseIds)
+            return Grade::whereIn('task_id', $taskIds)
                 ->whereNotIn('user_id', $teachers)
                 ->leftJoin('tasks', 'grades.task_id', '=', 'tasks.id')
                 ->select([DB::raw("count(tasks.id)/$enrolledCount as grade_count"), 'tasks.id', 'tasks.grouped_by', 'tasks.starts_at', 'tasks.name'])
