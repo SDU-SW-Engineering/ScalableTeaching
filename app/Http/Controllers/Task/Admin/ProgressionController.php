@@ -16,11 +16,9 @@ class ProgressionController extends Controller
     {
         $subTasks = $task->sub_tasks->all()->groupBy("group")->map(fn($tasks, $group) => [
             'name'    => $group,
-            'editing' => false,
             'tasks'   => $tasks->map(fn(SubTask $t) => [
                 'id'      => $t->id,
                 'name'    => $t->getName(),
-                'editing' => false,
                 'points'  => $t->points,
             ]),
         ])->values();

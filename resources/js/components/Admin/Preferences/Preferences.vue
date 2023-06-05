@@ -125,11 +125,11 @@ export default {
                     }
                 );
                 this.saved = true;
+                this.changed = false;
             } catch (e) {
                 alert(e.response.data.message);
             } finally {
                 this.saving = false;
-                this.changed = false;
                 setTimeout(() => (this.saved = false), 2000);
             }
         },
