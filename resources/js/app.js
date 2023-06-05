@@ -70,6 +70,11 @@ Vue.component(
     require("./components/Course/RepoSelection.vue").default
 );
 
+Vue.component(
+    "enrollment-url",
+    require("./components/EnrollmentUrl.vue").default
+);
+
 const settings = {
     "t-rich-select": {
         component: TRichSelect,
