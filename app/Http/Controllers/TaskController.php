@@ -92,7 +92,7 @@ class TaskController extends Controller
 
         $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
 
-        $download = $project?->downloads()->latest()->first();
+        $download = $project?->download;
         $codeRoute = $download != null ? route('courses.tasks.show-editor', [$course, $task, $project, $download]) : null;
 
         return view('tasks.show', [
@@ -222,7 +222,7 @@ class TaskController extends Controller
 
     public function nextExercise(Course $course, Task $task): array
     {
-        $nextExercise = $course->tasks()->exercises()->where('order', '>', $task->order)->orderBy('order')->first();
+        $nextExercise = $course->tasks()->where('order', '>', $task->order)->orderBy('order')->first();
 
         return [
             'route' => $nextExercise != null ? route('courses.tasks.show', [$course, $nextExercise]) : null,

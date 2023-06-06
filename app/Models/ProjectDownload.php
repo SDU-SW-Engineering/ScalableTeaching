@@ -76,24 +76,6 @@ class ProjectDownload extends Model
         DownloadProject::dispatch($this)->onQueue('downloads')->delay(now()->addMinutes($minutesDelay));
     }
 
-    private function getZipFile(): ?string
-    {
-        try {
-            if(!Storage::disk('local')->has($this->location)) {
-                $this->location = null;
-                $this->downloaded_at = null;
-                $this->save();
-                $this->queue();
-
-                return null;
-            }
-
-            return Storage::disk('local')->path($this->location);
-        } catch(FilesystemException $exception) {
-            return null;
-        }
-    }
-
     public function fileTree(): Directory
     {
         $root = new Directory(".");

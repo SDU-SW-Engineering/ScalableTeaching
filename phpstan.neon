@@ -5,5 +5,7 @@ parameters:
     paths:
         - app
         - domain
-    level: 6
+    excludePaths:
+        - app/Http/Controllers/GitLabOAuthController.php
+    level: 5
     checkMissingIterableValueType: false

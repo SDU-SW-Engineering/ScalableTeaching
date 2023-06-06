@@ -153,7 +153,7 @@ class ProjectController extends Controller
                 throw new \Exception("Project with id $project->id wasn't found.");
             }
 
-            $repoFiles = collect($projects[0]->repository->tree->blobs->nodes); //@phpstan-ignore-line
+            $repoFiles = collect($projects[0]->repository->tree->blobs->nodes);
             foreach($files as $file) {
                 $lookFor = $file->baseName;
                 $found = $repoFiles->firstWhere('name', $lookFor);
@@ -219,7 +219,7 @@ class ProjectController extends Controller
             $tree->traverse(function(IsChangeable $item) use ($filesChanged) {
                 $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
 
-                foreach($filesChanged as $file) {
+                foreach($filesChanged as $file) { // @phpstan-ignore-line
                     $pathMatches = !($path == '') && preg_match("/^$path/i", $file) === 1;
                     if($pathMatches) {
 

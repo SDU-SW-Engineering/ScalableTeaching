@@ -65,7 +65,7 @@ class DownloadProjects extends Command
                 continue;
             }
 
-            $projectDownload = $project->downloads()->create([
+            $projectDownload = $project->download()->create([
                 'ref'       => $latestPush->after_sha,
                 'expire_at' => now()->addYears(2),
             ]);

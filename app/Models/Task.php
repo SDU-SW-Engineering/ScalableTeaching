@@ -58,15 +58,16 @@ use Illuminate\Support\Str;
  * @property-read EloquentCollection|TaskDelegation[] $delegations
  * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
- * @property-read EloquentCollection<TaskProtectedFile> $protectedFiles
+ * @property-read EloquentCollection<int,TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
  * @property int|null $source_project_id
- * @property Carbon $starts_at
- * @property Carbon $ends_at
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $ends_at
  * @property bool $is_visible
  * @property string|null $current_sha
  * @property-read bool $is_publishable
  * @property ModuleConfiguration $module_configuration
+ * @property int $gitlab_group_id
  * @mixin Eloquent
  */
 class Task extends Model
@@ -182,12 +183,12 @@ class Task extends Model
     /**
      * @return HasManyThrough<ProjectDownload>
      */
-    public function downloads()
+    public function download()
     {
-        return $this->hasManyThrough(ProjectDownload::class, Project::class);
+        return $this->hasOneThrough(ProjectDownload::class, Project::class);
     }
     // endregion
-    
+
     /**
      * @param Builder<Task> $query
      * @return Builder<Task>
@@ -340,7 +341,7 @@ class Task extends Model
     public function loadShaValuesFromDirectory(Collection $files = new Collection()): void
     {
         if(count($files) == 0)
-            $files = $this->protectedFiles->map(fn(TaskProtectedFile $protectedFile) => $protectedFile->path); // @phpstan-ignore-line
+            $files = $this->protectedFiles->map(fn(TaskProtectedFile $protectedFile) => $protectedFile->path);
         if($files->count() == 0)
             return;
         $directories = DirectoryCollection::fromFiles($files);
@@ -543,7 +544,7 @@ class Task extends Model
     {
         return Attribute::make(
             get: fn($value, $attributes) => (bool)$value,
-            set: function($value, $attributes) {
+            set: function($value) {
                 if(!$this->is_publishable)
                     throw new \Exception("Task is not publishable.");
 
@@ -568,7 +569,7 @@ class Task extends Model
      */
     public function userProjectDictionary()
     {
-        return $userProjects = $this->projects()->get() // @phpstan-ignore-line
+        return $userProjects = $this->projects()->get()
         ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
             ->mapWithKeys(fn($userProject) => $userProject);
     }
@@ -632,7 +633,7 @@ class Task extends Model
         /** @var LinkRepositorySettings $settings */
         $settings = $linkRepositoryModule->settings();
         if($project == null)
-            $project = $this->forkProject($manager, $projectName, $settings->repo, $this->gitlab_group_id);
+            $project = $this->forkProject($manager, $projectName, (int)$settings->repo, $this->gitlab_group_id);
 
         /** @var Project $dbProject */
         $dbProject = $owner == null ? $this->projects()->create([

@@ -36,7 +36,6 @@ class DailyQuery
     {
         $start = $start->startOfDay();
         $end = $end->endOfDay();
-        /** @phpstan-ignore-next-line  */
         $occurrencesPerDay = $this->query
             ->select($this->selection())
             ->whereBetween("{$this->query->getQuery()->from}.$this->column", [$start, $end])

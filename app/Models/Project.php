@@ -68,6 +68,7 @@ use Illuminate\Support\Collection;
  * @property Carbon $validated_at
  * @property EloquentCollection<ProjectSubTask> $subTasks
  * @property EloquentCollection<ProjectSubTaskComment> $subTaskComments
+ * @property-read string $ownerNames
  */
 class Project extends Model
 {
@@ -381,7 +382,7 @@ class Project extends Model
 
     /**
      * Returns all pushes that have been made within the deadline of the project with a valid sha.
-     * @return HasMany a list of pushes in descending order
+     * @return HasMany<ProjectPush> a list of pushes in descending order
      */
     public function relevantPushes() : HasMany
     {

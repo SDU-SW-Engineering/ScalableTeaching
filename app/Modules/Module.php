@@ -134,7 +134,7 @@ abstract class Module
      */
     public function hasSidebar(): bool
     {
-        return file_exists($this->viewPath("sidebar.blade.php")) | file_exists($this->viewPath('sidebar.php'));
+        return file_exists($this->viewPath("sidebar.blade.php")) || file_exists($this->viewPath('sidebar.php'));
     }
 
     public function bigWidgets()

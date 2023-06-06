@@ -13,6 +13,7 @@ use App\Models\Task;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Controller extends BaseController
 {
@@ -32,7 +33,7 @@ class Controller extends BaseController
         ]);
     }
 
-    public function aggregatedTaskCompletion(Course $course, Task $task)
+    public function aggregatedTaskCompletion(Course $course, Task $task) : View
     {
         $projectIds = $task->projects()->pluck('id');
 
@@ -100,7 +101,7 @@ class Controller extends BaseController
 
         return "OK";
     }
-    public function exportResults(Course $course, Task $task, Excel $excel)
+    public function exportResults(Course $course, Task $task, Excel $excel): BinaryFileResponse
     {
         return $excel->download(new SubtaskCompletionExport($task), "$task->name Subtask Points.xlsx");
     }
