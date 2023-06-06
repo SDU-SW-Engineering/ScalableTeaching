@@ -1,6 +1,7 @@
 module.exports = {
     purge: [
         "./resources/**/*.blade.php",
+        "./app/Modules/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
     ],
