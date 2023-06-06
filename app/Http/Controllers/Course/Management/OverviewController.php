@@ -10,6 +10,7 @@ use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
 use Domain\SourceControl\SourceControl;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -46,7 +47,7 @@ class OverviewController extends Controller
     /**
      * @throws \Throwable
      */
-    public function store(Course $course, SourceControl $sourceControl): array|RedirectResponse
+    public function store(Course $course, Request $request, SourceControl $sourceControl): array|RedirectResponse
     {
         $validated = request()->validate([
             'name'  => 'required',
@@ -57,7 +58,7 @@ class OverviewController extends Controller
         /** @var Task $task */
         $task = $course->tasks()->create([
             'name'       => $validated['name'],
-            'grouped_by' => $validated['group']
+            'grouped_by' => $request->has('group') ? $validated['group'] : null
         ]);
 
         return [

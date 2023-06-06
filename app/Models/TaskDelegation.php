@@ -145,11 +145,11 @@ class TaskDelegation extends Model
                 IndexRepositoryChanges::dispatch($project, $projectPush->after_sha)->onQueue('index')->delay(now()->addMinutes($delayCounter / 2));
                 $delayCounter++;
                 $ineligibleTasks[] = $projectId;
-                if ($project->downloads()->where('ref', $projectPush->after_sha)->exists())
+                if ($project->download()->exists())
                     continue; // download is already queued.
 
                 /** @var ProjectDownload $download */
-                $download = $project->downloads()->create([
+                $download = $project->download()->create([
                     'ref'       => $projectPush->after_sha,
                     'expire_at' => now()->addYears(2),
                 ]);

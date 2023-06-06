@@ -24,10 +24,10 @@ it('has downloads', function() {
     $project = Project::factory()
         ->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])
             ->for(Course::factory()))
-        ->has(ProjectDownload::factory(3), 'downloads')
+        ->has(ProjectDownload::factory(1), 'download')
         ->createQuietly();
 
-    expect($project->downloads)->toHaveLength(3);
+    expect($project->download)->not()->toBeNull();
 });
 
 it('has projectFeedback', function() {
