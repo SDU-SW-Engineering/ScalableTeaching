@@ -4,6 +4,7 @@ namespace App\Modules\Subtasks;
 
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\Module;
+use Route;
 
 class Subtasks extends Module
 {
@@ -16,4 +17,14 @@ class Subtasks extends Module
     protected string $description = "Specify smaller subtasks that participants can complete.";
 
     protected array $dependencies = [LinkRepository::class];
+
+
+    public static function configRoutes(): void
+    {
+        Route::get('/', [Controller::class, 'subTasks'])->name('subTasks');
+        Route::post('/', [Controller::class, 'saveSubTasks'])->name('subTasks');
+        Route::get('export-results', [Controller::class, 'exportResults'])->name('export');
+        Route::get('task-completion', [Controller::class, 'taskCompletion'])->name('task-completion');
+        Route::get('task-completion/aggregate', [Controller::class, 'aggregatedTaskCompletion'])->name('aggregate-task-completion');
+    }
 }

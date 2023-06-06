@@ -76,6 +76,7 @@
             <div class="flex justify-between items-start w-full mb-2">
                 <input
                     v-model="group.name"
+                    placeholder="Group name..."
                     class="bg-gray-200 font-bold border-none rounded w-96"
                     type="text"
                 />
@@ -90,6 +91,7 @@
                 >
                     <input
                         type="text"
+                        placeholder="Some subtask..."
                         class="bg-gray-100 border-none text-black w-1/2 p-0.5 text-sm"
                         v-model="task.name"
                     />
@@ -114,6 +116,7 @@
                         <div>
                             <input
                                 type="number"
+                                min="1"
                                 class="text p-0 text-right text-lime-green-400 w-20 border-none"
                                 v-model="task.points"
                             />
@@ -219,7 +222,7 @@ export default {
             }
             try {
                 await axios.post(
-                    `/courses/${this.task.course_id}/tasks/${this.task.id}/admin/sub-tasks`,
+                    `/courses/${this.task.course_id}/tasks/${this.task.id}/admin/modules/subtasks`,
                     finalGroups
                 );
                 this.changed = false;

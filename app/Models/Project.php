@@ -218,6 +218,11 @@ class Project extends Model
         return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate(!$withToday))->get();
     }
 
+    public function ownerNames(): Attribute
+    {
+        return Attribute::make(get: fn() => $this->owners()->pluck('name')->join(', '));
+    }
+
     /**
      * @return Attribute<string,null>
      */

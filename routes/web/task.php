@@ -28,11 +28,7 @@ Route::prefix('{task}')->group(function() {
             Route::post('{module}/configure', 'doConfigure')->name('do-configure');
         });
 
-        Route::controller(ProgressionController::class)->group(function() {
-            Route::get('task-completion', 'taskCompletion')->name('taskCompletion');
-            Route::get('sub-tasks', 'subTasks')->name('subTasks');
-            Route::post('sub-tasks', 'saveSubTasks')->name('subTasks');
-        });
+
 
         Route::controller(GradingController::class)->group(function() {
             Route::get('grading-overview', 'gradingOverview')->name('gradingOverview');
