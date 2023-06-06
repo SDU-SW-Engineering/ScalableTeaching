@@ -195,7 +195,7 @@ class Course extends Model
     public function taskEngagement(): Attribute
     {
         return Attribute::make(get: function($value, $attributes) {
-            $taskIds = $this->tasks()->orderBy('order')->pluck('id');
+            $taskIds = $this->tasks()->where('grouped_by', '!=', 'sidebar')->orderBy('order')->pluck('id');
 
             if($taskIds->count() == 0)
                 return null;
@@ -211,7 +211,7 @@ class Course extends Model
                 ->orderBy('tasks.starts_at')
                 ->orderBy('tasks.order')
                 ->get()
-                ->mapWithKeys(fn($result) => [$result->name . ";" . $result->grouped_by  => round($result->grade_count, 2)]); // @phpstan-ignore-line
+                ->mapWithKeys(fn($result) => [$result->grouped_by  => round($result->grade_count, 2)]); // @phpstan-ignore-line
         });
     }
 
