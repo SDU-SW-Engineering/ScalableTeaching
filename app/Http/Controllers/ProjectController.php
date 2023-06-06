@@ -157,7 +157,7 @@ class ProjectController extends Controller
                 throw new \Exception("Project with id $project->id wasn't found.");
             }
 
-            $repoFiles = collect($projects[0]->repository->tree->blobs->nodes); //@phpstan-ignore-line
+            $repoFiles = collect($projects[0]->repository->tree->blobs->nodes);
             foreach($files as $file)
             {
                 $lookFor = $file->baseName;
@@ -183,11 +183,13 @@ class ProjectController extends Controller
         return redirect()->back();
     }
 
-    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload) : View
+    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
     {
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->orWhere('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
 
+        if($feedback == null)
+            return view('tasks.editor')->with('context', 'view');
         $context = match (true)
         {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
@@ -226,9 +228,8 @@ class ProjectController extends Controller
             $tree->traverse(function(IsChangeable $item) use ($filesChanged) {
                 $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
 
-                foreach($filesChanged as $file)
-                {
-                    $pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
+                foreach($filesChanged as $file) // @phpstan-ignore-line
+                {$pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
                     if($pathMatches)
                     {
 

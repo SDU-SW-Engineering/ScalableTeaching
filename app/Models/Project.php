@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Events\ProjectCreated;
 use App\Models\Casts\SubTask;
 use App\Models\Enums\CorrectionType;
+use App\Models\Enums\TaskDelegationType;
 use App\ProjectStatus;
 use App\Tasks\Validation\ProtectedFilesUntouched;
 use Carbon\Carbon;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -66,6 +68,7 @@ use Illuminate\Support\Collection;
  * @property Carbon $validated_at
  * @property EloquentCollection<ProjectSubTask> $subTasks
  * @property EloquentCollection<ProjectSubTaskComment> $subTaskComments
+ * @property-read string $ownerNames
  */
 class Project extends Model
 {
@@ -140,11 +143,11 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<ProjectDownload>
+     * @return HasOne
      */
-    public function downloads(): HasMany
+    public function download(): HasOne
     {
-        return $this->hasMany(ProjectDownload::class);
+        return $this->hasOne(ProjectDownload::class);
     }
 
     /**
@@ -181,6 +184,11 @@ class Project extends Model
         return $query->whereNull('ownable_id');
     }
 
+    public function scopeClaimed(Builder $query): Builder
+    {
+        return $query->whereNotNull('ownable_id');
+    }
+
     /**
      * returns a collection of users that own the project
      * @return EloquentCollection<int,User>
@@ -209,6 +217,11 @@ class Project extends Model
     public function dailyBuilds(bool $withToday = false): Collection
     {
         return $this->pipelines()->daily($this->task->starts_at->startOfDay(), $this->task->earliestEndDate( ! $withToday))->get();
+    }
+
+    public function ownerNames(): Attribute
+    {
+        return Attribute::make(get: fn() => $this->owners()->pluck('name')->join(', '));
     }
 
     /**
@@ -360,7 +373,7 @@ class Project extends Model
         return true;
     }
 
-    public function claim(User|Group $owner) : Project
+    public function claim(User|Group $owner): Project
     {
         $this->update([
             'ownable_id'   => $owner->id,
@@ -368,5 +381,18 @@ class Project extends Model
         ]);
 
         return $this;
+    }
+
+    /**
+     * Returns all pushes that have been made within the deadline of the project with a valid sha.
+     * @return HasMany<ProjectPush> a list of pushes in descending order
+     */
+    public function relevantPushes() : HasMany
+    {
+        return $this
+            ->pushes()
+            ->isAccepted($this->task)
+            ->isValid()
+            ->latest();
     }
 }

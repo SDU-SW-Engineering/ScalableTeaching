@@ -83,9 +83,7 @@ class ProjectFeedbackComment extends Model
      */
     public function lines(): ?Collection
     {
-        $project = $this->feedback->project;
-        $sha = $this->feedback->sha;
-        $content = $this->feedback->project->downloads()->where('ref', $sha)->first()?->file($this->filename);
+        $content = $this->feedback->project->download()->first()?->file($this->filename);
 
         return (new Highlight($this->filename))->code($content);
     }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Task\Admin\GradingController;
+use App\Http\Controllers\Task\Admin\ModuleController;
 use App\Http\Controllers\Task\Admin\OverviewController;
 use App\Http\Controllers\Task\Admin\ProgressionController;
 use App\Http\Controllers\Task\Admin\SettingsController;
@@ -19,11 +20,15 @@ Route::prefix('{task}')->group(function() {
             Route::get('log', 'log')->name('log');
         });
 
-        Route::controller(ProgressionController::class)->group(function() {
-            Route::get('task-completion', 'taskCompletion')->name('taskCompletion');
-            Route::get('sub-tasks', 'subTasks')->name('subTasks');
-            Route::post('sub-tasks', 'saveSubTasks')->name('subTasks');
+        Route::controller(ModuleController::class)->prefix('modules')->as('modules.')->group(function() {
+            Route::get('/', 'index')->name('index');
+            Route::get('install', 'install')->name('install');
+            Route::get('{module}/uninstall', 'uninstall')->name('uninstall');
+            Route::get('{module}/configure', 'configure')->name('configure');
+            Route::post('{module}/configure', 'doConfigure')->name('do-configure');
         });
+
+
 
         Route::controller(GradingController::class)->group(function() {
             Route::get('grading-overview', 'gradingOverview')->name('gradingOverview');
@@ -39,6 +44,7 @@ Route::prefix('{task}')->group(function() {
 
         Route::controller(SettingsController::class)->group(function() {
             Route::get('preferences', 'preferences')->name('preferences');
+            Route::put('preferences', 'savePreferences')->name('preferences');
             Route::post('save-description', 'saveDescription')->name('save-description');
             Route::get('load-description-from-repo', 'loadDescription')->name('load-description');
             Route::post('update-title', 'updateTitle')->name('update-title');

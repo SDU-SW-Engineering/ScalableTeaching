@@ -92,7 +92,7 @@ class TaskController extends Controller
 
         $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
 
-        $download = $project?->downloads()->latest()->first();
+        $download = $project?->download;
         $codeRoute = $download != null ? route('courses.tasks.show-editor', [$course, $task, $project, $download]) : null;
 
         return view('tasks.show', [
@@ -154,16 +154,6 @@ class TaskController extends Controller
         return "OK";
     }
 
-    public function showCreate(Course $course): View
-    {
-        $breadcrumbs = [
-            'Courses'     => route('courses.index'),
-            $course->name => null,
-        ];
-
-        return view('courses.manage.new-task', compact('course', 'breadcrumbs'));
-    }
-
     public function edit(Course $course, Task $task): View
     {
         $breadcrumbs = [
@@ -172,79 +162,6 @@ class TaskController extends Controller
         ];
 
         return view('courses.manage.editTask', compact('course', 'task', 'breadcrumbs'));
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    public function store(Course $course, SourceControl $sourceControl): array|RedirectResponse
-    {
-        $validated = request()->validate([
-            'name'    => 'required',
-            'type'    => 'required',
-            'repo-id' => ['required_if:type,assignment', 'string', 'nullable'],
-        ]);
-
-        if( ! array_key_exists('repo-id', $validated) || $validated['repo-id'] == null)
-        {
-            /** @var Task $task */
-            $task = $course->tasks()->create([
-                'name'              => $validated['name'],
-                'type'              => $validated['type'],
-                'source_project_id' => null,
-                'correction_type'   => $validated['type'] == 'exercise' ? 'self' : null,
-            ]);
-
-            return [
-                'id'    => $task->id,
-                'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
-            ];
-        }
-
-        $project = $sourceControl->showProject($validated['repo-id'], user: 'auth');
-        if($project == null)
-            return back()
-                ->withErrors(['project-id' => 'The GitLab project either doesn\'t exist or the Scalable Teaching user is not added to it.'], 'new')
-                ->withInput();
-
-        if(auth()->user()->access_token != null)
-            $sourceControl->addUserToProjectAs($project->id, $sourceControl->currentUser()->id, auth()->user()->access_token);
-        $params = [
-            'visibility'                => 'private',
-            'parent_id'                 => $course->gitlab_group_id,
-            'default_branch_protection' => 0,
-            'lfs_enabled'               => false,
-            'auto_devops_enabled'       => false,
-            'request_access_enabled'    => false,
-        ];
-
-        $groupId = null;
-
-        if($validated['type'] == 'exercise')
-        {
-            $forkFrom = Str::of($validated['repo-id'])->split('#/#')->last();
-            $project = $sourceControl->forkProject($forkFrom, "$course->gitlab_task_group_id", $validated['name']);
-            $sourceId = $project->id;
-        } else
-        {
-            $group = $sourceControl->createGroup($validated['name'], $params);
-            $groupId = $group->id;
-            $sourceId = Str::of($validated['repo-id'])->split('#/#')->last();
-        }
-
-        /** @var Task $task */
-        $task = $course->tasks()->create([
-            'source_project_id' => $sourceId,
-            'name'              => $validated['name'],
-            'type'              => $validated['type'],
-            'gitlab_group_id'   => $groupId,
-            'correction_type'   => $validated['type'] == 'exercise' ? 'self' : null,
-        ]);
-
-        return [
-            'id'    => $task->id,
-            'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
-        ];
     }
 
     public function update(Course $course, Task $task): RedirectResponse
@@ -307,7 +224,7 @@ class TaskController extends Controller
 
     public function nextExercise(Course $course, Task $task): array
     {
-        $nextExercise = $course->tasks()->exercises()->where('order', '>', $task->order)->orderBy('order')->first();
+        $nextExercise = $course->tasks()->where('order', '>', $task->order)->orderBy('order')->first();
 
         return [
             'route' => $nextExercise != null ? route('courses.tasks.show', [$course, $nextExercise]) : null,

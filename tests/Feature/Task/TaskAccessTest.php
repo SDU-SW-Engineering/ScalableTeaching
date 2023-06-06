@@ -11,7 +11,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function() {
     $this->course = Course::factory()->create();
-    $this->invisibleTask = Task::factory()->invisible()->exercise()->for($this->course)->create([
+    $this->invisibleTask = Task::factory()->invisible()->for($this->course)->create([
         'name' => 'invisible task',
     ]);
 });

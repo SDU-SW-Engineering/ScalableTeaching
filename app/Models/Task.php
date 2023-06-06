@@ -6,6 +6,10 @@ use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
+use App\Modules\LinkRepository\LinkRepository;
+use App\Modules\LinkRepository\LinkRepositorySettings;
+use App\Modules\ModuleConfiguration;
+use App\Modules\Template\Template;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Domain\SourceControl\Directory;
@@ -54,14 +58,16 @@ use Illuminate\Support\Str;
  * @property-read EloquentCollection|TaskDelegation[] $delegations
  * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
- * @property-read EloquentCollection<TaskProtectedFile> $protectedFiles
+ * @property-read EloquentCollection<int,TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
- * @property-read int|null $source_project_id
- * @property Carbon $starts_at
- * @property Carbon $ends_at
+ * @property int|null $source_project_id
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $ends_at
  * @property bool $is_visible
  * @property string|null $current_sha
  * @property-read bool $is_publishable
+ * @property ModuleConfiguration $module_configuration
+ * @property int $gitlab_group_id
  * @mixin Eloquent
  */
 class Task extends Model
@@ -77,9 +83,10 @@ class Task extends Model
     protected $dates = ['ends_at', 'starts_at'];
 
     protected $casts = [
-        'sub_tasks'       => SubTaskCollection::class,
-        'correction_type' => CorrectionType::class,
-        'type'            => TaskTypeEnum::class,
+        'module_configuration' => ModuleConfiguration::class,
+        'sub_tasks'            => SubTaskCollection::class,
+        'correction_type'      => CorrectionType::class,
+        'type'                 => TaskTypeEnum::class,
     ];
 
     public function reloadDescriptionFromRepo(): bool
@@ -172,25 +179,15 @@ class Task extends Model
     {
         return $this->hasMany(TaskDelegation::class);
     }
+
+    /**
+     * @return HasManyThrough<ProjectDownload>
+     */
+    public function download()
+    {
+        return $this->hasOneThrough(ProjectDownload::class, Project::class);
+    }
     // endregion
-
-    /**
-     * @param Builder<Task> $query
-     * @return Builder<Task>
-     */
-    public function scopeAssignments(Builder $query): Builder
-    {
-        return $query->where('type', 'assignment');
-    }
-
-    /**
-     * @param Builder<Task> $query
-     * @return Builder<Task>
-     */
-    public function scopeExercises(Builder $query): Builder
-    {
-        return $query->where('type', 'exercise');
-    }
 
     /**
      * @param Builder<Task> $query
@@ -344,7 +341,7 @@ class Task extends Model
     public function loadShaValuesFromDirectory(Collection $files = new Collection()): void
     {
         if(count($files) == 0)
-            $files = $this->protectedFiles->map(fn(TaskProtectedFile $protectedFile) => $protectedFile->path); // @phpstan-ignore-line
+            $files = $this->protectedFiles->map(fn(TaskProtectedFile $protectedFile) => $protectedFile->path);
         if($files->count() == 0)
             return;
         $directories = DirectoryCollection::fromFiles($files);
@@ -552,7 +549,7 @@ class Task extends Model
     {
         return Attribute::make(
             get: fn($value, $attributes) => (bool)$value,
-            set: function($value, $attributes) {
+            set: function($value) {
                 if( ! $this->is_publishable)
                     throw new \Exception("Task is not publishable.");
 
@@ -577,7 +574,7 @@ class Task extends Model
      */
     public function userProjectDictionary()
     {
-        return $userProjects = $this->projects()->get() // @phpstan-ignore-line
+        return $userProjects = $this->projects()->get()
         ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
             ->mapWithKeys(fn($userProject) => $userProject);
     }
@@ -640,8 +637,13 @@ class Task extends Model
         $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
         $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
         $project = $projects->firstWhere('name', $projectName);
+        abort_unless($this->module_configuration->isEnabled(Template::class), 400, 'The template module is not enabled.');
+
+        $linkRepositoryModule = $this->module_configuration->resolveModule(LinkRepository::class);
+        /** @var LinkRepositorySettings $settings */
+        $settings = $linkRepositoryModule->settings();
         if($project == null)
-            $project = $this->forkProject($manager, $projectName, $this->source_project_id, $this->gitlab_group_id);
+            $project = $this->forkProject($manager, $projectName, (int)$settings->repo, $this->gitlab_group_id);
 
         /** @var Project $dbProject */
         $dbProject = $owner == null ? $this->projects()->create([

@@ -11,28 +11,18 @@
                             <span class="text-lime-green-600 -mb-2 text-3xl dark:text-lime-green-300 font-bold">{{ $course->students->count() }}</span>
                             <span class="font-thin text-lg dark:text-gray-300">students</span>
                         </div>
+                        @if($course->tasks()->count() > 0)
+                            <div class="flex items-center justify-center flex-col">
+                                <span class="text-lime-green-600 -mb-2 text-3xl dark:text-lime-green-300 font-bold">{{ $course->tasks()->count() }}</span>
+                                <span class="font-thin text-lg dark:text-gray-300">tasks</span>
+                            </div>
+                        @endif
                         @if($course->projects->count() > 0)
                             <div class="flex items-center justify-center flex-col">
                                 <span class="text-lime-green-600 -mb-2 text-3xl dark:text-lime-green-300 font-bold">{{ $course->projects->count() }}</span>
-                                <span class="font-thin text-lg dark:text-gray-300">projects</span>
+                                <span class="font-thin text-lg dark:text-gray-300">submissions</span>
                             </div>
                         @endif
-                        @if($course->tasks()->exercises()->count() > 0)
-                            <div class="flex items-center justify-center flex-col">
-                                <span class="text-lime-green-600 -mb-2 text-3xl dark:text-lime-green-300 font-bold">{{ $course->tasks()->exercises()->count() }}</span>
-                                <span class="font-thin text-lg dark:text-gray-300">exercises</span>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="">
-                        <button class="flex bg-lime-green-400 text-white text-sm py-1.5 px-2 rounded hover:bg-lime-green-500 transition-colors">
-                            <span class="mr-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                                </svg>
-                            </span>
-                            <span>Copy Enrollment URL</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -44,4 +34,8 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('breadcrumbs-bar')
+    <enrollment-url url="{{ route('courses.enroll', [$course, 'token' => $course->enroll_token]) }}"></enrollment-url>
 @endsection

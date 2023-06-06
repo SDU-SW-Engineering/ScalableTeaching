@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Task;
+use App\Modules\ModuleService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -30,6 +32,13 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $stagingMiddleware = app()->environment('staging') ? ['staging'] : [];
+
+        Route::bind('module', function(string $value, \Illuminate\Routing\Route $route) {
+            $task = Task::findOrFail($route->parameter('task'));
+            abort_unless($task->module_configuration->hasInstalled($route->parameter('module')), 500, 'Module not installed');
+
+            return $task->module_configuration->resolveModule($route->parameter('module'));
+        });
 
         $this->routes(function() use ($stagingMiddleware) {
             Route::prefix('api')

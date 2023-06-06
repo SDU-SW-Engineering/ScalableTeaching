@@ -162,19 +162,6 @@ class Pipeline extends Model
         );
     }
 
-    private static function createPipelineForProject(Project $project): Pipeline
-    {
-        return $project->pipelines()->create([
-            'pipeline_id'    => request('object_attributes.id'),
-            'status'         => request('object_attributes.status'),
-            'sha'            => request('object_attributes.sha') ?? null,
-            'user_name'      => request('user.username'),
-            'duration'       => request('object_attributes.duration') ?? null,
-            'queue_duration' => request('object_attributes.queued_duration') ?? null,
-            'created_at'     => Carbon::parse(request('object_attributes.created_at'))->setTimezone(config('app.timezone')),
-        ]);
-    }
-
     /**
      * @param Builder<Pipeline> $query
      * @return Builder<Pipeline>

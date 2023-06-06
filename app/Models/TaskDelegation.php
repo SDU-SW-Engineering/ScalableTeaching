@@ -145,11 +145,11 @@ class TaskDelegation extends Model
                 IndexRepositoryChanges::dispatch($project, $projectPush->after_sha)->onQueue('index')->delay(now()->addMinutes($delayCounter / 2));
                 $delayCounter++;
                 $ineligibleTasks[] = $projectId;
-                if ($project->downloads()->where('ref', $projectPush->after_sha)->exists())
+                if ($project->download()->exists())
                     continue; // download is already queued.
 
                 /** @var ProjectDownload $download */
-                $download = $project->downloads()->create([
+                $download = $project->download()->create([
                     'ref'       => $projectPush->after_sha,
                     'expire_at' => now()->addYears(2),
                 ]);
@@ -218,17 +218,7 @@ class TaskDelegation extends Model
      */
     private function relevantPush(Project $project): ?ProjectPush
     {
-        return match ($this->type)
-        {
-            TaskDelegationType::LastPushes => $project
-                ->pushes()
-                ->isAccepted($project->task)
-                ->isValid()
-                ->latest()
-                ->first(),
-            TaskDelegationType::SucceedingPushes       => throw new \Exception('To be implemented'),
-            TaskDelegationType::SucceedingOrLastPushes => throw new \Exception('To be implemented')
-        };
+        return $project->relevantPushes()->first();
     }
 
     /**

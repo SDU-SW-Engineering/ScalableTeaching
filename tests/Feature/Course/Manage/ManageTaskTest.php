@@ -12,20 +12,20 @@ uses(RefreshDatabase::class);
 
 beforeEach(function() {
     $this->course = Course::factory()->create();
-    $this->task1 = Task::factory()->exercise()->for($this->course)->create();
-    $this->task2 = Task::factory()->exercise()->for($this->course)->create();
-    $this->task3 = Task::factory()->exercise()->for($this->course)->create();
-    $this->assignment = Task::factory()->assignment()->for($this->course)->create();
+    $this->task1 = Task::factory()->for($this->course)->create();
+    $this->task2 = Task::factory()->for($this->course)->create();
+    $this->task3 = Task::factory()->for($this->course)->create();
+    $this->assignment = Task::factory()->for($this->course)->create();
 
     $this->otherCourse = Course::factory()->create();
-    $this->externalExercise = Task::factory()->exercise()->for($this->otherCourse)->create();
+    $this->externalExercise = Task::factory()->for($this->otherCourse)->create();
 
     $this->teacher = User::factory()->hasAttached($this->course, ['role' => 'teacher'])->create();
     $this->student = User::factory()->hasAttached($this->course)->create();
 
 });
 
-it('reorganizes exercises', function() {
+it('reorganizes tasks', function() {
     actingAs($this->teacher);
 
     put(route('courses.manage.exercises.reorganize', [$this->course]), [
@@ -60,30 +60,7 @@ it('reorganizes exercises', function() {
     ]);
 });
 
-it('prevents assignments from being reorganized', function() {
-    actingAs($this->teacher);
-
-    put(route('courses.manage.exercises.reorganize', [$this->course]), [
-        [
-            'group' => 'test group',
-            'id'    => $this->task2->id,
-        ],
-        [
-            'group' => 'test group2',
-            'id'    => $this->task3->id,
-        ],
-        [
-            'group' => null,
-            'id'    => $this->task1->id,
-        ],
-        [
-            'group' => null,
-            'id'    => $this->assignment->id,
-        ],
-    ])->assertStatus(400);
-});
-
-it('prevents external exercises from being being reorganized', function() {
+it('prevents external tasks from being being reorganized', function() {
     actingAs($this->teacher);
 
     put(route('courses.manage.exercises.reorganize', [$this->course]), [

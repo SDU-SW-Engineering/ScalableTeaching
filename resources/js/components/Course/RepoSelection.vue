@@ -1,6 +1,13 @@
 <template>
-    <div class="mt-4">
-        <t-rich-select v-model="value" :fetch-options="fetchOptions" :minimum-input-length="3"
+    <div>
+        <div class="bg-gray-500 border border-gray-600 border-2 rounded-md flex justify-between items-center text-white" v-if="!update">
+            <div class="px-2">
+                <span>Repo: </span>
+                <span>{{ value }}</span>
+            </div>
+            <button type="button" @click="update = true" class="bg-gray-200 p-2 rounded-r md text-black hover:bg-gray-300 transition-colors">Change</button>
+        </div>
+        <t-rich-select v-else v-model="value" :fetch-options="fetchOptions" :minimum-input-length="3"
                        placeholder="Pick a repository"
                        text-attribute="name"
                        value-attribute="id">
@@ -34,7 +41,7 @@
                             {{ option.raw.name }}
                             <span v-if="isSelected">(Selected)</span>
                         </strong>
-                        <span class="text-sm leading-tight text-lime-green-400 dark:text-lime-green-300">{{
+                        <span v-if="option.raw.namespace !== null" class="text-sm leading-tight text-lime-green-400 dark:text-lime-green-300">{{
                                 option.raw.namespace.fullName
                             }}</span>
                         <span class="text-xs leading-tight text-gray-700 dark:text-gray-400">{{
@@ -50,10 +57,11 @@
 
 <script>
 export default {
-    props: ["name"],
+    props: ["name", "currentValue"],
     data() {
         return {
-            value: null
+            value: null,
+            update: true
         }
     },
     methods: {
@@ -62,10 +70,10 @@ export default {
             return {results: await response.json()};
         }
     },
-    watch: {
-        'value': function(after, before) {
-            this.$emit('changed', after)
-        }
+    mounted() {
+        if  (this.currentValue != "")
+            this.update = false;
+        this.value = this.currentValue
     }
 }
 </script>

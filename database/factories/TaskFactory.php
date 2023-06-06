@@ -17,7 +17,6 @@ class TaskFactory extends Factory
 
         return [
             'name'              => $this->faker->sentence(3),
-            'source_project_id' => $this->faker->randomNumber(1, 2000),
             'gitlab_group_id'   => $this->faker->randomNumber(1, 2000),
             'description'       => $this->faker->paragraph(rand(10, 20)),
             'correction_type'   => CorrectionType::None,
@@ -51,24 +50,6 @@ class TaskFactory extends Factory
         return $this->state(function(array $attributes) use ($group) {
             return [
                 'grouped_by' => $group,
-            ];
-        });
-    }
-
-    public function exercise()
-    {
-        return $this->state(function(array $attributes) {
-            return [
-                'type' => TaskTypeEnum::Exercise,
-            ];
-        });
-    }
-
-    public function assignment()
-    {
-        return $this->state(function(array $attributes) {
-            return [
-                'type' => TaskTypeEnum::Assignment,
             ];
         });
     }
