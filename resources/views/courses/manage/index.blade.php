@@ -23,5 +23,9 @@
                 </div>
             @endif
         </div>
+        <div class="md:col-span-2 bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
+            <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Latest activity</h3>
+            @include('courses.manage.partials.activityTable', compact('activities'))
+        </div>
     </div>
 @endsection

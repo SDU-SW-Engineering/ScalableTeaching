@@ -27,8 +27,8 @@ class SettingsController extends Controller
             return view('tasks.admin.preferences', compact('subTasks', 'task'));
         }
 
-        $startsAt = $task->starts_at->toDateTimeLocalString();
-        $endsAt = $task->ends_at->toDateTimeLocalString();
+        $startsAt = $task->starts_at?->toDateTimeLocalString();
+        $endsAt = $task->ends_at?->toDateTimeLocalString();
         return view('tasks.admin.preferences', compact('startsAt', 'endsAt'));
     }
 

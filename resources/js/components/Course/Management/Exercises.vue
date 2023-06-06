@@ -287,16 +287,12 @@
                                     role="group"
                                     aria-label="Basic example"
                                 >
-                                    <a
-                                        :href="
-                                            createTaskRoute +
-                                            '?group=' +
-                                            group.name
-                                        "
+                                    <button
+                                        @click="createTask(group.name)"
                                         class="btn btn-secondary text-center block bg-lime-green-400 w-full text-white rounded py-1 hover:bg-lime-green-500 transition-colors mb-4"
                                     >
                                         Create task
-                                    </a>
+                                    </button>
                                 </div>
                             </draggable>
                         </div>

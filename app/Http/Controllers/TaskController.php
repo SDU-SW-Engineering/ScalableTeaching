@@ -164,43 +164,6 @@ class TaskController extends Controller
         return view('courses.manage.editTask', compact('course', 'task', 'breadcrumbs'));
     }
 
-    /**
-     * @throws \Throwable
-     */
-    public function store(Course $course, SourceControl $sourceControl): array|RedirectResponse
-    {
-        $validated = request()->validate([
-            'name'  => 'required',
-            'group' => 'string'
-        ]);
-
-
-        /** @var Task $task */
-        $task = $course->tasks()->create([
-            'name'       => $validated['name'],
-            'grouped_by' => 'sidebar'
-        ]);
-
-        return [
-            'id'    => $task->id,
-            'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
-        ];
-
-        /** @var Task $task */
-        /*$task = $course->tasks()->create([
-            'source_project_id' => $sourceId,
-            'name'              => $validated['name'],
-            'type'              => $validated['type'],
-            'gitlab_group_id'   => $groupId,
-            'correction_type'   => $validated['type'] == 'exercise' ? 'self' : null,
-        ]);
-
-        return [
-            'id'    => $task->id,
-            'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
-        ];*/
-    }
-
     public function update(Course $course, Task $task): RedirectResponse
     {
         $validated = request()->validateWithBag('task', [

@@ -62,7 +62,7 @@ Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], func
 
     Route::group(['prefix' => 'manage', 'as' => 'manage.'], function() {
         Route::get('/', [OverviewController::class, 'index'])->name('index')->can('manage,course');
-        Route::post('tasks', [TaskController::class, 'store'])->name('storeTask')->middleware('can:manage,course');
+        Route::post('tasks', [OverviewController::class, 'store'])->name('storeTask')->middleware('can:manage,course');
 
         Route::controller(UserManagementController::class)->middleware('can:manage,course')->group(function() {
             Route::get('enrolment', 'enrolment')->name('enrolment.index');

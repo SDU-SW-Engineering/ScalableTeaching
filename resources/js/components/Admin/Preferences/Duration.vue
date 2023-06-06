@@ -17,7 +17,7 @@
                         type="datetime-local"
                         step="1"
                         @change="$emit('startsAt', $event.target.value)"
-                        value="2019-02-01T03:45:27"
+                        :value="startsAt"
                         name="from"
                         class="disabled:bg-gray-200 col-span-4 dark:disabled:bg-gray-700 bg-white flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none block w-full p-2.5 dark:bg-gray-600 dark:border-gray-700 dark:text-gray-200"
                     />
