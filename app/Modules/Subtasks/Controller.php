@@ -28,7 +28,7 @@ class Controller extends BaseController
             ]),
         ])->values();
 
-        return view('module-Subtasks::pages.subtasks', [
+        return view('module-Subtasks::Pages.subtasks', [
             'subTasks' => $subTasks,
         ]);
     }
@@ -65,7 +65,7 @@ class Controller extends BaseController
 
 
         //die();
-        return view('module-Subtasks::pages.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
+        return view('module-Subtasks::Pages.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
     }
 
     public function taskCompletion(Course $course, Task $task): View
@@ -79,7 +79,7 @@ class Controller extends BaseController
         })->sortBy('name');
         $groups = $subTasks->mapWithKeys(fn($task) => [$task->group => $task->group]);
 
-        return view('module-Subtasks::pages.studentTaskCompletion', compact('projects', 'groups'));
+        return view('module-Subtasks::Pages.studentTaskCompletion', compact('projects', 'groups'));
     }
 
 
