@@ -19,7 +19,7 @@ beforeEach(function() {
     $this->task = Task::factory([
         'starts_at' => Carbon::create(2022, 8, 8, 12),
         'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
-    ])->exercise()->selfCorrection()->for($this->course)->create();
+    ])->selfCorrection()->for($this->course)->create();
     $this->user = User::factory()->hasAttached($this->course)->create();
     Carbon::setTestNow(Carbon::create(2022, 8, 16));
     actingAs($this->user);

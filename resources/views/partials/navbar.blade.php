@@ -138,7 +138,7 @@
     <nav class="bg-gray-200 dark:bg-gray-600 relative z-10 dark:border-gray-700 shadow dark:shadow-lg">
         <div class="container px-6 mx-auto py-2">
             <div>
-                <nav class="flex" aria-label="Breadcrumb">
+                <nav class="flex justify-between" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
                         <li class="inline-flex items-center">
                             <a href="{{ route('home') }}"
@@ -172,6 +172,9 @@
                             </li>
                         @endforeach
                     </ol>
+                    <div>
+                        @yield('breadcrumbs-bar')
+                    </div>
                 </nav>
             </div>
         </div>

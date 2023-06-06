@@ -20,9 +20,11 @@ abstract class Settings implements \JsonSerializable
     {
         $values = [];
         $reflect = new ReflectionClass($this);
-        foreach($reflect->getProperties() as $property) {
+        foreach($reflect->getProperties() as $property)
+        {
             $values[$property->getName()] = $property->getValue($this);
         }
+
         return $values;
     }
 }

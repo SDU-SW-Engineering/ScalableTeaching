@@ -56,12 +56,14 @@ class DashboardController extends Controller
 
     public function authIndex() :view
     {
-        $awaitingFeedback = auth()->user()->feedback()->with(['taskDelegation', 'project.task.course'])->get();
+        $awaitingFeedback = auth()->user()->feedback()->unreviewed()->with(['taskDelegation', 'project.task.course', 'project.download'])->get();
+        $notDownloadedYetCount = $awaitingFeedback->filter(fn(ProjectFeedback $feedback) => $feedback->project->download == null)->count();
+        $completedFeedback = auth()->user()->feedback()->reviewed()->with(['taskDelegation', 'project.task.course'])->get();
         $courses = auth()->user()->courses()->orderBy('created_at', 'desc')->get();
-        $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->assignments()->orderBy('ends_at', 'asc')->visible()->get();
+        $tasks = Task::whereIn('course_id', $courses->pluck('id'))->where('ends_at', '>=', now())->orderBy('ends_at', 'asc')->visible()->get();
         $nextAssignment = $tasks->first();
-        $courseAssignments = Task::assignments()->whereIn('course_id', $courses->pluck('id'))->get();
-        $exercises = Task::exercises()->whereIn('course_id', $courses->pluck('id'))->orderBy('created_at', 'desc')->take(5)->visible()->get();
+        $courseAssignments = Task::whereIn('course_id', $courses->pluck('id'))->get();
+        $exercises = Task::whereIn('course_id', $courses->pluck('id'))->orderBy('created_at', 'desc')->take(5)->visible()->get();
 
         return view('dashboard', [
             'courses'           => $courses,
@@ -71,15 +73,11 @@ class DashboardController extends Controller
             'nextAssignment'    => $nextAssignment,
             'bg'                => 'bg-gray-100 dark:bg-gray-700',
             'awaitingFeedback'  => $awaitingFeedback,
+            ...compact('notDownloadedYetCount', 'completedFeedback'),
         ]);
     }
     public function index(): view
     {
-        if (Auth::check())
-        {
-            return $this->authIndex();
-        }
-
-        return $this->nonAuthIndex();
+        return Auth::check() ? $this->authIndex() : $this->nonAuthIndex();
     }
 }

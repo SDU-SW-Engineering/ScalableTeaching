@@ -27,12 +27,14 @@ class ModuleService
         $installed = array_keys($moduleConfiguration->enabled());
         $unmet = [];
         $registeredModules = array_flip($this->registeredModules);
-        foreach($module->dependencies() as $dependency) {
+        foreach($module->dependencies() as $dependency)
+        {
             $name = class_basename($dependency);
             throw_unless(array_key_exists($dependency, $registeredModules), \Exception::class, "Module [{$module->name()}] depends on module [$name] which is not registered.");
-            if(!in_array($name, $installed))
+            if( ! in_array($name, $installed))
                 $unmet[] = $name;
         }
+
         return $unmet;
     }
 
@@ -45,12 +47,14 @@ class ModuleService
         $unmet = [];
         $registeredModules = array_flip($this->registeredModules);
 
-        foreach($module->conflicts() as $conflict) {
+        foreach($module->conflicts() as $conflict)
+        {
             $name = class_basename($conflict);
             throw_unless(array_key_exists($conflict, $registeredModules), \Exception::class, "Module [{$module->name()}] conflicts with module [$name] which is not registered.");
             if(in_array($name, $installed))
                 $unmet[] = $name;
         }
+
         return $unmet;
     }
 
@@ -84,6 +88,7 @@ class ModuleService
         $found = array_values(array_filter($this->registeredModules, fn($registeredModule) => class_basename($registeredModule) == $identifier));
         if(count($found) == 0)
             return null;
+
         return $found[0];
     }
 

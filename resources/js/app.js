@@ -28,10 +28,6 @@ Vue.component(
     require("./components/Tasks/SubTaskList").default
 );
 Vue.component(
-    "new-task-wizard",
-    require("./components/Course/NewTaskWizard").default
-);
-Vue.component(
     "markdown-editor",
     require("./components/Tasks/Preferences/MarkdownEditor").default
 );
@@ -68,6 +64,15 @@ Vue.component(
 Vue.component(
     "repo-selection",
     require("./components/Course/RepoSelection.vue").default
+);
+
+Vue.component(
+    "enrollment-url",
+    require("./components/EnrollmentUrl.vue").default
+);
+
+Vue.component("admin-preferences", () =>
+    import("./components/Admin/Preferences/Preferences")
 );
 
 const settings = {

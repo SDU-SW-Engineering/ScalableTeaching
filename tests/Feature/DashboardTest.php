@@ -21,22 +21,22 @@ beforeEach(function() {
         'created_at' => date('2022-11-13'),
     ]);
 
-    $this->oldExercise = Task::factory()->exercise()->for($this->oldCourse)->create([
+    $this->oldExercise = Task::factory()->for($this->oldCourse)->create([
         'name'       => 'old exercise',
         'created_at' => date('2022-11-10'),
     ]);
 
-    $this->newExercise = Task::factory()->exercise()->for($this->oldCourse)->create([
+    $this->newExercise = Task::factory()->for($this->oldCourse)->create([
         'name'       => 'new exercise',
         'created_at' => date('2022-11-13'),
     ]);
 
-    $this->nearestAssignment = Task::factory()->assignment()->for($this->oldCourse)->create([
+    $this->nearestAssignment = Task::factory()->for($this->oldCourse)->create([
        'name'       => 'nearest assignment',
        'ends_at'    => Carbon::now()->addWeek(),
     ]);
 
-    $this->furthestAssignment = Task::factory()->assignment()->for($this->oldCourse)->create([
+    $this->furthestAssignment = Task::factory()->for($this->oldCourse)->create([
         'name'       => 'furthest assignment',
         'ends_at'    => Carbon::now()->addMonth(),
     ]);
@@ -50,18 +50,10 @@ it('tests courses are ordered by desc', function () {
         ->assertSeeInOrder(['new course', 'old course']);
 });
 
-it('tests exercises are ordered by desc', function () {
+it('tests tasks are ordered by desc', function () {
     $student = User::factory()->hasAttached([$this->oldCourse, $this->newCourse])->create();
     actingAs($student);
 
     $this->get(route('home'))
         ->assertSeeInOrder(['new exercise', 'old exercise']);
-});
-
-it('tests assignments are ordered by nearest deadline', function () {
-    $student = User::factory()->hasAttached([$this->oldCourse, $this->newCourse])->create();
-    actingAs($student);
-
-    $this->get(route('home'))
-        ->assertSeeInOrder(['nearest assignment', 'furthest assignment']);
 });

@@ -8,6 +8,7 @@ use App\Modules\ModuleService;
 use App\Modules\Template\Template;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Str;
 
 class ModuleProvider extends ServiceProvider
 {
@@ -23,7 +24,8 @@ class ModuleProvider extends ServiceProvider
 
         $moduleService = $this->app->get(ModuleService::class);
         $kernel = new Kernel;
-        foreach($kernel->modules as $module) {
+        foreach($kernel->modules as $module)
+        {
             /** @var Module $module */
             $moduleService->registerModule($module);
         }
@@ -37,13 +39,15 @@ class ModuleProvider extends ServiceProvider
     public function boot()
     {
         $kernel = new Kernel;
-        foreach($kernel->modules as $module) {
+        foreach($kernel->modules as $module)
+        {
             /** @var Module $module */
             $module = new $module;
             $id = $module->identifier();
             $groupName = str($id)->camel()->toString();
             $this->loadViewsFrom(app_path("Modules/$id/Views"), "module-$id");
-            Route::prefix("courses/{course}/tasks/{task}/admin/modules/{$module->identifier()}")
+            $path = Str::kebab($module->identifier());
+            Route::prefix("courses/{course}/tasks/{task}/admin/modules/$path")
                 ->middleware(['web', 'auth', 'can:viewDashboard,task', 'moduleInstalled'])
                 ->as("courses.tasks.admin.$groupName.")
                 ->group(function() use ($module) {

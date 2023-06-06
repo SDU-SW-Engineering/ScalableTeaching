@@ -30,39 +30,6 @@ class AnalyticsController extends Controller
         return view('tasks.admin.pushes', compact('pushes'));
     }
 
-    public function taskCompletion(Course $course, Task $task) : View
-    {
-        $projectIds = $task->projects()->pluck('id');
-
-        $completionPercentages = ProjectSubTask::whereIn('project_id', $projectIds)
-            ->select(\DB::raw('sub_task_id, avg(points) as points'))
-            ->groupBy('sub_task_id')
-            ->pluck('points', 'sub_task_id');
-
-        $maxPointsPerTask = $task->sub_tasks->all()->pluck('points', 'id');
-
-        $subtasks = $task->sub_tasks->all()->groupBy('group')->map(fn(Collection $subTasks, $group) => [
-            'group'     => $group,
-            'average'   => round($completionPercentages->filter(fn($v, $k) => $subTasks->pluck('id')->contains($k))->sum(), 2),
-            'maxPoints' => $subTasks->sum(fn(SubTask $task) => $task->getPoints()),
-            'tasks'     => $subTasks->map(function(SubTask $subTask) use ($maxPointsPerTask, $completionPercentages) {
-                $taskAverage = $completionPercentages->has($subTask->getId()) ? $completionPercentages[$subTask->getId()] : 0;
-                $maxPoints = $maxPointsPerTask->get($subTask->getId());
-
-                return [
-                    'id'         => $subTask->getId(),
-                    'isRequired' => $subTask->isRequired(),
-                    'name'       => $subTask->getDisplayName(),
-                    'maxPoints'  => $subTask->getPoints(),
-                    'average'    => $taskAverage,
-                    'percentage' => round($taskAverage / $maxPoints * 100),
-                ];
-            }),
-        ]);
-
-        return view('tasks.admin.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
-    }
-
     public function gradingOverview(Course $course, Task $task) : View
     {
         return view('tasks.admin.gradingOverview');

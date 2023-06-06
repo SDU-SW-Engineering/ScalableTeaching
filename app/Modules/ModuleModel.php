@@ -23,8 +23,8 @@ class ModuleModel implements \JsonSerializable
     {
         return [
             'installed' => $this->installed,
-            'enabled'  => $this->enabled,
-            'settings' => $this->settings
+            'enabled'   => $this->enabled,
+            'settings'  => $this->settings,
         ];
     }
 
@@ -63,7 +63,7 @@ class ModuleModel implements \JsonSerializable
     public static function fromConfiguration(string $moduleName, array $settings): ?ModuleModel
     {
         $modulePath = app(ModuleService::class)->getById($moduleName);
-        if (!class_exists($modulePath))
+        if ( ! class_exists($modulePath))
             return null;
         /** @var Module $module */
         $module = new $modulePath;

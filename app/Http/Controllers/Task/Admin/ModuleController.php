@@ -25,7 +25,7 @@ class ModuleController extends Controller
     public function install(Course $course, Task $task, ModuleService $moduleService) : RedirectResponse
     {
         $validated = request()->validate([
-            'module' => ['string', 'required']
+            'module' => ['string', 'required'],
         ]);
         $module = $moduleService->getById($validated['module']);
         if($moduleService->hasInstallProblems($module, $task->module_configuration) != null)
@@ -42,8 +42,9 @@ class ModuleController extends Controller
     {
         $variables = [];
         $reflect = new ReflectionClass($module->settings());
-        foreach($reflect->getProperties() as $property) {
-            $variables[$property->getName()]  = $property->getValue($module->settings());
+        foreach($reflect->getProperties() as $property)
+        {
+            $variables[$property->getName()] = $property->getValue($module->settings());
         }
 
         return view('tasks.admin.modules.configure', compact('module'))->with($variables);
@@ -58,7 +59,8 @@ class ModuleController extends Controller
             return redirect()->back();
         $request->validate($settings->validationRules());
         $reflect = new ReflectionClass($settings);
-        foreach($reflect->getProperties() as $property) {
+        foreach($reflect->getProperties() as $property)
+        {
             if($request->has($property->getName()))
                 $property->setValue($settings, $request->get($property->getName()));
         }

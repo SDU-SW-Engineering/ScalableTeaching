@@ -19,7 +19,7 @@ class EnsureModuleInstalled
      */
     public function handle(Request $request, Closure $next)
     {
-        /** @var Task $task */
+        /** @var Task|string $task */
         $task = $request->route()->parameter('task');
         abort_if($task == null, 400, 'Module can only be installed on tasks.');
         throw_if(is_string($task), "Task route parameter should be an instance of the Task model, have you typehinted your controller methods?");

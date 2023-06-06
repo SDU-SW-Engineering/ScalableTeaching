@@ -28,61 +28,34 @@ class SettingsController extends Controller
             return view('tasks.admin.preferences', compact('subTasks', 'task'));
         }
 
-        return view('tasks.admin.preferences');
+        $startsAt = $task->starts_at?->toDateTimeLocalString();
+        $endsAt = $task->ends_at?->toDateTimeLocalString();
+
+        return view('tasks.admin.preferences', compact('startsAt', 'endsAt'));
     }
 
-    public function saveDescription(Course $course, Task $task): string
+    public function savePreferences(Course $course, Task $task)
     {
-        $markdown = request('markdown');
-        $html = Http::post(getenv('FORMATTER_SERVICE_URL') . '/md', ['text' => $markdown])->json('html');
+        $validated = request()->validateWithBag('duration', [
+            'title'    => ['max:255'],
+            'startsAt' => ['date', 'nullable', 'before_or_equal:endsAt'],
+            'endsAt'   => ['date', 'nullable', 'after_or_equal:startsAt'],
+            'markdown' => ['string', 'nullable'],
+        ]);
 
-        $task->description = $html;
-        $task->markdown_description = $markdown;
+        $markdown = request('markdown');
+        if($markdown != "")
+        {
+            $html = Http::post(getenv('FORMATTER_SERVICE_URL') . '/md', ['text' => $markdown])->json('html');
+            $task->markdown_description = $markdown;
+            $task->description = $html;
+        }
+
+        $task->starts_at = $validated['startsAt'];
+        $task->ends_at = $validated['endsAt'];
         $task->save();
 
         return "OK";
-    }
-
-    public function loadDescription(Course $course, Task $task): string
-    {
-        if ( ! $task->reloadDescriptionFromRepo())
-            return redirect()->back()->with('error', 'No readme file to load.');
-
-        return redirect()->back();
-    }
-
-    public function updateTitle(Course $course, Task $task): RedirectResponse
-    {
-        $validated = request()->validateWithBag('title', [
-            'title' => 'required',
-        ]);
-
-        $task->update(['name' => $validated['title']]);
-
-        return back()->with('title-success', 'Changes saved');
-    }
-
-    public function updateDuration(Course $course, Task $task): RedirectResponse
-    {
-        $validated = request()->validateWithBag('duration', [
-            'from'       => ['required', 'date', 'before_or_equal:to'],
-            'to'         => ['required', 'date', 'after_or_equal:from'],
-            'start-time' => ['required', 'date_format:H:i'],
-            'end-time'   => ['required', 'date_format:H:i'],
-        ]);
-
-        $from = Carbon::parse($validated['from'] . " " . $validated['start-time']);
-        $to = Carbon::parse($validated['to'] . " " . $validated['end-time']);
-
-        if($from->isAfter($to) || $from->eq($to))
-            return back()->withInput()->withErrors('The from date must happen before the to date.', 'duration');
-
-        $task->update([
-            'starts_at' => $from,
-            'ends_at'   => $to,
-        ]);
-
-        return back()->with('duration-success', 'Changes saved');
     }
 
     public function toggleVisibility(Course $course, Task $task): string

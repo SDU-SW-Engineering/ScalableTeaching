@@ -9,7 +9,8 @@ use App\Modules\Module;
 
 class Controller extends BaseController
 {
-    public function pushes(Course $course, Task $task, Module $module)
+    public function pushes(Course $course, Task $task, Module $module) : void
     {
     }
 }
+

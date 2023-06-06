@@ -16,7 +16,7 @@ class SubTask implements Arrayable
     private ?bool $isRequired = null;
     public ?int $points = null;
 
-    public function __construct(private string $name, private ?string $alias = null, public ?string $group = null)
+    public function __construct(public string $name, private ?string $alias = null, public ?string $group = null)
     {
     }
 

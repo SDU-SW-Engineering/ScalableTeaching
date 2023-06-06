@@ -36,6 +36,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::bind('module', function(string $value, \Illuminate\Routing\Route $route) {
             $task = Task::findOrFail($route->parameter('task'));
             abort_unless($task->module_configuration->hasInstalled($route->parameter('module')), 500, 'Module not installed');
+
             return $task->module_configuration->resolveModule($route->parameter('module'));
         });
 

@@ -41,11 +41,6 @@ class ProjectFeedback extends Model
         });
     }
 
-    public function download() : ?ProjectDownload
-    {
-        return ProjectDownload::where('ref', $this->sha)->first();
-    }
-
     /**
      * @param Builder<ProjectFeedback> $query
      * @return Builder<ProjectFeedback>

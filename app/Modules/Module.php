@@ -92,6 +92,7 @@ abstract class Module
     public function setSettings(Settings $settings): Module
     {
         $this->settings = $settings;
+
         return $this;
     }
 
@@ -116,6 +117,7 @@ abstract class Module
     private function basePath(): string
     {
         $reflection = new ReflectionClass(get_class($this));
+
         return dirname($reflection->getFileName());
     }
 
@@ -134,14 +136,15 @@ abstract class Module
      */
     public function hasSidebar(): bool
     {
-        return file_exists($this->viewPath("sidebar.blade.php")) | file_exists($this->viewPath('sidebar.php'));
+        return file_exists($this->viewPath("sidebar.blade.php")) || file_exists($this->viewPath('sidebar.php'));
     }
 
     public function bigWidgets()
     {
         $path = $this->widgetPath('Big');
-        if (!file_exists($path))
+        if ( ! file_exists($path))
             return [];
+
         return array_values(preg_filter('/(.)(?:\.blade)?\.php/', '${1}', scandir($path)));
     }
 }

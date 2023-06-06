@@ -18,6 +18,6 @@ class AutomaticGrading extends Module
     protected array $dependencies = [Subtasks::class];
 
     protected array $conflicts = [
-        MarkAsDone::class
+        MarkAsDone::class,
     ];
 }

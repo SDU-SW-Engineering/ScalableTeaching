@@ -1,19 +1,9 @@
 @extends('tasks.admin.master')
 
 @section('adminContent')
-    <div class="flex justify-between">
-        <div></div>
-        <div class="flex items-center mb-4">
-            <div class="h-2.5 rounded-full bg-red-400 w-6"></div>
-            <span class="text-xs dark:text-white ml-2 mr-4">Passed < 33% </span>
-            <div class="h-2.5 rounded-full bg-gray-400 w-6"></div>
-            <span class="text-xs dark:text-white ml-2 mr-4">33% >= Passed < 66%  </span>
-            <div class="h-2.5 rounded-full bg-lime-green-400 w-6"></div>
-            <span class="text-xs dark:text-white ml-2">Passed >= 66%</span>
-        </div>
-    </div>
+    @include("module-Subtasks::partials.navbar")
     @foreach($subtasks as $subtaskGroup)
-        <div class="dark:bg-gray-800 px-4 py-3 mb-4 rounded-lg shadow-sm">
+        <div class="dark:bg-gray-800 bg-gray-100 border px-4 py-3 mb-4 rounded-lg shadow-sm">
             <div class="flex items-end justify-between">
                 <h1 class=" dark:text-white text-2xl">{{ $subtaskGroup['group'] }}</h1>
                 <h2 class="dark:text-lime-green-300 text-xl"><span class="font-thin text-gray-400">{{ $subtaskGroup['average'] }} /</span> {{ $subtaskGroup['maxPoints'] }}
@@ -35,7 +25,7 @@
                                             default => 'bg-red-400'
                                         } ]) style="width: {{ $task['percentage'] }}%">{{ round($task['average'], 2) }}</div>
                                     </div>
-                                    <span class="text-light text-lime-green-100 w-12">{{ $task['maxPoints'] }} pts</span>
+                                    <span class="text-light text-lime-green-700 dark:text-lime-green-100 w-12">{{ $task['maxPoints'] }} pts</span>
                                 </div>
                             </div>
                         </li>

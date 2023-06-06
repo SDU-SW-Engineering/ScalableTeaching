@@ -11,7 +11,7 @@ class LinkRepositorySettings extends Settings
     public function validationRules(): array
     {
         return [
-            'repo' => ['required']
+            'repo' => ['required'],
         ];
     }
 }

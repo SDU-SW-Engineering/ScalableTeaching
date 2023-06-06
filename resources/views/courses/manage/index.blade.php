@@ -11,7 +11,7 @@
             </div>
         </div>
         <div class="bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
-            <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Exercise Engagement</h3>
+            <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Task Engagement</h3>
             @if($userEngagementGraph == null)
                 <div class="flex items-center justify-center h-full">
                     <h2>Not enough data to create graph.</h2>
@@ -22,6 +22,10 @@
                                :data="{{ $userEngagementGraph->datasets()  }}"></bar-chart>
                 </div>
             @endif
+        </div>
+        <div class="md:col-span-2 bg-white shadow-lg p-4 rounded-md dark:bg-gray-900 border dark:border-gray-800">
+            <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Latest activity</h3>
+            @include('courses.manage.partials.activityTable', compact('activities'))
         </div>
     </div>
 @endsection
