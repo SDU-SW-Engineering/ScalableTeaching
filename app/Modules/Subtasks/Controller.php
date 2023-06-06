@@ -74,10 +74,11 @@ class Controller extends BaseController
         $projects = $task->projects()->claimed()->get()->map(function(Project $project) use ($subTasks) {
             return [
                 'groups' => $project->subtasks->groupBy(fn(ProjectSubTask $subTask) => $subTasks[$subTask->sub_task_id]->group),
-                'name' => $project->ownerNames
+                'name'   => $project->ownerNames,
             ];
         })->sortBy('name');
         $groups = $subTasks->mapWithKeys(fn($task) => [$task->group => $task->group]);
+
         return view('module-Subtasks::pages.studentTaskCompletion', compact('projects', 'groups'));
     }
 
@@ -92,6 +93,7 @@ class Controller extends BaseController
                 $subTask->setPoints($task['points']);
                 if($task['id'] != null)
                     $subTask->setId($task['id']);
+
                 return $subTask;
             }),
         ])->flatten()

@@ -25,9 +25,10 @@ class Controller extends BaseController
         $downloads = $projects->map(fn(Project $project) => [
             'project'  => $project,
             'download' => $project->download,
-            'indexed'  => false
+            'indexed'  => false,
         ]);
         $missingOnDisk = $downloads->filter(fn($download) => $download['download']?->state == DownloadState::Downloaded && $download['download']->queued_at == null);
+
         return view('module-AutomaticDownload::index')->with('downloads', $downloads)->with('missing', $missingOnDisk)->with('enabledAfterDeadline', $enabledAfterDeadline);
     }
 
@@ -56,7 +57,7 @@ class Controller extends BaseController
     {
         $projectDownload->queue();
         $projectDownload->update([
-            'queued_at' => now()
+            'queued_at' => now(),
         ]);
 
         return redirect()->back();
@@ -71,7 +72,7 @@ class Controller extends BaseController
             $download = $project->download()->create([
                 'ref'       => $push->after_sha,
                 'expire_at' => now()->addYears(2),
-                'queued_at' => now()
+                'queued_at' => now(),
             ]);
             $downloadMinute = (int)($index / 3);
             $download->queue($downloadMinute);
@@ -92,7 +93,7 @@ class Controller extends BaseController
                 $downloadMinute = (int)($index / 3);
                 $download->queue($downloadMinute);
                 $download->update([
-                    'queued_at' => now()
+                    'queued_at' => now(),
                 ]);
             });
 

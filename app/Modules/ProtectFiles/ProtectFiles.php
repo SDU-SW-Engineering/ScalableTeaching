@@ -8,7 +8,7 @@ use App\Modules\Template\Template;
 class ProtectFiles extends Module
 {
     protected array $dependencies = [
-        Template::class
+        Template::class,
     ];
 
     protected string $name = "Protect Files";

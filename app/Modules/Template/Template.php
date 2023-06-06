@@ -17,7 +17,7 @@ class Template extends Module
     protected string $description = "Makes the linked repository function as the starting point. When the assignment is started each participant will get their own forked version of the linked repo.";
 
     protected array $dependencies = [
-        LinkRepository::class
+        LinkRepository::class,
     ];
 
     public static function configRoutes(): void

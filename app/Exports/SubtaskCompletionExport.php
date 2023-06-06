@@ -40,14 +40,14 @@ class SubtaskCompletionExport implements FromQuery, WithTitle, WithMapping, With
     public function map($project): array
     {
         /** @var Collection $completedSubtasks */
-        $completedSubtasks =  $project->subTasks->pluck('points', 'sub_task_id');
+        $completedSubtasks = $project->subTasks->pluck('points', 'sub_task_id');
         $subTaskPoints = $this->subTasks->map(fn($name, $id) => $completedSubtasks->has($id) ? (string)$completedSubtasks[$id] : '0');
         $totalPoints = $subTaskPoints->sum();
 
         return [
             $project->ownerNames,
             ...$subTaskPoints,
-            (string)$totalPoints
+            (string)$totalPoints,
         ];
     }
 
@@ -56,7 +56,7 @@ class SubtaskCompletionExport implements FromQuery, WithTitle, WithMapping, With
         return [
             'Submission',
             ...$this->subTasks,
-            'Total'
+            'Total',
         ];
     }
 }

@@ -39,7 +39,7 @@ class OverviewController extends Controller
             'course'              => $course,
             'userEngagementGraph' => $userEngagementGraph,
             'enrolmentGraph'      => $enrolmentPerDayGraph,
-            'activities'          => $activities
+            'activities'          => $activities,
         ]);
     }
 
@@ -51,14 +51,14 @@ class OverviewController extends Controller
     {
         $validated = request()->validate([
             'name'  => 'required',
-            'group' => ['string', 'nullable']
+            'group' => ['string', 'nullable'],
         ]);
 
 
         /** @var Task $task */
         $task = $course->tasks()->create([
             'name'       => $validated['name'],
-            'grouped_by' => $request->has('group') ? $validated['group'] : null
+            'grouped_by' => $request->has('group') ? $validated['group'] : null,
         ]);
 
         return [

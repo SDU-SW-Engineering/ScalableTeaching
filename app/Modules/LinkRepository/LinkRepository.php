@@ -24,6 +24,7 @@ class LinkRepository extends Module
     {
         if($settings instanceof LinkRepositorySettings)
             return $settings->repo != "";
+
         return false;
     }
 }

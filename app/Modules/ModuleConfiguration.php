@@ -19,6 +19,7 @@ class ModuleConfiguration implements Castable
     {
         if($raw)
             return $this->installed;
+
         return array_filter($this->installed, fn(ModuleModel $model) => $model->installed);
     }
 
@@ -30,6 +31,7 @@ class ModuleConfiguration implements Castable
     public function hasInstalled(string $identifier): bool
     {
         $identifier = $this->resolveIdentifier($identifier);
+
         return array_key_exists($identifier, $this->installed());
     }
 
@@ -39,19 +41,20 @@ class ModuleConfiguration implements Castable
             $module = $module->identifier();
         else
             $module = $this->resolveIdentifier($module);
-        if(!$this->hasInstalled($module))
+        if( ! $this->hasInstalled($module))
             return false;
+
         return $this->installed[$module]->enabled;
     }
     private function resolveIdentifier(string $identifier) : string
     {
-        return last(explode('\\',$identifier));
+        return last(explode('\\', $identifier));
     }
 
     public function resolveModule(string $identifier): Module|null
     {
         $identifier = $this->resolveIdentifier($identifier);
-        if(!$this->hasInstalled($identifier))
+        if( ! $this->hasInstalled($identifier))
             return null;
         $modulePath = app(ModuleService::class)->getById($identifier);
         /** @var Module $module */
@@ -66,7 +69,8 @@ class ModuleConfiguration implements Castable
 
     public function canUninstall(string $identifier): bool
     {
-        foreach($this->installed() as $name => $moduleModel) {
+        foreach($this->installed() as $name => $moduleModel)
+        {
             if($identifier == $name)
                 continue; // we don't care about ourselves
 
@@ -93,11 +97,13 @@ class ModuleConfiguration implements Castable
         /** @var Module $module */
         $module = new $modulePath;
         $baseName = class_basename($modulePath);
-        if(array_key_exists($baseName, $this->installed)) {
+        if(array_key_exists($baseName, $this->installed))
+        {
             /** @var ModuleModel $model */
             $model = $this->installed[$baseName];
             $model->setInstalled(true);
             $model->setEnabled($module->isEnabled($model->settings));
+
             return;
         }
         $model = new ModuleModel(false, $module->settings());
@@ -118,7 +124,7 @@ class ModuleConfiguration implements Castable
 
     public function uninstall(Module $module): void
     {
-        if(!$this->canUninstall($module->identifier()))
+        if( ! $this->canUninstall($module->identifier()))
             return;
         /** @var ModuleModel $model */
         $model = $this->installed[$module->identifier()];
@@ -142,6 +148,7 @@ class ModuleConfiguration implements Castable
                     return $module != null;
                 });
                 $configuration->setInstalled($modules);
+
                 return $configuration;
             }
 
@@ -149,8 +156,9 @@ class ModuleConfiguration implements Castable
             {
                 /** @var ModuleConfiguration $configuration */
                 $configuration = $value;
+
                 return [
-                    $key => json_encode($configuration->installed(true))
+                    $key => json_encode($configuration->installed(true)),
                 ];
             }
         };

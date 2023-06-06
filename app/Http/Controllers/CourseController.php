@@ -140,7 +140,7 @@ class CourseController extends Controller
                 'Courses'     => route('courses.index'),
                 $course->name => null,
             ],
-            'mainTasks' => $mainTasks,
+            'mainTasks'       => $mainTasks,
             'sidebarTasks'    => $sidebarTasks,
         ]);
     }

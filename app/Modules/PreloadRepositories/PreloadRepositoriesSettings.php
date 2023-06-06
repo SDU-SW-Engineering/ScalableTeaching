@@ -11,7 +11,7 @@ class PreloadRepositoriesSettings extends Settings
     public function validationRules(): array
     {
         return [
-            'availability' => ['required', 'integer']
+            'availability' => ['required', 'integer'],
         ];
     }
 }

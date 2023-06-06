@@ -73,7 +73,7 @@ class DashboardController extends Controller
             'nextAssignment'    => $nextAssignment,
             'bg'                => 'bg-gray-100 dark:bg-gray-700',
             'awaitingFeedback'  => $awaitingFeedback,
-            ...compact('notDownloadedYetCount', 'completedFeedback')
+            ...compact('notDownloadedYetCount', 'completedFeedback'),
         ]);
     }
     public function index(): view

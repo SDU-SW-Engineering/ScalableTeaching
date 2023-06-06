@@ -43,7 +43,7 @@ class ProjectDownload extends Model
 
     protected $casts = [
         'expire_at' => 'datetime',
-        'queued_at' => 'datetime'
+        'queued_at' => 'datetime',
     ];
 
     /**
@@ -91,9 +91,11 @@ class ProjectDownload extends Model
         {
             $path = explode('/', $fileName);
             $currentDir = $root;
-            for($j = 0; $j < count($path); $j++) {
+            for($j = 0; $j < count($path); $j++)
+            {
                 $file = $path[$j];
-                if($j + 1 < count($path)) {
+                if($j + 1 < count($path))
+                {
                     $nextDirectory = $currentDir->getDirectory($file) ?? $currentDir->addDirectory(new Directory($file, $currentDir));
                     $currentDir = $nextDirectory;
                     continue;
@@ -103,6 +105,7 @@ class ProjectDownload extends Model
                 $currentDir->addFile(new File($fileName, $currentDir));;
             }
         }
+
         return $root->nextDirectoryWithFiles();
     }
 
@@ -113,6 +116,7 @@ class ProjectDownload extends Model
     public function file(string $file): string
     {
         $filePath = str($this->location)->append('/', $file);
+
         return trim(Storage::get($filePath));
     }
 
@@ -125,6 +129,7 @@ class ProjectDownload extends Model
         return Attribute::make(get: function() {
             if($this->location == null)
                 return DownloadState::Queued;
+
             return Storage::exists($this->location) ? DownloadState::OnDisk : DownloadState::Downloaded;
         });
     }

@@ -23,7 +23,8 @@ return new class extends Migration {
     {
         $service = app(ModuleService::class);
         Task::whereNull('module_configuration')->each(function(Task $task) use ($service) {
-            if($task->source_project_id != null) {
+            if($task->source_project_id != null)
+            {
                 // Link repository
                 $service->install(LinkRepository::class, $task);
                 /** @var LinkRepository $linkModule */
@@ -31,7 +32,8 @@ return new class extends Migration {
                 $linkModule->settings()->repo = $task->source_project_id;
                 $task->module_configuration->update(LinkRepository::class, $linkModule->settings());
 
-                if($task->correction_type != CorrectionType::Self) {
+                if($task->correction_type != CorrectionType::Self)
+                {
                     if($task->type != TaskTypeEnum::Exercise)
                         $service->install(BuildTracking::class, $task);
 
@@ -39,12 +41,14 @@ return new class extends Migration {
                 }
             }
 
-            if($task->sub_tasks != null && $task->sub_tasks->count() > 0) {
+            if($task->sub_tasks != null && $task->sub_tasks->count() > 0)
+            {
                 $service->install(Subtasks::class, $task);
             }
 
             // Self grading
-            if($task->correction_type == CorrectionType::Self) {
+            if($task->correction_type == CorrectionType::Self)
+            {
                 $service->install(MarkAsDone::class, $task);
             }
             $task->save();
@@ -67,7 +71,8 @@ return new class extends Migration {
         });
 
         Task::whereNotNull('module_configuration')->each(function(Task $task) {
-            if($task->module_configuration->hasInstalled(LinkRepository::class)) {
+            if($task->module_configuration->hasInstalled(LinkRepository::class))
+            {
                 /** @var LinkRepository $linkRepoModule */
                 $linkRepoModule = $task->module_configuration->resolveModule(LinkRepository::class);
                 $task->source_project_id = $linkRepoModule->settings()->repo;

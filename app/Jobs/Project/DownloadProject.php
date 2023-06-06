@@ -59,7 +59,7 @@ class DownloadProject implements ShouldQueue
         $this->download->update([
             'location'      => $newPath,
             'downloaded_at' => now(),
-            'queued_at'     => null
+            'queued_at'     => null,
         ]);
     }
 }

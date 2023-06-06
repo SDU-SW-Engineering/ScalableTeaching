@@ -25,6 +25,6 @@ class Kernel
         SubtaskGradingAndFeedback::class,
         AutomaticDownload::class,
         ProtectFiles::class,
-        PreloadRepositories::class
+        PreloadRepositories::class,
     ];
 }
