@@ -1,7 +1,7 @@
 @extends('tasks.admin.master')
 
 @section('adminContent')
-    @include("module-Subtasks::partials.navbar")
+    @include("module-Subtasks::Partials.navbar")
     <div class="dark:bg-gray-800 bg-gray-100 border px-4 py-3 mb-4 rounded-lg shadow-sm">
         <div class="flex flex-col">
             <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">

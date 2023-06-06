@@ -1,7 +1,7 @@
 @extends('tasks.admin.master')
 
 @section('adminContent')
-    @include("module-Subtasks::partials.navbar")
+    @include("module-Subtasks::Partials.navbar")
     @foreach($subtasks as $subtaskGroup)
         <div class="dark:bg-gray-800 bg-gray-100 border px-4 py-3 mb-4 rounded-lg shadow-sm">
             <div class="flex items-end justify-between">
