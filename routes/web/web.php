@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\VSCodeController;
+use App\Http\Controllers\AdminController;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,12 @@ Route::controller(GitLabOAuthController::class)->prefix('login')->middleware('gu
     Route::get('callback', 'callback')->name('callback');
 });
 
+Route::controller(AdminController::class)->prefix('admin')->name('admin.')->group(function() {
+    Route::get('/', 'index')->name('index');
+    Route::post('add-professor', 'addProfessor')->name('add-professor');
+    Route::get('professors/{user}/remove', 'removeProfessor')->name('remove-professor');
+    Route::get('professors/{user}/toggle-promotion', 'togglePromotion')->name('toggle-promotion');
+});
 
 Route::get('logout', function() {
     auth()->logout();
