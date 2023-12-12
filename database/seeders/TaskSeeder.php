@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Course;
 use App\Models\Task;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class TaskSeeder extends Seeder
@@ -21,11 +20,11 @@ class TaskSeeder extends Seeder
 
             foreach(["Group A", "Group B", "Group C"] as $group)
             {
-                Task::factory(rand(3, 6))->group($group)->exercise()->for($course)->create();
-                Task::factory(1)->group($group)->invisible()->exercise()->for($course)->create();
+                Task::factory(rand(3, 6))->group($group)->for($course)->create();
+                Task::factory(1)->group($group)->invisible()->for($course)->create();
             }
 
-            Task::factory(rand(3, 6))->exercise()->for($course)->create();
+            Task::factory(rand(3, 6))->for($course)->create();
         });
     }
 }
