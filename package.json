@@ -2,6 +2,7 @@
     "private": true,
     "scripts": {
         "dev": "npm run development",
+        "formatter-server": "node resources/js/formatter-service.js",
         "development": "mix",
         "watch": "mix watch",
         "watch-poll": "mix watch -- --watch-options-poll=1000",

@@ -12,25 +12,24 @@ ScalableTeaching currently relies on a GitLab + GitLab CI environment to serve a
 - Comoposer installed.
 - A MySQL instance
 - Node ~18
-- Yarn (instal with Node)
+- Yarn (install with Node)
 
 The solution is built on top of the Laravel web framework (v9).
 
 #### 1. Installing dependencies
 Run `composer install` to install Laravel and the project's dependencies
 
-#### 2. Migrate the database
-Use the `php artisan migrate` to ful
+Run `yarn` to install the node dependencies for the frontend.
 
-#### 3. Configure the environment
+#### 2. Configure environment variables
 
 Copy the `.env.example` to a new `.env` file, and edit the following variables:
 
 1. Setup the authentication. The authentication service uses GitLab's OAuth - configure the values below. If you are uncertain, these can be retrieved by inquirying the IT department.
     1. `GITLAB_CLIENT_ID`
     2. `GITLAB_CLIENT_SECRET`
-    3. `GITLAB_REDIRECT_URL` should be set to the host and port of your application and append `/login/callback` to it. 
-    4. `GITLAB_URL` should refer to the url of the gitlab instance. 
+    3. `GITLAB_REDIRECT_URL` should be set to the host and port of your application and append `/login/callback` to it.
+    4. `GITLAB_URL` should refer to the url of the gitlab instance.
     5. `GITLAB_ACCESS_TOKEN` of the user ScalableTeaching should act as within GitLab.
 2. Configure the database such that the application can establish a connection to your database
     1. `DB_HOST`
@@ -40,17 +39,16 @@ Copy the `.env.example` to a new `.env` file, and edit the following variables:
 4. `GITLAB_GROUP_ID` Should be set to the id of the group id that all repositories and tasks should be created within.
 
 
-#### 4. Setup frontend
+#### 3. Migrate the database
+Use the `php artisan migrate` command to migrate the database.
 
-The frontend uses Tailwind and various other 3rd party ui libraries. To install these run:
-
-`yarn`
+Additionally, if you want to populate it with dummy data, add `--seed` to the command, and if you want to migrate it from scratch again then run `migrate:fresh` instead.
 
 ## Development environment and CI
 
 To enhance the developer workflow, this repository includes various tools to ensure a high quality of code.
 Specifically:
-- `php-cs-fixer` that ensures a consistent code style. Install php-cs-fixer globally by running `composer global require php-cs-fixer`, after which you can run `php-cs-fixer fix` within the root of this project to fix issues.
+- `php-cs-fixer` that ensures a consistent code style. Install php-cs-fixer globally by running `composer global require friendsofphp/php-cs-fixer`, after which you can run `php-cs-fixer fix` within the root of this project to fix issues.
 - `larastan` that runs a suite of static analyses. You may check your code for pitfalls using the `php vendor/bin/phpstan` 
 
 
@@ -60,6 +58,14 @@ You may trigger the tests by using the command `php artisan test`
 
 php-cs-fixer, larastan and tests are validated whenever you submit changes to the repo.
 
-### Frontend
+### Running the application
+
+#### Frontend
 
 Use `yarn watch` to create a development build of the frontend. This command will keep watching for file changes and automatically recreate the underlying files whenever you make changes.
+
+#### Laravel
+Run `php artisan serve` to start the laravel application. 
+
+#### Formatter 
+Run `yarn formatter-server` to start the formatter server, which is required for formatting markdown descriptions.
