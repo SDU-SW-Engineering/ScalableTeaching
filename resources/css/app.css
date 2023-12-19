@@ -82,3 +82,13 @@
 .prose-sm ol > li {
     padding-left: 0;
 }
+
+.nav-item-selected::before {
+    content: " ";
+    position: relative;
+    background-color: limegreen;
+    width: 100%;
+    height: 4px;
+    left: 0;
+    bottom: 0;
+}
