@@ -20,7 +20,7 @@ class UserFactory extends Factory
      *
      * @return array
      */
-    public function definition()
+    public function definition(): array
     {
         return [
             'name'           => $this->faker->name(),
@@ -32,25 +32,30 @@ class UserFactory extends Factory
         ];
     }
 
-    public function admin()
+    /**
+     * Indicate the user should be a system administrator
+     *
+     * @return UserFactory
+     */
+    public function system_admin(): UserFactory
     {
-        return $this->state(function(array $attributes) {
-            return [
-                'is_admin' => true,
-            ];
+        return $this->state(function () {
+           return [
+               'is_sys_admin' => true,
+           ];
         });
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * * Indicate the user should be a professor (Administrator)
      *
-     * @return Factory
+     * @return UserFactory
      */
-    public function unverified()
+    public function admin(): UserFactory
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function() {
             return [
-                'email_verified_at' => null,
+                'is_admin' => true,
             ];
         });
     }
