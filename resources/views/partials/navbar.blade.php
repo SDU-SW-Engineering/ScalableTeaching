@@ -137,8 +137,15 @@
                         Surveys
                     </a>
                 @endif
-                <a class="my-1 text-sm py-1 px-2 font-medium bg-lime-green-500 rounded hover:bg-lime-green-400 text-white hover:text-white md:ml-4 md:my-0"
-                   href="#">{{ auth()->user()->name }}</a>
+                <span class="my-1 text-sm py-1 px-2 font-medium bg-lime-green-500 rounded text-white md:ml-4 md:my-0">
+                    {{ auth()->user()->name }}
+                </span>
+                @auth
+                    <a href="{{route("logout")}}"
+                       class="my-1 text-sm py-1 px-2 font-medium hover:bg-red-400 rounded hover:text-black text-white md:ml-4 md:my-0">
+                        Logout
+                    </a>
+                @endauth
             </div>
         </div>
     </div>
