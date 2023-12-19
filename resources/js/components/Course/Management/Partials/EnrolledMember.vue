@@ -30,9 +30,10 @@
                         d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/>
                 </svg>
             </a>
-            <button @click="kick(userInfo)"
+            <button @click="kick(userInfo)" :disabled="isSelf"
+                    :class="{'hover:bg-gray-50': !isSelf, 'dark:hover:bg-gray-500': !isSelf, 'cursor-default': isSelf}"
                     class="justify-between flex transition-colors duration-200 focus:ring-4 focus:outline-none
-                bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500  rounded-r-lg  focus:ring-gray-300 dark:focus:ring-gray-600 text-gray-500 dark:text-gray-200
+                bg-white dark:bg-gray-600 rounded-r-lg  focus:ring-gray-300 dark:focus:ring-gray-600 text-gray-500 dark:text-gray-200
                 border dark:border-gray-700 font-medium text-sm px-4 py-2.5 text-center inline-flex items-center"
                     type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
@@ -51,6 +52,13 @@ import RoleDropdown from "./RoleDropdown";
 export default {
     components: {RoleDropdown},
     props: {
+        /**
+         * Whether this enrolled member represents the logged-in account
+         */
+        isSelf: {
+          type: Boolean,
+          required: true
+        },
         member: {
             type: Object,
             required: true
@@ -77,7 +85,7 @@ export default {
             this.member.role = roleId;
         },
         kick: async function (user) {
-            if (confirm("Are you sure you wan't to kick " + user.name + " from the course?") !== true)
+            if (confirm("Are you sure you want to kick " + user.name + " from the course?") !== true)
                 return;
             await axios.delete(this.kickRoute, {
                 data: {
