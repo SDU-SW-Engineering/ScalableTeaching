@@ -12,7 +12,6 @@ use App\Models\GroupUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\View;
 
 class UserManagementController extends Controller
@@ -57,6 +56,13 @@ class UserManagementController extends Controller
         $validated = request()->validate([
             'user' => ['required', 'numeric'],
         ]);
+
+
+
+        if (auth()->id() === $validated['user']) {
+            flash()->addError("You are not allowed to kick yourself!");
+            return redirect()->back();
+        }
 
         $course->members()->detach($validated['user']);
 
