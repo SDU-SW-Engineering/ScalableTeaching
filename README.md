@@ -69,3 +69,11 @@ Run `php artisan serve` to start the laravel application.
 
 #### Formatter 
 Run `yarn formatter-server` to start the formatter server, which is required for formatting markdown descriptions.
+
+
+### FAQ
+
+#### Fatal error: Allowed memory size of 134217728 bytes exhausted (tried to allocate 36864 bytes)
+This means your PHP is configured with a memory limit that is too low to run the tests.
+
+Update it by going to your php.ini file, and then searching for the field `memory_limit` and upping it. (Recommendation is to set it to `1G`)
