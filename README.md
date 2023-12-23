@@ -14,7 +14,7 @@ ScalableTeaching currently relies on a GitLab + GitLab CI environment to serve a
 - Node ~18
 - Yarn (install with Node)
 
-The solution is built on top of the Laravel web framework (v9).
+The solution is built on top of the Laravel web framework (v9), with Vue 2 powering some frontend components.
 
 #### 1. Installing dependencies
 Run `composer install` to install Laravel and the project's dependencies
