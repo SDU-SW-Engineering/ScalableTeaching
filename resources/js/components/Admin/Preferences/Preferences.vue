@@ -28,7 +28,7 @@
             :task="task"
         ></description>
         <div class="flex items-center"></div>
-        <div class="fixed bottom-0 left-0 right-0 bg-white border-t">
+        <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-600">
             <div class="container mx-auto px-6 h-16">
                 <div class="flex items-center justify-end h-full">
                     <transition name="slide">
