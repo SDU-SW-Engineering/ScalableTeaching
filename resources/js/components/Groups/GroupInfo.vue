@@ -104,7 +104,7 @@
                         <span class="text-sm text-gray-400">No projects</span>
                     </div>
                     <div v-else class="mt-2 grid grid-cols-2 xl:grid-cols-3 gap-4 h-full">
-                        <a :href="'/courses/' + group.course_id + '/tasks/' + project.task_id" :key="project.id"
+                        <a :href="'/courses/' + group.courseId + '/tasks/' + project.task_id" :key="project.id"
                            v-for="project in group.projects"
                            class="border hover:shadow-lg py-6 max-h-14 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ">
                             {{ group.tasks.find((task) => task.id === project.task_id).name }}

@@ -36,6 +36,7 @@ class GroupInformation extends JsonResource
         return [
             'id'          => $group->id,
             'name'        => $group->name,
+            'courseId'    => $group->course_id,
             'memberCap'   => $course->max_group_size,
             'invitations' => $group->invitations->map(fn(GroupInvitation $invitation) => [
                 'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
