@@ -16,7 +16,7 @@
                     <input
                         type="datetime-local"
                         step="1"
-                        @change="$emit('startsAt', $event.target.value)"
+                        @change="setStartsAtTime"
                         :value="startsAt"
                         name="from"
                         class="disabled:bg-gray-200 col-span-4 dark:disabled:bg-gray-700 bg-white flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none block w-full p-2.5 dark:bg-gray-600 dark:border-gray-700 dark:text-gray-200"
@@ -31,6 +31,7 @@
                     <input
                         type="datetime-local"
                         step="1"
+                        :min="startsAt ? startsAt : currentTime"
                         @change="$emit('endsAt', $event.target.value)"
                         :value="endsAt"
                         class="disabled:bg-gray-200 col-span-4 dark:disabled:bg-gray-700 bg-white flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none block w-full p-2.5 dark:bg-gray-600 dark:border-gray-700 dark:text-gray-200"
@@ -44,5 +45,20 @@
 <script>
 export default {
     props: ["startsAt", "endsAt"],
+    data() {
+        return {
+            currentTime: new Date().toISOString().split(".")[0]
+        }
+    },
+    methods: {
+        setStartsAtTime($event) {
+
+            if (this.endsAt && Date.parse(this.endsAt) < Date.parse($event.target.value)) {
+                this.$emit('endsAt', undefined)
+            }
+
+            this.$emit('startsAt', $event.target.value)
+        }
+    }
 };
 </script>
