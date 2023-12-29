@@ -1,3 +1,6 @@
+import ToastPlugin from "vue-toast-notification";
+import 'vue-toast-notification/dist/theme-bootstrap.css';
+
 require("./bootstrap");
 require("chart.js");
 
@@ -238,6 +241,10 @@ const settings = {
 };
 
 Vue.use(VueTailwind, settings);
+Vue.use(ToastPlugin, {
+    duration: 6_000,
+    position: 'top-right'
+})
 
 const app = new Vue({
     el: "#app",
