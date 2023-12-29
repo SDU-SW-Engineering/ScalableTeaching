@@ -66,7 +66,10 @@ export default {
     },
     methods: {
         async fetchOptions(q) {
-            let response = await fetch(`/api/user/repositories?q=${q}`);
+
+            const response = await fetch(`/api/user/repositories?q=${q}`, {
+                headers: 'Content-Type: application/json'
+            });
             return {results: await response.json()};
         }
     },
