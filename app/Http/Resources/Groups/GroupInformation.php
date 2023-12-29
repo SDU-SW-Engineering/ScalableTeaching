@@ -4,6 +4,8 @@ namespace App\Http\Resources\Groups;
 
 use App\Models\Group;
 use App\Models\GroupInvitation;
+use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Gate;
 use Illuminate\Contracts\Support\Arrayable;
@@ -27,6 +29,10 @@ class GroupInformation extends JsonResource
         $course = $group->course;
         $projects = $group->projects;
 
+        $tasks = Task::findMany(array_map(function (Project $project) {
+            return $project->task_id;
+        }, $projects->all()));
+
         return [
             'id'          => $group->id,
             'name'        => $group->name,
@@ -35,6 +41,7 @@ class GroupInformation extends JsonResource
                 'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
                 'recipient'   => $invitation->recipient,
             ]),
+            'tasks'       => $tasks,
             'projects'    => $projects,
             'users'       => $group->members->map(fn(User $member) => [
                 'name'            => $member->name,

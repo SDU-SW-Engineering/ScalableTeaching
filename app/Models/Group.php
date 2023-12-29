@@ -15,8 +15,13 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 /**
+ * @property int id
+ * @property int course_id
+ * @property string name
  * @property-read Collection<int,User> $members
  * @property-read Course $course
+ * @property-read Collection<Project> $projects
+ * @property-read Collection<GroupInvitation> $invitations
  * @property-read string $projectName
  */
 class Group extends Model

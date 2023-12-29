@@ -107,7 +107,7 @@
                         <a :href="'/courses/' + group.course_id + '/tasks/' + project.task_id" :key="project.id"
                            v-for="project in group.projects"
                            class="border hover:shadow-lg py-6 max-h-14 hover:text-white dark:border-gray-500 dark:hover:border-lime-green-500 text-black dark:text-white flex hover:bg-lime-green-500 rounded-lg justify-center items-center font-medium text-sm ">
-                            Assignment 1
+                            {{ group.tasks.find((task) => task.id === project.task_id).name }}
                         </a>
                     </div>
                 </div>
