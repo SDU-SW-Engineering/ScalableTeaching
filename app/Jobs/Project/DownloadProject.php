@@ -39,7 +39,7 @@ class DownloadProject implements ShouldQueue
 
         $gitLabManager = app(GitLabManager::class);
 
-        $archiveContent = $gitLabManager->repositories()->archive($this->download->project->project_id, [
+        $archiveContent = $gitLabManager->repositories()->archive($this->download->project->gitlab_project_id, [
             'sha' => $this->download->ref,
         ], 'zip');
 
