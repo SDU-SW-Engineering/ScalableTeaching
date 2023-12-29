@@ -37,8 +37,9 @@
                         >
                     </transition>
                     <button
-                        @click="save()"
-                        class="bg-lime-green-300 flex items-center justify-center text-lime-green-800 py-2 px-4 rounded hover:bg-lime-green-400"
+                        @click="save()" :disabled="!canSave"
+                        :class="[!canSave ? 'cursor-not-allowed bg-gray-750' : 'bg-lime-green-300 hover:bg-lime-green-400']"
+                        class=" flex items-center justify-center text-lime-green-800 py-2 px-4 rounded "
                     >
                         <svg
                             v-if="saving"
@@ -116,10 +117,31 @@ export default {
     methods: {
         save: async function () {
             this.saving = true;
-            let markdown =
+            const markdown =
                 this.$refs.description.$refs.editor.$refs.mdEditor.invoke(
                     "getMarkdown"
-                );
+                ).trim();
+
+            if (markdown.length <= 0 && this.task.markdown_description.length <= 0) {
+                this.$toast.error('Description can not be empty')
+                this.saving = false;
+                this.changed = false;
+                return;
+            }
+
+            if (this.title.trim().length <= 0) {
+                this.$toast.error('Title can not be empty')
+                this.saving = false;
+                this.changed = false;
+                return;
+            }
+
+            if (!this.canSave) {
+                this.$toast.error('Some of the details are missing')
+                this.saving = false;
+                this.changed = false;
+                return;
+            }
 
             try {
                 await axios.put(
@@ -145,6 +167,12 @@ export default {
             e.preventDefault();
             e.returnValue = "";
         },
+    },
+    computed: {
+        canSave: function () {
+            // We can't check description in here right now, since $refs can't be accessed in computed properties.
+            return this.changed && this.title.trim().length > 0 && this.newEndsAt && this.newStartsAt
+        }
     },
     watch: {
         title: function (after, before) {

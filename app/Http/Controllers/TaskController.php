@@ -18,22 +18,22 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\Graph;
-use Domain\SourceControl\SourceControl;
-use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
-use Http\Client\Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class TaskController extends Controller
 {
-    public function show(Course $course, Task $task): View
+    public function show(Course $course, Task $task): RedirectResponse|View
     {
         abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
+        if (!$task->starts_at || !$task->ends_at) {
+            return redirect()->route('courses.tasks.admin.preferences', [$course->id, $task->id]);
+        }
+
         $project = $task->currentProjectForUser(auth()->user());
 
         return $this->showProject($course, $task, $project);
