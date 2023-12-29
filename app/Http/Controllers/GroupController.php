@@ -110,6 +110,8 @@ class GroupController extends Controller
 
     public function leave(Course $course, Group $group): string
     {
+        \Gate::authorize('group:leave', $group);
+
         $group->members()->detach(auth()->id());
 
         return "ok";

@@ -28,7 +28,7 @@
                         {{ group.canDelete.message }}
                     </tippy>
                     <button @click="showDeleteDialog = true" name="btnCanDelete"
-                            :class="[group.canDelete.allowed ? 'hover:bg-red-200 hover:text-red-800' : 'opacity-50']"
+                            :class="[group.canDelete.allowed ? 'hover:bg-red-200 hover:text-red-800' : 'opacity-50 cursor-not-allowed']"
                             class="mr-2 group flex items-center rounded-md bg-red-100 text-red-700 text-sm font-medium px-4 py-2">
 
                         <svg xmlns="http://www.w3.org/2000/svg" class="text-red-600 mr-2 h-4 w-4 h-4 w-4" fill="none"
@@ -38,12 +38,12 @@
                         </svg>
                         Delete
                     </button>
-                    <tippy to="btnCanLeave" placement="bottom"
+                    <tippy to="leaveGroup" placement="bottom"
                            v-if="!group.canLeave.allowed && group.canLeave.message != null">
                         {{ group.canLeave.message }}
                     </tippy>
-                    <button @click="showLeaveDialog = true" name="btnCanLeave"
-                            :class="[group.canLeave.allowed ? 'hover:bg-red-200 hover:text-red-800' : 'opacity-50']"
+                    <button @click="showLeaveDialog = true" name="leaveGroup"
+                            :class="[group.canLeave.allowed ? 'hover:bg-red-200 hover:text-red-800' : 'opacity-50 cursor-not-allowed']"
                             class="group flex items-center rounded-md bg-red-100 text-red-700 text-sm font-medium px-4 py-2">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="text-red-600 mr-2 h-4 w-4 h-4 w-4" fill="none"
@@ -64,7 +64,7 @@
                         }})</span></h2>
                     <div class="mt-2">
                         <member @remove="removeUserFromGroup(user)" :key="user.id" :is-you="user.isYou"
-                                :is-owner="user.is_owner"
+                                :is-owner="group.isOwner"
                                 :can-remove="group.isOwner" v-for="user in group.users" :name="user.name"></member>
                         <member @remove="removeInvitation(invitation)" :key="invitation.id" :can-remove="group.isOwner"
                                 v-for="invitation in group.invitations" :name="invitation.recipient.name"
