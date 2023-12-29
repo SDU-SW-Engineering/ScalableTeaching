@@ -632,30 +632,46 @@ class Task extends Model
      */
     private function newProject(User|Group|null $owner): Project
     {
-        $manager = app(GitLabManager::class);
-        $resultPager = new ResultPager($manager->connection());
-        $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
-        $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
-        $project = $projects->firstWhere('name', $projectName);
-        abort_unless($this->module_configuration->isEnabled(Template::class), 400, 'The template module is not enabled.');
 
-        $linkRepositoryModule = $this->module_configuration->resolveModule(LinkRepository::class);
-        /** @var LinkRepositorySettings $settings */
-        $settings = $linkRepositoryModule->settings();
-        if($project == null)
-            $project = $this->forkProject($manager, $projectName, (int)$settings->repo, $this->gitlab_group_id);
+        if ($this->isGitlabEnabled()) {
+            $manager = app(GitLabManager::class);
+            $resultPager = new ResultPager($manager->connection());
+            $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
+            $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
+            $project = $projects->firstWhere('name', $projectName);
 
-        /** @var Project $dbProject */
-        $dbProject = $owner == null ? $this->projects()->create([
-            'project_id' => $project['id'],
-            'repo_name'  => $project['name'],
-        ]) : $owner->projects()->updateOrCreate([
-            'project_id' => $project['id'],
-            'task_id'    => $this->id,
-            'repo_name'  => $project['name'],
-        ]);
+            abort_unless($this->module_configuration->isEnabled(Template::class), 400, 'The template module is not enabled.');
+            $linkRepositoryModule = $this->module_configuration->resolveModule(LinkRepository::class);
+            /** @var LinkRepositorySettings $settings */
+            $settings = $linkRepositoryModule->settings();
+            if ($project == null) {
+                $linkedRepositoryParts = explode('/', $settings->repo);
+                $projectId = (int)$linkedRepositoryParts[sizeof($linkedRepositoryParts) - 1]; // Get the last part, which is the Gitlab project id.
+                $project = $this->forkProject($manager, $projectName, $projectId, $this->gitlab_group_id);
+            }
+
+            /** @var Project $dbProject */
+            $dbProject = $owner == null ? $this->projects()->create([
+                'gitlab_project_id' => $project['id'],
+                'repo_name'  => $project['name'],
+            ]) : $owner->projects()->updateOrCreate([
+                'gitlab_project_id' => $project['id'],
+                'task_id'    => $this->id,
+                'repo_name'  => $project['name'],
+            ]);
+        } else {
+            $dbProject = $owner->projects()->updateOrCreate([
+                'task_id'   => $this->id
+            ]);
+        }
+
+
 
         return $dbProject;
+    }
+
+    public function isGitlabEnabled(): bool {
+        return $this->module_configuration->isEnabled(LinkRepository::class);
     }
 
     /**
@@ -674,7 +690,6 @@ class Task extends Model
             'namespace_id'           => $groupId,
             'shared_runners_enabled' => false,
         ];
-
         $id = rawurlencode((string)$sourceProjectId);
         $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
 
