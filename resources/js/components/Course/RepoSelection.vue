@@ -66,11 +66,17 @@ export default {
     },
     methods: {
         async fetchOptions(q) {
-
-            const response = await fetch(`/api/user/repositories?q=${q}`, {
-                headers: 'Content-Type: application/json'
-            });
-            return {results: await response.json()};
+            try {
+                const headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                const response = await fetch(`/api/user/repositories?q=${q}`, {
+                    headers
+                });
+                return {results: await response.json()};
+            } catch (e) {
+                console.error("Something unexpected happened", e)
+                return {results: []}
+            }
         }
     },
     mounted() {
