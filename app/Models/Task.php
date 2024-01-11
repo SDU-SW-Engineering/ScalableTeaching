@@ -654,10 +654,10 @@ class Task extends Model
 
             /** @var Project $dbProject */
             $dbProject = $owner == null ? $this->projects()->create([
-                'project_id' => $project['id'],
+                'project_id'        => $project['id'],
                 'repo_name'         => $project['name'],
             ]) : $owner->projects()->updateOrCreate([
-                'project_id' => $project['id'],
+                'project_id'        => $project['id'],
                 'task_id'           => $this->id,
                 'repo_name'         => $project['name'],
             ]);
