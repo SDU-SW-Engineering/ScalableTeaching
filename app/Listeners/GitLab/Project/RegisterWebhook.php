@@ -37,7 +37,8 @@ class RegisterWebhook implements ShouldQueue
      */
     public function handle(ProjectCreated $event)
     {
-        if (!$event->project->task->isGitlabEnabled()) {
+        if ( ! $event->project->task->isGitlabEnabled())
+        {
             return;
         }
 

@@ -56,7 +56,7 @@ class OverviewController extends Controller
 
         // Create a Gitlab sub-group for each task.
         $gitlabGroup = $sourceControl->createGroup($validated['name'], [
-            "parent_id" => $course->gitlab_group_id
+            "parent_id" => $course->gitlab_group_id,
         ]);
 
 

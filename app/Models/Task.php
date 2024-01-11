@@ -633,7 +633,8 @@ class Task extends Model
     private function newProject(User|Group|null $owner): Project
     {
 
-        if ($this->isGitlabEnabled()) {
+        if ($this->isGitlabEnabled())
+        {
             $manager = app(GitLabManager::class);
             $resultPager = new ResultPager($manager->connection());
             $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
@@ -644,7 +645,8 @@ class Task extends Model
             $linkRepositoryModule = $this->module_configuration->resolveModule(LinkRepository::class);
             /** @var LinkRepositorySettings $settings */
             $settings = $linkRepositoryModule->settings();
-            if ($project == null) {
+            if ($project == null)
+            {
                 $linkedRepositoryParts = explode('/', $settings->repo);
                 $projectId = (int)$linkedRepositoryParts[sizeof($linkedRepositoryParts) - 1]; // Get the last part, which is the Gitlab project id.
                 $project = $this->forkProject($manager, $projectName, $projectId, $this->gitlab_group_id);
@@ -653,15 +655,16 @@ class Task extends Model
             /** @var Project $dbProject */
             $dbProject = $owner == null ? $this->projects()->create([
                 'gitlab_project_id' => $project['id'],
-                'repo_name'  => $project['name'],
+                'repo_name'         => $project['name'],
             ]) : $owner->projects()->updateOrCreate([
                 'gitlab_project_id' => $project['id'],
-                'task_id'    => $this->id,
-                'repo_name'  => $project['name'],
+                'task_id'           => $this->id,
+                'repo_name'         => $project['name'],
             ]);
-        } else {
+        } else
+        {
             $dbProject = $owner->projects()->updateOrCreate([
-                'task_id'   => $this->id
+                'task_id'   => $this->id,
             ]);
         }
 
@@ -670,7 +673,8 @@ class Task extends Model
         return $dbProject;
     }
 
-    public function isGitlabEnabled(): bool {
+    public function isGitlabEnabled(): bool
+    {
         return $this->module_configuration->isEnabled(LinkRepository::class);
     }
 

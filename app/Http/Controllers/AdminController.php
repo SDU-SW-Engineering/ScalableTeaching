@@ -12,6 +12,7 @@ class AdminController extends Controller
     {
         $this->middleware(function(Request $request, Closure $next) {
             abort_unless($request->user()->is_sys_admin, 403);
+
             return $next($request);
         });
     }
@@ -19,13 +20,14 @@ class AdminController extends Controller
     public function index()
     {
         $professors = User::where('is_admin', true)->orderBy('name')->get();
+
         return view('admin.index')->with('professors', $professors);
     }
 
     public function addProfessor(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email']
+            'email' => ['required', 'email'],
         ]);
 
         $user = User::firstWhere('email', $request->get('email'));
@@ -49,7 +51,7 @@ class AdminController extends Controller
 
     public function togglePromotion(Request $request, User $user)
     {
-        $user->is_sys_admin = !$user->is_sys_admin;
+        $user->is_sys_admin = ! $user->is_sys_admin;
         $user->save();
 
         return redirect()->back();

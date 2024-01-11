@@ -61,7 +61,7 @@ class GroupInformation extends JsonResource
             'leaveRoute'  => route('courses.groups.leave', [$group->course_id, $group->id]),
             'canDelete'   => Gate::inspect('delete', $group)->toArray(),
             'canLeave'    => Gate::inspect('group:leave', $group)->toArray(),
-            'isOwner'     => $owner->id == auth()->id()
+            'isOwner'     => $owner->id == auth()->id(),
         ];
     }
 }

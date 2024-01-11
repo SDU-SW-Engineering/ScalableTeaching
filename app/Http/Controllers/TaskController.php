@@ -30,7 +30,8 @@ class TaskController extends Controller
     public function show(Course $course, Task $task): RedirectResponse|View
     {
         abort_if( ! $task->is_visible && auth()->user()->cannot('manage', $course), 401);
-        if (!$task->starts_at || !$task->ends_at) {
+        if ( ! $task->starts_at || ! $task->ends_at)
+        {
             return redirect()->route('courses.tasks.admin.preferences', [$course->id, $task->id]);
         }
 

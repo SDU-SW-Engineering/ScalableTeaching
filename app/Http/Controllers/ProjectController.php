@@ -230,7 +230,8 @@ class ProjectController extends Controller
                 $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
 
                 foreach($filesChanged as $file) // @phpstan-ignore-line
-                {$pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
+                {
+                $pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
                     if($pathMatches)
                     {
 

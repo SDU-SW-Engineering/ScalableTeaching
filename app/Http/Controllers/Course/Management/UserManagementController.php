@@ -59,8 +59,10 @@ class UserManagementController extends Controller
 
 
 
-        if (auth()->id() === $validated['user']) {
+        if (auth()->id() === $validated['user'])
+        {
             flash()->addError("You are not allowed to kick yourself!");
+
             return redirect()->back();
         }
 
