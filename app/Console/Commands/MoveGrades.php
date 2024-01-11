@@ -59,8 +59,7 @@ class MoveGrades extends Command
                     'value'       => match ($project->status)
                     {
                         ProjectStatus::Overdue  => 'failed',
-                        ProjectStatus::Finished => 'passed',
-                        default                 => throw new Exception("Unexpected match value")
+                        ProjectStatus::Finished => 'passed'
                     },
                 ]);
             }

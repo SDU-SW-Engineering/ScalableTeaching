@@ -48,7 +48,7 @@ Additionally, if you want to populate it with dummy data, add `--seed` to the co
 
 To enhance the developer workflow, this repository includes various tools to ensure a high quality of code.
 Specifically:
-- `php-cs-fixer` that ensures a consistent code style. Install php-cs-fixer globally by running `composer global require friendsofphp/php-cs-fixer`, after which you can run `./vendor/friendsofphp/php-cs-fixer fix` within the root of this project to fix issues.
+- `php-cs-fixer` that ensures a consistent code style. Install php-cs-fixer globally by running `composer global require friendsofphp/php-cs-fixer`, after which you can run `./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix` within the root of this project to fix issues.
 - `larastan` that runs a suite of static analyses. You may check your code for pitfalls using the `php vendor/bin/phpstan` 
 
 

@@ -120,7 +120,7 @@ class GroupController extends Controller
     public function deleteInvite(Course $course, Group $group, GroupInvitation $groupInvitation): string
     {
         $actor = $group->members->find(auth()->id());
-        if ( ! $actor->pivot->is_owner)
+        if ( ! $actor->getRelationValue('pivot')->is_owner)
         {
             abort(403);
         }

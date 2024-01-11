@@ -69,7 +69,7 @@ class ProjectController extends Controller
     {
         abort_unless($project->status == ProjectStatus::Active, 400);
         \DB::transaction(function() use ($gitLabManager, $project) {
-            $found = $project->gitlab_project_id != null;
+            $found = $project->project_id != null;
             try
             {
                 $gitLabManager->projects()->show($project->project_id);

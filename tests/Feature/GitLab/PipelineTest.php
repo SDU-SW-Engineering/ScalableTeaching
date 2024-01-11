@@ -286,6 +286,6 @@ it('ensures failing pipelines can be updated to a succeeding', function() {
     sendSucceedingPipeline();
 
     $pipeline->refresh();
-    expect($pipeline->project->status)->toBe(ProjectStatus::Active);
-    expect($pipeline->status)->toBe(PipelineStatusEnum::Success);
+    expect($pipeline->project->status)->toEqual(ProjectStatus::Active);
+    expect($pipeline->status)->toEqual(PipelineStatusEnum::Success);
 });
