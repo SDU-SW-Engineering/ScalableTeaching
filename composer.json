@@ -40,12 +40,14 @@
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
         "itsgoingd/clockwork": "^5.1",
+        "larastan/larastan": "^2.0",
         "laravel/dusk": "^7.1",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.2",
         "nunomaduro/collision": "^6.1",
         "nunomaduro/larastan": "^2.1",
         "pestphp/pest-plugin-laravel": "^1.2",
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.3.3",
         "spatie/laravel-ignition": "^1.0"
     },
