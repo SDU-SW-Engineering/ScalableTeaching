@@ -70,6 +70,9 @@ Run `php artisan serve` to start the laravel application.
 #### Formatter 
 Run `yarn formatter-server` to start the formatter server, which is required for formatting markdown descriptions.
 
+#### Database
+Start the development database
+
 
 ### FAQ
 
