@@ -16,7 +16,7 @@ jobs:
         ports:
           - 3306:3306
     steps:
-      - uses: shivammathur/setup-php@2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
       - uses: actions/checkout@v2
@@ -51,7 +51,7 @@ jobs:
     name: Static analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: shivammathur/setup-php@2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
       - uses: actions/checkout@v2
