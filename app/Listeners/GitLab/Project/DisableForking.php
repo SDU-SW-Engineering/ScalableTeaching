@@ -41,11 +41,11 @@ class DisableForking implements ShouldQueue
 
         $gitLabManager = app(GitLabManager::class);
 
-        $project = $gitLabManager->projects()->show($event->project->gitlab_project_id);
+        $project = $gitLabManager->projects()->show($event->project->project_id);
         if($project['import_error'] != null || $project['import_status'] != 'finished')
             throw new Exception("Import not fully done yet.");
 
-        $gitLabManager->projects()->update($event->project->gitlab_project_id, [
+        $gitLabManager->projects()->update($event->project->project_id, [
             'forking_access_level' => 'disabled',
         ]);
     }

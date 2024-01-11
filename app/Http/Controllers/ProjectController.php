@@ -72,15 +72,14 @@ class ProjectController extends Controller
             $found = $project->gitlab_project_id != null;
             try
             {
-                // Be aware if passed in value is null, then it will return all projects and therefore not throwing.
-                $gitLabManager->projects()->show($project->gitlab_project_id);
+                $gitLabManager->projects()->show($project->project_id);
             } catch(RuntimeException $runtimeException)
             {
                 $found = $runtimeException->getCode() != 404;
             }
 
             if($found)
-                $gitLabManager->projects()->remove($project->gitlab_project_id);
+                $gitLabManager->projects()->remove($project->project_id);
 
 
             $project->delete();
@@ -120,7 +119,7 @@ class ProjectController extends Controller
         abort_if($sha == null, 404);
 
         return response()->streamDownload(function() use ($sha, $project, $gitLabManager) {
-            echo $gitLabManager->repositories()->archive($project->gitlab_project_id, [
+            echo $gitLabManager->repositories()->archive($project->project_id, [
                 'sha' => $sha,
             ], 'zip');
         }, "$project->repo_name.zip");
@@ -141,7 +140,7 @@ class ProjectController extends Controller
         {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
-                ->setIds(["gid://gitlab/Project/$project->gitlab_project_id"])
+                ->setIds(["gid://gitlab/Project/$project->project_id"])
                 ->setFirst(1))
                 ->selectNodes()
                 ->selectRepository()

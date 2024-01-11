@@ -49,7 +49,7 @@ class ProtectedFilesUntouched implements SubmissionValidation
     {
         $files = $protectedFiles->map(fn(TaskProtectedFile $taskProtectedFile) => $taskProtectedFile->path);
         $directoryCollection = DirectoryCollection::fromFiles($files);
-        app(SourceControl::class)->getFilesFromDirectories("$project->gitlab_project_id", $directoryCollection);
+        app(SourceControl::class)->getFilesFromDirectories("$project->project_id", $directoryCollection);
 
         return $directoryCollection;
     }

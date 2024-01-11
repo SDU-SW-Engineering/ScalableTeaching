@@ -28,7 +28,7 @@ use Illuminate\Support\Collection;
  * App\Models\Project
  *
  * @property int $id
- * @property int|null $gitlab_project_id
+ * @property int $project_id
  * @property int $task_id
  * @property string $repo_name
  * @property ProjectStatus $status
@@ -246,7 +246,7 @@ class Project extends Model
 
     public static function token(Project|int $project): string
     {
-        return md5(strtolower($project instanceof Project ? "$project->gitlab_project_id" : $project) . config('scalable.webhook_secret'));
+        return md5(strtolower($project instanceof Project ? "$project->project_id" : $project) . config('scalable.webhook_secret'));
     }
 
     public function progress(): int
@@ -348,7 +348,7 @@ class Project extends Model
     {
         $sourceControl = app(SourceControl::class);
 
-        return $sourceControl->showProject((string)$this->gitlab_project_id);
+        return $sourceControl->showProject((string)$this->project_id);
     }
 
     public function validateSubmission(): bool

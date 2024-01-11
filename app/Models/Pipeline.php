@@ -142,7 +142,7 @@ class Pipeline extends Model
 
             return;
         }
-        $pipeline = $sourceControl->getPipeline($this->project->gitlab_project_id, $this->pipeline_id);
+        $pipeline = $sourceControl->getPipeline($this->project->project_id, $this->pipeline_id);
         if($pipeline == null || $this->project->status == ProjectStatus::Finished)
         {
             // pipeline no longer exists -> failed
@@ -150,7 +150,7 @@ class Pipeline extends Model
 
             return;
         }
-        $jobs = $sourceControl->getPipelineJobs($this->project->gitlab_project_id, $this->pipeline_id);
+        $jobs = $sourceControl->getPipelineJobs($this->project->project_id, $this->pipeline_id);
         $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
         $succeedingBuilds = array_filter($jobs, fn(Job $job) => $tracking->contains($job->name) && $job->status == 'success');
         $this->process(

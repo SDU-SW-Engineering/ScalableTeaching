@@ -295,7 +295,7 @@ test('static isCorrectToken returns true if token matches the project', function
     Config::set('scalable.webhook_secret', $secret);
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
-    expect(Project::isCorrectToken($project, md5(strtolower($project->gitlab_project_id) . $secret)))->toBeTrue();
+    expect(Project::isCorrectToken($project, md5(strtolower($project->project_id) . $secret)))->toBeTrue();
 });
 
 test('static isCorrectToken returns false if token does not match the project', function() {
@@ -312,7 +312,7 @@ test('static token returns the passed projects token', function() {
     Config::set('scalable.webhook_secret', $secret);
     $project = Project::factory()->for(Task::factory(['ends_at' => Carbon::now()->addMonth()])->for(Course::factory()))->createQuietly();
 
-    expect(Project::token($project))->toBe(md5(strtolower($project->gitlab_project_id) . $secret));
+    expect(Project::token($project))->toBe(md5(strtolower($project->project_id) . $secret));
     expect(Project::token(11))->toBe(md5(11 . $secret));
 });
 

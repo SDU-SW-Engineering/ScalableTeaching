@@ -51,7 +51,7 @@ class LoadCurrentProjects extends Command
         $task = Task::findOrFail($this->ask('What task does the projects belong to'));
         $this->withProgressBar($projects, function ($project) use ($task) {
             $task->projects()->updateOrCreate([
-                'gitlab_project_id' => $project['id'],
+                'project_id' => $project['id'],
             ], [
                 'repo_name'  => $project['name'],
                 'created_at' => Carbon::parse($project['created_at'])->setTimezone(config('app.timezone')),
