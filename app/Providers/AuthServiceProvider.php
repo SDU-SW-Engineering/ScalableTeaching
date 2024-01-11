@@ -37,16 +37,9 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::define('group:leave', function (User $user, Group $group) {
 
-           if ($group->members->count() > 1)
+           if ($group->members->count() == 1)
            {
                return Response::deny("You can not leave a group of 1");
-           }
-
-           if ($group->members->get($group->members->search(function (User $groupUser) use ($user) {
-               return $groupUser->pivot->is_owner && $groupUser->id == $user->id;
-           })))
-           {
-               return Response::deny("You can not leave as the owner of the group.");
            }
 
            return Response::allow();
