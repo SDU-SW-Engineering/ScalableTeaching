@@ -75,7 +75,7 @@ class Task extends Model
     use HasFactory;
 
     protected $fillable = [
-        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order', 'source_project_id',
+        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order',
         'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required',
         'current_sha',
     ];

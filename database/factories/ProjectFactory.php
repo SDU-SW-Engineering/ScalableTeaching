@@ -16,10 +16,10 @@ class ProjectFactory extends Factory
     public function definition()
     {
         return [
-            'task_id'         => '',
-            'project_id'      => $this->faker->randomNumber(),
-            'repo_name'       => $this->faker->bothify("?????##"),
-            'status'          => ProjectStatus::Active,
+            'task_id'                => '',
+            'gitlab_project_id'      => $this->faker->randomNumber(),
+            'repo_name'              => $this->faker->bothify("?????##"),
+            'status'                 => ProjectStatus::Active,
         ];
     }
 

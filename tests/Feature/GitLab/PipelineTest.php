@@ -45,7 +45,7 @@ function sendPendingPipeline(): Pipeline
         'X-Gitlab-Token' => Project::token(test()->project),
     ]);
 
-    $project = Project::firstWhere('project_id', test()->pipelinePendingRequest['project']['id']);
+    $project = Project::firstWhere('gitlab_project_id', test()->pipelinePendingRequest['project']['id']);
 
     return $project->pipelines()->first();
 }
@@ -57,7 +57,7 @@ function sendRunningPipeline(): Pipeline
         'X-Gitlab-Token' => Project::token(test()->project),
     ]);
 
-    $project = Project::firstWhere('project_id', test()->pipelineRunningRequest['project']['id']);
+    $project = Project::firstWhere('gitlab_project_id', test()->pipelineRunningRequest['project']['id']);
 
     return $project->pipelines()->first();
 }
@@ -69,7 +69,7 @@ function sendFailedPipeline(): ?Pipeline
         'X-Gitlab-Token' => Project::token(test()->project),
     ]);
 
-    $project = Project::firstWhere('project_id', test()->pipelineFailedRequest['project']['id']);
+    $project = Project::firstWhere('gitlab_project_id', test()->pipelineFailedRequest['project']['id']);
 
     return $project->pipelines()->first();
 }
@@ -81,7 +81,7 @@ function sendSucceedingPipeline(): Pipeline
         'X-Gitlab-Token' => Project::token(test()->project),
     ]);
 
-    $project = Project::firstWhere('project_id', test()->pipelineSucceedingRequest['project']['id']);
+    $project = Project::firstWhere('gitlab_project_id', test()->pipelineSucceedingRequest['project']['id']);
 
     return $project->pipelines()->first();
 }

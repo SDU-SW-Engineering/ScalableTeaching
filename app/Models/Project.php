@@ -87,7 +87,7 @@ class Project extends Model
     protected $hidden = ['final_commit_sha'];
 
     protected $fillable = [
-        'project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
+        'gitlab_project_id', 'task_id', 'repo_name', 'status', 'ownable_type', 'ownable_id',
         'final_commit_sha', 'created_at', 'finished_at', 'validation_errors', 'validated_at', 'hook_id',
     ];
 

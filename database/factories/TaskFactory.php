@@ -54,12 +54,4 @@ class TaskFactory extends Factory
         });
     }
 
-    public function selfCorrection()
-    {
-        return $this->state(function(array $attributes) {
-            return [
-                'correction_type' => CorrectionType::Self,
-            ];
-        });
-    }
 }
