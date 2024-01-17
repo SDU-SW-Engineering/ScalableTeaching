@@ -28,13 +28,13 @@ beforeEach(function() {
         'ends_at'         => Carbon::create(2022, 2, 3),
     ])->for(Course::factory()))->createQuietly();
     $this->pipelinePendingRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline1.json')), true);
-    $this->pipelinePendingRequest['project']['id'] = $this->project->project_id;
+    $this->pipelinePendingRequest['project']['id'] = $this->project->gitlab_project_id;
     $this->pipelineRunningRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline2.json')), true);
-    $this->pipelineRunningRequest['project']['id'] = $this->project->project_id;
+    $this->pipelineRunningRequest['project']['id'] = $this->project->gitlab_project_id;
     $this->pipelineFailedRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline3.json')), true);
-    $this->pipelineFailedRequest['project']['id'] = $this->project->project_id;
+    $this->pipelineFailedRequest['project']['id'] = $this->project->gitlab_project_id;
     $this->pipelineSucceedingRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline4.json')), true);
-    $this->pipelineSucceedingRequest['project']['id'] = $this->project->project_id;
+    $this->pipelineSucceedingRequest['project']['id'] = $this->project->gitlab_project_id;
 });
 
 

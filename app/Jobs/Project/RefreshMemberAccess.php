@@ -54,14 +54,14 @@ class RefreshMemberAccess implements ShouldQueue
         })->reject(function($gitlabId) {
             return $gitlabId == null;
         });
-        $currentMembers = (new Collection($gitLabManager->projects()->members($this->project->project_id)))->pluck('id');
+        $currentMembers = (new Collection($gitLabManager->projects()->members($this->project->gitlab_project_id)))->pluck('id');
         $add = $supposedMembers->diff($currentMembers);
         $remove = $currentMembers->diff($supposedMembers);
         $this->addUsersToGitlab($this->project, $add);
         $remove->each(function($gitlabUserId) use ($gitLabManager) {
             try
             {
-                $gitLabManager->projects()->removeMember($this->project->project_id, $gitlabUserId);
+                $gitLabManager->projects()->removeMember($this->project->gitlab_project_id, $gitlabUserId);
             } catch(\Exception $ignored)
             {
 
@@ -82,7 +82,7 @@ class RefreshMemberAccess implements ShouldQueue
             $gitLabManager = app(GitLabManager::class);
             try
             {
-                $gitLabManager->projects()->addMember($project->project_id, $gitlabId, 30);
+                $gitLabManager->projects()->addMember($project->gitlab_project_id, $gitlabId, 30);
             } catch(\Exception $e)
             {
                 $message = strtolower($e->getMessage());
