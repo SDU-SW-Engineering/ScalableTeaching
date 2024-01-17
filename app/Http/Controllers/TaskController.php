@@ -99,6 +99,7 @@ class TaskController extends Controller
         return view('tasks.show', [
             'course'          => $course,
             'task'            => $task->setHidden(['markdown_description']),
+            'isMarkAsDone'    => $task->isTextTask(),
             'bg'              => 'bg-gray-50 dark:bg-gray-600',
             'project'         => $project,
             'subTasks'        => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks, CorrectionType::Manual])
