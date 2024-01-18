@@ -3,14 +3,12 @@
 namespace App\Models;
 
 use App\Events\ProjectCreated;
-use App\Models\Casts\SubTask;
 use App\Models\Enums\CorrectionType;
-use App\Models\Enums\TaskDelegationType;
 use App\ProjectStatus;
 use App\Tasks\Validation\ProtectedFilesUntouched;
 use Carbon\Carbon;
-use Domain\GitLab\Definitions\Build;
 use Domain\SourceControl\SourceControl;
+use Eloquent;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -70,6 +68,7 @@ use Illuminate\Support\Collection;
  * @property EloquentCollection<ProjectSubTaskComment> $subTaskComments
  * @property ProjectDownload $download
  * @property-read string $ownerNames
+ * @mixin Eloquent
  */
 class Project extends Model
 {

@@ -99,7 +99,8 @@ class TaskController extends Controller
         return view('tasks.show', [
             'course'          => $course,
             'task'            => $task->setHidden(['markdown_description']),
-            'isMarkAsDone'    => $task->isTextTask(),
+            'canMarkAsComplete'    => $task->isTextTask(),
+            'isCodeTask'      => $task->isCodeTask(),
             'bg'              => 'bg-gray-50 dark:bg-gray-600',
             'project'         => $project,
             'subTasks'        => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks, CorrectionType::Manual])
@@ -209,7 +210,7 @@ class TaskController extends Controller
 
     public function markComplete(Course $course, Task $task): string|Response
     {
-        if($task->correction_type != CorrectionType::Self)
+        if( ! $task->isTextTask())
             return response('Bad request', 400);
         if(Grade::where(['task_id' => $task->id, 'user_id' => auth()->id()])->exists())
             return response('Bad request', 400);

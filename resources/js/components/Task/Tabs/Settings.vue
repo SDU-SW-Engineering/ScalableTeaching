@@ -4,7 +4,7 @@
             class="bg-white p-4 rounded-md shadow-md dark:bg-gray-800">
             <h2 class="dark:text-white font-semibold text-2xl">Settings</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div v-if="project.ownable_type === 'App\\Models\\Group'">
+                <div v-if="project.ownable_type === 'App\\Models\\Group' && this.isCodeTask">
                     <div class="border-2 rounded-xl p-4 mt-6 border-lime-green-400 relative">
                         <h3 class="absolute text-lime-green-400 -my-8 -ml-2 bg-white dark:bg-gray-800 px-2">Repository
                             Access</h3>
@@ -33,7 +33,7 @@
                             reset.</p>
                     </div>
                 </div>
-                <div v-if="project.ownable_type === 'App\\Models\\User'">
+                <div v-if="project.ownable_type === 'App\\Models\\User' && this.isCodeTask">
                     <div class="border-2 rounded-xl p-4 mt-6 border-lime-green-400 relative">
                         <h3 class="absolute text-lime-green-400 -my-8 -ml-2 bg-white dark:bg-gray-800 px-2">Migrate to
                             group</h3>
@@ -71,12 +71,12 @@
 </template>
 
 <script>
-import Alert from "./Alert";
-import GroupBox from "./GroupBox";
+import Alert from "../../Alert";
+import GroupBox from "../../GroupBox";
 
 export default {
     components: {GroupBox, Alert},
-    props: ['project', 'groups'],
+    props: ['project', 'groups', 'isCodeTask'],
     data: function () {
         return {
             showResetWarning: false,
@@ -102,6 +102,9 @@ export default {
             })
             location.reload();
         }
+    },
+    mounted() {
+        console.log(this.project.ownable_type === "App\\Models\\Group")
     }
 }
 </script>

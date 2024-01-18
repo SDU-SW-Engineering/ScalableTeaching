@@ -19,7 +19,7 @@
                     <select v-model="startAs" id="countries"
                             class="bg-gray-100 dark:bg-gray-600 border-gray-300 text-gray-900 dark:text-gray-200 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         <option value="solo" v-text="userName"></option>
-                        <option :key="id" :value="id" v-for="(group, id) in groups"
+                        <option :key="id" :value="id" v-for="(group, id) in groups" v-if="!this.canMarkAsComplete"
                                 v-text="group"></option>
                     </select>
                 </div>
@@ -43,7 +43,7 @@
 
 <script>
 export default {
-    props: ['startingAssignment', 'errorMessage', 'groups', 'userName'],
+    props: ['startingAssignment', 'errorMessage', 'groups', 'userName', 'canMarkAsComplete'],
     data() {
         return {
             startAs: "solo"

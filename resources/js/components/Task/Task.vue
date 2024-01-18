@@ -159,7 +159,7 @@
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
                 </div>
                 <div v-show="tab === 'settings'">
-                    <settings :groups="groups" :project="project" v-if="project != null"></settings>
+                    <settings :groups="groups" :project="project" :is-code-task="this.isCodeTask" v-if="project != null"></settings>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">
@@ -177,6 +177,7 @@
 
                     <not-started :errorMessage.sync="errorMessage" @startAssignment="startAssignment"
                                  :starting-assignment="startingAssignment" :groups="groups" :user-name="userName"
+                                 :can-mark-as-complete="this.canMarkAsComplete"
                                  v-if="(hideMissingAssignmentWarning || tab !== 'description') && project == null && !progress.ended"></not-started>
                     <started :project="project" :progress="progress"
                              v-else-if="project != null && project.status === 'active' && !progress.ended"></started>
@@ -187,7 +188,7 @@
                     <overdue v-else-if="project != null && project.isMissed"></overdue>
                 </div>
                 <go-to-repo v-if="task.source_project_id != null && task.type === 'exercise'" :url="'https://gitlab.sdu.dk/projects/' + task.source_project_id"/>
-                <mark-completed v-if="task.correction_type === 'self'" :csrf="this.csrf" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
+                <mark-completed v-if="this.canMarkAsComplete" :csrf="this.csrf" :grade="this.grade" :course-id="this.task.course_id" :task-id="this.task.id"></mark-completed>
                 <div v-if="false" class="bg-white shadow-lg p-4 rounded-md mt-8 dark:bg-gray-800">
                     <h3 class="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-3">Builds</h3>
                     <div>
@@ -205,23 +206,23 @@
 </template>
 
 <script>
-import LineChart from "./LineChart";
-import BuildTable from "./BuildTable";
-import Settings from "./Settings";
-import NotStarted from "./Widgets/NotStarted";
-import Started from "./Widgets/Started";
-import Completed from "./Widgets/Completed";
-import Overdue from "./Widgets/Overdue";
-import Alert from "./Alert";
-import BarChart from "./BarChart";
-import Warning from "./Widgets/Warning";
-import SubTasks from "./SubTasks";
-import PartOfTrack from "./Widgets/PartOfTrack";
-import Waiting from "./Widgets/Waiting";
-import Survey from "./Task/Tabs/Survey";
-import MarkCompleted from "./Widgets/MarkCompleted";
-import ValidationFailed from "./Widgets/ValidationFailed.vue";
-import GoToRepo from "./Widgets/GoToRepo.vue";
+import LineChart from "../LineChart";
+import BuildTable from "./Tabs/BuildTable";
+import Settings from "./Tabs/Settings";
+import NotStarted from "../Widgets/NotStarted";
+import Started from "../Widgets/Started";
+import Completed from "../Widgets/Completed";
+import Overdue from "../Widgets/Overdue";
+import Alert from "../Alert";
+import BarChart from "../BarChart";
+import Warning from "../Widgets/Warning";
+import SubTasks from "./Tabs/SubTasks";
+import PartOfTrack from "../Widgets/PartOfTrack";
+import Waiting from "../Widgets/Waiting";
+import Survey from "./Tabs/Survey";
+import MarkCompleted from "../Widgets/MarkCompleted";
+import ValidationFailed from "../Widgets/ValidationFailed.vue";
+import GoToRepo from "../Widgets/GoToRepo.vue";
 
 export default {
     components: {
@@ -233,7 +234,7 @@ export default {
         SubTasks,
         Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert, Waiting
     },
-    props: ['editRoute', 'task', 'grade', 'survey', 'pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks', 'codeRoute'],
+    props: ['editRoute', 'task', 'grade', 'survey', 'pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks', 'codeRoute', 'canMarkAsComplete', 'isCodeTask'],
     methods: {
         startAssignment: async function (startAs) {
             let createAs = startAs == null ? this.startAs : startAs;

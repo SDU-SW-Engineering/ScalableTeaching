@@ -84,7 +84,7 @@ class WebhookController extends Controller
     private function push(): string
     {
         /** @var Project $project */
-        $project = Project::firstWhere('project_id', request('project.id'));
+        $project = Project::firstWhere('gitlab_project_id', request('project.id'));
         abort_if($project == null, 404);
         $project->pushes()->create([
             'before_sha' => request('before'),
