@@ -17,7 +17,10 @@
         <div class="flex items-center">
             <role-dropdown @new-role="newRole" :user-id="userInfo.id" :roles="availableRoles" :route="roleRoute"
                            :current-role="userInfo.role"></role-dropdown>
-            <a :href="activityRoute + '?user=' + userInfo.id"
+            <tippy :to="'seeActivity' + userInfo.id" placement="bottom">
+                See activity
+            </tippy>
+            <a :href="activityRoute + '?user=' + userInfo.id" :name="'seeActivity' + userInfo.id"
                class="justify-between flex transition-colors duration-200 focus:ring-4 focus:outline-none
                 bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 focus:ring-gray-300 dark:focus:ring-gray-600 text-gray-500 dark:text-gray-200
                 border dark:border-gray-700 font-medium text-sm px-4 py-2.5 text-center inline-flex items-center"
@@ -30,17 +33,21 @@
                         d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/>
                 </svg>
             </a>
-            <button @click="kick(userInfo)"
-                    class="justify-between flex transition-colors duration-200 focus:ring-4 focus:outline-none
-                bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500  rounded-r-lg  focus:ring-gray-300 dark:focus:ring-gray-600 text-gray-500 dark:text-gray-200
-                border dark:border-gray-700 font-medium text-sm px-4 py-2.5 text-center inline-flex items-center"
-                    type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                    <path fill-rule="evenodd"
-                          d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5V15a.75.75 0 011.5 0v3.75a3 3 0 01-3 3h-6a3 3 0 01-3-3V5.25a3 3 0 013-3h6a3 3 0 013 3V9A.75.75 0 0115 9V5.25a1.5 1.5 0 00-1.5-1.5h-6zm10.72 4.72a.75.75 0 011.06 0l3 3a.75.75 0 010 1.06l-3 3a.75.75 0 11-1.06-1.06l1.72-1.72H9a.75.75 0 010-1.5h10.94l-1.72-1.72a.75.75 0 010-1.06z"
-                          clip-rule="evenodd"/>
-                </svg>
-            </button>
+            <tippy to="kick" placement="bottom" v-if="!isSelf">
+                Kick
+            </tippy>
+                <button @click="kick(userInfo)" name="kick" :disabled="isSelf"
+                        :class="{'hover:bg-gray-50 dark:hover:bg-gray-500': !isSelf, 'cursor-not-allowed': isSelf}"
+                        class="justify-between flex transition-colors duration-200 focus:ring-4 focus:outline-none
+                    bg-white dark:bg-gray-600 rounded-r-lg  focus:ring-gray-300 dark:focus:ring-gray-600 text-gray-500 dark:text-gray-200
+                    border dark:border-gray-700 font-medium text-sm px-4 py-2.5 text-center inline-flex items-center"
+                        type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                        <path fill-rule="evenodd"
+                              d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5V15a.75.75 0 011.5 0v3.75a3 3 0 01-3 3h-6a3 3 0 01-3-3V5.25a3 3 0 013-3h6a3 3 0 013 3V9A.75.75 0 0115 9V5.25a1.5 1.5 0 00-1.5-1.5h-6zm10.72 4.72a.75.75 0 011.06 0l3 3a.75.75 0 010 1.06l-3 3a.75.75 0 11-1.06-1.06l1.72-1.72H9a.75.75 0 010-1.5h10.94l-1.72-1.72a.75.75 0 010-1.06z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                </button>
         </div>
     </div>
 </template>
@@ -51,6 +58,13 @@ import RoleDropdown from "./RoleDropdown";
 export default {
     components: {RoleDropdown},
     props: {
+        /**
+         * Whether this enrolled member represents the logged-in account
+         */
+        isSelf: {
+          type: Boolean,
+          required: true
+        },
         member: {
             type: Object,
             required: true
@@ -77,7 +91,7 @@ export default {
             this.member.role = roleId;
         },
         kick: async function (user) {
-            if (confirm("Are you sure you wan't to kick " + user.name + " from the course?") !== true)
+            if (confirm("Are you sure you want to kick " + user.name + " from the course?") !== true)
                 return;
             await axios.delete(this.kickRoute, {
                 data: {

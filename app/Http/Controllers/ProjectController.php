@@ -69,7 +69,7 @@ class ProjectController extends Controller
     {
         abort_unless($project->status == ProjectStatus::Active, 400);
         \DB::transaction(function() use ($gitLabManager, $project) {
-            $found = true;
+            $found = $project->project_id != null;
             try
             {
                 $gitLabManager->projects()->show($project->project_id);
@@ -229,7 +229,8 @@ class ProjectController extends Controller
                 $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
 
                 foreach($filesChanged as $file) // @phpstan-ignore-line
-                {$pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
+                {
+                $pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
                     if($pathMatches)
                     {
 

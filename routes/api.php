@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::any('reporter', [WebhookController::class, 'reporter'])->name('reporter');
 
 Route::get('user/search', [UserController::class, 'search'])->middleware('auth');
-Route::get('user/repositories', [UserController::class, 'repositories'])->middleware('auth');
+Route::get('user/repositories', [UserController::class, 'repositories']);
 
 Route::controller(VSCodeController::class)->prefix('vs-code')->group(function() {
     Route::get('retrieve-authentication', 'retrieveAuthentication');

@@ -17,6 +17,9 @@ class UserSeeder extends Seeder
     public function run()
     {
         $courses = Course::all();
+        User::factory(1)->system_admin()->create()->each(function(User $system_admin) use ($courses) {
+            $system_admin->courses()->attach($courses);
+        });
         User::factory(1)->admin()->create()->each(function(User $admin) use ($courses) {
             $admin->courses()->attach($courses);
         });

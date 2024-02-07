@@ -37,6 +37,8 @@ class DisableForking implements ShouldQueue
      */
     public function handle(ProjectCreated $event)
     {
+        if ( ! $event->project->task->isGitlabEnabled()) return;
+
         $gitLabManager = app(GitLabManager::class);
 
         $project = $gitLabManager->projects()->show($event->project->project_id);

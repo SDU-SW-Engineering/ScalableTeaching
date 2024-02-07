@@ -38,7 +38,7 @@
                                     @endif
                                     @if(!$task->module_configuration->isEnabled($module))
                                         <p class="text-yellow-500 font-light text-sm"><span class="mr-1 font-semibold">Configuration
-                                                required!</span><span>{{  $missingDependency }}</span></p>
+                                                required!</span></p>
                                     @endif
                                 </div>
                                 <div>

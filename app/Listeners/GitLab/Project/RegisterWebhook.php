@@ -37,6 +37,11 @@ class RegisterWebhook implements ShouldQueue
      */
     public function handle(ProjectCreated $event)
     {
+        if ( ! $event->project->task->isGitlabEnabled())
+        {
+            return;
+        }
+
         $manager = app(GitLabManager::class);
         $currentHooks = new Collection($manager->projects()->hooks($event->project->project_id));
         if($currentHooks->isEmpty())

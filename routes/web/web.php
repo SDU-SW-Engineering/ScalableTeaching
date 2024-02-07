@@ -68,5 +68,5 @@ Route::controller(AdminController::class)->prefix('admin')->name('admin.')->grou
 Route::get('logout', function() {
     auth()->logout();
 
-    return redirect()->home();
-});
+    return redirect()->route('home');
+})->name("logout");

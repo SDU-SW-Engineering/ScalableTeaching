@@ -54,11 +54,17 @@ class OverviewController extends Controller
             'group' => ['string', 'nullable'],
         ]);
 
+        // Create a Gitlab sub-group for each task.
+        $gitlabGroup = $sourceControl->createGroup($validated['name'], [
+            "parent_id" => $course->gitlab_group_id,
+        ]);
+
 
         /** @var Task $task */
         $task = $course->tasks()->create([
-            'name'       => $validated['name'],
-            'grouped_by' => $request->has('group') ? $validated['group'] : null,
+            'name'              => $validated['name'],
+            'gitlab_group_id'   => $gitlabGroup->id,
+            'grouped_by'        => $request->has('group') ? $validated['group'] : null,
         ]);
 
         return [

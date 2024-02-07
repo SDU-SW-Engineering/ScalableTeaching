@@ -68,6 +68,7 @@ use Illuminate\Support\Collection;
  * @property Carbon $validated_at
  * @property EloquentCollection<ProjectSubTask> $subTasks
  * @property EloquentCollection<ProjectSubTaskComment> $subTaskComments
+ * @property ProjectDownload $download
  * @property-read string $ownerNames
  */
 class Project extends Model
@@ -143,7 +144,7 @@ class Project extends Model
     }
 
     /**
-     * @return HasOne
+     * @return HasOne<ProjectDownload>
      */
     public function download(): HasOne
     {

@@ -51,6 +51,7 @@ class SettingsController extends Controller
             $task->description = $html;
         }
 
+        $task->name = $validated['title'];
         $task->starts_at = $validated['startsAt'];
         $task->ends_at = $validated['endsAt'];
         $task->save();

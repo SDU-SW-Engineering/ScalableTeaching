@@ -40,6 +40,8 @@ class RefreshMemberAccess implements ShouldQueue
 
     public function handle() : void
     {
+        if ( ! $this->project->task->isGitlabEnabled()) return;
+
         $gitLabManager = app(GitLabManager::class);
         $supposedMembers = $this->project->owners()->map(function(User $user) use ($gitLabManager) {
             $users = $gitLabManager->users()->all([
