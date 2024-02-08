@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Domain\ActivityLogging\Course\CourseActivityLogging;
 use Domain\ActivityLogging\Course\CourseActivityMessage;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  */
 class GroupUser extends Pivot
 {
+    use HasFactory;
     use CourseActivityLogging;
 
     protected $casts = ['is_owner' => 'bool'];

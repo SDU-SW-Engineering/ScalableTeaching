@@ -97,11 +97,11 @@ class TaskController extends Controller
         $codeRoute = $download != null ? route('courses.tasks.show-editor', [$course, $task, $project, $download]) : null;
 
         return view('tasks.show', [
-            'course'          => $course,
-            'task'            => $task->setHidden(['markdown_description']),
-            'bg'              => 'bg-gray-50 dark:bg-gray-600',
-            'project'         => $project,
-            'subTasks'        => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks, CorrectionType::Manual])
+            'course'               => $course,
+            'task'                 => $task->setHidden(['markdown_description']),
+            'bg'                   => 'bg-gray-50 dark:bg-gray-600',
+            'project'              => $project,
+            'subTasks'             => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks, CorrectionType::Manual])
                 ? ['list' => $subTasks, 'gradeDelegations' => $gradeDelegations]
                 : null,
             'progress'        => [
@@ -204,23 +204,6 @@ class TaskController extends Controller
         }
 
         return redirect()->back()->with('success-task', 'The readme was updated.');
-    }
-
-    public function markComplete(Course $course, Task $task): string|Response
-    {
-        if($task->correction_type != CorrectionType::Self)
-            return response('Bad request', 400);
-        if(Grade::where(['task_id' => $task->id, 'user_id' => auth()->id()])->exists())
-            return response('Bad request', 400);
-
-        auth()->user()->grades()->create([
-            'task_id'     => $task->id,
-            'source_id'   => auth()->id(),
-            'source_type' => User::class,
-            'value'       => GradeEnum::Passed,
-        ]);
-
-        return "OK";
     }
 
     public function nextExercise(Course $course, Task $task): array

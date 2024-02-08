@@ -14,7 +14,7 @@ Vue.component(
     "simple-doughnut-chart",
     require("./components/SimpleDoughnutChart").default
 );
-Vue.component("task", require("./components/Task").default);
+Vue.component("task", require("./components/Task/Task").default);
 Vue.component("line-chart", require("./components/LineChart").default);
 Vue.component("bar-chart", require("./components/BarChart").default);
 Vue.component("groups", require("./components/Groups").default);

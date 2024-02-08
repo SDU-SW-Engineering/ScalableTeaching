@@ -8,6 +8,7 @@ use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\LinkRepository\LinkRepositorySettings;
+use App\Modules\MarkAsDone\MarkAsDone;
 use App\Modules\ModuleConfiguration;
 use App\Modules\Template\Template;
 use App\ProjectStatus;
@@ -21,7 +22,6 @@ use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
-use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Http\Client\Exception;
@@ -75,7 +75,7 @@ class Task extends Model
     use HasFactory;
 
     protected $fillable = [
-        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order', 'source_project_id',
+        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order',
         'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required',
         'current_sha',
     ];
@@ -83,10 +83,10 @@ class Task extends Model
     protected $dates = ['ends_at', 'starts_at'];
 
     protected $casts = [
-        'module_configuration' => ModuleConfiguration::class,
-        'sub_tasks'            => SubTaskCollection::class,
-        'correction_type'      => CorrectionType::class,
-        'type'                 => TaskTypeEnum::class,
+        'module_configuration'  => ModuleConfiguration::class,
+        'sub_tasks'             => SubTaskCollection::class,
+        'correction_type'       => CorrectionType::class,
+        'type'                  => TaskTypeEnum::class,
     ];
 
     public function reloadDescriptionFromRepo(): bool
@@ -633,7 +633,7 @@ class Task extends Model
     private function newProject(User|Group|null $owner): Project
     {
 
-        if ($this->isGitlabEnabled())
+        if ($this->isCodeTask())
         {
             $manager = app(GitLabManager::class);
             $resultPager = new ResultPager($manager->connection());
@@ -673,11 +673,6 @@ class Task extends Model
         return $dbProject;
     }
 
-    public function isGitlabEnabled(): bool
-    {
-        return $this->module_configuration->isEnabled(LinkRepository::class);
-    }
-
     /**
      * @param GitLabManager $manager
      * @param string $username
@@ -698,5 +693,23 @@ class Task extends Model
         $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
 
         return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Checks if the task is a text task, by checking if the mark as done module is installed.
+     * @return bool
+     */
+    public function isTextTask(): bool
+    {
+        return $this->module_configuration->isEnabled(MarkAsDone::class);
+    }
+
+    /**
+     * Check if it's a coding task, by checking if the first code module is installed.
+     * @return bool
+     */
+    public function isCodeTask(): bool
+    {
+        return $this->module_configuration->isEnabled(LinkRepository::class);
     }
 }

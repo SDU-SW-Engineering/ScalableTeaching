@@ -1,4 +1,4 @@
-@php use Carbon\Carbon; @endphp
+@php use App\Models\Enums\GradeEnum;use Carbon\Carbon; @endphp
 @extends('master')
 
 @section('content')

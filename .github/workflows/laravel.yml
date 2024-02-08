@@ -5,6 +5,9 @@ on:
     branches: [trunk]
 jobs:
   testing:
+    concurrency:
+      group: ${{ github.workflow }}-testing-${{ github.ref }}
+      cancel-in-progress: true
     name: Testing
     runs-on: ubuntu-latest
     services:
@@ -48,6 +51,9 @@ jobs:
           DB_DATABASE: scalable
         run: vendor/bin/pest
   static-analysis:
+    concurrency:
+      group: ${{ github.workflow }}-analysis-${{ github.ref }}
+      cancel-in-progress: true
     name: Static analysis
     runs-on: ubuntu-latest
     steps:

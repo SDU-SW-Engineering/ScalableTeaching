@@ -35,7 +35,7 @@ class WebhookController extends Controller
     private function pipeline(): string
     {
         /** @var Project|null $project */
-        $project = Project::firstWhere('project_id', request('project.id'));
+        $project = Project::firstWhere('gitlab_project_id', request('project.id'));
         abort_if($project == null, 400, "Project not found");
         $startedAt = Carbon::parse(\request('object_attributes.created_at'))->setTimezone(config('app.timezone'));
         abort_if(Pipeline::isOutsideTimeFrame($startedAt, $project), 400, 'Pipeline could not be processed as it is not within the timeframe of the task.');
@@ -84,7 +84,7 @@ class WebhookController extends Controller
     private function push(): string
     {
         /** @var Project $project */
-        $project = Project::firstWhere('project_id', request('project.id'));
+        $project = Project::firstWhere('gitlab_project_id', request('project.id'));
         abort_if($project == null, 404);
         $project->pushes()->create([
             'before_sha' => request('before'),

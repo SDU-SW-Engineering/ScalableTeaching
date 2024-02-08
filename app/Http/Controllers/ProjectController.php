@@ -34,14 +34,11 @@ use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
-use Spatie\ShikiPhp\Shiki;
 use Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use function Pest\Laravel\get;
 
 class ProjectController extends Controller
 {
@@ -69,21 +66,51 @@ class ProjectController extends Controller
     {
         abort_unless($project->status == ProjectStatus::Active, 400);
         \DB::transaction(function() use ($gitLabManager, $project) {
-            $found = $project->project_id != null;
+            $found = $project->gitlab_project_id != null;
             try
             {
-                $gitLabManager->projects()->show($project->project_id);
+                // Be aware if passed in value is null, then it will return all projects and therefore not throwing.
+                $gitLabManager->projects()->show($project->gitlab_project_id);
             } catch(RuntimeException $runtimeException)
             {
                 $found = $runtimeException->getCode() != 404;
             }
 
             if($found)
-                $gitLabManager->projects()->remove($project->project_id);
+                $gitLabManager->projects()->remove($project->gitlab_project_id);
 
 
             $project->delete();
+
+            /** @var ?Grade $grade */
+            $grade = Grade::where("task_id", "=", $project->task->id)
+                ->where("source_type", "=", User::class)
+                ->where("source_id", "=", auth()->id())->first();
+            if ($grade)
+            {
+                $grade->delete();
+            }
+
         });
+
+        return "OK";
+    }
+
+    public function markComplete(Course $course, Task $task, Project $project): string|Response
+    {
+        if( ! $task->isTextTask())
+            return response('Bad request', 400);
+        if(Grade::where(['task_id' => $task->id, 'user_id' => auth()->id()])->exists())
+            return response('Bad request', 400);
+
+        $foundProject = $project->owners()->find(auth()->id());
+
+        if ( ! $foundProject)
+        {
+            return response('Forbidden', 403);
+        }
+
+        $project->setProjectStatus(ProjectStatus::Finished);
 
         return "OK";
     }
@@ -119,7 +146,7 @@ class ProjectController extends Controller
         abort_if($sha == null, 404);
 
         return response()->streamDownload(function() use ($sha, $project, $gitLabManager) {
-            echo $gitLabManager->repositories()->archive($project->project_id, [
+            echo $gitLabManager->repositories()->archive($project->gitlab_project_id, [
                 'sha' => $sha,
             ], 'zip');
         }, "$project->repo_name.zip");
@@ -140,7 +167,7 @@ class ProjectController extends Controller
         {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
-                ->setIds(["gid://gitlab/Project/$project->project_id"])
+                ->setIds(["gid://gitlab/Project/$project->gitlab_project_id"])
                 ->setFirst(1))
                 ->selectNodes()
                 ->selectRepository()

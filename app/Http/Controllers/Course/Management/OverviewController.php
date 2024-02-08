@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Course\Management;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\Enums\CorrectionType;
 use App\Models\Task;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\DataSets\LineDataSet;
@@ -65,25 +66,12 @@ class OverviewController extends Controller
             'name'              => $validated['name'],
             'gitlab_group_id'   => $gitlabGroup->id,
             'grouped_by'        => $request->has('group') ? $validated['group'] : null,
+            'correction_type'   => CorrectionType::None, //TODO: This is added to remove the "builds" tab in a task overview. This will be removed when looking at the Build Tracking module.
         ]);
 
         return [
             'id'    => $task->id,
             'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
         ];
-
-        /** @var Task $task */
-        /*$task = $course->tasks()->create([
-            'source_project_id' => $sourceId,
-            'name'              => $validated['name'],
-            'type'              => $validated['type'],
-            'gitlab_group_id'   => $groupId,
-            'correction_type'   => $validated['type'] == 'exercise' ? 'self' : null,
-        ]);
-
-        return [
-            'id'    => $task->id,
-            'route' => route('courses.tasks.admin.preferences', [$course->id, $task->id]),
-        ];*/
     }
 }

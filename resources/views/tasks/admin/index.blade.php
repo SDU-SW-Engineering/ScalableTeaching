@@ -1,3 +1,4 @@
+@php use App\ProjectStatus; @endphp
 @extends('tasks.admin.master')
 
 @section('adminContent')
@@ -204,7 +205,7 @@
                                     {{ $project->progress() }}%
                                 </td>
                                 <td class="text-sm flex text-gray-500 px-6 py-4 whitespace-nowrap">
-                                    @if($project->status == \App\ProjectStatus::Active)
+                                    @if($project->status == ProjectStatus::Active)
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                              class="h-6 w-6 active text-yellow-400 mr-2" fill="none"
                                              viewBox="0 0 24 24" stroke="currentColor">
@@ -213,7 +214,7 @@
                                                   d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
                                     @else
-                                        @if($project->status == \App\ProjectStatus::Finished)
+                                        @if($project->status == ProjectStatus::Finished)
                                             <div class="flex">
                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                      class="h-6 w-6 text-lime-green-300 handed-in mr-2"
@@ -278,7 +279,7 @@
                                         <a type="button"
                                            href="{{ route('courses.tasks.showProject', [$course->id, $task->id, $project->id]) }}"
                                            class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium rounded-l-lg text-xs px-3 py-2 text-center">Open</a>
-                                        @if($project->status == 'finished')
+                                        @if($project->status == ProjectStatus::Finished)
                                             <a type="button"
                                                href="{{ route('courses.tasks.downloadProject', [$course->id, $task->id, $project->id]) }}"
                                                class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium text-xs px-3 py-2 text-center">Download</a>
@@ -286,7 +287,7 @@
                                             <a type="button"
                                                class="text-white not-done bg-gray-500 cursor-not-allowed font-medium text-xs px-3 py-2 text-center">Download</a>
                                         @endif
-                                        @if($project->status == 'finished')
+                                        @if($project->status == ProjectStatus::Finished)
                                             <a type="button"
                                                href="{{ route('courses.tasks.validateProject', [$course->id, $task->id, $project->id]) }}"
                                                class="text-white bg-lime-green-500 hover:bg-lime-green-600 focus:ring-4 focus:ring-lime-green-300 font-medium rounded-r-lg text-xs px-3 py-2 text-center">Validate</a>

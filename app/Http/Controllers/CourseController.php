@@ -4,19 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Jobs\Course\AddMemberToCourseGroup;
 use App\Models\Course;
-use App\Models\Enums\TaskTypeEnum;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
 use GrahamCampbell\GitLab\GitLabManager;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use function Ramsey\Uuid\v1;
 use Illuminate\View\View;
 
 class CourseController extends Controller
