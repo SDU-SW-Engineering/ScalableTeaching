@@ -1,0 +1,3 @@
+./vendor/friendsofphp/php-cs-fixer/php-cs-fixer check
+php artisan test
+./vendor/bin/phpstan
