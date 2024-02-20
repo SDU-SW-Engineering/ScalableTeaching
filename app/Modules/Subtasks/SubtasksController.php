@@ -63,9 +63,7 @@ class SubtasksController extends BaseController
             }),
         ]);
 
-
-        //die();
-        return view('module-Subtasks::Pages.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
+        return view('module-Subtasks::Pages.aggregateTaskCompletion', compact('subtasks', 'maxPointsPerTask'));
     }
 
     public function taskCompletion(Course $course, Task $task): View
