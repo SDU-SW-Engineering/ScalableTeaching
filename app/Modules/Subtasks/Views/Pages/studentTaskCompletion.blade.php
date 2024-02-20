@@ -2,7 +2,7 @@
 
 @section('adminContent')
     @include("module-Subtasks::Partials.navbar")
-    <div class="dark:bg-gray-800 bg-gray-100 border px-4 py-3 mb-4 rounded-lg shadow-sm">
+    <div class="dark:bg-gray-800 bg-gray-100 border px-4 py-3 mb-4 rounded-lg shadow-sm dark:text-white">
         <div class="flex flex-col">
             <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">

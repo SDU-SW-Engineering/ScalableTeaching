@@ -1,26 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Task\\:\\:\\$projects\\.$#"
-			count: 1
-			path: app/Console/Commands/Export/TaskStatus.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Task\\:\\:\\$projects\\.$#"
-			count: 2
-			path: app/Http/Controllers/Task/Admin/GradingController.php
-
-		-
-			message: "#^Method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<App\\\\Models\\\\Project\\>\\:\\:select\\(\\) invoked with 2 parameters, 0\\-1 required\\.$#"
-			count: 1
-			path: app/Http/Controllers/Task/Admin/OverviewController.php
-
-		-
-			message: "#^Relation 'projects' is not found in App\\\\Models\\\\Task model\\.$#"
-			count: 1
-			path: app/Http/Controllers/VSCodeController.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$pivot\\.$#"
 			count: 1
 			path: app/Http/Resources/Groups/GroupInformation.php
@@ -36,11 +16,6 @@ parameters:
 			path: app/Http/Resources/Groups/GroupInformation.php
 
 		-
-			message: "#^Relation 'projects' is not found in App\\\\Models\\\\Task model\\.$#"
-			count: 1
-			path: app/Models/CourseTrack.php
-
-		-
 			message: "#^PHPDoc tag @property has invalid value \\(int course_id\\)\\: Unexpected token \"course_id\", expected variable at offset 41$#"
 			count: 1
 			path: app/Models/Group.php
@@ -54,21 +29,6 @@ parameters:
 			message: "#^PHPDoc tag @property has invalid value \\(string name\\)\\: Unexpected token \"name\", expected variable at offset 71$#"
 			count: 1
 			path: app/Models/Group.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Task\\:\\:\\$projects\\.$#"
-			count: 1
-			path: app/Models/Task.php
-
-		-
-			message: "#^Method App\\\\Models\\\\Task\\:\\:claimedProjects\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Project\\>\\.$#"
-			count: 1
-			path: app/Models/Task.php
-
-		-
-			message: "#^Access to an undefined property App\\\\Models\\\\Task\\:\\:\\$projects\\.$#"
-			count: 3
-			path: app/Models/TaskDelegation.php
 
 		-
 			message: "#^Left side of && is always false\\.$#"
