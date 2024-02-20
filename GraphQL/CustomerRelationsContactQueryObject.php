@@ -6,6 +6,13 @@ class CustomerRelationsContactQueryObject extends QueryObject
 {
     const OBJECT_NAME = "CustomerRelationsContact";
 
+    public function selectActive()
+    {
+        $this->selectField("active");
+
+        return $this;
+    }
+
     public function selectCreatedAt()
     {
         $this->selectField("createdAt");

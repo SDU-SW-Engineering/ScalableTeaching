@@ -17,6 +17,24 @@ class NoteQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectAuthorIsContributor()
+    {
+        $this->selectField("authorIsContributor");
+
+        return $this;
+    }
+
+    public function selectAwardEmoji(NoteAwardEmojiArgumentsObject $argsObject = null)
+    {
+        $object = new AwardEmojiConnectionQueryObject("awardEmoji");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectBody()
     {
         $this->selectField("body");
@@ -31,6 +49,9 @@ class NoteQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated This was renamed. Please use `internal`. Deprecated in 15.5.
+     */
     public function selectConfidential()
     {
         $this->selectField("confidential");
@@ -59,6 +80,38 @@ class NoteQueryObject extends QueryObject
     public function selectId()
     {
         $this->selectField("id");
+
+        return $this;
+    }
+
+    public function selectInternal()
+    {
+        $this->selectField("internal");
+
+        return $this;
+    }
+
+    public function selectLastEditedAt()
+    {
+        $this->selectField("lastEditedAt");
+
+        return $this;
+    }
+
+    public function selectLastEditedBy(NoteLastEditedByArgumentsObject $argsObject = null)
+    {
+        $object = new UserCoreQueryObject("lastEditedBy");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectMaxAccessLevelOfAuthor()
+    {
+        $this->selectField("maxAccessLevelOfAuthor");
 
         return $this;
     }
@@ -129,6 +182,17 @@ class NoteQueryObject extends QueryObject
         $this->selectField("systemNoteIconName");
 
         return $this;
+    }
+
+    public function selectSystemNoteMetadata(NoteSystemNoteMetadataArgumentsObject $argsObject = null)
+    {
+        $object = new SystemNoteMetadataQueryObject("systemNoteMetadata");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectUpdatedAt()

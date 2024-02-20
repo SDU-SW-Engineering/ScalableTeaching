@@ -71,6 +71,20 @@ class ReleaseQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectHistoricalRelease()
+    {
+        $this->selectField("historicalRelease");
+
+        return $this;
+    }
+
+    public function selectId()
+    {
+        $this->selectField("id");
+
+        return $this;
+    }
+
     public function selectLinks(ReleaseLinksArgumentsObject $argsObject = null)
     {
         $object = new ReleaseLinksQueryObject("links");

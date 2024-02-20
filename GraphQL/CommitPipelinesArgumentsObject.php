@@ -11,6 +11,9 @@ class CommitPipelinesArgumentsObject extends ArgumentsObject
     protected $ref;
     protected $sha;
     protected $source;
+    protected $updatedAfter;
+    protected $updatedBefore;
+    protected $username;
     protected $after;
     protected $before;
     protected $first;
@@ -47,6 +50,27 @@ class CommitPipelinesArgumentsObject extends ArgumentsObject
     public function setSource($source)
     {
         $this->source = $source;
+
+        return $this;
+    }
+
+    public function setUpdatedAfter($updatedAfter)
+    {
+        $this->updatedAfter = $updatedAfter;
+
+        return $this;
+    }
+
+    public function setUpdatedBefore($updatedBefore)
+    {
+        $this->updatedBefore = $updatedBefore;
+
+        return $this;
+    }
+
+    public function setUsername($username)
+    {
+        $this->username = $username;
 
         return $this;
     }

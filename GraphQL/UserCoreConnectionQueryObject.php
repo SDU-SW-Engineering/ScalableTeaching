@@ -6,6 +6,13 @@ class UserCoreConnectionQueryObject extends QueryObject
 {
     const OBJECT_NAME = "UserCoreConnection";
 
+    public function selectCount()
+    {
+        $this->selectField("count");
+
+        return $this;
+    }
+
     public function selectEdges(UserCoreConnectionEdgesArgumentsObject $argsObject = null)
     {
         $object = new UserCoreEdgeQueryObject("edges");

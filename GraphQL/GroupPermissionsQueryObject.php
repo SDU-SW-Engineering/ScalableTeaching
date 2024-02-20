@@ -6,6 +6,13 @@ class GroupPermissionsQueryObject extends QueryObject
 {
     const OBJECT_NAME = "GroupPermissions";
 
+    public function selectCreateCustomEmoji()
+    {
+        $this->selectField("createCustomEmoji");
+
+        return $this;
+    }
+
     public function selectCreateProjects()
     {
         $this->selectField("createProjects");

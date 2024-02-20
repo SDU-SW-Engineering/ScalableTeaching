@@ -20,6 +20,13 @@ class ProjectStatisticsQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectContainerRegistrySize()
+    {
+        $this->selectField("containerRegistrySize");
+
+        return $this;
+    }
+
     public function selectLfsObjectsSize()
     {
         $this->selectField("lfsObjectsSize");

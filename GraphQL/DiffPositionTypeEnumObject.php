@@ -6,4 +6,5 @@ class DiffPositionTypeEnumObject extends EnumObject
 {
     const TEXT = "text";
     const IMAGE = "image";
+    const FILE = "file";
 }

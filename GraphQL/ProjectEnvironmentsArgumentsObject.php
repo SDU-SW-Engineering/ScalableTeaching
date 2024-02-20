@@ -7,6 +7,7 @@ class ProjectEnvironmentsArgumentsObject extends ArgumentsObject
     protected $name;
     protected $search;
     protected $states;
+    protected $type;
     protected $after;
     protected $before;
     protected $first;
@@ -29,6 +30,13 @@ class ProjectEnvironmentsArgumentsObject extends ArgumentsObject
     public function setStates(array $states)
     {
         $this->states = $states;
+
+        return $this;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
 
         return $this;
     }

@@ -2,10 +2,13 @@
 
 namespace GraphQL\SchemaObject;
 
+use GraphQL\RawObject;
+
 class RepositoryBlobsArgumentsObject extends ArgumentsObject
 {
     protected $paths;
     protected $ref;
+    protected $refType;
     protected $after;
     protected $before;
     protected $first;
@@ -21,6 +24,13 @@ class RepositoryBlobsArgumentsObject extends ArgumentsObject
     public function setRef($ref)
     {
         $this->ref = $ref;
+
+        return $this;
+    }
+
+    public function setRefType($refType)
+    {
+        $this->refType = new RawObject($refType);
 
         return $this;
     }

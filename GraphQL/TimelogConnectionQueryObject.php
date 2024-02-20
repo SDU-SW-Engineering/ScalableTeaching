@@ -6,6 +6,13 @@ class TimelogConnectionQueryObject extends QueryObject
 {
     const OBJECT_NAME = "TimelogConnection";
 
+    public function selectCount()
+    {
+        $this->selectField("count");
+
+        return $this;
+    }
+
     public function selectEdges(TimelogConnectionEdgesArgumentsObject $argsObject = null)
     {
         $object = new TimelogEdgeQueryObject("edges");
@@ -37,5 +44,12 @@ class TimelogConnectionQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectTotalSpentTime()
+    {
+        $this->selectField("totalSpentTime");
+
+        return $this;
     }
 }

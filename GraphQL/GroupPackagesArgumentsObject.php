@@ -9,6 +9,7 @@ class GroupPackagesArgumentsObject extends ArgumentsObject
     protected $sort;
     protected $packageName;
     protected $packageType;
+    protected $packageVersion;
     protected $status;
     protected $includeVersionless;
     protected $after;
@@ -33,6 +34,13 @@ class GroupPackagesArgumentsObject extends ArgumentsObject
     public function setPackageType($packageTypeEnum)
     {
         $this->packageType = new RawObject($packageTypeEnum);
+
+        return $this;
+    }
+
+    public function setPackageVersion($packageVersion)
+    {
+        $this->packageVersion = $packageVersion;
 
         return $this;
     }

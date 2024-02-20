@@ -5,6 +5,7 @@ namespace GraphQL\SchemaObject;
 class ProjectJobsArgumentsObject extends ArgumentsObject
 {
     protected $statuses;
+    protected $withArtifacts;
     protected $after;
     protected $before;
     protected $first;
@@ -13,6 +14,13 @@ class ProjectJobsArgumentsObject extends ArgumentsObject
     public function setStatuses(array $statuses)
     {
         $this->statuses = $statuses;
+
+        return $this;
+    }
+
+    public function setWithArtifacts($withArtifacts)
+    {
+        $this->withArtifacts = $withArtifacts;
 
         return $this;
     }

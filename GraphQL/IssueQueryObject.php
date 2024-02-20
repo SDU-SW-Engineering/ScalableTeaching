@@ -6,9 +6,23 @@ class IssueQueryObject extends QueryObject
 {
     const OBJECT_NAME = "Issue";
 
+    /**
+     * @deprecated Use `alert_management_alerts`. Deprecated in 15.6.
+     */
     public function selectAlertManagementAlert(IssueAlertManagementAlertArgumentsObject $argsObject = null)
     {
         $object = new AlertManagementAlertQueryObject("alertManagementAlert");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectAlertManagementAlerts(IssueAlertManagementAlertsArgumentsObject $argsObject = null)
+    {
+        $object = new AlertManagementAlertConnectionQueryObject("alertManagementAlerts");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -39,23 +53,9 @@ class IssueQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectBlocked()
+    public function selectClosedAsDuplicateOf(IssueClosedAsDuplicateOfArgumentsObject $argsObject = null)
     {
-        $this->selectField("blocked");
-
-        return $this;
-    }
-
-    public function selectBlockedByCount()
-    {
-        $this->selectField("blockedByCount");
-
-        return $this;
-    }
-
-    public function selectBlockedByIssues(IssueBlockedByIssuesArgumentsObject $argsObject = null)
-    {
-        $object = new IssueConnectionQueryObject("blockedByIssues");
+        $object = new IssueQueryObject("closedAsDuplicateOf");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -64,18 +64,22 @@ class IssueQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectBlockingCount()
-    {
-        $this->selectField("blockingCount");
-
-        return $this;
-    }
-
     public function selectClosedAt()
     {
         $this->selectField("closedAt");
 
         return $this;
+    }
+
+    public function selectCommenters(IssueCommentersArgumentsObject $argsObject = null)
+    {
+        $object = new UserCoreConnectionQueryObject("commenters");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectConfidential()
@@ -178,6 +182,9 @@ class IssueQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated Use `emails_enabled`. Deprecated in 16.3.
+     */
     public function selectEmailsDisabled()
     {
         $this->selectField("emailsDisabled");
@@ -185,26 +192,11 @@ class IssueQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectEpic(IssueEpicArgumentsObject $argsObject = null)
+    public function selectEmailsEnabled()
     {
-        $object = new EpicQueryObject("epic");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
+        $this->selectField("emailsEnabled");
 
-        return $object;
-    }
-
-    public function selectEscalationPolicy(IssueEscalationPolicyArgumentsObject $argsObject = null)
-    {
-        $object = new EscalationPolicyTypeQueryObject("escalationPolicy");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
+        return $this;
     }
 
     public function selectEscalationStatus()
@@ -214,9 +206,9 @@ class IssueQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectHealthStatus()
+    public function selectExternalAuthor()
     {
-        $this->selectField("healthStatus");
+        $this->selectField("externalAuthor");
 
         return $this;
     }
@@ -256,17 +248,6 @@ class IssueQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectIteration(IssueIterationArgumentsObject $argsObject = null)
-    {
-        $object = new IterationQueryObject("iteration");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectLabels(IssueLabelsArgumentsObject $argsObject = null)
     {
         $object = new LabelConnectionQueryObject("labels");
@@ -283,17 +264,6 @@ class IssueQueryObject extends QueryObject
         $this->selectField("mergeRequestsCount");
 
         return $this;
-    }
-
-    public function selectMetricImages(IssueMetricImagesArgumentsObject $argsObject = null)
-    {
-        $object = new MetricImageQueryObject("metricImages");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
     }
 
     public function selectMilestone(IssueMilestoneArgumentsObject $argsObject = null)
@@ -361,6 +331,17 @@ class IssueQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectRelatedMergeRequests(IssueRelatedMergeRequestsArgumentsObject $argsObject = null)
+    {
+        $object = new MergeRequestConnectionQueryObject("relatedMergeRequests");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectRelativePosition()
     {
         $this->selectField("relativePosition");
@@ -375,23 +356,9 @@ class IssueQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectSlaDueAt()
-    {
-        $this->selectField("slaDueAt");
-
-        return $this;
-    }
-
     public function selectState()
     {
         $this->selectField("state");
-
-        return $this;
-    }
-
-    public function selectStatusPagePublishedIncident()
-    {
-        $this->selectField("statusPagePublishedIncident");
 
         return $this;
     }
@@ -520,13 +487,6 @@ class IssueQueryObject extends QueryObject
     public function selectWebUrl()
     {
         $this->selectField("webUrl");
-
-        return $this;
-    }
-
-    public function selectWeight()
-    {
-        $this->selectField("weight");
 
         return $this;
     }

@@ -13,6 +13,20 @@ class RootStorageStatisticsQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectContainerRegistrySize()
+    {
+        $this->selectField("containerRegistrySize");
+
+        return $this;
+    }
+
+    public function selectContainerRegistrySizeIsEstimated()
+    {
+        $this->selectField("containerRegistrySizeIsEstimated");
+
+        return $this;
+    }
+
     public function selectDependencyProxySize()
     {
         $this->selectField("dependencyProxySize");
@@ -37,6 +51,16 @@ class RootStorageStatisticsQueryObject extends QueryObject
     public function selectPipelineArtifactsSize()
     {
         $this->selectField("pipelineArtifactsSize");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use `container_registry_size_is_estimated`. Deprecated in 16.2.
+     */
+    public function selectRegistrySizeEstimated()
+    {
+        $this->selectField("registrySizeEstimated");
 
         return $this;
     }

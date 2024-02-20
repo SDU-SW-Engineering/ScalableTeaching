@@ -13,6 +13,13 @@ class MergeRequestPermissionsQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectCanApprove()
+    {
+        $this->selectField("canApprove");
+
+        return $this;
+    }
+
     public function selectCanMerge()
     {
         $this->selectField("canMerge");

@@ -30,6 +30,16 @@ class CiRunnerQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated Use field in `manager` object instead. Deprecated in 16.2.
+     */
+    public function selectArchitectureName()
+    {
+        $this->selectField("architectureName");
+
+        return $this;
+    }
+
     public function selectContactedAt()
     {
         $this->selectField("contactedAt");
@@ -44,6 +54,17 @@ class CiRunnerQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectCreatedBy(CiRunnerCreatedByArgumentsObject $argsObject = null)
+    {
+        $object = new UserCoreQueryObject("createdBy");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectDescription()
     {
         $this->selectField("description");
@@ -54,6 +75,36 @@ class CiRunnerQueryObject extends QueryObject
     public function selectEditAdminUrl()
     {
         $this->selectField("editAdminUrl");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.9.
+     */
+    public function selectEphemeralAuthenticationToken()
+    {
+        $this->selectField("ephemeralAuthenticationToken");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.11.
+     */
+    public function selectEphemeralRegisterUrl()
+    {
+        $this->selectField("ephemeralRegisterUrl");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use field in `manager` object instead. Deprecated in 16.2.
+     */
+    public function selectExecutorName()
+    {
+        $this->selectField("executorName");
 
         return $this;
     }
@@ -76,6 +127,9 @@ class CiRunnerQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated Use field in `manager` object instead. Deprecated in 16.2.
+     */
     public function selectIpAddress()
     {
         $this->selectField("ipAddress");
@@ -86,6 +140,16 @@ class CiRunnerQueryObject extends QueryObject
     public function selectJobCount()
     {
         $this->selectField("jobCount");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.7.
+     */
+    public function selectJobExecutionStatus()
+    {
+        $this->selectField("jobExecutionStatus");
 
         return $this;
     }
@@ -108,11 +172,50 @@ class CiRunnerQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectMaintenanceNote()
+    {
+        $this->selectField("maintenanceNote");
+
+        return $this;
+    }
+
+    public function selectMaintenanceNoteHtml()
+    {
+        $this->selectField("maintenanceNoteHtml");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.10.
+     */
+    public function selectManagers(CiRunnerManagersArgumentsObject $argsObject = null)
+    {
+        $object = new CiRunnerManagerConnectionQueryObject("managers");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectMaximumTimeout()
     {
         $this->selectField("maximumTimeout");
 
         return $this;
+    }
+
+    public function selectOwnerProject(CiRunnerOwnerProjectArgumentsObject $argsObject = null)
+    {
+        $object = new ProjectQueryObject("ownerProject");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectPaused()
@@ -122,9 +225,12 @@ class CiRunnerQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectPrivateProjectsMinutesCostFactor()
+    /**
+     * @deprecated Use field in `manager` object instead. Deprecated in 16.2.
+     */
+    public function selectPlatformName()
     {
-        $this->selectField("privateProjectsMinutesCostFactor");
+        $this->selectField("platformName");
 
         return $this;
     }
@@ -147,13 +253,16 @@ class CiRunnerQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectPublicProjectsMinutesCostFactor()
+    public function selectRegisterAdminUrl()
     {
-        $this->selectField("publicProjectsMinutesCostFactor");
+        $this->selectField("registerAdminUrl");
 
         return $this;
     }
 
+    /**
+     * @deprecated Use field in `manager` object instead. Deprecated in 16.2.
+     */
     public function selectRevision()
     {
         $this->selectField("revision");
@@ -214,6 +323,9 @@ class CiRunnerQueryObject extends QueryObject
         return $object;
     }
 
+    /**
+     * @deprecated Use field in `manager` object instead. Deprecated in 16.2.
+     */
     public function selectVersion()
     {
         $this->selectField("version");

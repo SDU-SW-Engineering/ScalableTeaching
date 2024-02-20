@@ -13,13 +13,6 @@ class ProjectPermissionsQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectAdminPathLocks()
-    {
-        $this->selectField("adminPathLocks");
-
-        return $this;
-    }
-
     public function selectAdminProject()
     {
         $this->selectField("adminProject");
@@ -212,6 +205,13 @@ class ProjectPermissionsQueryObject extends QueryObject
     public function selectReadDesign()
     {
         $this->selectField("readDesign");
+
+        return $this;
+    }
+
+    public function selectReadEnvironment()
+    {
+        $this->selectField("readEnvironment");
 
         return $this;
     }

@@ -6,17 +6,6 @@ class BoardListQueryObject extends QueryObject
 {
     const OBJECT_NAME = "BoardList";
 
-    public function selectAssignee(BoardListAssigneeArgumentsObject $argsObject = null)
-    {
-        $object = new UserCoreQueryObject("assignee");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectCollapsed()
     {
         $this->selectField("collapsed");
@@ -49,17 +38,6 @@ class BoardListQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectIteration(BoardListIterationArgumentsObject $argsObject = null)
-    {
-        $object = new IterationQueryObject("iteration");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectLabel(BoardListLabelArgumentsObject $argsObject = null)
     {
         $object = new LabelQueryObject("label");
@@ -71,43 +49,11 @@ class BoardListQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectLimitMetric()
-    {
-        $this->selectField("limitMetric");
-
-        return $this;
-    }
-
     public function selectListType()
     {
         $this->selectField("listType");
 
         return $this;
-    }
-
-    public function selectMaxIssueCount()
-    {
-        $this->selectField("maxIssueCount");
-
-        return $this;
-    }
-
-    public function selectMaxIssueWeight()
-    {
-        $this->selectField("maxIssueWeight");
-
-        return $this;
-    }
-
-    public function selectMilestone(BoardListMilestoneArgumentsObject $argsObject = null)
-    {
-        $object = new MilestoneQueryObject("milestone");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
     }
 
     public function selectPosition()
@@ -120,13 +66,6 @@ class BoardListQueryObject extends QueryObject
     public function selectTitle()
     {
         $this->selectField("title");
-
-        return $this;
-    }
-
-    public function selectTotalWeight()
-    {
-        $this->selectField("totalWeight");
 
         return $this;
     }

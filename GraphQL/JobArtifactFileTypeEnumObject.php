@@ -15,6 +15,9 @@ class JobArtifactFileTypeEnumObject extends EnumObject
     const COBERTURA = "COBERTURA";
     const CLUSTER_APPLICATIONS = "CLUSTER_APPLICATIONS";
     const LSIF = "LSIF";
+    const CYCLONEDX = "CYCLONEDX";
+    const ANNOTATIONS = "ANNOTATIONS";
+    const REPOSITORY_XRAY = "REPOSITORY_XRAY";
     const SAST = "SAST";
     const SECRET_DETECTION = "SECRET_DETECTION";
     const DEPENDENCY_SCANNING = "DEPENDENCY_SCANNING";
@@ -29,6 +32,7 @@ class JobArtifactFileTypeEnumObject extends EnumObject
     const LOAD_PERFORMANCE = "LOAD_PERFORMANCE";
     const TERRAFORM = "TERRAFORM";
     const REQUIREMENTS = "REQUIREMENTS";
+    const REQUIREMENTS_V2 = "REQUIREMENTS_V2";
     const COVERAGE_FUZZING = "COVERAGE_FUZZING";
     const API_FUZZING = "API_FUZZING";
 }

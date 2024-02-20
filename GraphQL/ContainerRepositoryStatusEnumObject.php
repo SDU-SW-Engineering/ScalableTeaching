@@ -6,4 +6,5 @@ class ContainerRepositoryStatusEnumObject extends EnumObject
 {
     const DELETE_SCHEDULED = "DELETE_SCHEDULED";
     const DELETE_FAILED = "DELETE_FAILED";
+    const DELETE_ONGOING = "DELETE_ONGOING";
 }

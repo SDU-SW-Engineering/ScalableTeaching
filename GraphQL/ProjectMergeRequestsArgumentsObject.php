@@ -11,6 +11,7 @@ class ProjectMergeRequestsArgumentsObject extends ArgumentsObject
     protected $targetBranches;
     protected $state;
     protected $draft;
+    protected $approved;
     protected $createdAfter;
     protected $createdBefore;
     protected $updatedAfter;
@@ -60,6 +61,13 @@ class ProjectMergeRequestsArgumentsObject extends ArgumentsObject
     public function setDraft($draft)
     {
         $this->draft = $draft;
+
+        return $this;
+    }
+
+    public function setApproved($approved)
+    {
+        $this->approved = $approved;
 
         return $this;
     }

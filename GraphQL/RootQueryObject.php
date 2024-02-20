@@ -6,6 +6,45 @@ class RootQueryObject extends QueryObject
 {
     const OBJECT_NAME = "";
 
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.3.
+     */
+    public function selectAbuseReport(RootAbuseReportArgumentsObject $argsObject = null)
+    {
+        $object = new AbuseReportQueryObject("abuseReport");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.3.
+     */
+    public function selectAbuseReportLabels(RootAbuseReportLabelsArgumentsObject $argsObject = null)
+    {
+        $object = new LabelConnectionQueryObject("abuseReportLabels");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectAuditEventDefinitions(RootAuditEventDefinitionsArgumentsObject $argsObject = null)
+    {
+        $object = new AuditEventDefinitionConnectionQueryObject("auditEventDefinitions");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectBoardList(RootBoardListArgumentsObject $argsObject = null)
     {
         $object = new BoardListQueryObject("boardList");
@@ -28,6 +67,34 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.1.
+     */
+    public function selectCiCatalogResource(RootCiCatalogResourceArgumentsObject $argsObject = null)
+    {
+        $object = new CiCatalogResourceQueryObject("ciCatalogResource");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.11.
+     */
+    public function selectCiCatalogResources(RootCiCatalogResourcesArgumentsObject $argsObject = null)
+    {
+        $object = new CiCatalogResourceConnectionQueryObject("ciCatalogResources");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectCiConfig(RootCiConfigArgumentsObject $argsObject = null)
     {
         $object = new CiConfigQueryObject("ciConfig");
@@ -39,9 +106,20 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectCiMinutesUsage(RootCiMinutesUsageArgumentsObject $argsObject = null)
+    public function selectCiPipelineStage(RootCiPipelineStageArgumentsObject $argsObject = null)
     {
-        $object = new CiMinutesNamespaceMonthlyUsageConnectionQueryObject("ciMinutesUsage");
+        $object = new CiStageQueryObject("ciPipelineStage");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectCiVariables(RootCiVariablesArgumentsObject $argsObject = null)
+    {
+        $object = new CiInstanceVariableConnectionQueryObject("ciVariables");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -61,20 +139,9 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectCurrentLicense(RootCurrentLicenseArgumentsObject $argsObject = null)
-    {
-        $object = new CurrentLicenseQueryObject("currentLicense");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectCurrentUser(RootCurrentUserArgumentsObject $argsObject = null)
     {
-        $object = new UserCoreQueryObject("currentUser");
+        $object = new CurrentUserQueryObject("currentUser");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -94,17 +161,6 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectDevopsAdoptionEnabledNamespaces(RootDevopsAdoptionEnabledNamespacesArgumentsObject $argsObject = null)
-    {
-        $object = new DevopsAdoptionEnabledNamespaceConnectionQueryObject("devopsAdoptionEnabledNamespaces");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectEcho()
     {
         $this->selectField("echo");
@@ -112,15 +168,33 @@ class RootQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectGeoNode(RootGeoNodeArgumentsObject $argsObject = null)
+    public function selectFrecentGroups(RootFrecentGroupsArgumentsObject $argsObject = null)
     {
-        $object = new GeoNodeQueryObject("geoNode");
+        $object = new GroupQueryObject("frecentGroups");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectFrecentProjects(RootFrecentProjectsArgumentsObject $argsObject = null)
+    {
+        $object = new ProjectQueryObject("frecentProjects");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectGitpodEnabled()
+    {
+        $this->selectField("gitpodEnabled");
+
+        return $this;
     }
 
     public function selectGroup(RootGroupArgumentsObject $argsObject = null)
@@ -134,23 +208,9 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectInstanceSecurityDashboard(RootInstanceSecurityDashboardArgumentsObject $argsObject = null)
+    public function selectGroups(RootGroupsArgumentsObject $argsObject = null)
     {
-        $object = new InstanceSecurityDashboardQueryObject("instanceSecurityDashboard");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    /**
-     * @deprecated This was renamed. Please use `Query.usageTrendsMeasurements`. Deprecated in 13.10.
-     */
-    public function selectInstanceStatisticsMeasurements(RootInstanceStatisticsMeasurementsArgumentsObject $argsObject = null)
-    {
-        $object = new UsageTrendsMeasurementConnectionQueryObject("instanceStatisticsMeasurements");
+        $object = new GroupConnectionQueryObject("groups");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -170,9 +230,12 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectIteration(RootIterationArgumentsObject $argsObject = null)
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.6.
+     */
+    public function selectIssues(RootIssuesArgumentsObject $argsObject = null)
     {
-        $object = new IterationQueryObject("iteration");
+        $object = new IssueConnectionQueryObject("issues");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -181,9 +244,9 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectLicenseHistoryEntries(RootLicenseHistoryEntriesArgumentsObject $argsObject = null)
+    public function selectJobs(RootJobsArgumentsObject $argsObject = null)
     {
-        $object = new LicenseHistoryEntryConnectionQueryObject("licenseHistoryEntries");
+        $object = new CiJobConnectionQueryObject("jobs");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -225,9 +288,65 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.7.
+     */
+    public function selectMlModel(RootMlModelArgumentsObject $argsObject = null)
+    {
+        $object = new MlModelQueryObject("mlModel");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectNamespace(RootNamespaceArgumentsObject $argsObject = null)
     {
         $object = new NamespaceQueryObject("namespace");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.9.
+     */
+    public function selectNote(RootNoteArgumentsObject $argsObject = null)
+    {
+        $object = new NoteQueryObject("note");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.4.
+     */
+    public function selectOrganization(RootOrganizationArgumentsObject $argsObject = null)
+    {
+        $object = new OrganizationQueryObject("organization");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.8.
+     */
+    public function selectOrganizations(RootOrganizationsArgumentsObject $argsObject = null)
+    {
+        $object = new OrganizationConnectionQueryObject("organizations");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -291,6 +410,9 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
+    /**
+     * @deprecated No longer used, use gitlab-runner documentation to learn about supported platforms. Deprecated in 15.9.
+     */
     public function selectRunnerPlatforms(RootRunnerPlatformsArgumentsObject $argsObject = null)
     {
         $object = new RunnerPlatformConnectionQueryObject("runnerPlatforms");
@@ -302,6 +424,9 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
+    /**
+     * @deprecated No longer used, use gitlab-runner documentation to learn about runner registration commands. Deprecated in 15.9.
+     */
     public function selectRunnerSetup(RootRunnerSetupArgumentsObject $argsObject = null)
     {
         $object = new RunnerSetupQueryObject("runnerSetup");
@@ -335,9 +460,12 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectSubscriptionFutureEntries(RootSubscriptionFutureEntriesArgumentsObject $argsObject = null)
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.9.
+     */
+    public function selectSyntheticNote(RootSyntheticNoteArgumentsObject $argsObject = null)
     {
-        $object = new SubscriptionFutureEntryConnectionQueryObject("subscriptionFutureEntries");
+        $object = new NoteQueryObject("syntheticNote");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -349,6 +477,17 @@ class RootQueryObject extends QueryObject
     public function selectTimelogs(RootTimelogsArgumentsObject $argsObject = null)
     {
         $object = new TimelogConnectionQueryObject("timelogs");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectTodo(RootTodoArgumentsObject $argsObject = null)
+    {
+        $object = new TodoQueryObject("todo");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -401,9 +540,12 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectVulnerabilities(RootVulnerabilitiesArgumentsObject $argsObject = null)
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.1.
+     */
+    public function selectWorkItem(RootWorkItemArgumentsObject $argsObject = null)
     {
-        $object = new VulnerabilityConnectionQueryObject("vulnerabilities");
+        $object = new WorkItemQueryObject("workItem");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -412,20 +554,12 @@ class RootQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectVulnerabilitiesCountByDay(RootVulnerabilitiesCountByDayArgumentsObject $argsObject = null)
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.7.
+     */
+    public function selectWorkItemsByReference(RootWorkItemsByReferenceArgumentsObject $argsObject = null)
     {
-        $object = new VulnerabilitiesCountByDayConnectionQueryObject("vulnerabilitiesCountByDay");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectVulnerability(RootVulnerabilityArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerabilityQueryObject("vulnerability");
+        $object = new WorkItemConnectionQueryObject("workItemsByReference");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }

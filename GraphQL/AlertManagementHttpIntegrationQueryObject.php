@@ -34,35 +34,6 @@ class AlertManagementHttpIntegrationQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectPayloadAlertFields(AlertManagementHttpIntegrationPayloadAlertFieldsArgumentsObject $argsObject = null)
-    {
-        $object = new AlertManagementPayloadAlertFieldQueryObject("payloadAlertFields");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectPayloadAttributeMappings(AlertManagementHttpIntegrationPayloadAttributeMappingsArgumentsObject $argsObject = null)
-    {
-        $object = new AlertManagementPayloadAlertMappingFieldQueryObject("payloadAttributeMappings");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectPayloadExample()
-    {
-        $this->selectField("payloadExample");
-
-        return $this;
-    }
-
     public function selectToken()
     {
         $this->selectField("token");

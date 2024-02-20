@@ -16,4 +16,6 @@ class PackageTypeEnumEnumObject extends EnumObject
     const RUBYGEMS = "RUBYGEMS";
     const HELM = "HELM";
     const TERRAFORM_MODULE = "TERRAFORM_MODULE";
+    const RPM = "RPM";
+    const ML_MODEL = "ML_MODEL";
 }

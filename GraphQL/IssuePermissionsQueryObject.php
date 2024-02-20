@@ -13,6 +13,13 @@ class IssuePermissionsQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectAdminIssueRelation()
+    {
+        $this->selectField("adminIssueRelation");
+
+        return $this;
+    }
+
     public function selectCreateDesign()
     {
         $this->selectField("createDesign");
@@ -51,6 +58,13 @@ class IssuePermissionsQueryObject extends QueryObject
     public function selectReopenIssue()
     {
         $this->selectField("reopenIssue");
+
+        return $this;
+    }
+
+    public function selectUpdateDesign()
+    {
+        $this->selectField("updateDesign");
 
         return $this;
     }

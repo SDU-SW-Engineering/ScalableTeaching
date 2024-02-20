@@ -6,13 +6,6 @@ class ProjectQueryObject extends QueryObject
 {
     const OBJECT_NAME = "Project";
 
-    public function selectActualRepositorySizeLimit()
-    {
-        $this->selectField("actualRepositorySizeLimit");
-
-        return $this;
-    }
-
     public function selectAgentConfigurations(ProjectAgentConfigurationsArgumentsObject $argsObject = null)
     {
         $object = new AgentConfigurationConnectionQueryObject("agentConfigurations");
@@ -79,17 +72,6 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectAlertManagementPayloadFields(ProjectAlertManagementPayloadFieldsArgumentsObject $argsObject = null)
-    {
-        $object = new AlertManagementPayloadAlertFieldQueryObject("alertManagementPayloadFields");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectAllowMergeOnSkippedPipeline()
     {
         $this->selectField("allowMergeOnSkippedPipeline");
@@ -97,15 +79,18 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectApiFuzzingCiConfiguration(ProjectApiFuzzingCiConfigurationArgumentsObject $argsObject = null)
+    public function selectAllowsMultipleMergeRequestAssignees()
     {
-        $object = new ApiFuzzingCiConfigurationQueryObject("apiFuzzingCiConfiguration");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
+        $this->selectField("allowsMultipleMergeRequestAssignees");
 
-        return $object;
+        return $this;
+    }
+
+    public function selectAllowsMultipleMergeRequestReviewers()
+    {
+        $this->selectField("allowsMultipleMergeRequestReviewers");
+
+        return $this;
     }
 
     public function selectArchived()
@@ -120,6 +105,17 @@ class ProjectQueryObject extends QueryObject
         $this->selectField("autocloseReferencedIssues");
 
         return $this;
+    }
+
+    public function selectAutocompleteUsers(ProjectAutocompleteUsersArgumentsObject $argsObject = null)
+    {
+        $object = new AutocompletedUserQueryObject("autocompleteUsers");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectAvatarUrl()
@@ -151,6 +147,28 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectBranchRules(ProjectBranchRulesArgumentsObject $argsObject = null)
+    {
+        $object = new BranchRuleConnectionQueryObject("branchRules");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectCiAccessAuthorizedAgents(ProjectCiAccessAuthorizedAgentsArgumentsObject $argsObject = null)
+    {
+        $object = new ClusterAgentAuthorizationCiAccessConnectionQueryObject("ciAccessAuthorizedAgents");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectCiCdSettings(ProjectCiCdSettingsArgumentsObject $argsObject = null)
     {
         $object = new ProjectCiCdSettingQueryObject("ciCdSettings");
@@ -169,6 +187,20 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.3.
+     */
+    public function selectCiConfigVariables(ProjectCiConfigVariablesArgumentsObject $argsObject = null)
+    {
+        $object = new CiConfigVariableQueryObject("ciConfigVariables");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectCiJobTokenScope(ProjectCiJobTokenScopeArgumentsObject $argsObject = null)
     {
         $object = new CiJobTokenScopeTypeQueryObject("ciJobTokenScope");
@@ -183,6 +215,17 @@ class ProjectQueryObject extends QueryObject
     public function selectCiTemplate(ProjectCiTemplateArgumentsObject $argsObject = null)
     {
         $object = new CiTemplateQueryObject("ciTemplate");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectCiVariables(ProjectCiVariablesArgumentsObject $argsObject = null)
+    {
+        $object = new CiProjectVariableConnectionQueryObject("ciVariables");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -213,20 +256,12 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectCodeCoverageSummary(ProjectCodeCoverageSummaryArgumentsObject $argsObject = null)
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.0.
+     */
+    public function selectCommitReferences(ProjectCommitReferencesArgumentsObject $argsObject = null)
     {
-        $object = new CodeCoverageSummaryQueryObject("codeCoverageSummary");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectComplianceFrameworks(ProjectComplianceFrameworksArgumentsObject $argsObject = null)
-    {
-        $object = new ComplianceFrameworkConnectionQueryObject("complianceFrameworks");
+        $object = new CommitReferencesQueryObject("commitReferences");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -271,17 +306,6 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectCorpuses(ProjectCorpusesArgumentsObject $argsObject = null)
-    {
-        $object = new CoverageFuzzingCorpusConnectionQueryObject("corpuses");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectCreatedAt()
     {
         $this->selectField("createdAt");
@@ -289,9 +313,9 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectDastProfile(ProjectDastProfileArgumentsObject $argsObject = null)
+    public function selectDataTransfer(ProjectDataTransferArgumentsObject $argsObject = null)
     {
-        $object = new DastProfileQueryObject("dastProfile");
+        $object = new ProjectDataTransferQueryObject("dataTransfer");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -300,53 +324,9 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectDastProfiles(ProjectDastProfilesArgumentsObject $argsObject = null)
+    public function selectDeployment(ProjectDeploymentArgumentsObject $argsObject = null)
     {
-        $object = new DastProfileConnectionQueryObject("dastProfiles");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectDastScannerProfiles(ProjectDastScannerProfilesArgumentsObject $argsObject = null)
-    {
-        $object = new DastScannerProfileConnectionQueryObject("dastScannerProfiles");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectDastSiteProfile(ProjectDastSiteProfileArgumentsObject $argsObject = null)
-    {
-        $object = new DastSiteProfileQueryObject("dastSiteProfile");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectDastSiteProfiles(ProjectDastSiteProfilesArgumentsObject $argsObject = null)
-    {
-        $object = new DastSiteProfileConnectionQueryObject("dastSiteProfiles");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectDastSiteValidations(ProjectDastSiteValidationsArgumentsObject $argsObject = null)
-    {
-        $object = new DastSiteValidationConnectionQueryObject("dastSiteValidations");
+        $object = new DeploymentQueryObject("deployment");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -369,9 +349,9 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectDora(ProjectDoraArgumentsObject $argsObject = null)
+    public function selectDetailedImportStatus(ProjectDetailedImportStatusArgumentsObject $argsObject = null)
     {
-        $object = new DoraQueryObject("dora");
+        $object = new DetailedImportStatusQueryObject("detailedImportStatus");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -394,6 +374,56 @@ class ProjectQueryObject extends QueryObject
     public function selectEnvironments(ProjectEnvironmentsArgumentsObject $argsObject = null)
     {
         $object = new EnvironmentConnectionQueryObject("environments");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.10.
+     */
+    public function selectFlowMetrics(ProjectFlowMetricsArgumentsObject $argsObject = null)
+    {
+        $object = new ProjectValueStreamAnalyticsFlowMetricsQueryObject("flowMetrics");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.7.
+     */
+    public function selectForkDetails(ProjectForkDetailsArgumentsObject $argsObject = null)
+    {
+        $object = new ForkDetailsQueryObject("forkDetails");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectForkTargets(ProjectForkTargetsArgumentsObject $argsObject = null)
+    {
+        $object = new NamespaceConnectionQueryObject("forkTargets");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectForkingAccessLevel(ProjectForkingAccessLevelArgumentsObject $argsObject = null)
+    {
+        $object = new ProjectFeatureAccessQueryObject("forkingAccessLevel");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -459,42 +489,20 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectIncidentManagementEscalationPolicies(ProjectIncidentManagementEscalationPoliciesArgumentsObject $argsObject = null)
-    {
-        $object = new EscalationPolicyTypeConnectionQueryObject("incidentManagementEscalationPolicies");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectIncidentManagementEscalationPolicy(ProjectIncidentManagementEscalationPolicyArgumentsObject $argsObject = null)
-    {
-        $object = new EscalationPolicyTypeQueryObject("incidentManagementEscalationPolicy");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectIncidentManagementOncallSchedules(ProjectIncidentManagementOncallSchedulesArgumentsObject $argsObject = null)
-    {
-        $object = new IncidentManagementOncallScheduleConnectionQueryObject("incidentManagementOncallSchedules");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectIncidentManagementTimelineEvent(ProjectIncidentManagementTimelineEventArgumentsObject $argsObject = null)
     {
         $object = new TimelineEventTypeQueryObject("incidentManagementTimelineEvent");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectIncidentManagementTimelineEventTags(ProjectIncidentManagementTimelineEventTagsArgumentsObject $argsObject = null)
+    {
+        $object = new TimelineEventTagTypeQueryObject("incidentManagementTimelineEventTags");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -512,6 +520,34 @@ class ProjectQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectInheritedCiVariables(ProjectInheritedCiVariablesArgumentsObject $argsObject = null)
+    {
+        $object = new InheritedCiVariableConnectionQueryObject("inheritedCiVariables");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.11.
+     */
+    public function selectIsCatalogResource()
+    {
+        $this->selectField("isCatalogResource");
+
+        return $this;
+    }
+
+    public function selectIsForked()
+    {
+        $this->selectField("isForked");
+
+        return $this;
     }
 
     public function selectIssue(ProjectIssueArgumentsObject $argsObject = null)
@@ -547,33 +583,22 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectIssuesAccessLevel(ProjectIssuesAccessLevelArgumentsObject $argsObject = null)
+    {
+        $object = new ProjectFeatureAccessQueryObject("issuesAccessLevel");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectIssuesEnabled()
     {
         $this->selectField("issuesEnabled");
 
         return $this;
-    }
-
-    public function selectIterationCadences(ProjectIterationCadencesArgumentsObject $argsObject = null)
-    {
-        $object = new IterationCadenceConnectionQueryObject("iterationCadences");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectIterations(ProjectIterationsArgumentsObject $argsObject = null)
-    {
-        $object = new IterationConnectionQueryObject("iterations");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
     }
 
     public function selectJiraImportStatus()
@@ -586,6 +611,17 @@ class ProjectQueryObject extends QueryObject
     public function selectJiraImports(ProjectJiraImportsArgumentsObject $argsObject = null)
     {
         $object = new JiraImportConnectionQueryObject("jiraImports");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectJob(ProjectJobArgumentsObject $argsObject = null)
+    {
+        $object = new CiJobQueryObject("job");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -634,6 +670,17 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectLanguages(ProjectLanguagesArgumentsObject $argsObject = null)
+    {
+        $object = new RepositoryLanguageQueryObject("languages");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectLastActivityAt()
     {
         $this->selectField("lastActivityAt");
@@ -646,6 +693,17 @@ class ProjectQueryObject extends QueryObject
         $this->selectField("lfsEnabled");
 
         return $this;
+    }
+
+    public function selectMaxAccessLevel(ProjectMaxAccessLevelArgumentsObject $argsObject = null)
+    {
+        $object = new AccessLevelQueryObject("maxAccessLevel");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectMergeCommitTemplate()
@@ -669,6 +727,17 @@ class ProjectQueryObject extends QueryObject
     public function selectMergeRequests(ProjectMergeRequestsArgumentsObject $argsObject = null)
     {
         $object = new MergeRequestConnectionQueryObject("mergeRequests");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectMergeRequestsAccessLevel(ProjectMergeRequestsAccessLevelArgumentsObject $argsObject = null)
+    {
+        $object = new ProjectFeatureAccessQueryObject("mergeRequestsAccessLevel");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -702,6 +771,20 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.8.
+     */
+    public function selectMlModels(ProjectMlModelsArgumentsObject $argsObject = null)
+    {
+        $object = new MlModelConnectionQueryObject("mlModels");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectName()
     {
         $this->selectField("name");
@@ -727,9 +810,9 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectNetworkPolicies(ProjectNetworkPoliciesArgumentsObject $argsObject = null)
+    public function selectNestedEnvironments(ProjectNestedEnvironmentsArgumentsObject $argsObject = null)
     {
-        $object = new NetworkPolicyConnectionQueryObject("networkPolicies");
+        $object = new NestedEnvironmentConnectionQueryObject("nestedEnvironments");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -759,9 +842,38 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectOpenMergeRequestsCount()
+    {
+        $this->selectField("openMergeRequestsCount");
+
+        return $this;
+    }
+
     public function selectPackages(ProjectPackagesArgumentsObject $argsObject = null)
     {
         $object = new PackageConnectionQueryObject("packages");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectPackagesCleanupPolicy(ProjectPackagesCleanupPolicyArgumentsObject $argsObject = null)
+    {
+        $object = new PackagesCleanupPolicyQueryObject("packagesCleanupPolicy");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectPackagesProtectionRules(ProjectPackagesProtectionRulesArgumentsObject $argsObject = null)
+    {
+        $object = new PackagesProtectionRuleConnectionQueryObject("packagesProtectionRules");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -775,17 +887,6 @@ class ProjectQueryObject extends QueryObject
         $this->selectField("path");
 
         return $this;
-    }
-
-    public function selectPathLocks(ProjectPathLocksArgumentsObject $argsObject = null)
-    {
-        $object = new PathLockConnectionQueryObject("pathLocks");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
     }
 
     public function selectPipeline(ProjectPipelineArgumentsObject $argsObject = null)
@@ -813,6 +914,31 @@ class ProjectQueryObject extends QueryObject
     public function selectPipelineCounts(ProjectPipelineCountsArgumentsObject $argsObject = null)
     {
         $object = new PipelineCountsQueryObject("pipelineCounts");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectPipelineSchedules(ProjectPipelineSchedulesArgumentsObject $argsObject = null)
+    {
+        $object = new PipelineScheduleConnectionQueryObject("pipelineSchedules");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.3.
+     */
+    public function selectPipelineTriggers(ProjectPipelineTriggersArgumentsObject $argsObject = null)
+    {
+        $object = new PipelineTriggerConnectionQueryObject("pipelineTriggers");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -850,22 +976,35 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectPublicJobs()
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.9.
+     */
+    public function selectProjectPlanLimits(ProjectProjectPlanLimitsArgumentsObject $argsObject = null)
     {
-        $this->selectField("publicJobs");
-
-        return $this;
-    }
-
-    public function selectPushRules(ProjectPushRulesArgumentsObject $argsObject = null)
-    {
-        $object = new PushRulesQueryObject("pushRules");
+        $object = new ProjectPlanLimitsQueryObject("projectPlanLimits");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
         $this->selectField($object);
 
         return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.9.
+     */
+    public function selectProtectableBranches()
+    {
+        $this->selectField("protectableBranches");
+
+        return $this;
+    }
+
+    public function selectPublicJobs()
+    {
+        $this->selectField("publicJobs");
+
+        return $this;
     }
 
     public function selectRecentIssueBoards(ProjectRecentIssueBoardsArgumentsObject $argsObject = null)
@@ -919,13 +1058,6 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectRepositorySizeExcess()
-    {
-        $this->selectField("repositorySizeExcess");
-
-        return $this;
-    }
-
     public function selectRequestAccessEnabled()
     {
         $this->selectField("requestAccessEnabled");
@@ -933,31 +1065,9 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectRequirement(ProjectRequirementArgumentsObject $argsObject = null)
+    public function selectRunners(ProjectRunnersArgumentsObject $argsObject = null)
     {
-        $object = new RequirementQueryObject("requirement");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectRequirementStatesCount(ProjectRequirementStatesCountArgumentsObject $argsObject = null)
-    {
-        $object = new RequirementStatesCountQueryObject("requirementStatesCount");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectRequirements(ProjectRequirementsArgumentsObject $argsObject = null)
-    {
-        $object = new RequirementConnectionQueryObject("requirements");
+        $object = new CiRunnerConnectionQueryObject("runners");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -969,57 +1079,6 @@ class ProjectQueryObject extends QueryObject
     public function selectSastCiConfiguration(ProjectSastCiConfigurationArgumentsObject $argsObject = null)
     {
         $object = new SastCiConfigurationQueryObject("sastCiConfiguration");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectScanExecutionPolicies(ProjectScanExecutionPoliciesArgumentsObject $argsObject = null)
-    {
-        $object = new ScanExecutionPolicyConnectionQueryObject("scanExecutionPolicies");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectScanResultPolicies(ProjectScanResultPoliciesArgumentsObject $argsObject = null)
-    {
-        $object = new ScanResultPolicyConnectionQueryObject("scanResultPolicies");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectSecurityDashboardPath()
-    {
-        $this->selectField("securityDashboardPath");
-
-        return $this;
-    }
-
-    public function selectSecurityScanners(ProjectSecurityScannersArgumentsObject $argsObject = null)
-    {
-        $object = new SecurityScannersQueryObject("securityScanners");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectSecurityTrainingProviders(ProjectSecurityTrainingProvidersArgumentsObject $argsObject = null)
-    {
-        $object = new ProjectSecurityTrainingQueryObject("securityTrainingProviders");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -1064,6 +1123,9 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated This will be renamed to `Project.integrations`. Deprecated in 15.9.
+     */
     public function selectServices(ProjectServicesArgumentsObject $argsObject = null)
     {
         $object = new ServiceConnectionQueryObject("services");
@@ -1139,6 +1201,17 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectStatisticsDetailsPaths(ProjectStatisticsDetailsPathsArgumentsObject $argsObject = null)
+    {
+        $object = new ProjectStatisticsRedirectQueryObject("statisticsDetailsPaths");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectSuggestionCommitMessage()
     {
         $this->selectField("suggestionCommitMessage");
@@ -1178,6 +1251,20 @@ class ProjectQueryObject extends QueryObject
         return $object;
     }
 
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.3.
+     */
+    public function selectTimelogCategories(ProjectTimelogCategoriesArgumentsObject $argsObject = null)
+    {
+        $object = new TimeTrackingTimelogCategoryConnectionQueryObject("timelogCategories");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectTimelogs(ProjectTimelogsArgumentsObject $argsObject = null)
     {
         $object = new TimelogConnectionQueryObject("timelogs");
@@ -1196,9 +1283,31 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectUserAccessAuthorizedAgents(ProjectUserAccessAuthorizedAgentsArgumentsObject $argsObject = null)
+    {
+        $object = new ClusterAgentAuthorizationUserAccessConnectionQueryObject("userAccessAuthorizedAgents");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectUserPermissions(ProjectUserPermissionsArgumentsObject $argsObject = null)
     {
         $object = new ProjectPermissionsQueryObject("userPermissions");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectValueStreams(ProjectValueStreamsArgumentsObject $argsObject = null)
+    {
+        $object = new ValueStreamConnectionQueryObject("valueStreams");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -1214,42 +1323,12 @@ class ProjectQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectVulnerabilities(ProjectVulnerabilitiesArgumentsObject $argsObject = null)
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.10.
+     */
+    public function selectVisibleForks(ProjectVisibleForksArgumentsObject $argsObject = null)
     {
-        $object = new VulnerabilityConnectionQueryObject("vulnerabilities");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectVulnerabilitiesCountByDay(ProjectVulnerabilitiesCountByDayArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerabilitiesCountByDayConnectionQueryObject("vulnerabilitiesCountByDay");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectVulnerabilityScanners(ProjectVulnerabilityScannersArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerabilityScannerConnectionQueryObject("vulnerabilityScanners");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectVulnerabilitySeveritiesCount(ProjectVulnerabilitySeveritiesCountArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerabilitySeveritiesCountQueryObject("vulnerabilitySeveritiesCount");
+        $object = new ProjectConnectionQueryObject("visibleForks");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -1270,5 +1349,44 @@ class ProjectQueryObject extends QueryObject
         $this->selectField("wikiEnabled");
 
         return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.7.
+     */
+    public function selectWorkItemStateCounts(ProjectWorkItemStateCountsArgumentsObject $argsObject = null)
+    {
+        $object = new WorkItemStateCountsTypeQueryObject("workItemStateCounts");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectWorkItemTypes(ProjectWorkItemTypesArgumentsObject $argsObject = null)
+    {
+        $object = new WorkItemTypeConnectionQueryObject("workItemTypes");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.1.
+     */
+    public function selectWorkItems(ProjectWorkItemsArgumentsObject $argsObject = null)
+    {
+        $object = new WorkItemConnectionQueryObject("workItems");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 }

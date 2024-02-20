@@ -13,6 +13,20 @@ class RepositoryBlobQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.3.
+     */
+    public function selectBlame(RepositoryBlobBlameArgumentsObject $argsObject = null)
+    {
+        $object = new BlameQueryObject("blame");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectBlamePath()
     {
         $this->selectField("blamePath");
@@ -34,15 +48,11 @@ class RepositoryBlobQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectCodeOwners(RepositoryBlobCodeOwnersArgumentsObject $argsObject = null)
+    public function selectCodeNavigationPath()
     {
-        $object = new UserCoreQueryObject("codeOwners");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
+        $this->selectField("codeNavigationPath");
 
-        return $object;
+        return $this;
     }
 
     public function selectEditBlobPath()
@@ -97,6 +107,20 @@ class RepositoryBlobQueryObject extends QueryObject
     public function selectForkAndEditPath()
     {
         $this->selectField("forkAndEditPath");
+
+        return $this;
+    }
+
+    public function selectForkAndViewPath()
+    {
+        $this->selectField("forkAndViewPath");
+
+        return $this;
+    }
+
+    public function selectGitpodBlobUrl()
+    {
+        $this->selectField("gitpodBlobUrl");
 
         return $this;
     }
@@ -188,6 +212,13 @@ class RepositoryBlobQueryObject extends QueryObject
     public function selectPlainData()
     {
         $this->selectField("plainData");
+
+        return $this;
+    }
+
+    public function selectProjectBlobPathRoot()
+    {
+        $this->selectField("projectBlobPathRoot");
 
         return $this;
     }

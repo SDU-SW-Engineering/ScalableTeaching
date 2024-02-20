@@ -2,6 +2,8 @@
 
 namespace GraphQL\SchemaObject;
 
+use GraphQL\RawObject;
+
 class RootTimelogsArgumentsObject extends ArgumentsObject
 {
     protected $startDate;
@@ -11,6 +13,7 @@ class RootTimelogsArgumentsObject extends ArgumentsObject
     protected $projectId;
     protected $groupId;
     protected $username;
+    protected $sort;
     protected $after;
     protected $before;
     protected $first;
@@ -61,6 +64,13 @@ class RootTimelogsArgumentsObject extends ArgumentsObject
     public function setUsername($username)
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function setSort($timelogSort)
+    {
+        $this->sort = new RawObject($timelogSort);
 
         return $this;
     }

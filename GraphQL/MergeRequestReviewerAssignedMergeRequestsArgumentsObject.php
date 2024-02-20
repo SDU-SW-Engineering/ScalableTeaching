@@ -11,6 +11,7 @@ class MergeRequestReviewerAssignedMergeRequestsArgumentsObject extends Arguments
     protected $targetBranches;
     protected $state;
     protected $draft;
+    protected $approved;
     protected $createdAfter;
     protected $createdBefore;
     protected $updatedAfter;
@@ -21,6 +22,7 @@ class MergeRequestReviewerAssignedMergeRequestsArgumentsObject extends Arguments
     protected $milestoneTitle;
     protected $sort;
     protected $not;
+    protected $groupId;
     protected $projectPath;
     protected $projectId;
     protected $authorUsername;
@@ -61,6 +63,13 @@ class MergeRequestReviewerAssignedMergeRequestsArgumentsObject extends Arguments
     public function setDraft($draft)
     {
         $this->draft = $draft;
+
+        return $this;
+    }
+
+    public function setApproved($approved)
+    {
+        $this->approved = $approved;
 
         return $this;
     }
@@ -131,6 +140,13 @@ class MergeRequestReviewerAssignedMergeRequestsArgumentsObject extends Arguments
     public function setNot(MergeRequestsResolverNegatedParamsInputObject $mergeRequestsResolverNegatedParamsInputObject)
     {
         $this->not = $mergeRequestsResolverNegatedParamsInputObject;
+
+        return $this;
+    }
+
+    public function setGroupId($groupId)
+    {
+        $this->groupId = $groupId;
 
         return $this;
     }

@@ -56,6 +56,17 @@ class TodoQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectNote(TodoNoteArgumentsObject $argsObject = null)
+    {
+        $object = new NoteQueryObject("note");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectProject(TodoProjectArgumentsObject $argsObject = null)
     {
         $object = new ProjectQueryObject("project");

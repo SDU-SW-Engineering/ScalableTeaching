@@ -13,6 +13,13 @@ class TerraformStateQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectDeletedAt()
+    {
+        $this->selectField("deletedAt");
+
+        return $this;
+    }
+
     public function selectId()
     {
         $this->selectField("id");

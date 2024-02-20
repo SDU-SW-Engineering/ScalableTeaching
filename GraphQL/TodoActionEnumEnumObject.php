@@ -13,4 +13,7 @@ class TodoActionEnumEnumObject extends EnumObject
     const DIRECTLY_ADDRESSED = "directly_addressed";
     const MERGE_TRAIN_REMOVED = "merge_train_removed";
     const REVIEW_REQUESTED = "review_requested";
+    const MEMBER_ACCESS_REQUESTED = "member_access_requested";
+    const REVIEW_SUBMITTED = "review_submitted";
+    const OKR_CHECKIN_REQUESTED = "okr_checkin_requested";
 }

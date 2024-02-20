@@ -13,6 +13,13 @@ class CiRunnerEdgeQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectEditUrl()
+    {
+        $this->selectField("editUrl");
+
+        return $this;
+    }
+
     public function selectNode(CiRunnerEdgeNodeArgumentsObject $argsObject = null)
     {
         $object = new CiRunnerQueryObject("node");

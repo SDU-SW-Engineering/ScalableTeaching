@@ -6,18 +6,18 @@ class GroupQueryObject extends QueryObject
 {
     const OBJECT_NAME = "Group";
 
-    public function selectActualRepositorySizeLimit()
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.8.
+     */
+    public function selectAchievements(GroupAchievementsArgumentsObject $argsObject = null)
     {
-        $this->selectField("actualRepositorySizeLimit");
+        $object = new AchievementConnectionQueryObject("achievements");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
 
-        return $this;
-    }
-
-    public function selectAdditionalPurchasedStorageSize()
-    {
-        $this->selectField("additionalPurchasedStorageSize");
-
-        return $this;
+        return $object;
     }
 
     public function selectAutoDevopsEnabled()
@@ -27,16 +27,20 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectAutocompleteUsers(GroupAutocompleteUsersArgumentsObject $argsObject = null)
+    {
+        $object = new AutocompletedUserQueryObject("autocompleteUsers");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectAvatarUrl()
     {
         $this->selectField("avatarUrl");
-
-        return $this;
-    }
-
-    public function selectBillableMembersCount()
-    {
-        $this->selectField("billableMembersCount");
 
         return $this;
     }
@@ -63,9 +67,9 @@ class GroupQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectCodeCoverageActivities(GroupCodeCoverageActivitiesArgumentsObject $argsObject = null)
+    public function selectCiVariables(GroupCiVariablesArgumentsObject $argsObject = null)
     {
-        $object = new CodeCoverageActivityConnectionQueryObject("codeCoverageActivities");
+        $object = new CiGroupVariableConnectionQueryObject("ciVariables");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -74,9 +78,9 @@ class GroupQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectComplianceFrameworks(GroupComplianceFrameworksArgumentsObject $argsObject = null)
+    public function selectContactStateCounts(GroupContactStateCountsArgumentsObject $argsObject = null)
     {
-        $object = new ComplianceFrameworkConnectionQueryObject("complianceFrameworks");
+        $object = new ContactStateCountsQueryObject("contactStateCounts");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -114,9 +118,9 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectContainsLockedProjects()
+    public function selectCrossProjectPipelineAvailable()
     {
-        $this->selectField("containsLockedProjects");
+        $this->selectField("crossProjectPipelineAvailable");
 
         return $this;
     }
@@ -124,6 +128,17 @@ class GroupQueryObject extends QueryObject
     public function selectCustomEmoji(GroupCustomEmojiArgumentsObject $argsObject = null)
     {
         $object = new CustomEmojiConnectionQueryObject("customEmoji");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectDataTransfer(GroupDataTransferArgumentsObject $argsObject = null)
+    {
+        $object = new GroupDataTransferQueryObject("dataTransfer");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -204,6 +219,23 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectDependencyProxyTotalSizeBytes()
+    {
+        $this->selectField("dependencyProxyTotalSizeBytes");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use `dependencyProxyTotalSizeBytes`. Deprecated in 16.1.
+     */
+    public function selectDependencyProxyTotalSizeInBytes()
+    {
+        $this->selectField("dependencyProxyTotalSizeInBytes");
+
+        return $this;
+    }
+
     public function selectDescendantGroups(GroupDescendantGroupsArgumentsObject $argsObject = null)
     {
         $object = new GroupConnectionQueryObject("descendantGroups");
@@ -213,6 +245,13 @@ class GroupQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectDescendantGroupsCount()
+    {
+        $this->selectField("descendantGroupsCount");
+
+        return $this;
     }
 
     public function selectDescription()
@@ -229,17 +268,6 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectDora(GroupDoraArgumentsObject $argsObject = null)
-    {
-        $object = new DoraQueryObject("dora");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectEmailsDisabled()
     {
         $this->selectField("emailsDisabled");
@@ -247,60 +275,16 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectEpic(GroupEpicArgumentsObject $argsObject = null)
+    public function selectEmailsEnabled()
     {
-        $object = new EpicQueryObject("epic");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectEpicBoard(GroupEpicBoardArgumentsObject $argsObject = null)
-    {
-        $object = new EpicBoardQueryObject("epicBoard");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectEpicBoards(GroupEpicBoardsArgumentsObject $argsObject = null)
-    {
-        $object = new EpicBoardConnectionQueryObject("epicBoards");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectEpics(GroupEpicsArgumentsObject $argsObject = null)
-    {
-        $object = new EpicConnectionQueryObject("epics");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectEpicsEnabled()
-    {
-        $this->selectField("epicsEnabled");
+        $this->selectField("emailsEnabled");
 
         return $this;
     }
 
-    public function selectExternalAuditEventDestinations(GroupExternalAuditEventDestinationsArgumentsObject $argsObject = null)
+    public function selectEnvironmentScopes(GroupEnvironmentScopesArgumentsObject $argsObject = null)
     {
-        $object = new ExternalAuditEventDestinationConnectionQueryObject("externalAuditEventDestinations");
+        $object = new CiGroupEnvironmentScopeConnectionQueryObject("environmentScopes");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -334,6 +318,13 @@ class GroupQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectGroupMembersCount()
+    {
+        $this->selectField("groupMembersCount");
+
+        return $this;
+    }
+
     public function selectId()
     {
         $this->selectField("id");
@@ -341,38 +332,9 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectIsTemporaryStorageIncreaseEnabled()
-    {
-        $this->selectField("isTemporaryStorageIncreaseEnabled");
-
-        return $this;
-    }
-
     public function selectIssues(GroupIssuesArgumentsObject $argsObject = null)
     {
         $object = new IssueConnectionQueryObject("issues");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectIterationCadences(GroupIterationCadencesArgumentsObject $argsObject = null)
-    {
-        $object = new IterationCadenceConnectionQueryObject("iterationCadences");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectIterations(GroupIterationsArgumentsObject $argsObject = null)
-    {
-        $object = new IterationConnectionQueryObject("iterations");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -410,6 +372,31 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectLockMathRenderingLimitsEnabled()
+    {
+        $this->selectField("lockMathRenderingLimitsEnabled");
+
+        return $this;
+    }
+
+    public function selectMathRenderingLimitsEnabled()
+    {
+        $this->selectField("mathRenderingLimitsEnabled");
+
+        return $this;
+    }
+
+    public function selectMaxAccessLevel(GroupMaxAccessLevelArgumentsObject $argsObject = null)
+    {
+        $object = new AccessLevelQueryObject("maxAccessLevel");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectMentionsDisabled()
     {
         $this->selectField("mentionsDisabled");
@@ -444,6 +431,17 @@ class GroupQueryObject extends QueryObject
         $this->selectField("name");
 
         return $this;
+    }
+
+    public function selectOrganizationStateCounts(GroupOrganizationStateCountsArgumentsObject $argsObject = null)
+    {
+        $object = new OrganizationStateCountsQueryObject("organizationStateCounts");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectOrganizations(GroupOrganizationsArgumentsObject $argsObject = null)
@@ -515,6 +513,13 @@ class GroupQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectProjectsCount()
+    {
+        $this->selectField("projectsCount");
+
+        return $this;
+    }
+
     public function selectRecentIssueBoards(GroupRecentIssueBoardsArgumentsObject $argsObject = null)
     {
         $object = new BoardConnectionQueryObject("recentIssueBoards");
@@ -526,11 +531,15 @@ class GroupQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectRepositorySizeExcessProjectCount()
+    public function selectReleases(GroupReleasesArgumentsObject $argsObject = null)
     {
-        $this->selectField("repositorySizeExcessProjectCount");
+        $object = new ReleaseConnectionQueryObject("releases");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
 
-        return $this;
+        return $object;
     }
 
     public function selectRequestAccessEnabled()
@@ -583,24 +592,6 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectStats(GroupStatsArgumentsObject $argsObject = null)
-    {
-        $object = new GroupStatsQueryObject("stats");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectStorageSizeLimit()
-    {
-        $this->selectField("storageSizeLimit");
-
-        return $this;
-    }
-
     public function selectSubgroupCreationLevel()
     {
         $this->selectField("subgroupCreationLevel");
@@ -608,11 +599,18 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectTemporaryStorageIncreaseEndsOn()
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.3.
+     */
+    public function selectTimelogCategories(GroupTimelogCategoriesArgumentsObject $argsObject = null)
     {
-        $this->selectField("temporaryStorageIncreaseEndsOn");
+        $object = new TimeTrackingTimelogCategoryConnectionQueryObject("timelogCategories");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
 
-        return $this;
+        return $object;
     }
 
     public function selectTimelogs(GroupTimelogsArgumentsObject $argsObject = null)
@@ -624,20 +622,6 @@ class GroupQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
-    }
-
-    public function selectTotalRepositorySize()
-    {
-        $this->selectField("totalRepositorySize");
-
-        return $this;
-    }
-
-    public function selectTotalRepositorySizeExcess()
-    {
-        $this->selectField("totalRepositorySizeExcess");
-
-        return $this;
     }
 
     public function selectTwoFactorGracePeriod()
@@ -665,65 +649,63 @@ class GroupQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectVulnerabilities(GroupVulnerabilitiesArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerabilityConnectionQueryObject("vulnerabilities");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectVulnerabilitiesCountByDay(GroupVulnerabilitiesCountByDayArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerabilitiesCountByDayConnectionQueryObject("vulnerabilitiesCountByDay");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectVulnerabilityGrades(GroupVulnerabilityGradesArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerableProjectsByGradeQueryObject("vulnerabilityGrades");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectVulnerabilityScanners(GroupVulnerabilityScannersArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerabilityScannerConnectionQueryObject("vulnerabilityScanners");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectVulnerabilitySeveritiesCount(GroupVulnerabilitySeveritiesCountArgumentsObject $argsObject = null)
-    {
-        $object = new VulnerabilitySeveritiesCountQueryObject("vulnerabilitySeveritiesCount");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectWebUrl()
     {
         $this->selectField("webUrl");
 
         return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.4.
+     */
+    public function selectWorkItem(GroupWorkItemArgumentsObject $argsObject = null)
+    {
+        $object = new WorkItemQueryObject("workItem");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.7.
+     */
+    public function selectWorkItemStateCounts(GroupWorkItemStateCountsArgumentsObject $argsObject = null)
+    {
+        $object = new WorkItemStateCountsTypeQueryObject("workItemStateCounts");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectWorkItemTypes(GroupWorkItemTypesArgumentsObject $argsObject = null)
+    {
+        $object = new WorkItemTypeConnectionQueryObject("workItemTypes");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.3.
+     */
+    public function selectWorkItems(GroupWorkItemsArgumentsObject $argsObject = null)
+    {
+        $object = new WorkItemConnectionQueryObject("workItems");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 }

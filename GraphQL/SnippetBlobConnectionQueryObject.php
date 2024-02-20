@@ -17,6 +17,13 @@ class SnippetBlobConnectionQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectHasUnretrievableBlobs()
+    {
+        $this->selectField("hasUnretrievableBlobs");
+
+        return $this;
+    }
+
     public function selectNodes(SnippetBlobConnectionNodesArgumentsObject $argsObject = null)
     {
         $object = new SnippetBlobQueryObject("nodes");

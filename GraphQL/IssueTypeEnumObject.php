@@ -8,4 +8,5 @@ class IssueTypeEnumObject extends EnumObject
     const INCIDENT = "INCIDENT";
     const TEST_CASE = "TEST_CASE";
     const REQUIREMENT = "REQUIREMENT";
+    const TASK = "TASK";
 }

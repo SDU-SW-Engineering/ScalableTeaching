@@ -6,17 +6,6 @@ class UserMergeRequestInteractionQueryObject extends QueryObject
 {
     const OBJECT_NAME = "UserMergeRequestInteraction";
 
-    public function selectApplicableApprovalRules(UserMergeRequestInteractionApplicableApprovalRulesArgumentsObject $argsObject = null)
-    {
-        $object = new ApprovalRuleQueryObject("applicableApprovalRules");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectApproved()
     {
         $this->selectField("approved");

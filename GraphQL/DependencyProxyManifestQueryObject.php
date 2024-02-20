@@ -48,6 +48,13 @@ class DependencyProxyManifestQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectStatus()
+    {
+        $this->selectField("status");
+
+        return $this;
+    }
+
     public function selectUpdatedAt()
     {
         $this->selectField("updatedAt");

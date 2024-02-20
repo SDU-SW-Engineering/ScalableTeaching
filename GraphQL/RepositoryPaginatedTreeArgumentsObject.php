@@ -2,11 +2,14 @@
 
 namespace GraphQL\SchemaObject;
 
+use GraphQL\RawObject;
+
 class RepositoryPaginatedTreeArgumentsObject extends ArgumentsObject
 {
     protected $path;
     protected $recursive;
     protected $ref;
+    protected $refType;
     protected $after;
     protected $before;
     protected $first;
@@ -29,6 +32,13 @@ class RepositoryPaginatedTreeArgumentsObject extends ArgumentsObject
     public function setRef($ref)
     {
         $this->ref = $ref;
+
+        return $this;
+    }
+
+    public function setRefType($refType)
+    {
+        $this->refType = new RawObject($refType);
 
         return $this;
     }

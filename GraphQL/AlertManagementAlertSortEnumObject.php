@@ -4,10 +4,6 @@ namespace GraphQL\SchemaObject;
 
 class AlertManagementAlertSortEnumObject extends EnumObject
 {
-    const UPDATED_DESC = "UPDATED_DESC";
-    const UPDATED_ASC = "UPDATED_ASC";
-    const CREATED_DESC = "CREATED_DESC";
-    const CREATED_ASC = "CREATED_ASC";
     const STARTED_AT_ASC = "STARTED_AT_ASC";
     const STARTED_AT_DESC = "STARTED_AT_DESC";
     const ENDED_AT_ASC = "ENDED_AT_ASC";
@@ -22,4 +18,8 @@ class AlertManagementAlertSortEnumObject extends EnumObject
     const SEVERITY_DESC = "SEVERITY_DESC";
     const STATUS_ASC = "STATUS_ASC";
     const STATUS_DESC = "STATUS_DESC";
+    const UPDATED_DESC = "UPDATED_DESC";
+    const UPDATED_ASC = "UPDATED_ASC";
+    const CREATED_DESC = "CREATED_DESC";
+    const CREATED_ASC = "CREATED_ASC";
 }

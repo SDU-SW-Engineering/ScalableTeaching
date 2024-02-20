@@ -4,10 +4,18 @@ namespace GraphQL\SchemaObject;
 
 class GroupCustomEmojiArgumentsObject extends ArgumentsObject
 {
+    protected $includeAncestorGroups;
     protected $after;
     protected $before;
     protected $first;
     protected $last;
+
+    public function setIncludeAncestorGroups($includeAncestorGroups)
+    {
+        $this->includeAncestorGroups = $includeAncestorGroups;
+
+        return $this;
+    }
 
     public function setAfter($after)
     {

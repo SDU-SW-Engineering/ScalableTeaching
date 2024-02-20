@@ -7,37 +7,121 @@ use GraphQL\RawObject;
 class ProjectIssueArgumentsObject extends ArgumentsObject
 {
     protected $search;
+    protected $in;
+    protected $assigneeId;
+    protected $assigneeUsernames;
+    protected $assigneeWildcardId;
+    protected $authorUsername;
+    protected $closedAfter;
+    protected $closedBefore;
+    protected $confidential;
+    protected $createdAfter;
+    protected $createdBefore;
+    protected $crmContactId;
+    protected $crmOrganizationId;
     protected $iid;
     protected $iids;
     protected $labelName;
     protected $milestoneTitle;
-    protected $authorUsername;
-    protected $assigneeUsernames;
-    protected $assigneeId;
-    protected $createdBefore;
-    protected $createdAfter;
-    protected $updatedBefore;
-    protected $updatedAfter;
-    protected $closedBefore;
-    protected $closedAfter;
-    protected $types;
     protected $milestoneWildcardId;
     protected $myReactionEmoji;
-    protected $confidential;
     protected $not;
+    protected $or;
+    protected $types;
+    protected $updatedAfter;
+    protected $updatedBefore;
     protected $sort;
     protected $state;
-    protected $iterationId;
-    protected $iterationWildcardId;
-    protected $epicId;
-    protected $includeSubepics;
-    protected $weight;
     protected $releaseTag;
     protected $releaseTagWildcardId;
 
     public function setSearch($search)
     {
         $this->search = $search;
+
+        return $this;
+    }
+
+    public function setIn(array $in)
+    {
+        $this->in = $in;
+
+        return $this;
+    }
+
+    public function setAssigneeId($assigneeId)
+    {
+        $this->assigneeId = $assigneeId;
+
+        return $this;
+    }
+
+    public function setAssigneeUsernames(array $assigneeUsernames)
+    {
+        $this->assigneeUsernames = $assigneeUsernames;
+
+        return $this;
+    }
+
+    public function setAssigneeWildcardId($assigneeWildcardId)
+    {
+        $this->assigneeWildcardId = new RawObject($assigneeWildcardId);
+
+        return $this;
+    }
+
+    public function setAuthorUsername($authorUsername)
+    {
+        $this->authorUsername = $authorUsername;
+
+        return $this;
+    }
+
+    public function setClosedAfter($closedAfter)
+    {
+        $this->closedAfter = $closedAfter;
+
+        return $this;
+    }
+
+    public function setClosedBefore($closedBefore)
+    {
+        $this->closedBefore = $closedBefore;
+
+        return $this;
+    }
+
+    public function setConfidential($confidential)
+    {
+        $this->confidential = $confidential;
+
+        return $this;
+    }
+
+    public function setCreatedAfter($createdAfter)
+    {
+        $this->createdAfter = $createdAfter;
+
+        return $this;
+    }
+
+    public function setCreatedBefore($createdBefore)
+    {
+        $this->createdBefore = $createdBefore;
+
+        return $this;
+    }
+
+    public function setCrmContactId($crmContactId)
+    {
+        $this->crmContactId = $crmContactId;
+
+        return $this;
+    }
+
+    public function setCrmOrganizationId($crmOrganizationId)
+    {
+        $this->crmOrganizationId = $crmOrganizationId;
 
         return $this;
     }
@@ -70,76 +154,6 @@ class ProjectIssueArgumentsObject extends ArgumentsObject
         return $this;
     }
 
-    public function setAuthorUsername($authorUsername)
-    {
-        $this->authorUsername = $authorUsername;
-
-        return $this;
-    }
-
-    public function setAssigneeUsernames(array $assigneeUsernames)
-    {
-        $this->assigneeUsernames = $assigneeUsernames;
-
-        return $this;
-    }
-
-    public function setAssigneeId($assigneeId)
-    {
-        $this->assigneeId = $assigneeId;
-
-        return $this;
-    }
-
-    public function setCreatedBefore($createdBefore)
-    {
-        $this->createdBefore = $createdBefore;
-
-        return $this;
-    }
-
-    public function setCreatedAfter($createdAfter)
-    {
-        $this->createdAfter = $createdAfter;
-
-        return $this;
-    }
-
-    public function setUpdatedBefore($updatedBefore)
-    {
-        $this->updatedBefore = $updatedBefore;
-
-        return $this;
-    }
-
-    public function setUpdatedAfter($updatedAfter)
-    {
-        $this->updatedAfter = $updatedAfter;
-
-        return $this;
-    }
-
-    public function setClosedBefore($closedBefore)
-    {
-        $this->closedBefore = $closedBefore;
-
-        return $this;
-    }
-
-    public function setClosedAfter($closedAfter)
-    {
-        $this->closedAfter = $closedAfter;
-
-        return $this;
-    }
-
-    public function setTypes(array $types)
-    {
-        $this->types = $types;
-
-        return $this;
-    }
-
     public function setMilestoneWildcardId($milestoneWildcardId)
     {
         $this->milestoneWildcardId = new RawObject($milestoneWildcardId);
@@ -154,16 +168,37 @@ class ProjectIssueArgumentsObject extends ArgumentsObject
         return $this;
     }
 
-    public function setConfidential($confidential)
+    public function setNot(NegatedIssueFilterInputInputObject $negatedIssueFilterInputInputObject)
     {
-        $this->confidential = $confidential;
+        $this->not = $negatedIssueFilterInputInputObject;
 
         return $this;
     }
 
-    public function setNot(NegatedIssueFilterInputInputObject $negatedIssueFilterInputInputObject)
+    public function setOr(UnionedIssueFilterInputInputObject $unionedIssueFilterInputInputObject)
     {
-        $this->not = $negatedIssueFilterInputInputObject;
+        $this->or = $unionedIssueFilterInputInputObject;
+
+        return $this;
+    }
+
+    public function setTypes(array $types)
+    {
+        $this->types = $types;
+
+        return $this;
+    }
+
+    public function setUpdatedAfter($updatedAfter)
+    {
+        $this->updatedAfter = $updatedAfter;
+
+        return $this;
+    }
+
+    public function setUpdatedBefore($updatedBefore)
+    {
+        $this->updatedBefore = $updatedBefore;
 
         return $this;
     }
@@ -178,41 +213,6 @@ class ProjectIssueArgumentsObject extends ArgumentsObject
     public function setState($issuableState)
     {
         $this->state = new RawObject($issuableState);
-
-        return $this;
-    }
-
-    public function setIterationId(array $iterationId)
-    {
-        $this->iterationId = $iterationId;
-
-        return $this;
-    }
-
-    public function setIterationWildcardId($iterationWildcardId)
-    {
-        $this->iterationWildcardId = new RawObject($iterationWildcardId);
-
-        return $this;
-    }
-
-    public function setEpicId($epicId)
-    {
-        $this->epicId = $epicId;
-
-        return $this;
-    }
-
-    public function setIncludeSubepics($includeSubepics)
-    {
-        $this->includeSubepics = $includeSubepics;
-
-        return $this;
-    }
-
-    public function setWeight($weight)
-    {
-        $this->weight = $weight;
 
         return $this;
     }

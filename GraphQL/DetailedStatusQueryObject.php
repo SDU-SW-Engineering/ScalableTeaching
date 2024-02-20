@@ -31,6 +31,9 @@ class DetailedStatusQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated The `group` attribute is deprecated. Use `name` instead. Deprecated in 16.4.
+     */
     public function selectGroup()
     {
         $this->selectField("group");
@@ -45,6 +48,9 @@ class DetailedStatusQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated The `icon` attribute is deprecated. Use `name` to identify the status to display instead. Deprecated in 16.4.
+     */
     public function selectIcon()
     {
         $this->selectField("icon");
@@ -66,6 +72,16 @@ class DetailedStatusQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectName()
+    {
+        $this->selectField("name");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated The `text` attribute is being deprecated. Use `label` instead. Deprecated in 16.4.
+     */
     public function selectText()
     {
         $this->selectField("text");

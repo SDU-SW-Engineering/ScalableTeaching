@@ -28,6 +28,17 @@ class SnippetQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectCommenters(SnippetCommentersArgumentsObject $argsObject = null)
+    {
+        $object = new UserCoreConnectionQueryObject("commenters");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectCreatedAt()
     {
         $this->selectField("createdAt");
@@ -63,6 +74,13 @@ class SnippetQueryObject extends QueryObject
     public function selectFileName()
     {
         $this->selectField("fileName");
+
+        return $this;
+    }
+
+    public function selectHidden()
+    {
+        $this->selectField("hidden");
 
         return $this;
     }

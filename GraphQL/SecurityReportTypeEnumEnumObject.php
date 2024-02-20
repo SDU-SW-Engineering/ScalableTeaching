@@ -6,6 +6,7 @@ class SecurityReportTypeEnumEnumObject extends EnumObject
 {
     const SAST = "SAST";
     const SAST_IAC = "SAST_IAC";
+    const BREACH_AND_ATTACK_SIMULATION = "BREACH_AND_ATTACK_SIMULATION";
     const DAST = "DAST";
     const DEPENDENCY_SCANNING = "DEPENDENCY_SCANNING";
     const CONTAINER_SCANNING = "CONTAINER_SCANNING";

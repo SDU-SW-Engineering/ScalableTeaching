@@ -6,23 +6,12 @@ class NamespaceQueryObject extends QueryObject
 {
     const OBJECT_NAME = "Namespace";
 
-    public function selectActualRepositorySizeLimit()
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.8.
+     */
+    public function selectAchievements(NamespaceAchievementsArgumentsObject $argsObject = null)
     {
-        $this->selectField("actualRepositorySizeLimit");
-
-        return $this;
-    }
-
-    public function selectAdditionalPurchasedStorageSize()
-    {
-        $this->selectField("additionalPurchasedStorageSize");
-
-        return $this;
-    }
-
-    public function selectComplianceFrameworks(NamespaceComplianceFrameworksArgumentsObject $argsObject = null)
-    {
-        $object = new ComplianceFrameworkConnectionQueryObject("complianceFrameworks");
+        $object = new AchievementConnectionQueryObject("achievements");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -31,9 +20,9 @@ class NamespaceQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectContainsLockedProjects()
+    public function selectCrossProjectPipelineAvailable()
     {
-        $this->selectField("containsLockedProjects");
+        $this->selectField("crossProjectPipelineAvailable");
 
         return $this;
     }
@@ -69,13 +58,6 @@ class NamespaceQueryObject extends QueryObject
     public function selectId()
     {
         $this->selectField("id");
-
-        return $this;
-    }
-
-    public function selectIsTemporaryStorageIncreaseEnabled()
-    {
-        $this->selectField("isTemporaryStorageIncreaseEnabled");
 
         return $this;
     }
@@ -123,13 +105,6 @@ class NamespaceQueryObject extends QueryObject
         return $object;
     }
 
-    public function selectRepositorySizeExcessProjectCount()
-    {
-        $this->selectField("repositorySizeExcessProjectCount");
-
-        return $this;
-    }
-
     public function selectRequestAccessEnabled()
     {
         $this->selectField("requestAccessEnabled");
@@ -155,32 +130,18 @@ class NamespaceQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectStorageSizeLimit()
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.3.
+     */
+    public function selectTimelogCategories(NamespaceTimelogCategoriesArgumentsObject $argsObject = null)
     {
-        $this->selectField("storageSizeLimit");
+        $object = new TimeTrackingTimelogCategoryConnectionQueryObject("timelogCategories");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
 
-        return $this;
-    }
-
-    public function selectTemporaryStorageIncreaseEndsOn()
-    {
-        $this->selectField("temporaryStorageIncreaseEndsOn");
-
-        return $this;
-    }
-
-    public function selectTotalRepositorySize()
-    {
-        $this->selectField("totalRepositorySize");
-
-        return $this;
-    }
-
-    public function selectTotalRepositorySizeExcess()
-    {
-        $this->selectField("totalRepositorySizeExcess");
-
-        return $this;
+        return $object;
     }
 
     public function selectVisibility()
