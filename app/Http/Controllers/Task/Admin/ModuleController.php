@@ -29,7 +29,12 @@ class ModuleController extends Controller
         ]);
         $module = $moduleService->getById($validated['module']);
         if($moduleService->hasInstallProblems($module, $task->module_configuration) != null)
-            return redirect()->back();
+        {
+            return redirect()
+                ->back()
+                ->with("error", "You cannot install the " . $validated['module'] . " module due to errors.");
+        }
+
         $moduleService->install($module, $task);
 
         return redirect()->back();

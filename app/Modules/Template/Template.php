@@ -22,6 +22,6 @@ class Template extends Module
 
     public static function configRoutes(): void
     {
-        Route::get('pushes', [Controller::class, 'pushes']);
+        Route::get('pushes', [TemplateController::class, 'pushes'])->name("pushes");
     }
 }
