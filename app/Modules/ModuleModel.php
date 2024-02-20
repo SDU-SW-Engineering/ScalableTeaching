@@ -72,6 +72,7 @@ class ModuleModel implements \JsonSerializable
         if($module->settings() == null)
             return $model;
 
+        // TODO: Investigate if this even does something.
         foreach($settings['settings'] as $property => $value)
             $module->settings()->$property = $value;
 

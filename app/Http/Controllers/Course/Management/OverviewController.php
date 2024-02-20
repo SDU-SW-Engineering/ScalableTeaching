@@ -55,11 +55,12 @@ class OverviewController extends Controller
             'group' => ['string', 'nullable'],
         ]);
 
+        // TODO: Move this into the module space, where when LinkRepository module is installed, then set up this gitlab group.
+        // TODO: This requires a bit of a refactor, to add a new way to only trigger it on new installs and uninstalls, but not on loads from database.
         // Create a Gitlab sub-group for each task.
         $gitlabGroup = $sourceControl->createGroup($validated['name'], [
             "parent_id" => $course->gitlab_group_id,
         ]);
-
 
         /** @var Task $task */
         $task = $course->tasks()->create([
