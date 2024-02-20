@@ -17,7 +17,7 @@ class TemplateController extends BaseController
     {
         $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
 
-        return view('module-Template::pushes', compact('pushes'));
+        return view('module-Template::Pages.pushes', compact('pushes'));
     }
 }
 
