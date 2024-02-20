@@ -15,7 +15,7 @@ use Illuminate\View\View;
 use Maatwebsite\Excel\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class Controller extends BaseController
+class SubtasksController extends BaseController
 {
     public function subTasks(Course $course, Task $task): View
     {
