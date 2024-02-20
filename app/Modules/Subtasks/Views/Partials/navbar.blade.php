@@ -2,8 +2,8 @@
     <div class="flex gap-4">
         <a href="{{ route('courses.tasks.admin.subtasks.task-completion', [$course, $task]) }}"
            @class([
-                ' rounded transition-colors  h-full border px-4 flex items-center gap-2 ',
-                request()->is('*/modules/subtasks/task-completion') ? 'bg-lime-green-200 text-lime-green-800 hover:bg-lime-green-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+                'flex items-center font-medium  transition-colors text-sm rounded-lg px-4 py-3 gap-2',
+                request()->is('*/modules/subtasks/task-completion') ? 'bg-lime-green-200 text-lime-green-800 hover:bg-lime-green-300' : 'bg-white hover:bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-200 dark:hover:bg-gray-500'
             ])>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                 <path
@@ -13,8 +13,8 @@
         </a>
         <a href="{{ route('courses.tasks.admin.subtasks.aggregate-task-completion', [$course, $task]) }}"
            @class([
-                ' rounded transition-colors  h-full border px-4 flex items-center gap-2 ',
-                request()->is('*/modules/subtasks/task-completion/aggregate') ? 'bg-lime-green-200 text-lime-green-800 hover:bg-lime-green-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+                'flex items-center font-medium  transition-colors text-sm rounded-lg px-4 py-3 gap-2',
+                request()->is('*/modules/subtasks/task-completion/aggregate') ? 'bg-lime-green-200 text-lime-green-800 hover:bg-lime-green-300' : 'bg-white hover:bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-200 dark:hover:bg-gray-500'
             ])>
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 24 24"
                  style=";transform: ;msFilter:;">
@@ -26,7 +26,7 @@
     </div>
     <div class="h-full flex">
         <a href="{{ route('courses.tasks.admin.subtasks.export', [$course, $task]) }}"
-           class="bg-gray-200 rounded transition-colors hover:bg-gray-300 h-full border px-4 flex items-center gap-2 text-gray-600">
+           class="flex items-center font-medium  transition-colors text-sm rounded-lg px-4 py-3 gap-2 bg-white hover:bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-200 dark:hover:bg-gray-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 24 24"
                  style=";transform: ;msFilter:;">
                 <path
