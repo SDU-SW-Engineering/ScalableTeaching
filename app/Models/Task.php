@@ -60,6 +60,7 @@ use Illuminate\Support\Str;
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
  * @property-read EloquentCollection<int,TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
+ * @property-read Course $course
  * @property int|null $source_project_id
  * @property Carbon|null $starts_at
  * @property Carbon|null $ends_at
@@ -654,12 +655,12 @@ class Task extends Model
 
             /** @var Project $dbProject */
             $dbProject = $owner == null ? $this->projects()->create([
-                'project_id'        => $project['id'],
-                'repo_name'         => $project['name'],
+                'gitlab_project_id'        => $project['id'],
+                'repo_name'                => $project['name'],
             ]) : $owner->projects()->updateOrCreate([
-                'project_id'        => $project['id'],
-                'task_id'           => $this->id,
-                'repo_name'         => $project['name'],
+                'gitlab_project_id'        => $project['id'],
+                'task_id'                  => $this->id,
+                'repo_name'                => $project['name'],
             ]);
         } else
         {
