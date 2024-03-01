@@ -4,6 +4,7 @@ namespace App\Modules\Subtasks;
 
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\Module;
+use App\Modules\Template\Template;
 use Route;
 
 class Subtasks extends Module
@@ -14,9 +15,9 @@ class Subtasks extends Module
   <path fill-rule="evenodd" d="M12.75 3a.75.75 0 01.75-.75 8.25 8.25 0 018.25 8.25.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75V3z" clip-rule="evenodd" />
 </svg>
 ';
-    protected string $description = "Specify smaller subtasks that participants can complete.";
+    protected string $description = "Specify smaller subtasks that participants can complete. This module requires either the \"Automatic Grading\" or \"Subtask Grading and Feedback\" module installed, to allow grading subtasks.";
 
-    protected array $dependencies = [LinkRepository::class];
+    protected array $dependencies = [LinkRepository::class, Template::class];
 
 
     public static function configRoutes(): void
@@ -24,7 +25,7 @@ class Subtasks extends Module
         Route::get('/', [SubtasksController::class, 'subTasks'])->name('subTasks');
         Route::post('/', [SubtasksController::class, 'saveSubTasks'])->name('subTasks');
         Route::get('export-results', [SubtasksController::class, 'exportResults'])->name('export');
-        Route::get('task-completion', [SubtasksController::class, 'taskCompletion'])->name('task-completion');
+        Route::get('task-completion', [SubtasksController::class, 'studentTaskCompletion'])->name('task-completion');
         Route::get('task-completion/aggregate', [SubtasksController::class, 'aggregatedTaskCompletion'])->name('aggregate-task-completion');
     }
 }

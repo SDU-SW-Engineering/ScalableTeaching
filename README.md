@@ -79,7 +79,10 @@ Run `php artisan serve` to start the laravel application.
 Run `yarn formatter-server` to start the formatter server, which is required for formatting markdown descriptions.
 
 #### Database
-Start the development database
+Start the database.
+
+This can be done by running `docker compose up`, which runs a development database and a in-memory MySQL test database, to avoid having to re-seed everytime the test are ran.  
+Once you're done, you can shut them down by running `docker compose down`
 
 
 ### FAQ

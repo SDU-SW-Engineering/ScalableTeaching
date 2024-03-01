@@ -9,13 +9,13 @@
                     <div class="overflow-hidden">
                         <table class="min-w-full text-left text-sm font-light">
                             <thead class="border-b font-medium dark:border-neutral-500">
-                            <tr>
-                                <th scope="col" class="px-4 py-2 text-sm">Submission</th>
-                                @foreach($groups as $group)
-                                    <th scope="col" class="px-4 py-2 text-sm text-center">{{ $group }}</th>
-                                @endforeach
-                                <th scope="col" class="px-4 py-2 text-sm">Total</th>
-                            </tr>
+                                <tr>
+                                    <th scope="col" class="px-4 py-2 text-sm">Submission</th>
+                                    @foreach($groups as $group)
+                                        <th scope="col" class="px-4 py-2 text-sm text-center">{{ $group }}</th>
+                                    @endforeach
+                                    <th scope="col" class="px-4 py-2 text-sm text-center">Total</th>
+                                </tr>
                             </thead>
                             <tbody>
                             @foreach($projects as $project)
@@ -24,7 +24,7 @@
                                     @foreach($groups  as $id => $group)
                                         <td>{{ $project['groups']->has($id) ? $project['groups'][$id]->sum('points'): "0" }}</td>
                                     @endforeach
-                                    <td class="font-medium">{{ $project['groups']->reduce(fn($carry, $cur) => $carry + $cur->sum('points'), 0) }}</td>
+                                    <td class="font-bold">{{ $project['groups']->reduce(fn($carry, $cur) => $carry + $cur->sum('points'), 0) }}</td>
                                 </tr>
                             @endforeach
                             </tbody>

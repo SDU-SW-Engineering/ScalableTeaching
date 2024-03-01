@@ -2,10 +2,11 @@
     <div>
         <div class="flex w-full flex-col justify-center items-center">
             <span class="font-bold text-4xl">{{ total }}</span>
-            <span class="font-thin text-xl">total possible points</span>
+            <span class="font-thin text-xl">Total possible points</span>
             <button
                 @click="saveChanges()"
-                class="bg-lime-green-300 my-4 flex items-center justify-center text-lime-green-800 py-2 px-4 rounded hover:bg-lime-green-400"
+                :disabled="total === 0"
+                :class="[total === 0 ? 'disabled-btn' : 'active-btn', 'flex items-center my-4']"
             >
                 <svg
                     v-if="saving"
@@ -77,7 +78,7 @@
                 <input
                     v-model="group.name"
                     placeholder="Group name..."
-                    class="bg-gray-200 font-bold border-none rounded w-96"
+                    class="bg-gray-200 font-bold border-none rounded w-96 text-black"
                     type="text"
                 />
                 <span class="font-thin text-lg text-lime-green-600"
@@ -92,7 +93,7 @@
                     <input
                         type="text"
                         placeholder="Some subtask..."
-                        class="bg-gray-100 border-none text-black w-1/2 p-0.5 text-sm"
+                        class="bg-gray-200 border-none rounded text-black w-1/2 p-0.5 text-sm"
                         v-model="task.name"
                     />
                     <div class="w-1/2 flex items-center gap-4 justify-end">
@@ -231,7 +232,7 @@ export default {
                 alert(e.response.data.message);
             } finally {
                 this.saving = false;
-                setTimeout(() => (this.saved = false), 2000);
+                setTimeout(() => (this.saved = false), 4000);
             }
         },
         preventNav(e) {
