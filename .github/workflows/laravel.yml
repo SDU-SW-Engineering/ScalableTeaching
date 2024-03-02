@@ -14,8 +14,8 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: secret
-          MYSQL_DATABASE: scalable
+          MYSQL_ROOT_PASSWORD: testroot
+          MYSQL_DATABASE: laravel
         ports:
           - 3306:3306
     steps:
