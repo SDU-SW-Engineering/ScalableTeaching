@@ -14,10 +14,10 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: secret
-          MYSQL_DATABASE: scalable
+          MYSQL_ROOT_PASSWORD: testroot
+          MYSQL_DATABASE: test
         ports:
-          - 3306:3306
+          - 3307:3306
     steps:
       - uses: shivammathur/setup-php@v2
         with:
