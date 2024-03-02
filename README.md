@@ -48,7 +48,7 @@ Additionally, if you want to populate it with dummy data, add `--seed` to the co
 
 To enhance the developer workflow, this repository includes various tools to ensure a high quality of code.
 Specifically:
-- `php-cs-fixer` that ensures a consistent code style. Install php-cs-fixer globally by running `composer global require friendsofphp/php-cs-fixer`, after which you can run `./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix` within the root of this project to fix issues.
+- `php-cs-fixer` that ensures a consistent code style. Install php-cs-fixer globally by running `composer global require friendsofphp/php-cs-fixer`, after which you can run `php-cs-fixer fix` within the root of this project to fix issues.
 - `larastan` that runs a suite of static analyses. You may check your code for pitfalls using the `php vendor/bin/phpstan`
 
 A large portion of the code base is also covered by both unit and feature tests, these can be inspected within the `/tests` directory. The tests are written using the [PEST PHP testing framework](https://pestphp.com/).
@@ -84,6 +84,14 @@ Start the database.
 This can be done by running `docker compose up`, which runs a development database and a in-memory MySQL test database, to avoid having to re-seed everytime the test are ran.  
 Once you're done, you can shut them down by running `docker compose down`
 
+#### Bonus
+If you're a Mac user, you can use [laravel valet](https://laravel.com/docs/9.x/valet#installation) to share your laravel app to the outside world, through [ngrok](https://ngrok.com)'s free tier, or expose.  
+On your ngrok account, you will find a static domain, you can use this to ensure it's the same URL every time you spin it up.  
+
+**_Note: I would not recommend developing against this tunnel connection, but purely use it for testing gitlab webhook events._**
+
+After installed, you can run `valet share --domain=<your static domain> --region=eu` in the root of the project, which will spin up a tunnel connection for the static url.  
+You can then set this static url in your `.env` file, the key is `VALET_DOMAIN`, if this is set and it's a local environment, this static url will be used for gitlab webhooks, so you can test the events produced by gitlab.
 
 ### FAQ
 
@@ -91,3 +99,8 @@ Once you're done, you can shut them down by running `docker compose down`
 This means your PHP is configured with a memory limit that is too low to run the tests.
 
 Update it by going to your php.ini file, and then searching for the field `memory_limit` and upping it. (Recommendation is to set it to `1G`)
+
+#### Command not found: php-cs-fixer (Mac/Linux)
+Ensure you have updated your . profile, for your terminal.
+
+Example: `export PATH=<laravel vendor bin location>:$PATH`, for me it was under `~/.composer/vendor/bin`.
