@@ -15,7 +15,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: testroot
-          MYSQL_DATABASE: laravel
+          MYSQL_DATABASE: test
         ports:
           - 3307:3306
     steps:
