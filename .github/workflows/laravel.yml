@@ -17,7 +17,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: testroot
           MYSQL_DATABASE: laravel
         ports:
-          - 3306:3306
+          - 3307:3306
     steps:
       - uses: shivammathur/setup-php@v2
         with:
