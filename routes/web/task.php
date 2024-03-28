@@ -3,7 +3,6 @@
 use App\Http\Controllers\Task\Admin\GradingController;
 use App\Http\Controllers\Task\Admin\ModuleController;
 use App\Http\Controllers\Task\Admin\OverviewController;
-use App\Http\Controllers\Task\Admin\ProgressionController;
 use App\Http\Controllers\Task\Admin\SettingsController;
 use App\Http\Controllers\Task\Admin\StudentController;
 
@@ -14,7 +13,6 @@ Route::prefix('{task}')->group(function() {
 
         Route::controller(StudentController::class)->group(function() {
             Route::get('students', 'students')->name('students');
-            Route::get('builds', 'builds')->name('builds');
             Route::get('downloads', 'downloads')->name('downloads');
             Route::get('log', 'log')->name('log');
         });
