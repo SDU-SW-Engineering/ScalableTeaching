@@ -34,11 +34,4 @@ class StudentController extends Controller
 
         return view('tasks.admin.builds', compact('course', 'task', 'dailyBuildsGraph', 'builds'));
     }
-
-    public function pushes(Course $course, Task $task) : View
-    {
-        $pushes = $task->pushes()->with(['project.ownable'])->latest()->paginate(50);
-
-        return view('tasks.admin.pushes', compact('pushes'));
-    }
 }
