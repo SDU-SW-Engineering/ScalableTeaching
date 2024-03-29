@@ -158,7 +158,9 @@ class ProjectController extends Controller
     public function validateProject(Course $course, Task $task, Project $project): RedirectResponse
     {
         if($project->final_commit_sha == null)
+        {
             return redirect()->back()->withErrors('Can\'t validate this project as it isn\' finished yet');
+        }
 
         $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
