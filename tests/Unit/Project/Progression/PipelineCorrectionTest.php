@@ -7,20 +7,31 @@ use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
+use App\Modules\AutomaticGrading\AutomaticGradingType;
 use App\ProjectStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->project = Project::factory()->for(Task::factory([
-        'correction_type' => CorrectionType::PipelineSuccess,
+    /** @var Task $task */
+    $task = Task::factory([
         'sub_tasks'       => [
             (new SubTask('11 Equals [10, 1]', 'test 11 equals [10, 1]'))->setIsRequired(true),
             new SubTask('9 Equals [5,2,2]', 'test 9 equals [5,2,2]'),
             (new SubTask('2 Equals [2]', 'test 2 equals [2]'))->setIsRequired(true),
         ],
-    ])->for(Course::factory()))->createQuietly();
+    ])->for(Course::factory())->make();
+
+    $task->module_configuration->addModule(AutomaticGrading::class);
+    $settings = new AutomaticGradingSettings();
+    $settings->gradingType = AutomaticGradingType::PIPELINE_SUCCESS->value;
+    $task->module_configuration->update(AutomaticGrading::class, $settings);
+    $task->save();
+
+    $this->project = Project::factory()->for($task)->createQuietly();
 });
 
 it('ensures projects to be active when no pipelines have been submitted', function () {

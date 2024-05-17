@@ -9,7 +9,7 @@ namespace App\Models\Enums;
 enum CorrectionType: string
 {
     case None = 'none';
-    case PipelineSuccess = 'pipeline_success';
+    case PipelineSuccess = 'pipeline_success'; // Replaced in favor of AutomaticGradingType::PIPELINE_SUCCESS
     case Manual = 'manual';
     case AllTasks = 'all_tasks';
     case RequiredTasks = 'required_tasks';

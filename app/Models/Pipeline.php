@@ -4,8 +4,9 @@ namespace App\Models;
 
 use App\Exceptions\PipelineException;
 use App\Models\Casts\SubTask;
-use App\Models\Enums\CorrectionType;
 use App\Models\Enums\PipelineStatusEnum;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -68,22 +70,38 @@ class Pipeline extends Model
 
     protected static function booted()
     {
-        static::created(function(Pipeline $pipeline) {
-            if($pipeline->project->task->correction_type != CorrectionType::PipelineSuccess)
-                return;
-
-            if($pipeline->status != PipelineStatusEnum::Success)
-                return;
-
-            $pipeline->project->update([
-                'status' => ProjectStatus::Finished,
-            ]);
+        static::created(function (Pipeline $pipeline) {
+            Pipeline::checkAutomaticGrading($pipeline);
         });
+    }
+
+    private static function checkAutomaticGrading(Pipeline $pipeline)
+    {
+        $automaticGradingModule = $pipeline->project->task->module_configuration->resolveModule(AutomaticGrading::class);
+        if ($automaticGradingModule == null)
+            return;
+
+
+        /** @var AutomaticGradingSettings $settings */
+        $settings = $automaticGradingModule->settings();
+        if ( ! $settings->isPipelineBased())
+        {
+            return;
+        }
+
+        if ($pipeline->status != PipelineStatusEnum::Success)
+            return;
+
+        Log::info("Pipeline {$pipeline->pipeline_id} is successful, automatically grading project {$pipeline->project_id}");
+
+        $pipeline->project->update([
+            'status' => ProjectStatus::Finished,
+        ]);
     }
 
     public function isUpgradable(PipelineStatusEnum $to): bool
     {
-        if( ! array_key_exists($this->status->value, static::$upgradable))
+        if ( ! array_key_exists($this->status->value, static::$upgradable))
             return false;
 
         return in_array($to, static::$upgradable[$this->status->value]);
@@ -106,10 +124,10 @@ class Pipeline extends Model
     public function process(Carbon $startedAt, PipelineStatusEnum $status, float $duration = null, float $queueDuration = null, array $succeedingBuilds = [])
     {
         throw_if(self::isOutsideTimeFrame($startedAt, $this->project), PipelineException::class, "Past deadline");
-        if( ! $this->isUpgradable($status))
+        if ( ! $this->isUpgradable($status))
             return;
 
-        DB::transaction(function() use ($succeedingBuilds, $queueDuration, $duration, $status) {
+        DB::transaction(function () use ($succeedingBuilds, $queueDuration, $duration, $status) {
             $this->update([
                 'status'         => $status->value,
                 'duration'       => $duration,
@@ -117,7 +135,7 @@ class Pipeline extends Model
             ]);
             $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getName() => $task]);
             $this->project->subTasks()->delete(); // reset subtasks
-            (new Collection($succeedingBuilds))->each(function($build) use ($tracking) {
+            (new Collection($succeedingBuilds))->each(function ($build) use ($tracking) {
                 /** @var SubTask $subTask */
                 $subTask = $tracking->get($build);
                 $this->project->subTasks()->firstOrCreate([
@@ -128,6 +146,8 @@ class Pipeline extends Model
                 ]);
             });
         });
+
+        Pipeline::checkAutomaticGrading($this);
     }
 
     /**

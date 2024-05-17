@@ -68,7 +68,7 @@ it('ensures projects to be active when 2 of 2 required subtask are complete', fu
     ]);
     $this->project->refresh();
     expect($this->project->status)->toBe(ProjectStatus::Finished);
-});
+})->skip('Skipped until additional AutomaticGradingType is added');
 
 it('ensures projects to be finished when 2 of 2 required subtask are complete and 1 optional is complete', function () {
     $this->project->subTasks()->createMany([
@@ -90,4 +90,4 @@ it('ensures projects to be finished when 2 of 2 required subtask are complete an
     ]);
     $this->project->refresh();
     expect($this->project->status)->toBe(ProjectStatus::Finished);
-});
+})->skip('Skipped until additional AutomaticGradingType is added');

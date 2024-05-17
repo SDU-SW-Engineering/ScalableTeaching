@@ -78,6 +78,9 @@ Vue.component("admin-preferences", () =>
     import("./components/Admin/Preferences/Preferences")
 );
 
+// Module configuration entries
+Vue.component("automatic-grading-configuration", () => import("./components/Tasks/Modules/AutomaticGrading/AutomaticGradingConfiguration"));
+
 const settings = {
     "t-rich-select": {
         component: TRichSelect,

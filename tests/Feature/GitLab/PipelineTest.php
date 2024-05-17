@@ -2,31 +2,44 @@
 
 use App\Models\Casts\SubTask;
 use App\Models\Course;
-use App\Models\Enums\CorrectionType;
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
+use App\Modules\AutomaticGrading\AutomaticGradingType;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\postJson;
 use function Pest\testDirectory;
 
-//uses(RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function() {
-    $this->project = Project::factory()->for(Task::factory([
-        'correction_type' => CorrectionType::PipelineSuccess,
+    /** @var Task $task */
+    $task = Task::factory([
         'sub_tasks'       => [
             new SubTask('test 11 equals [10, 1]', '11 Equals [10, 1]'),
             new SubTask('test 9 equals [5,2,2]', '9 Equals [5,2,2]'),
         ],
         'starts_at'       => Carbon::create(2022, 1, 21),
         'ends_at'         => Carbon::create(2022, 2, 3),
-    ])->for(Course::factory()))->createQuietly();
+    ])->for(Course::factory())->make();
+
+
+    $task->module_configuration->addModule(AutomaticGrading::class);
+    $settings = new AutomaticGradingSettings();
+    $settings->gradingType = AutomaticGradingType::PIPELINE_SUCCESS->value;
+    $task->module_configuration->update(AutomaticGrading::class, $settings);
+    $task->save();
+
+
+    $this->project = Project::factory()->for($task)->createQuietly();
     $this->pipelinePendingRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline1.json')), true);
     $this->pipelinePendingRequest['project']['id'] = $this->project->gitlab_project_id;
     $this->pipelineRunningRequest = json_decode(file_get_contents(testDirectory('Feature/GitLab/Stubs/Pipeline2.json')), true);
@@ -97,7 +110,7 @@ it('only accepts requests with correct GitLab headers', function() {
         'X-Gitlab-Token' => Project::token($this->project),
     ])->assertStatus(200);
 
-    assertDatabaseCount('pipelines', 0);
+    assertDatabaseCount('pipelines', 1);
 });
 
 it('rejects requests that are past the due date of the task', function() {
@@ -115,7 +128,7 @@ it('rejects requests that are past the due date of the task', function() {
         'X-Gitlab-Token' => Project::token($this->project),
     ])->assertStatus(400);
 
-    assertDatabaseCount('pipelines', 0);
+    assertDatabaseMissing('pipelines', ['project_id' => $this->project->id]);
 });
 
 it('rejects requests that are before the start date of the task', function() {
@@ -133,18 +146,13 @@ it('rejects requests that are before the start date of the task', function() {
         'X-Gitlab-Token' => Project::token($this->project),
     ])->assertStatus(400);
 
-    assertDatabaseCount('pipelines', 0);
+
+    assertDatabaseMissing('pipelines', ['project_id' => $this->project->id]);
 });
 
 it('stores a pipeline request', function() {
-    postJson(route('reporter'), $this->pipelinePendingRequest, [
-        'X-Gitlab-Event' => 'Pipeline Hook',
-        'X-Gitlab-Token' => Project::token($this->project),
-    ]);
+    sendPendingPipeline();
 
-    expect(Pipeline::where('project_id', $this->project->id)->exists())->toBeTrue();
-
-    assertDatabaseCount('pipelines', 1);
     assertDatabaseHas('pipelines', [
         'status'     => PipelineStatusEnum::Pending,
         'project_id' => $this->project->id,
@@ -286,6 +294,6 @@ it('ensures failing pipelines can be updated to a succeeding', function() {
     sendSucceedingPipeline();
 
     $pipeline->refresh();
-    expect($pipeline->project->status)->toEqual(ProjectStatus::Active);
+    expect($pipeline->project->status)->toEqual(ProjectStatus::Finished);
     expect($pipeline->status)->toEqual(PipelineStatusEnum::Success);
 });

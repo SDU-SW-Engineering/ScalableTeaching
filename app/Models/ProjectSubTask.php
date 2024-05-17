@@ -2,16 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Casts\SubTask;
 use App\Models\Enums\CorrectionType;
-use App\Models\Enums\PipelineStatusEnum;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use App\ProjectStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use InvalidArgumentException;
 
 /**
  * @property Project $project
@@ -27,6 +24,18 @@ class ProjectSubTask extends Model
         static::created(function(ProjectSubTask $projectSubTask) {
             if($projectSubTask->project->status == ProjectStatus::Finished)
                 return;
+
+            $automaticGradingModule = $projectSubTask->project->task->module_configuration->resolveModule(AutomaticGrading::class);
+            if ($automaticGradingModule == null)
+                return;
+
+            /** @var AutomaticGradingSettings $settings */
+            $settings = $automaticGradingModule->settings();
+            if ($settings->isPipelineBased())
+            {
+                // This case will be handled in the pipeline itself. See Pipeline#checkAutomaticGrading
+                return;
+            }
 
             $project = $projectSubTask->project;
             $isFinished = static::isFinished($project);

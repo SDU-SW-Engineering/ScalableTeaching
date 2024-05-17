@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\WebhookTypes;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
@@ -69,6 +70,7 @@ class WebhookController extends Controller
      */
     private function createPipeline(Project $project): Pipeline
     {
+        Log::info("Creating pipeline for project {$project->id} with status " . request('object_attributes.status'));
         /** @var Pipeline $pipeline */
         $pipeline = $project->pipelines()->create([
             'pipeline_id'    => request('object_attributes.id'),
