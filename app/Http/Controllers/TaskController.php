@@ -96,12 +96,13 @@ class TaskController extends Controller
         $download = $project?->download;
         $codeRoute = $download != null ? route('courses.tasks.show-editor', [$course, $task, $project, $download]) : null;
 
+
         return view('tasks.show', [
             'course'               => $course,
             'task'                 => $task->setHidden(['markdown_description']),
             'bg'                   => 'bg-gray-50 dark:bg-gray-600',
             'project'              => $project,
-            'subTasks'             => in_array($task->correction_type, [CorrectionType::NumberOfTasks, CorrectionType::PointsRequired, CorrectionType::AllTasks, CorrectionType::RequiredTasks, CorrectionType::Manual])
+            'subTasks'             => count($subTasks) > 0
                 ? ['list' => $subTasks, 'gradeDelegations' => $gradeDelegations]
                 : null,
             'progress'        => [
