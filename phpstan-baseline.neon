@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method App\\\\Exports\\\\SubtaskCompletionExport\\:\\:query\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Builder but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\<App\\\\Models\\\\Project\\>\\.$#"
-			count: 1
-			path: app/Exports/SubtaskCompletionExport.php
-
-		-
 			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$pivot\\.$#"
 			count: 1
 			path: app/Http/Resources/Groups/GroupInformation.php

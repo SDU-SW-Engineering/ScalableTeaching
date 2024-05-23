@@ -60,6 +60,7 @@ use Illuminate\Support\Collection;
  * @method static Builder|Project whereVerified($value)
  * @method static \Illuminate\Database\Query\Builder|Project withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Project withoutTrashed()
+ * @method Builder claimed()
  * @property Grade $grade
  * @property-read bool $isMissed
  * @property Collection<int,string> $validation_errors

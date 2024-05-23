@@ -15,7 +15,7 @@ use Illuminate\View\View;
 use Maatwebsite\Excel\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class Controller extends BaseController
+class SubtasksController extends BaseController
 {
     public function subTasks(Course $course, Task $task): View
     {
@@ -42,19 +42,15 @@ class Controller extends BaseController
             ->groupBy('sub_task_id')
             ->pluck('points', 'sub_task_id');
 
-        $maxPointsPerTask = $task->sub_tasks->all()->pluck('points', 'id');
-
-        $subtasks = $task->sub_tasks->all()->groupBy('group')->map(fn(Collection $subTasks, $group) => [
+        $subtaskGroups = $task->sub_tasks->all()->groupBy('group')->map(fn(Collection $subTasks, $group) => [
             'group'     => $group,
             'average'   => round($completionPercentages->filter(fn($v, $k) => $subTasks->pluck('id')->contains($k))->sum(), 2),
             'maxPoints' => $subTasks->sum(fn(SubTask $task) => $task->getPoints()),
-            'tasks'     => $subTasks->map(function(SubTask $subTask) use ($maxPointsPerTask, $completionPercentages) {
-                $taskAverage = $completionPercentages->has($subTask->getId()) ? $completionPercentages[$subTask->getId()] : 0;
-                $maxPoints = $maxPointsPerTask->get($subTask->getId());
+            'tasks'     => $subTasks->map(function(SubTask $subTask) use ($completionPercentages) {
+                $taskAverage = $completionPercentages[$subTask->getId()] ?? 0;
+                $maxPoints = $subTask->getPoints() ?? 0;
 
                 return [
-                    'id'         => $subTask->getId(),
-                    'isRequired' => $subTask->isRequired(),
                     'name'       => $subTask->getDisplayName(),
                     'maxPoints'  => $subTask->getPoints(),
                     'average'    => $taskAverage,
@@ -63,12 +59,10 @@ class Controller extends BaseController
             }),
         ]);
 
-
-        //die();
-        return view('module-Subtasks::Pages.taskCompletion', compact('subtasks', 'maxPointsPerTask'));
+        return view('module-Subtasks::Pages.aggregateTaskCompletion', compact('subtaskGroups'));
     }
 
-    public function taskCompletion(Course $course, Task $task): View
+    public function studentTaskCompletion(Course $course, Task $task): View
     {
         $subTasks = $task->sub_tasks->all()->keyBy('id');
         $projects = $task->projects()->claimed()->get()->map(function(Project $project) use ($subTasks) {

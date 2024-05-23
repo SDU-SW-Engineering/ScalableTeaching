@@ -2,7 +2,7 @@
 
 @section('adminContent')
     @include("module-Subtasks::Partials.navbar")
-    @foreach($subtasks as $subtaskGroup)
+    @foreach($subtaskGroups as $subtaskGroup)
         <div class="dark:bg-gray-800 bg-gray-100 border px-4 py-3 mb-4 rounded-lg shadow-sm">
             <div class="flex items-end justify-between">
                 <h1 class=" dark:text-white text-2xl">{{ $subtaskGroup['group'] }}</h1>
@@ -23,7 +23,11 @@
                                             $task['percentage'] >= 66 => 'bg-lime-green-400',
                                             $task['percentage'] >= 33 => 'bg-gray-400',
                                             default => 'bg-red-400'
-                                        } ]) style="width: {{ $task['percentage'] }}%">{{ round($task['average'], 2) }}</div>
+                                        } ]) style="width: {{ min($task['percentage'], 100) }}%">
+                                            @if($task['percentage'] > 0)
+                                                <span class="text-black font-bold">{{ round($task['average'], 2) }}</span>
+                                            @endif
+                                        </div>
                                     </div>
                                     <span class="text-light text-lime-green-700 dark:text-lime-green-100 w-12">{{ $task['maxPoints'] }} pts</span>
                                 </div>
