@@ -21,4 +21,9 @@ class AutomaticGradingSettings extends Settings
         return $this->gradingType == AutomaticGradingType::PIPELINE_SUCCESS->value;
     }
 
+    public function getGradingType(): AutomaticGradingType
+    {
+        return AutomaticGradingType::from($this->gradingType);
+    }
+
 }

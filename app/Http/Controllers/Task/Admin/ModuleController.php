@@ -9,6 +9,7 @@ use App\Modules\Module;
 use App\Modules\ModuleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use ReflectionClass;
 
@@ -59,6 +60,8 @@ class ModuleController extends Controller
      */
     public function doConfigure(Course $course, Task $task, Module $module, Request $request) : RedirectResponse
     {
+        Log::info("Updating configuration for module " . $module->identifier());
+
         $settings = $module->settings();
         if($settings == null)
             return redirect()->back();
@@ -67,7 +70,10 @@ class ModuleController extends Controller
         foreach($reflect->getProperties() as $property)
         {
             if($request->has($property->getName()))
+            {
+                Log::debug("Updating property " . $property->getName() . " to " . $request->get($property->getName()));
                 $property->setValue($settings, $request->get($property->getName()));
+            }
         }
         $task->module_configuration->update($module->identifier(), $settings);
         $task->save();

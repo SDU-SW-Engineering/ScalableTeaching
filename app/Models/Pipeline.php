@@ -133,7 +133,8 @@ class Pipeline extends Model
                 'duration'       => $duration,
                 'queue_duration' => $queueDuration,
             ]);
-            $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getName() => $task]);
+            $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [strtolower($task->getName()) => $task]);
+            Log::info("Resetting subtasks for project {$this->project->id}");
             $this->project->subTasks()->delete(); // reset subtasks
             (new Collection($succeedingBuilds))->each(function ($build) use ($tracking) {
                 /** @var SubTask $subTask */
