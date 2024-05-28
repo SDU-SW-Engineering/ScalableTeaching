@@ -8,7 +8,6 @@ use App\Http\Controllers\GitLabOAuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SurveyController;
-use App\Http\Controllers\VSCodeController;
 use App\Http\Controllers\AdminController;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
@@ -38,7 +37,6 @@ Route::group(['prefix' => 'projects/{project}', 'as' => 'projects.', 'middleware
     });
 });
 
-Route::get('vs-code/authenticate', [VSCodeController::class, 'authenticate'])->middleware('auth');
 
 Route::get('random-name', function() {
     return PhraseGenerator::generate();

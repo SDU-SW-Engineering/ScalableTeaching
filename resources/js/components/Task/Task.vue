@@ -153,7 +153,7 @@
                                :tasks="subTasks" :tasks-required="task.correction_tasks_required"
                                :points-required="task.correction_points_required"
                                :correction-type="task.correction_type"
-                               :project-status="project == null ? null : project.status"></sub-tasks>
+                               :project-status="project !== null ? project.status : null"></sub-tasks>
                 </div>
                 <div v-show="tab === 'builds'">
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
@@ -169,7 +169,7 @@
                         <h3 class="font-bold text-xl dark:text-white text-center">Group Project</h3>
                     </div>
                 </div>
-                <div v-if="task.source_project_id !== null && task.type == 'assignment'">
+                <div v-if="project !== null && this.isCodeTask">
                     <validation-failed v-if="project != null && project.validation_errors != null && project.validation_errors.length > 0" :errors="project.validation_errors"></validation-failed>
                     <warning :message="warning" v-if="warning.length > 0"></warning>
                     <part-of-track v-if="task.track != null" :track="task.track"
@@ -272,7 +272,7 @@ export default {
             return this.project != null && this.survey.details != null && this.survey.can.view;
         },
         showBuilds: function () {
-            return this.task.correction_type !== 'none';
+            return this.project !== null && this.isCodeTask;
         },
         /*taskCount: function () {
             return this.subTasks.list.reduce((total, group) => total + group.tasks.length, 0);

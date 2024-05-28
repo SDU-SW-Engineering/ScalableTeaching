@@ -42,7 +42,6 @@
                     </div>
                     <div class="mt-4 flex items-center gap-4">
                         <button type="submit"
-                                href="{{ route('courses.tasks.admin.modules.configure', [$course, $task, $module->identifier()]) }}"
                                 class="bg-gray-600 px-3.5 py-2.5 text-sm font-semibold rounded text-gray-200 transition-colors shadow-sm hover:bg-gray-500">
                             Save changes
                         </button>

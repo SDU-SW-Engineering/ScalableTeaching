@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\Casts\SubTask;
 use App\Models\Enums\CorrectionType;
-use App\Models\Enums\PipelineStatusEnum;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
+use App\Modules\AutomaticGrading\AutomaticGradingType;
 use App\ProjectStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use InvalidArgumentException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property Project $project
@@ -25,25 +24,64 @@ class ProjectSubTask extends Model
     protected static function booted()
     {
         static::created(function(ProjectSubTask $projectSubTask) {
-            if($projectSubTask->project->status == ProjectStatus::Finished)
+            $automaticGradingModule = $projectSubTask->project->task->module_configuration->resolveModule(AutomaticGrading::class);
+            if ($automaticGradingModule == null)
                 return;
+
+            /** @var AutomaticGradingSettings $settings */
+            $settings = $automaticGradingModule->settings();
+            if ($settings->isPipelineBased())
+            {
+                // This case will be handled in the pipeline itself. See Pipeline#checkAutomaticGrading
+                return;
+            }
 
             $project = $projectSubTask->project;
-            $isFinished = static::isFinished($project);
-            if( ! $isFinished)
-                return;
+            ProjectSubTask::checkAutomaticGrading($project, $settings->getGradingType());
 
-            if( ! $project->validateSubmission())
-                return;
+            // Re-enable once validation is based on module installation.
+            //if( ! $project->validateSubmission())
+            //    return;
 
-            $project->setProjectStatus(ProjectStatus::Finished);
+
         });
+    }
+
+    private static function checkAutomaticGrading(Project $project, AutomaticGradingType $gradingType)
+    {
+
+        $isValid = match ($gradingType)
+        {
+            AutomaticGradingType::ALL_SUBTASKS     => ProjectSubTask::validateAllSubtasks($project),
+            default                                => false
+        };
+
+        if ($isValid)
+            $project->setProjectStatus(ProjectStatus::Finished);
+        else
+            $project->setProjectStatus(ProjectStatus::Active);
+    }
+
+    private static function validateAllSubtasks(Project $project): bool
+    {
+        Log::info("Validating project {$project->id} for all subtasks completed");
+        $completedSubTasks = $project->subTasks->pluck('sub_task_id');
+        $task = $project->task;
+        $isValid = ! $task->sub_tasks->isMissingAny($completedSubTasks);
+
+        if ( ! $isValid)
+        {
+            Log::info("Project {$project->id} is not valid for all subtasks completed");
+        }
+
+        return $isValid;
     }
 
     /**
      * @param Project $project
      * @return bool
      * @throws \Exception
+     * @deprecated Kept around to cover all the same cases, but will be removed after they have all been converted to AutomaticGrading module settings.
      */
     protected static function isFinished(Project $project): bool
     {

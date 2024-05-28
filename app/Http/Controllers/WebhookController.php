@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\WebhookTypes;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
@@ -33,6 +34,7 @@ class WebhookController extends Controller
 
     private function pipeline(): string
     {
+        Log::info("Pipeline event received");
         /** @var Project|null $project */
         $project = Project::firstWhere('gitlab_project_id', request('project.id'));
         abort_if($project == null, 400, "Project not found");
@@ -43,9 +45,9 @@ class WebhookController extends Controller
         if($pipeline == null)
             $pipeline = $this->createPipeline($project);
 
-        $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
+        $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => strtolower($task->getName())]);
         $builds = new Collection(request('builds'));
-        $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains($build['name']) && $build['status'] == 'success');
+        $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains(strtolower($build['name'])) && $build['status'] == 'success');
         try
         {
             $pipeline->process(
@@ -69,6 +71,7 @@ class WebhookController extends Controller
      */
     private function createPipeline(Project $project): Pipeline
     {
+        Log::info("Creating pipeline for project {$project->id} with status " . request('object_attributes.status'));
         /** @var Pipeline $pipeline */
         $pipeline = $project->pipelines()->create([
             'pipeline_id'    => request('object_attributes.id'),

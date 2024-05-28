@@ -85,14 +85,15 @@ This can be done by running `docker compose up`, which runs a development databa
 Once you're done, you can shut them down by running `docker compose down`
 
 #### Bonus
-If you're a Mac user, you can use [laravel valet](https://laravel.com/docs/9.x/valet#installation) to share your laravel app to the outside world, through [ngrok](https://ngrok.com)'s free tier, or expose.  
+For testing Gitlab webhook changes, you can use the free tier of [Ngrok](https://ngrok.com) to expose your local environment to the outside world.
 On your ngrok account, you will find a static domain, you can use this to ensure it's the same URL every time you spin it up.  
 
 **_Note: I would not recommend developing against this tunnel connection, but purely use it for testing gitlab webhook events._**
 
-After installed, you can run `valet share --domain=<your static domain> --region=eu` in the root of the project, which will spin up a tunnel connection for the static url.  
-You can then set this static url in your `.env` file, the key is `VALET_DOMAIN`, if this is set and it's a local environment, this static url will be used for gitlab webhooks, so you can test the events produced by gitlab.
+After installed, you can run `ngrok http 8000 --domain <your static domain>` in the root of the project, which will spin up a tunnel connection for the static url.  
+You can then set this static url in your `.env` file, the key is `GITLAB_WEBHOOK_URL`.
 
+_Another way of tunneling, in case you own a domain is to use cloudflare tunnels, which works way better than the ngrok free tier_
 ### FAQ
 
 #### Fatal error: Allowed memory size of 134217728 bytes exhausted (tried to allocate 36864 bytes)

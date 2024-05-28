@@ -23,5 +23,6 @@ class Template extends Module
     public static function configRoutes(): void
     {
         Route::get('pushes', [TemplateController::class, 'pushes'])->name("pushes");
+        Route::get('open_external/{project}', [TemplateController::class, 'browseGitlabAtCommit'])->name('open_external');
     }
 }

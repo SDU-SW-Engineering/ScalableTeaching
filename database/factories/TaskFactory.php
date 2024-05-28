@@ -12,8 +12,8 @@ class TaskFactory extends Factory
 
     public function definition()
     {
-        $starts_at = $this->faker->dateTimeBetween("-8 weeks", "8 weeks");
-        $ends_at = Carbon::instance($starts_at)->addWeeks(rand(2, 4));
+        $starts_at = $this->faker->dateTimeBetween("-8 weeks");
+        $ends_at = $this->faker->dateTimeBetween($starts_at, "+8 weeks");
 
         return [
             'name'              => $this->faker->sentence(3),

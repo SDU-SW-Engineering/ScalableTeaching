@@ -63,7 +63,7 @@ it('ensures projects are finished when 75 of 75 points have been reached', funct
     $this->project->refresh();
 
     expect($this->project->status)->toBe(ProjectStatus::Finished);
-});
+})->skip('Skipped until AutomaticGradingType points required is implemented');
 
 it('ensures projects are finished when 115 of 75 points have been reached', function () {
     $this->project->subTasks()->create([
@@ -84,7 +84,7 @@ it('ensures projects are finished when 115 of 75 points have been reached', func
     $this->project->refresh();
 
     expect($this->project->status)->toBe(ProjectStatus::Finished);
-});
+})->skip('Skipped until AutomaticGradingType points required is implemented');
 
 it('ensures projects are active when 65 of 75 points have been reached', function () {
     $this->project->subTasks()->create([

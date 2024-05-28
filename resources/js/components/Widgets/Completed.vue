@@ -12,7 +12,10 @@
                 <div class="flex flex-col w-full justify-center">
                     <h3 class="font-bold text-lg dark:text-white">Assignment handed in</h3>
                     <p class="text-gray-600 dark:text-gray-300">You have successfully handed in your assignment.
-                        Subsequent builds will not be tracked.</p>
+                        <!-- TODO: Should this text still be here? We do overwrite the status now, but maybe that is something we can discuss.
+                        Subsequent builds will not be tracked.
+                        -->
+                    </p>
                 </div>
             </div>
         </div>

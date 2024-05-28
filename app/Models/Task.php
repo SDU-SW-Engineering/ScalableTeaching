@@ -10,6 +10,7 @@ use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\LinkRepository\LinkRepositorySettings;
 use App\Modules\MarkAsDone\MarkAsDone;
 use App\Modules\ModuleConfiguration;
+use App\Modules\ProtectFiles\ProtectFiles;
 use App\Modules\Template\Template;
 use App\ProjectStatus;
 use Carbon\Carbon;
@@ -712,5 +713,14 @@ class Task extends Model
     public function isCodeTask(): bool
     {
         return $this->module_configuration->isEnabled(LinkRepository::class);
+    }
+
+    /**
+     * Checks whether validation is enabled on this task, to show relevant UI and block features.
+     * @return bool Whether validation is enabled based on current module composition
+     */
+    public function isValidationEnabled(): bool
+    {
+        return $this->module_configuration->isEnabled(ProtectFiles::class);
     }
 }

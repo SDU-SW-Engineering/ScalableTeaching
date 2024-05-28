@@ -46,12 +46,7 @@ class RegisterWebhook implements ShouldQueue
         $currentHooks = new Collection($manager->projects()->hooks($event->project->gitlab_project_id));
         if($currentHooks->isEmpty())
         {
-            $webhookUrl = 'https://scalableteaching.sdu.dk/api/reporter';
-            if (app()->environment('local') && getenv('VALET_DOMAIN') !== false)
-            {
-                $webhookUrl = getenv('VALET_DOMAIN') . "/api/reporter";
-            }
-
+            $webhookUrl = getenv('GITLAB_WEBHOOK_URL');
             $response = $manager->projects()->addHook($event->project->gitlab_project_id, $webhookUrl, [
                 'pipeline_events'         => true,
                 'token'                   => Project::token($event->project),
