@@ -185,9 +185,9 @@ class Task extends Model
     /**
      * @return HasManyThrough<ProjectDownload>
      */
-    public function download()
+    public function downloads(): HasManyThrough
     {
-        return $this->hasOneThrough(ProjectDownload::class, Project::class);
+        return $this->hasManyThrough(ProjectDownload::class, Project::class);
     }
     // endregion
 
@@ -572,13 +572,12 @@ class Task extends Model
      * Key corresponds to the user id
      * Value corresponds to their associated project
      * Users that haven't created a project won't be in the dictionary
-     * @return EloquentCollection|\Illuminate\Support\Collection<int, int>
      */
     public function userProjectDictionary()
     {
         return $userProjects = $this->projects()->get()
         ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
-            ->mapWithKeys(fn($userProject) => $userProject);
+            ->mapWithKeys(fn($userProject) => $userProject); // @phpstan-ignore-line
     }
 
     /**

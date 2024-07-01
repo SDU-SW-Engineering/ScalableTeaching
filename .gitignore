@@ -21,3 +21,4 @@ yarn-error.log
 public/js/*.js
 /public/mix-manifest.json
 dump.rdb
+html-coverage

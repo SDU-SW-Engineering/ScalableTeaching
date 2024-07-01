@@ -31,16 +31,6 @@ parameters:
 			path: app/Models/Group.php
 
 		-
-			message: "#^Left side of && is always false\\.$#"
-			count: 2
-			path: app/Modules/AutomaticDownload/Controller.php
-
-		-
-			message: "#^Using nullsafe property access on non\\-nullable type App\\\\Models\\\\ProjectDownload\\. Use \\-\\> instead\\.$#"
-			count: 1
-			path: app/Modules/AutomaticDownload/Controller.php
-
-		-
 			message: "#^Parameter \\#1 \\$key of method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:every\\(\\) expects \\(callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: bool\\)\\|Illuminate\\\\Database\\\\Eloquent\\\\Model\\|string, Closure\\(App\\\\Models\\\\Project\\)\\: bool given\\.$#"
 			count: 1
 			path: app/Policies/GroupPolicy.php

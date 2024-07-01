@@ -208,7 +208,7 @@ class Project extends Model
      */
     public function duration(): Attribute
     {
-        return Attribute::make(fn($value, $attributes) => $this->finished_at == null ? null : number_format($this->created_at->diffInHours($this->finished_at) / 24, 2));
+        return Attribute::make(fn($value, $attributes) => $this->finished_at == null ? null : number_format($this->created_at->diffInHours($this->finished_at) / 24));
     }
 
     /**

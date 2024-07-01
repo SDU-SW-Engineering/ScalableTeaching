@@ -21,10 +21,10 @@ class AutomaticDownload extends Module
 
     public static function configRoutes(): void
     {
-        Route::get('downloads', [Controller::class, 'index'])->name('index');
-        Route::get('download/queue-all', [Controller::class, 'queueAll'])->name('queue-all');
-        Route::get('download/create-all', [Controller::class, 'createDownloads'])->name('create-all');
-        Route::get('downloads/{projectDownload}', [Controller::class, 'download'])->name('download');
-        Route::get('download/{projectDownload}', [Controller::class, 'queue'])->name('queue');
+        Route::get('downloads', [AutomaticDownloadController::class, 'index'])->name('index');
+        Route::get('download/queue-all', [AutomaticDownloadController::class, 'queueAll'])->name('queue-all');
+        Route::get('download/create-all', [AutomaticDownloadController::class, 'createDownloads'])->name('create-all');
+        Route::get('downloads/{projectDownload}', [AutomaticDownloadController::class, 'download'])->name('download');
+        Route::get('download/{projectDownload}', [AutomaticDownloadController::class, 'queue'])->name('queue');
     }
 }

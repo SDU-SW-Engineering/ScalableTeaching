@@ -127,6 +127,9 @@
             tippy('.handed-in', {
                 content: 'This project has been handed in',
             });
+            tippy('.failed-hand-in', {
+                content: 'This project was not handed in on time',
+            });
             tippy('.waiting-for-verification', {
                 content: 'Waiting for validation'
             });

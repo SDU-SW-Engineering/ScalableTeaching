@@ -56,6 +56,8 @@ A large portion of the code base is also covered by both unit and feature tests,
 
 You may trigger the tests by using the command `php artisan test`
 
+You can also generate coverage by running `php artisan test --coverage-html html-coverage`
+
 php-cs-fixer, larastan and tests are validated whenever you submit changes to the repo.
 
 ### Gitlab Backbone

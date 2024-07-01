@@ -50,4 +50,13 @@ class ProjectFactory extends Factory
             ];
         });
     }
+
+    public function overdue()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => ProjectStatus::Overdue,
+            ];
+        });
+    }
 }

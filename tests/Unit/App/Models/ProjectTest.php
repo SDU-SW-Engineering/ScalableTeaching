@@ -95,7 +95,7 @@ test('duration returns 2 if the task has been completed two days ago', function(
             ]
         );
 
-    expect($project->duration)->toBe('2.00');
+    expect($project->duration)->toEqual('2');
 });
 
 test('dailyBuilds returns an array of days between start date and day before now', function() {

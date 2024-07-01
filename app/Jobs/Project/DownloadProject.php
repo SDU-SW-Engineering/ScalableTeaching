@@ -4,11 +4,13 @@ namespace App\Jobs\Project;
 
 use App\Models\ProjectDownload;
 use GrahamCampbell\GitLab\GitLabManager;
+use Http\Client\Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Storage;
 use ZipArchive;
 
@@ -34,30 +36,37 @@ class DownloadProject implements ShouldQueue
 
     public function handle(): void
     {
+        Log::info("Handling download for project {$this->download->project_id} with ref {$this->download->ref}");
         if($this->download->downloaded_at != null && $this->download->queued_at == null)
+        {
+            Log::debug("Download for project {$this->download->project_id} with ref {$this->download->ref} already downloaded. Skipping.");
+
             return;
+        }
 
         $gitLabManager = app(GitLabManager::class);
 
-        $archiveContent = $gitLabManager->repositories()->archive($this->download->project->gitlab_project_id, [
-            'sha' => $this->download->ref,
-        ], 'zip');
+        try
+        {
+            $archiveContent = $gitLabManager->repositories()->archive($this->download->project->gitlab_project_id, [
+                'sha' => $this->download->ref,
+            ], 'zip');
+        } catch (\Exception $e)
+        {
+            Log::error("Something went wrong while getting the archive of project {$this->download->project_id} with ref {$this->download->ref}", [
+                'exception' => $e,
+            ]);
 
-        $tempName = "temp" . str()->random(4);
+            return;
+        }
+
+        $fileName = "{$this->download->project_id}_{$this->download->ref}";
         $basePath = "tasks/{$this->download->project->task_id}/projects";
-        $fileLocation = "$basePath/$tempName.zip";
+        $fileLocation = "$basePath/$fileName.zip";
         Storage::disk('local')->put($fileLocation, $archiveContent);
 
-        $zip = new ZipArchive();
-        $zip->open(Storage::path($fileLocation));
-        $zipBaseDir = $zip->getNameIndex(0);
-        $zip->extractTo(Storage::path("$basePath"));
-        $newPath = "$basePath/{$this->download->project_id}_{$this->download->ref}";
-        Storage::move("$basePath/$zipBaseDir", "$newPath");
-        Storage::delete($fileLocation);
-
         $this->download->update([
-            'location'      => $newPath,
+            'location'      => $fileLocation,
             'downloaded_at' => now(),
             'queued_at'     => null,
         ]);
