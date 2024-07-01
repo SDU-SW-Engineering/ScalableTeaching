@@ -9,10 +9,14 @@ class AutomaticGradingSettings extends Settings
 {
     public ?string $gradingType = null;
 
+    // Only used when gradingType == REQUIRED_SUBTASKS
+    public ?array $requiredSubtaskIds = [];
+
     public function validationRules(): array
     {
         return [
-            'gradingType' => ['required', Rule::enum(AutomaticGradingType::class)],
+            'gradingType'         => ['required', Rule::enum(AutomaticGradingType::class)],
+            '$requiredSubtaskIds' => ['array'],
         ];
     }
 

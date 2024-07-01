@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Task\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Task;
+use App\Modules\AutomaticGrading\AutomaticGrading;
 use App\Modules\Module;
 use App\Modules\ModuleService;
 use Illuminate\Http\RedirectResponse;
@@ -53,7 +54,13 @@ class ModuleController extends Controller
             $variables[$property->getName()] = $property->getValue($module->settings());
         }
 
-        return view('tasks.admin.modules.configure', compact('module'))->with($variables);
+        $subTasks = null;
+        if ($module instanceof AutomaticGrading)
+        {
+            $subTasks = $task->sub_tasks->all();
+        }
+
+        return view('tasks.admin.modules.configure', compact('module', 'subTasks'))->with($variables);
     }
 
     /**
@@ -65,14 +72,16 @@ class ModuleController extends Controller
         $settings = $module->settings();
         if($settings == null)
             return redirect()->back();
+
         $request->validate($settings->validationRules());
         $reflect = new ReflectionClass($settings);
         foreach($reflect->getProperties() as $property)
         {
             if($request->has($property->getName()))
             {
-                Log::debug("Updating property " . $property->getName() . " to " . $request->get($property->getName()));
-                $property->setValue($settings, $request->get($property->getName()));
+                $value = $request->get($property->getName());
+                Log::debug("Updating property " . $property->getName() . " to " . (is_array($value) ? implode(",", $value) : $value));
+                $property->setValue($settings, $value);
             }
         }
         $task->module_configuration->update($module->identifier(), $settings);

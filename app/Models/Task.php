@@ -6,6 +6,8 @@ use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\LinkRepository\LinkRepositorySettings;
 use App\Modules\MarkAsDone\MarkAsDone;
@@ -721,5 +723,21 @@ class Task extends Model
     public function isValidationEnabled(): bool
     {
         return $this->module_configuration->isEnabled(ProtectFiles::class);
+    }
+
+    public function isMissingRequiredSubtasks(Collection $completedSubTaskIds): bool
+    {
+        if ( ! $this->module_configuration->isEnabled(AutomaticGrading::class))
+        {
+            throw new \Error("Automatic grading module is not enabled.");
+        }
+
+        /** @var AutomaticGradingSettings $moduleSettings */
+        $moduleSettings = $this->module_configuration->resolveModule(AutomaticGrading::class)->settings();
+        $requiredSubTaskIds = $moduleSettings->requiredSubtaskIds;
+
+        $missingRequiredSubtaskIds = array_filter($requiredSubTaskIds, fn ($requiredId) => ! $completedSubTaskIds->contains($requiredId));
+
+        return count($missingRequiredSubtaskIds) > 0;
     }
 }

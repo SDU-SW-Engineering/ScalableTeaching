@@ -5,6 +5,9 @@
         <automatic-grading-configuration
             :grading-types="{{ json_encode(array_map(function ($case) {return ["name" => $case->name, "value" => $case->value];}, AutomaticGradingType::cases())) }}"
             :current-grading-type="{{ json_encode($gradingType) }}"
+            :sub-tasks="{{ $subTasks }}"
+            :required-subtask-ids="{{json_encode($requiredSubtaskIds)}}"
+
         ></automatic-grading-configuration>
     </div>
 </div>

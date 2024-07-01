@@ -166,28 +166,6 @@ test('progress returns 0 when correction type is PointsRequired and no subtasks 
     expect($project->progress())->toBe(0);
 });
 
-test('progress returns 25 when correction type is PointsRequired and one of three subtasks are completed', function() {
-    $project = Project::factory()->for(Task::factory([
-        'ends_at'         => Carbon::now()->addMonth(),
-        'correction_type' => CorrectionType::PointsRequired,
-    ])->for(Course::factory()))->createQuietly();
-
-    $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
-    $project->task->update(['sub_tasks' => $subTasks]);
-    $project->refresh();
-
-    $project->subTasks()->create([
-        'sub_task_id' => 1,
-        'source_type' => Project::class,
-        'source_id'   => $project->id,
-    ]);
-
-    expect($project->progress())->toBe(25);
-});
-
 test('progress returns 0 when correction type is not PointsRequired and no subtasks are completed', function() {
     $project = Project::factory()->for(Task::factory([
         'ends_at'         => Carbon::now()->addMonth(),

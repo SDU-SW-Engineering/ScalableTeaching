@@ -75,28 +75,28 @@ class Pipeline extends Model
         });
     }
 
-    private static function checkAutomaticGrading(Pipeline $pipeline)
+    private static function checkAutomaticGrading(Pipeline $pipeline): bool
     {
         $automaticGradingModule = $pipeline->project->task->module_configuration->resolveModule(AutomaticGrading::class);
         if ($automaticGradingModule == null)
-            return;
+            return false;
 
 
         /** @var AutomaticGradingSettings $settings */
         $settings = $automaticGradingModule->settings();
         if ( ! $settings->isPipelineBased())
         {
-            return;
+            return false;
         }
 
         if ($pipeline->status != PipelineStatusEnum::Success)
-            return;
+            return false;
 
         Log::info("Pipeline {$pipeline->pipeline_id} is successful, automatically grading project {$pipeline->project_id}");
 
-        $pipeline->project->update([
-            'status' => ProjectStatus::Finished,
-        ]);
+        $pipeline->project->setProjectStatus(ProjectStatus::Finished);
+
+        return true;
     }
 
     public function isUpgradable(PipelineStatusEnum $to): bool
@@ -148,7 +148,13 @@ class Pipeline extends Model
             });
         });
 
-        Pipeline::checkAutomaticGrading($this);
+        $gradeResult = Pipeline::checkAutomaticGrading($this);
+        // Since some checks run on sub task creation, we have this clause here
+        // to overwrite finished projects, if all jobs fail, but it requires all jobs or something along the lines.
+        if ($gradeResult == false && count($succeedingBuilds) < 1)
+        {
+            $this->project->setProjectStatus(ProjectStatus::Active);
+        }
     }
 
     /**
