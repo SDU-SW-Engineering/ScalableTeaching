@@ -96,6 +96,42 @@ On your ngrok account, you will find a static domain, you can use this to ensure
 After installed, you can run `ngrok http 8000 --domain <your static domain>` in the root of the project, which will spin up a tunnel connection for the static url.  
 You can then set this static url in your `.env` file, the key is `GITLAB_WEBHOOK_URL`.
 
+_**Note: If you own your own domain, I recommend using cloudflare tunnels as they are much more reliably.**_ 
+_Can also be used without a domain, but requires switching the webhook url in GitLab every time you spin up the tunnel._
+
+### Production server
+
+#### Server location
+The server which runs ScalableTeaching is located on the SDU network, and it is therefore required for you to connect with the SDU VPN (Cisco).
+It's also **REQUIRED** to login to the VPN with your employee account so the account that ends in `@mmmi.sdu.dk`, this ensures you get routed differently on the SDU server.
+
+Then you can SSH into the server with the account created like so: `<ACCOUNT_NAME>@scalable.srv.sdu.dk` and the password is your account password.
+
+#### Deployment
+TBD
+
+#### Backup
+
+Login to the server and run the following command to back up the app files. This will copy the files to your home directory, remove the storage, vendor and node_modules directories, and then compress the files into a tarball.
+```bash
+cp -r /var/www/sites/main/ ~/backup-app && rm -rf ~/backup-app/storage && rm -rf ~/backup-app/vendor && rm -rf ~/backup-app/node_modules && tar -zcvf ~/backup-app.tar.gz ~/backup-app
+```
+
+Next up backup the current database with mysqldump. This will create a dump of the database in a sql file, that can be replayed with 
+```bash
+mysqldump -u <USERNAME> -p <DATABASE_NAME> --result-file=~/scalable-db-backup.sql --no-tablespaces 
+```
+
+The backed up files can be copied to your local machine through the use of SCP.
+
+#### Restoring a backup
+To restore the database backup, you can run the following command. This will create a new database, and then replay the sql file into it.
+```bash
+mysql -u <USERNAME> -p && create database <DATABASE_NAME>; && use <DATABASE_NAME>; && source <PATH_TO_SQL_BACKUP_FILE>; 
+```
+
+TBD: Restoring the app files.
+
 ### FAQ
 
 #### Fatal error: Allowed memory size of 134217728 bytes exhausted (tried to allocate 36864 bytes)
