@@ -15,7 +15,7 @@
             <div>
                 <bar-chart :disable-animations="true" :height="250" :labels="{{ $dailyBuildsGraph->labels() }}"
                            :data="{{ $dailyBuildsGraph->datasets()  }}"
-                           route="{{ route('courses.tasks.admin.builds', [$course->id, $task->id]) }}"></bar-chart>
+                           route="{{ route('courses.tasks.admin.buildTracking.builds', [$course->id, $task->id]) }}"></bar-chart>
             </div>
         </div>
         <div class="overflow-x-auto shadow-md rounded-b-md bg-gray-600">
@@ -25,11 +25,6 @@
                         class="bg-gray-50 dark:bg-gray-800 min-w-full py-2 pl-6 pr-3 flex justify-between items-center">
                         <h2 class="text-lg  dark:text-gray-200">Builds</h2>
                         <div class="flex items-center">
-                            <!--<form>
-                                <input type="text" autocomplete="off"
-                                       class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-800 text-gray-900 dark:text-gray-100 text-xs rounded-lg focus:ring-lime-green-500 focus:border-lime-green-500 mr-2"
-                                       placeholder="Filter" required>
-                            </form>-->
                             <a href="{{ request()->fullUrlWithQuery(['status'=>'success']) }}"
                                 @class([
                                         'text-white text-sm bg-lime-green-400 px-2 py-0.5 rounded-md mr-2' => request()->get('status') == 'success',
@@ -52,7 +47,7 @@
                             >
                                 Canceled
                             </a>
-                            <a href="{{ request()->fullUrlWithQuery(['status'=> null]) }}"
+                            <a href="{{ request()->fullUrlWithoutQuery(['status']) }}"
                                 @class([
                                         'text-white text-sm bg-lime-green-400 px-2 py-0.5 rounded-md' => request()->get('status','all') == 'all',
                                         'text-gray-600 dark:text-white text-sm px-2 py-0.5 hover:bg-lime-green-200 dark:hover:bg-lime-green-800 rounded-md mr-2' => request()->get('status', 'all') != 'all'
@@ -84,6 +79,10 @@
                             <th scope="col"
                                 class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
                                 When
+                            </th>
+                            <th scope="col"
+                                class="text-xs font-medium text-gray-700 dark:text-gray-200 px-6 py-3 text-left uppercase tracking-wider">
+                                Link
                             </th>
                         </tr>
                         </thead>
@@ -146,9 +145,8 @@
                                 </td>
                                 <td class="text-sm text-gray-500 px-6 py-4 whitespace-nowrap dark:text-gray-200">
                                     <div class="text-sm text-gray-900 dark:text-gray-200">{{ $build->user_name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $build->user_email }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 flex flex-col">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                                     @if($build->project == null)
                                         <i>Not connected</i>
                                     @elseif($build->project->ownable_type == \App\Models\User::class)
@@ -176,6 +174,18 @@
                                     <div class="text-sm text-gray-500 dark:text-gray-400">
                                         {{ $build->updated_at->toDateTimeString() }}
                                     </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500 flex-shrink">
+                                    <a href="{{ route('courses.tasks.admin.buildTracking.redirect_pipeline', [$course, $task, $build->project, "pipeline_id" => $build->pipeline_id]) }}"
+                                       target="_blank"
+                                       class="text-sm flex items-center bg-gray-500 hover:bg-gray-400 transition-colors text-gray-100 py-1 px-1 rounded-md w-max">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                             stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                        <span class="text-sm my-1">Open pipeline</span>
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach
