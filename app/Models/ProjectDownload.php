@@ -29,7 +29,7 @@ use ZipArchive;
  * @property Carbon|null $queued_at
  * @property string $ref
  * @property-read bool $isDownloaded
- * @property-read string $state
+ * @property-read DownloadState $state
  * @property string|null $location
  * @mixin Eloquent
  */

@@ -52,8 +52,9 @@ class ProjectSubTask extends Model
 
         $isValid = match ($gradingType)
         {
-            AutomaticGradingType::ALL_SUBTASKS     => ProjectSubTask::validateAllSubtasks($project),
-            default                                => false
+            AutomaticGradingType::ALL_SUBTASKS      => ProjectSubTask::validateAllSubtasks($project),
+            AutomaticGradingType::REQUIRED_SUBTASKS => ProjectSubTask::validateRequiredSubtasks($project),
+            default                                 => false
         };
 
         if ($isValid)
@@ -68,6 +69,21 @@ class ProjectSubTask extends Model
         $completedSubTasks = $project->subTasks->pluck('sub_task_id');
         $task = $project->task;
         $isValid = ! $task->sub_tasks->isMissingAny($completedSubTasks);
+
+        if ( ! $isValid)
+        {
+            Log::info("Project {$project->id} is not valid for all subtasks completed");
+        }
+
+        return $isValid;
+    }
+
+    private static function validateRequiredSubtasks(Project $project): bool
+    {
+        Log::info("Validating project {$project->id} for all subtasks completed");
+        $completedSubTasks = $project->subTasks->pluck('sub_task_id');
+
+        $isValid = ! $project->task->isMissingRequiredSubtasks($completedSubTasks);
 
         if ( ! $isValid)
         {

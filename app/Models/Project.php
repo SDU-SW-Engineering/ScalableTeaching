@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Events\ProjectCreated;
 use App\Models\Enums\CorrectionType;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
+use App\Modules\AutomaticGrading\AutomaticGradingType;
 use App\ProjectStatus;
 use App\Tasks\Validation\ProtectedFilesUntouched;
 use Carbon\Carbon;
@@ -208,7 +211,7 @@ class Project extends Model
      */
     public function duration(): Attribute
     {
-        return Attribute::make(fn($value, $attributes) => $this->finished_at == null ? null : number_format($this->created_at->diffInHours($this->finished_at) / 24, 2));
+        return Attribute::make(fn($value, $attributes) => $this->finished_at == null ? null : number_format($this->created_at->diffInHours($this->finished_at) / 24));
     }
 
     /**
@@ -252,13 +255,54 @@ class Project extends Model
 
     public function progress(): int
     {
-        return match ($this->task->correction_type)
+        if ($this->task->isTextTask())
         {
-            CorrectionType::PointsRequired => $this->pointProgress(),
-            default                        => $this->plainProgress()
+            return $this->getProgressBasedOnFinished();
+        }
+
+        if ( ! $this->task->module_configuration->isEnabled(AutomaticGrading::class))
+        {
+            return $this->plainProgress();
+        }
+
+        /** @var AutomaticGradingSettings $settings */
+        $settings = $this->task->module_configuration->resolveModule(AutomaticGrading::class)->settings();
+
+        return match ($settings->getGradingType())
+        {
+            AutomaticGradingType::PIPELINE_SUCCESS,
+            AutomaticGradingType::ALL_SUBTASKS      => $this->getProgressBasedOnFinished(),
+            AutomaticGradingType::REQUIRED_SUBTASKS => $this->getProgressBasedOnRequiredSubtasks($settings->requiredSubtaskIds)
         };
     }
 
+    /**
+     * Simple function to get the progress based on the status of the project
+     * @return int 0 or 100, depending on if the project is finished or not
+     */
+    private function getProgressBasedOnFinished(): int
+    {
+        $isCompleted = $this->status == ProjectStatus::Finished;
+
+        return $isCompleted ? 100 : 0;
+    }
+
+    private function getProgressBasedOnRequiredSubtasks(array $requiredSubtaskIds): int
+    {
+        $completed = $this->subTasks->pluck('sub_task_id');
+        if($completed->isEmpty())
+            return 0;
+
+        $amountOfMissingRequiredSubtasks = count(array_filter($requiredSubtaskIds, fn($id) => ! $completed->contains($id)));
+        $amountOfRequiredSubtasks = count($requiredSubtaskIds);
+
+        return (int)(round(($amountOfRequiredSubtasks - $amountOfMissingRequiredSubtasks) / $amountOfRequiredSubtasks * 100));
+    }
+
+    /**
+     * TODO: Use this function for POINTS_REQUIRED automatic grading type.
+     */
+    // @phpstan-ignore-next-line
     private function pointProgress(): int
     {
         $completed = $this->subTasks->pluck('sub_task_id');
@@ -271,6 +315,10 @@ class Project extends Model
         return (int)(round($points / $maxPoints * 100));
     }
 
+    /**
+     * TODO: This needs to be tweaked to work with the new way of getting required subtasks.
+     * Consider adding a migration to move any previously required subtasks to the new module configuration. (Not sure if possible, to correctly determine which should have the new module enabled)
+     */
     private function plainProgress(): int
     {
         if($this->status == ProjectStatus::Finished && ! in_array($this->task->correction_type, [CorrectionType::RequiredTasks, CorrectionType::Manual]))
@@ -312,26 +360,35 @@ class Project extends Model
     public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, ?array $gradeMeta = [], Carbon $startedAt = null, Carbon $endedAt = null): void
     {
         $this->update([
-            'status' => $status,
-            ...$status == ProjectStatus::Finished ? ['finished_at' => now()] : [],
+            'status'      => $status,
+            'finished_at' => $status == ProjectStatus::Finished ? now() : null,
         ]);
-        $this->owners()->each(/**
-         * @throws Exception
-         */ fn(User $user) => Grade::create([
-            'task_id'     => $this->task_id,
-            'source_type' => $ownableType,
-            'source_id'   => $ownableId,
-            'user_id'     => $user->id,
-            'value'       => match ($status)
-            {
-                ProjectStatus::Overdue  => 'failed',
-                ProjectStatus::Finished => 'passed',
-                default                 => throw new Exception("Passes status must be a final value.")
-            },
-            'value_raw'   => $gradeMeta,
-            'started_at'  => $startedAt,
-            'ended_at'    => $endedAt,
-        ]));
+
+        if ($status == ProjectStatus::Active)
+        {
+            // remove all grades, since it's still active and has not yet failed or passed
+            $this->owners()->each(fn(User $user) => $user->grades()->where('task_id', $this->task_id)->delete());
+
+        } else
+        {
+            // give all owners a passing or failing grade
+            $this->owners()->each(/**
+             * @throws Exception
+             */ fn(User $user) => Grade::create([
+                'task_id'     => $this->task_id,
+                'source_type' => $ownableType,
+                'source_id'   => $ownableId,
+                'user_id'     => $user->id,
+                'value'       => match ($status)
+                {
+                    ProjectStatus::Overdue  => 'failed',
+                    ProjectStatus::Finished => 'passed'
+                },
+                'value_raw'   => $gradeMeta,
+                'started_at'  => $startedAt,
+                'ended_at'    => $endedAt,
+            ]));
+        }
     }
 
     /**

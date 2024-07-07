@@ -10,55 +10,43 @@ use App\Models\ProjectDownload;
 use App\Models\ProjectPush;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\View\View;
 use Storage;
-use ZipStream\Exception\FileNotFoundException;
-use ZipStream\Exception\FileNotReadableException;
-use ZipStream\Option\Archive;
-use ZipStream\ZipStream;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class Controller extends BaseController
+class AutomaticDownloadController extends BaseController
 {
-    public function index(Course $course, Task $task)
+    public function index(Course $course, Task $task): View
     {
         $projects = $task->projects()->claimed()->with('download', 'ownable')->get()->sort(fn(Project $a, Project $b) => strcmp($a->ownable->name, $b->ownable->name))->values();
-        $enabledAfterDeadline = $task->download()->count() == 0;
+        $enabledAfterDeadline = $task->downloads()->count() == 0;
         $downloads = $projects->map(fn(Project $project) => [
-            'project'  => $project,
-            'download' => $project->download,
-            'indexed'  => false,
+            'project'       => $project,
+            'ownableName'   => $project->ownable->displayName(),
+            'download'      => $project->download,
+            'indexed'       => false,
         ]);
-        $missingOnDisk = $downloads->filter(fn($download) => $download['download']?->state == DownloadState::Downloaded && $download['download']->queued_at == null);
+        $missingOnDisk = $downloads->filter(function($download) {
+            /** @var ProjectDownload $projectDownload */
+            $projectDownload = $download['download'];
+
+            return $projectDownload->state == DownloadState::Downloaded && $projectDownload->queued_at == null;
+        });
 
         return view('module-AutomaticDownload::index')->with('downloads', $downloads)->with('missing', $missingOnDisk)->with('enabledAfterDeadline', $enabledAfterDeadline);
     }
 
-    /**
-     * @throws FileNotFoundException
-     * @throws FileNotReadableException
-     */
-    public function download(Course $course, Task $task, ProjectDownload $projectDownload)
+    public function download(Course $course, Task $task, ProjectDownload $projectDownload): StreamedResponse
     {
-        $name = str($projectDownload->project->ownable->name)->slug()->append("-$projectDownload->ref")->append('.zip');
-        $options = new Archive();
-        $options->setSendHttpHeaders(true);
-        $zip = new ZipStream($name, $options);
-        $files = Storage::allFiles($projectDownload->location);
-        foreach($files as $file)
-        {
-            $internalPath = str($file)->remove($projectDownload->location)->ltrim('/')->toString();
-            $zip->addFileFromPath($internalPath, Storage::path($file));
-        }
-
-        $zip->finish();
-        //return Storage::download($projectDownload->location, str($projectDownload->project->ownable->name)->slug()->append("-$projectDownload->ref"));
+        return Storage::download($projectDownload->location, str($projectDownload->project->ownable->name)->slug()->append("-$projectDownload->ref"));
     }
 
     public function queue(Course $course, Task $task, ProjectDownload $projectDownload)
     {
-        $projectDownload->queue();
         $projectDownload->update([
             'queued_at' => now(),
         ]);
+        $projectDownload->queue();
 
         return redirect()->back();
     }
@@ -91,10 +79,10 @@ class Controller extends BaseController
             ->values()
             ->each(function(ProjectDownload $download, int $index) {
                 $downloadMinute = (int)($index / 3);
-                $download->queue($downloadMinute);
                 $download->update([
                     'queued_at' => now(),
                 ]);
+                $download->queue($downloadMinute);
             });
 
         return redirect()->back();

@@ -36,12 +36,12 @@ class TaskPolicy
         return false;
     }
 
-    public function viewDashboard(User $user, Task $task) : bool
+    public function viewDashboard(User $user, Task $task) : Response
     {
         if ($task->course->hasTeacher($user))
-            return true;
+            return Response::allow();
 
-        return false;
+        return Response::deny();
     }
 
 }

@@ -52,7 +52,7 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = [
         'username',
@@ -180,5 +180,13 @@ class User extends Authenticatable
 
             return $firstName . ' ' . mb_convert_encoding(substr($names->last(), 0, 1), 'UTF-8', 'UTF-8') . '.';
         });
+    }
+
+    /**
+     * @return string The display name of the user
+     */
+    public function displayName(): string
+    {
+        return $this->name;
     }
 }

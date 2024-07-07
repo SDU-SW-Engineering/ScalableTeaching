@@ -23,6 +23,7 @@ use Illuminate\Support\Str;
  * @property-read Collection<Project> $projects
  * @property-read Collection<GroupInvitation> $invitations
  * @property-read string $projectName
+ * @property-read string $memberString
  */
 class Group extends Model
 {
@@ -99,5 +100,14 @@ class Group extends Model
     protected function logDeleted(Group $deleted): ?CourseActivityMessage
     {
         return new CourseActivityMessage("Deleted group \"$deleted->name\".", $deleted->course_id, auth()->id(), auth()->id());
+    }
+
+    /**
+     * @return string The formatted name of the group, including individual member names.
+     * @example "Group Name (Member 1, Member 2)"
+     */
+    public function displayName(): string
+    {
+        return $this->name . ' (' . $this->memberString . ')';
     }
 }

@@ -10,6 +10,8 @@ use App\Models\Course;
 use App\Models\Project;
 use App\Models\ProjectSubTask;
 use App\Models\Task;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Excel;
@@ -93,6 +95,16 @@ class SubtasksController extends BaseController
         ])->flatten()
             ->each(fn(SubTask $subTask) => $subTaskCollection->add($subTask));
         $task->sub_tasks = $subTaskCollection;
+
+        if ($task->module_configuration->isEnabled(AutomaticGrading::class))
+        { // Remove any tasks that was required, if removed from the list of subtasks
+            /** @var AutomaticGradingSettings $settings */
+            $settings = $task->module_configuration->resolveModule(AutomaticGrading::class)->settings();
+            $subTaskIds = $task->sub_tasks->all()->pluck('id');
+            $settings->requiredSubtaskIds = array_filter($settings->requiredSubtaskIds, fn(int $requiredSubtaskId) => $subTaskIds->contains($requiredSubtaskId));
+            $task->module_configuration->update(AutomaticGrading::class, $settings);
+        }
+
         $task->save();
 
         return "OK";

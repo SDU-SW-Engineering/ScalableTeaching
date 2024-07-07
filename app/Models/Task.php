@@ -6,6 +6,8 @@ use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\LinkRepository\LinkRepositorySettings;
 use App\Modules\MarkAsDone\MarkAsDone;
@@ -185,9 +187,9 @@ class Task extends Model
     /**
      * @return HasManyThrough<ProjectDownload>
      */
-    public function download()
+    public function downloads(): HasManyThrough
     {
-        return $this->hasOneThrough(ProjectDownload::class, Project::class);
+        return $this->hasManyThrough(ProjectDownload::class, Project::class);
     }
     // endregion
 
@@ -572,13 +574,12 @@ class Task extends Model
      * Key corresponds to the user id
      * Value corresponds to their associated project
      * Users that haven't created a project won't be in the dictionary
-     * @return EloquentCollection|\Illuminate\Support\Collection<int, int>
      */
     public function userProjectDictionary()
     {
         return $userProjects = $this->projects()->get()
         ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
-            ->mapWithKeys(fn($userProject) => $userProject);
+            ->mapWithKeys(fn($userProject) => $userProject); // @phpstan-ignore-line
     }
 
     /**
@@ -722,5 +723,21 @@ class Task extends Model
     public function isValidationEnabled(): bool
     {
         return $this->module_configuration->isEnabled(ProtectFiles::class);
+    }
+
+    public function isMissingRequiredSubtasks(Collection $completedSubTaskIds): bool
+    {
+        if ( ! $this->module_configuration->isEnabled(AutomaticGrading::class))
+        {
+            throw new \Error("Automatic grading module is not enabled.");
+        }
+
+        /** @var AutomaticGradingSettings $moduleSettings */
+        $moduleSettings = $this->module_configuration->resolveModule(AutomaticGrading::class)->settings();
+        $requiredSubTaskIds = $moduleSettings->requiredSubtaskIds;
+
+        $missingRequiredSubtaskIds = array_filter($requiredSubTaskIds, fn ($requiredId) => ! $completedSubTaskIds->contains($requiredId));
+
+        return count($missingRequiredSubtaskIds) > 0;
     }
 }

@@ -16,7 +16,6 @@ it('marks projects overdue that is active past the deadline', function() {
         ->active()
         ->for(User::factory(), 'ownable')
         ->for(Task::factory()->for(Course::factory())->create([
-            'correction_type' => CorrectionType::PipelineSuccess,
             'ends_at'         => Carbon::create(2022, 1, 22),
         ]))->createQuietly();
 
@@ -32,7 +31,6 @@ it('ignores projects that are not past the deadline', function() {
         ->active()
         ->for(User::factory(), 'ownable')
         ->for(Task::factory()->for(Course::factory())->create([
-            'correction_type' => CorrectionType::PipelineSuccess,
             'ends_at'         => Carbon::create(2022, 1, 22),
         ]))->createQuietly();
 
@@ -43,18 +41,18 @@ it('ignores projects that are not past the deadline', function() {
     expect(Project::all()->pluck('status')->toArray())->toBe([ProjectStatus::Active, ProjectStatus::Active, ProjectStatus::Active]);
 });
 
-it('ignores projects that are active past the deadline when the task correction type is set to none', function() {
+
+it('ignores projects that are finished', function() {
     Project::factory(3)
-        ->active()
+        ->finished()
         ->for(User::factory(), 'ownable')
         ->for(Task::factory()->for(Course::factory())->create([
-            'correction_type' => CorrectionType::None,
             'ends_at'         => Carbon::create(2022, 1, 22),
         ]))->createQuietly();
 
-    Carbon::setTestNow(Carbon::create(2022, 1, 23));
+    Carbon::setTestNow(Carbon::create(2022, 1, 21));
 
     $this->artisan('tasks:mark-expired')->assertSuccessful();
 
-    expect(Project::all()->pluck('status')->toArray())->toBe([ProjectStatus::Active, ProjectStatus::Active, ProjectStatus::Active]);
+    expect(Project::all()->pluck('status')->toArray())->toBe([ProjectStatus::Finished, ProjectStatus::Finished, ProjectStatus::Finished]);
 });
