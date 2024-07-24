@@ -51,6 +51,7 @@ jobs:
           DB_DATABASE: scalable
         run: vendor/bin/pest --coverage-clover coverage.xml
       - name: Upload coverage to Codecov
+        if: always()
         uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
