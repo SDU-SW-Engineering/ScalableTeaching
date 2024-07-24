@@ -12,7 +12,7 @@
             <directory>./tests/Feature</directory>
         </testsuite>
     </testsuites>
-    <coverage processUncoveredFiles="true">
+    <coverage processUncoveredFiles="true" cacheDirectory=".phpunit.cache/code-coverage">
         <include>
             <directory suffix=".php">./app</directory>
             <directory suffix=".php">./domain</directory>

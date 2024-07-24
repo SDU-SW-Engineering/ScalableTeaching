@@ -22,3 +22,6 @@ public/js/*.js
 /public/mix-manifest.json
 dump.rdb
 html-coverage
+builds
+coverage.xml
+.phpunit.cache

@@ -50,6 +50,10 @@ jobs:
           DB_PASSWORD: secret
           DB_DATABASE: scalable
         run: vendor/bin/pest
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   static-analysis:
     concurrency:
       group: ${{ github.workflow }}-analysis-${{ github.ref }}
