@@ -8,13 +8,11 @@ use App\Models\Course;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
 use App\Models\Task;
-use Carbon\Carbon;
 use Domain\GitLab\CIReader;
 use Domain\GitLab\CITask;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
+use Spatie\LaravelMarkdown\MarkdownRenderer;
 
 class SettingsController extends Controller
 {
@@ -46,7 +44,7 @@ class SettingsController extends Controller
         $markdown = request('markdown');
         if($markdown != "")
         {
-            $html = Http::post(getenv('FORMATTER_SERVICE_URL') . '/md', ['text' => $markdown])->json('html');
+            $html = app(MarkdownRenderer::class)->toHtml($markdown);
             $task->markdown_description = $markdown;
             $task->description = $html;
         }
