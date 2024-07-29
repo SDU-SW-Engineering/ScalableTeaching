@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * App\Models\Project
@@ -268,12 +269,22 @@ class Project extends Model
         /** @var AutomaticGradingSettings $settings */
         $settings = $this->task->module_configuration->resolveModule(AutomaticGrading::class)->settings();
 
-        return match ($settings->getGradingType())
+        try
         {
-            AutomaticGradingType::PIPELINE_SUCCESS,
-            AutomaticGradingType::ALL_SUBTASKS      => $this->getProgressBasedOnFinished(),
-            AutomaticGradingType::REQUIRED_SUBTASKS => $this->getProgressBasedOnRequiredSubtasks($settings->requiredSubtaskIds)
-        };
+            return match ($settings->getGradingType())
+            {
+                AutomaticGradingType::PIPELINE_SUCCESS,
+                AutomaticGradingType::ALL_SUBTASKS      => $this->getProgressBasedOnFinished(),
+                AutomaticGradingType::REQUIRED_SUBTASKS => $this->getProgressBasedOnRequiredSubtasks($settings->requiredSubtaskIds),
+                AutomaticGradingType::POINTS_REQUIRED   => $this->getProgressBasedOnRequiredPoints($settings->getPointsRequired()),
+            };
+        } catch (Exception)
+        {
+            Log::error("Unknown grading type for project {$this->id}, returning 0 progress");
+
+            return 0;
+        }
+
     }
 
     /**
@@ -300,19 +311,20 @@ class Project extends Model
     }
 
     /**
-     * TODO: Use this function for POINTS_REQUIRED automatic grading type.
+     * @param int $pointsRequired
+     * @return int progress based on amount of points required, capped at 100%
      */
-    // @phpstan-ignore-next-line
-    private function pointProgress(): int
+    private function getProgressBasedOnRequiredPoints(int $pointsRequired): int
     {
         $completed = $this->subTasks->pluck('sub_task_id');
         if($completed->isEmpty())
             return 0;
 
-        $maxPoints = $this->task->sub_tasks->maxPoints();
         $points = $this->task->sub_tasks->points($completed);
 
-        return (int)(round($points / $maxPoints * 100));
+        $completedPercentage = (int)(round($points / $pointsRequired * 100));
+
+        return min($completedPercentage, 100);
     }
 
     /**
@@ -452,5 +464,21 @@ class Project extends Model
             ->isAccepted($this->task)
             ->isValid()
             ->latest();
+    }
+
+    /**
+     * @param ProjectSubTask[] $subTasks
+     * @return void
+     */
+    public function createSubTasks(array $subTasks): void
+    {
+        Log::info("Resetting subtasks for project {$this->id}");
+        $this->subTasks()->delete();
+
+        $subTaskCount = count($subTasks);
+        Log::info("Saving {$subTaskCount} subtasks for project {$this->id}");
+        $this->subTasks()->saveMany($subTasks);
+        $this->refresh();
+        Log::info("Successfully saved {$subTaskCount} subtasks for project {$this->id}");
     }
 }

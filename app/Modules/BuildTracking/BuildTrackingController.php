@@ -27,7 +27,7 @@ class BuildTrackingController extends Controller
         if(\request('status') != null)
             $buildQuery->where('pipelines.status', \request('status'));
 
-        $buildQuery->latest();
+        $buildQuery->latest('updated_at');
         $builds = $buildQuery->paginate(25)->withQueryString();
 
         return view('module-BuildTracking::Pages.builds', compact('course', 'task', 'dailyBuildsGraph', 'builds'));

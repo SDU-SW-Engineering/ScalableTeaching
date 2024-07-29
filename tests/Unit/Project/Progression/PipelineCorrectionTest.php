@@ -2,8 +2,6 @@
 
 use App\Models\Casts\SubTask;
 use App\Models\Course;
-use App\Models\Enums\CorrectionType;
-use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
@@ -28,7 +26,7 @@ beforeEach(function () {
     $task->module_configuration->addModule(AutomaticGrading::class);
     $settings = new AutomaticGradingSettings();
     $settings->gradingType = AutomaticGradingType::PIPELINE_SUCCESS->value;
-    $task->module_configuration->update(AutomaticGrading::class, $settings);
+    $task->module_configuration->update(AutomaticGrading::class, $settings, $task);
     $task->save();
 
     $this->project = Project::factory()->for($task)->createQuietly();

@@ -73,7 +73,7 @@ class ModuleController extends Controller
         if($settings == null)
             return redirect()->back();
 
-        $request->validate($settings->validationRules());
+        $request->validate($settings->validationRules($task));
         $reflect = new ReflectionClass($settings);
         foreach($reflect->getProperties() as $property)
         {
@@ -84,8 +84,9 @@ class ModuleController extends Controller
                 $property->setValue($settings, $value);
             }
         }
-        $task->module_configuration->update($module->identifier(), $settings);
+        $task->module_configuration->update($module->identifier(), $settings, $task);
         $task->save();
+        $task->module_configuration->resolveModule($module->identifier())->update($task);
 
         return redirect()->back();
     }

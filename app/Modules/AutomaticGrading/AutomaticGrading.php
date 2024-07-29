@@ -2,10 +2,17 @@
 
 namespace App\Modules\AutomaticGrading;
 
+use App\Jobs\Pipeline\RefreshPipeline;
+use App\Models\Pipeline;
+use App\Models\Project;
+use App\Models\ProjectSubTask;
+use App\Models\Task;
 use App\Modules\BuildTracking\BuildTracking;
 use App\Modules\MarkAsDone\MarkAsDone;
 use App\Modules\Module;
 use App\Modules\Settings;
+use App\ProjectStatus;
+use Illuminate\Support\Facades\Log;
 
 class AutomaticGrading extends Module
 {
@@ -38,6 +45,49 @@ class AutomaticGrading extends Module
         }
 
         return false;
+    }
+
+    public function update(Task $task): void
+    {
+
+        /** @var AutomaticGradingSettings $settings */
+        $settings = $this->settings();
+        Log::info("Updating task {$task->id} with automatic grading settings: {$settings->gradingType}");
+        if ($settings->isPipelineBased())
+        {
+            $allProjectsForTask = $task->projects();
+            $allProjectsForTask->each(function (Project $project, $index) {
+                /** @var Pipeline|null $latestPipeline */
+                $latestPipeline = $project->pipelines()->latest()->first();
+                if ( ! $latestPipeline)
+                {
+                    Log::info("No pipeline found for project {$project->id}, setting status to active.");
+                    $project->setProjectStatus(ProjectStatus::Active);
+
+                    return;
+                }
+
+                // Queue jobs to refresh pipelines to avoid overloading the gitlab api.
+                // We delay each job by 1 second. Since the projects endpoint can do 400 requests per minute. See https://docs.gitlab.com/ee/administration/settings/rate_limit_on_projects_api.html
+                RefreshPipeline::dispatch($latestPipeline)->delay($index * 1);
+            });
+        } else
+        {
+            $task->projects()->each(function (Project $project) {
+                $subTasksToRecreate = array_map(function($subTask) {
+                    return new ProjectSubTask([
+                        'sub_task_id' => $subTask['sub_task_id'],
+                        'source_type' => $subTask['source_type'],
+                        'source_id'   => $subTask['source_id'],
+                        'points'      => $subTask['points'],
+                    ]);
+                }, $project->subTasks->toArray());
+                if (count($subTasksToRecreate) > 0)
+                {
+                    $project->createSubTasks($subTasksToRecreate);
+                }
+            });
+        }
     }
 
 

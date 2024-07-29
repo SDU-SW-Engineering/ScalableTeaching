@@ -7,6 +7,8 @@
             :current-grading-type="{{ json_encode($gradingType) }}"
             :sub-tasks="{{ $subTasks }}"
             :required-subtask-ids="{{json_encode($requiredSubtaskIds)}}"
+            :points-required="{{ $pointsRequired == null ? 1 : $pointsRequired }}"
+            :max-subtask-points="{{ $subTasks->sum('points') }}"
 
         ></automatic-grading-configuration>
     </div>

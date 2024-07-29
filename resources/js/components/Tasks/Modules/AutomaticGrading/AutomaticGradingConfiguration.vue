@@ -26,6 +26,12 @@
                 </div>
             </div>
         </div>
+        <div
+            class="mt-4"
+            v-if="this.selectedGradingType && this.selectedGradingType === 'points_required'">
+            <p class="text-gray-200 font-light text-sm">Tasks will automatically be graded with a pass or fail based on if the student has obtained the amount of required points.</p>
+            <input type="number" name="pointsRequired" class="dark:bg-gray-600 rounded dark:text-gray-200 w-1/2" :value="pointsRequiredValue" :max="maxSubtaskPoints" @change="setPointsRequired" min="1"/>
+        </div>
     </div>
 </template>
 
@@ -47,17 +53,29 @@ export default {
         requiredSubtaskIds: {
             type: Array,
             required: true
+        },
+        pointsRequired: {
+            type: Number,
+            required: true
+        },
+        maxSubtaskPoints: {
+            type: Number,
+            required: true
         }
     },
     methods: {
         updateGradingType(event) {
             this.selectedGradingType = event.target.value;
+        },
+        setPointsRequired(event) {
+            this.pointsRequiredValue = event.target.value;
         }
     },
     data() {
         return {
             selectedGradingType: this.currentGradingType, // The value of the enum.
-            mappedRequiredSubtaskIds: this.requiredSubtaskIds.map((val) => Number(val))
+            mappedRequiredSubtaskIds: this.requiredSubtaskIds.map((val) => Number(val)),
+            pointsRequiredValue: this.pointsRequired
         }
     },
 }

@@ -14,7 +14,7 @@ use Domain\SourceControl\SourceControl;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 
-//uses(RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function() {
     /** @var Task $task */
@@ -28,7 +28,7 @@ beforeEach(function() {
     $task->module_configuration->addModule(AutomaticGrading::class);
     $settings = new AutomaticGradingSettings();
     $settings->gradingType = AutomaticGradingType::PIPELINE_SUCCESS->value;
-    $task->module_configuration->update(AutomaticGrading::class, $settings);
+    $task->module_configuration->update(AutomaticGrading::class, $settings, $task);
     $task->save();
 
     /** @var Project project */

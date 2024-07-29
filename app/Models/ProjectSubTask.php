@@ -7,6 +7,7 @@ use App\Modules\AutomaticGrading\AutomaticGrading;
 use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use App\Modules\AutomaticGrading\AutomaticGradingType;
 use App\ProjectStatus;
+use Eloquent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * @property Project $project
+ * @property int $points
+ * @property int $sub_task_id
+ * @mixin Eloquent
  */
 class ProjectSubTask extends Model
 {
@@ -54,6 +58,8 @@ class ProjectSubTask extends Model
         {
             AutomaticGradingType::ALL_SUBTASKS      => ProjectSubTask::validateAllSubtasks($project),
             AutomaticGradingType::REQUIRED_SUBTASKS => ProjectSubTask::validateRequiredSubtasks($project),
+            AutomaticGradingType::POINTS_REQUIRED   => ProjectSubTask::validatePointsRequired($project),
+
             default                                 => false
         };
 
@@ -88,6 +94,20 @@ class ProjectSubTask extends Model
         if ( ! $isValid)
         {
             Log::info("Project {$project->id} is not valid for all subtasks completed");
+        }
+
+        return $isValid;
+    }
+
+    private static function validatePointsRequired(Project $project): bool
+    {
+        Log::info("Validating project {$project->id} for points required");
+
+        $isValid = $project->task->hasProjectCompletedPointsRequired($project);
+
+        if ( ! $isValid)
+        {
+            Log::info("Project {$project->id} is not valid for points required");
         }
 
         return $isValid;

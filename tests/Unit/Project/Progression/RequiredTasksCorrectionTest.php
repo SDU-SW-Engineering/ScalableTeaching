@@ -2,7 +2,6 @@
 
 use App\Models\Casts\SubTask;
 use App\Models\Course;
-use App\Models\Enums\CorrectionType;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
@@ -29,7 +28,7 @@ beforeEach(function () {
     $settings = new AutomaticGradingSettings();
     $settings->gradingType = AutomaticGradingType::REQUIRED_SUBTASKS->value;
     $settings->requiredSubtaskIds = [1, 3];
-    $task->module_configuration->update(AutomaticGrading::class, $settings);
+    $task->module_configuration->update(AutomaticGrading::class, $settings, $task);
     $task->save();
 
     $this->project = Project::factory()->for($task)->createQuietly();

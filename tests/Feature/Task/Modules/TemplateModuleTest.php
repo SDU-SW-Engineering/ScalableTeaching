@@ -7,7 +7,6 @@
 use App\Models\Course;
 use App\Models\Task;
 use App\Modules\LinkRepository\LinkRepository;
-use App\Modules\LinkRepository\LinkRepositorySettings;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,10 +25,10 @@ beforeEach(function() {
         'starts_at' => Carbon::create(2022, 8, 8, 12),
         'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
     ])->for($this->course)->create();
-    $task->module_configuration->addModule(LinkRepository::class);
-    $settings = new LinkRepositorySettings();
-    $settings->repo = "mock-id";
-    $task->module_configuration->update(LinkRepository::class, $settings);
+
+    installLinkRepositoryModule($task);
+
+
     $task->save();
     $this->task = $task;
 

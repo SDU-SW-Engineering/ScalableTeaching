@@ -740,4 +740,23 @@ class Task extends Model
 
         return count($missingRequiredSubtaskIds) > 0;
     }
+
+    public function hasProjectCompletedPointsRequired(Project $project): bool
+    {
+        if ( ! $this->module_configuration->isEnabled(AutomaticGrading::class))
+        {
+            throw new \Error("Automatic grading module is not enabled.");
+        }
+
+        /** @var AutomaticGradingSettings $moduleSettings */
+        $moduleSettings = $this->module_configuration->resolveModule(AutomaticGrading::class)->settings();
+        $pointsRequired = $moduleSettings->pointsRequired;
+
+        $completedSubTaskPoints = $project->subTasks->map(function ($subTask) {
+            /** @var ProjectSubTask $subTask */
+            return $subTask->points;
+        })->sum();
+
+        return $completedSubTaskPoints >= $pointsRequired;
+    }
 }

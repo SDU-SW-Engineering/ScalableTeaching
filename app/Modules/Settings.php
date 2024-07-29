@@ -2,6 +2,7 @@
 
 namespace App\Modules;
 
+use App\Models\Task;
 use ReflectionClass;
 
 abstract class Settings implements \JsonSerializable
@@ -11,7 +12,7 @@ abstract class Settings implements \JsonSerializable
      * to a property on the settings class.
      * @return array Laravel validation rules
      */
-    public function validationRules(): array
+    public function validationRules(Task $task): array
     {
         return [];
     }

@@ -29,7 +29,7 @@ beforeEach(function() {
     $task->module_configuration->addModule(AutomaticGrading::class);
     $settings = new AutomaticGradingSettings();
     $settings->gradingType = AutomaticGradingType::ALL_SUBTASKS->value;
-    $task->module_configuration->update(AutomaticGrading::class, $settings);
+    $task->module_configuration->update(AutomaticGrading::class, $settings, $task);
     $task->save();
 
     $this->project = Project::factory()->for($task)->createQuietly();

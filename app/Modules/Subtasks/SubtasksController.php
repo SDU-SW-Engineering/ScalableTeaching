@@ -102,7 +102,7 @@ class SubtasksController extends BaseController
             $settings = $task->module_configuration->resolveModule(AutomaticGrading::class)->settings();
             $subTaskIds = $task->sub_tasks->all()->pluck('id');
             $settings->requiredSubtaskIds = array_filter($settings->requiredSubtaskIds, fn(int $requiredSubtaskId) => $subTaskIds->contains($requiredSubtaskId));
-            $task->module_configuration->update(AutomaticGrading::class, $settings);
+            $task->module_configuration->update(AutomaticGrading::class, $settings, $task);
         }
 
         $task->save();
