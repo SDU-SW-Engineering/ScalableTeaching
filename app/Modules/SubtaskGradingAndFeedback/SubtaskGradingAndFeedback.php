@@ -5,6 +5,7 @@ namespace App\Modules\SubtaskGradingAndFeedback;
 use App\Modules\Module;
 use App\Modules\Subtasks\Subtasks;
 use App\Modules\Template\Template;
+use Illuminate\Support\Facades\Route;
 
 class SubtaskGradingAndFeedback extends Module
 {
@@ -18,4 +19,20 @@ class SubtaskGradingAndFeedback extends Module
     protected string $description = "Enable manual grading of subtasks and feedback of handed in code. Can also be used for peer feedback. Can be combined with the Automatic Grading module.";
 
     protected array $dependencies = [Template::class, Subtasks::class];
+
+    public static function configRoutes(): void
+    {
+        // Delegation controller
+        Route::get('/delegation', [DelegationController::class, 'index'])->name('delegation.index');
+        Route::post('/delegation', [DelegationController::class, 'store'])->name('delegation.store');
+        Route::get('/delegation/{taskDelegation}', [DelegationController::class, 'show'])->name('delegation.show');
+        Route::delete('/delegation/{taskDelegation}', [DelegationController::class, 'delete'])->name('delegation.delete');
+
+        // Feedback controller
+        Route::get("/feedback", [FeedbackController::class, 'index'])->name('feedback.index');
+        Route::get("/feedback/comment/{comment}", [FeedbackController::class, 'getComment'])->name('feedback.getComment');
+        Route::put("/feedback/comment/{comment}", [FeedbackController::class, 'setCommentStatus'])->name('feedback.setCommentStatus');
+    }
+
+
 }

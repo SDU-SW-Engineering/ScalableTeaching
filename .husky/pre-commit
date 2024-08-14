@@ -1,2 +1,2 @@
-./vendor/friendsofphp/php-cs-fixer/php-cs-fixer check
+./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix
 ./vendor/bin/phpstan

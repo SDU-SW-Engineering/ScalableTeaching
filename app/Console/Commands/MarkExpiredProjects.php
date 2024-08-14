@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Enums\CorrectionType;
+use App\Models\Project;
 use App\Models\Task;
+use App\ProjectStatus;
 use Illuminate\Console\Command;
 
 class MarkExpiredProjects extends Command
@@ -49,9 +51,9 @@ class MarkExpiredProjects extends Command
                 continue;
             }
 
-            $count = $task->projects()->where('status', 'active')->withTrashed()->update([
-                'status' => 'overdue',
-            ]);
+            $count = $task->projects()->where('status', 'active')->withTrashed()->each(function(Project $project) {
+                $project->setProjectStatus(ProjectStatus::Overdue);
+            });
             $this->info("Marked $count projects as overdue.");
         }
 

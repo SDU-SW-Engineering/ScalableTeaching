@@ -9,7 +9,9 @@ use App\Modules\AutomaticDownload\AutomaticDownload;
 use Carbon\Carbon;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Mockery\MockInterface;
+use function Pest\testDirectory;
 
 uses(RefreshDatabase::class);
 
@@ -52,10 +54,12 @@ it('should call GitLab to fetch the archived version of the repository when proj
         'queued_at'     => Carbon::now(),
     ])->for($this->project)->create();
 
+    Storage::fake('local');
+
     $this->mock(GitLabManager::class, function (MockInterface $mock) use ($projectDownload) {
         $mock->shouldReceive('repositories->archive')->once()->with($projectDownload->project->gitlab_project_id, [
             'sha' => $projectDownload->ref,
-        ], 'zip')->andReturn('archive-content.zip');
+        ], 'zip')->andReturn( file_get_contents(testDirectory("Files/test.zip")));
     });
 
     $job = new DownloadProject($projectDownload);
@@ -69,10 +73,12 @@ it('should call GitLab to fetch the archived version of the repository when proj
         'queued_at'     => Carbon::now(),
     ])->for($this->project)->create();
 
+    Storage::fake('local');
+
     $this->mock(GitLabManager::class, function (MockInterface $mock) use ($projectDownload) {
         $mock->shouldReceive('repositories->archive')->once()->with($projectDownload->project->gitlab_project_id, [
             'sha' => $projectDownload->ref,
-        ], 'zip')->andReturn('archive-content.zip');
+        ], 'zip')->andReturn(file_get_contents(testDirectory("Files/test.zip")));
     });
 
     $job = new DownloadProject($projectDownload);
@@ -86,16 +92,18 @@ it('should store the downloaded archive in the local storage', function() {
         'queued_at'     => Carbon::now(),
     ])->for($this->project)->create();
 
+    Storage::fake('local');
+
     $this->mock(GitLabManager::class, function (MockInterface $mock) use ($projectDownload) {
         $mock->shouldReceive('repositories->archive')->once()->with($projectDownload->project->gitlab_project_id, [
             'sha' => $projectDownload->ref,
-        ], 'zip')->andReturn('archive-content.zip');
+        ], 'zip')->andReturn(file_get_contents(testDirectory("Files/test.zip")));
     });
 
     $job = new DownloadProject($projectDownload);
     $job->handle();
 
-    Storage::disk('local')->assertExists("tasks/{$projectDownload->project->task_id}/projects/{$projectDownload->project_id}_{$projectDownload->ref}.zip");
+    Storage::disk('local')->assertExists("tasks/{$projectDownload->project->task_id}/projects/{$projectDownload->project_id}_{$projectDownload->ref}");
 });
 
 it('should update the project downloads table, setting the location, downloaded_at and queued_at to null', function() {
@@ -105,6 +113,8 @@ it('should update the project downloads table, setting the location, downloaded_
         'queued_at'     => Carbon::now(),
     ])->for($this->project)->create();
 
+    Storage::fake('local');
+
     // Guard
     expect($projectDownload->location)->toBeNull();
     expect($projectDownload->downloaded_at)->toBeNull();
@@ -113,7 +123,7 @@ it('should update the project downloads table, setting the location, downloaded_
     $this->mock(GitLabManager::class, function (MockInterface $mock) use ($projectDownload) {
         $mock->shouldReceive('repositories->archive')->once()->with($projectDownload->project->gitlab_project_id, [
             'sha' => $projectDownload->ref,
-        ], 'zip')->andReturn('archive-content.zip');
+        ], 'zip')->andReturn(file_get_contents(testDirectory("Files/test.zip")));
     });
 
     $job = new DownloadProject($projectDownload);
@@ -121,7 +131,7 @@ it('should update the project downloads table, setting the location, downloaded_
 
     // Assert
     $projectDownload->refresh();
-    expect($projectDownload->location)->toEqual("tasks/{$projectDownload->project->task_id}/projects/{$projectDownload->project_id}_{$projectDownload->ref}.zip");
+    expect($projectDownload->location)->toEqual("tasks/{$projectDownload->project->task_id}/projects/{$projectDownload->project_id}_{$projectDownload->ref}");
     expect($projectDownload->downloaded_at)->not()->toBeNull();
     expect($projectDownload->queued_at)->toBeNull();
 });

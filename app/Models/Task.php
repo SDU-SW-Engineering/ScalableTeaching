@@ -72,6 +72,7 @@ use Illuminate\Support\Str;
  * @property-read bool $is_publishable
  * @property ModuleConfiguration $module_configuration
  * @property int $gitlab_group_id
+ * @property-read Collection<int, Project> $projects
  * @mixin Eloquent
  */
 class Task extends Model
@@ -714,6 +715,15 @@ class Task extends Model
     public function isCodeTask(): bool
     {
         return $this->module_configuration->isEnabled(LinkRepository::class);
+    }
+
+    /**
+     * Check if the task is being automatically graded
+     * @return bool true or false whether the task is being automatically graded
+     */
+    public function isAutomaticallyGraded(): bool
+    {
+        return $this->module_configuration->isEnabled(AutomaticGrading::class);
     }
 
     /**

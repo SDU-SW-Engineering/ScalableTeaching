@@ -24,12 +24,12 @@ beforeEach(function() {
         $project = Project::factory()->for($this->task)->for($user, 'ownable')->has(ProjectPush::factory()->before($this->task->ends_at), 'pushes')->createQuietly();
     });
     $this->task->delegations()->create([
-        'number_of_tasks' => 2,
-        'type'            => TaskDelegationType::LastPushes,
-        'course_role_id'  => 1, // students (for now),
-        'feedback'        => 1,
-        'grading'         => 0,
-        'deadline_at'     => $this->task->ends_at->copy()->addDays(2),
+        'number_of_projects' => 2,
+        'type'               => TaskDelegationType::LastPushes,
+        'course_role_id'     => 1, // students (for now),
+        'feedback'           => 1,
+        'grading'            => 0,
+        'deadline_at'        => $this->task->ends_at->copy()->addDays(2),
     ]);
 });
 

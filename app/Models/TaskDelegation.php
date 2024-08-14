@@ -7,6 +7,7 @@ use App\Jobs\Project\DownloadProject;
 use App\Jobs\Project\IndexRepositoryChanges;
 use App\Models\Enums\TaskDelegationType;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,8 +16,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
+ * @property int $id
  * @property-read Task $task
  * @property TaskDelegationType $type
  * @property bool $delegated
@@ -24,14 +28,15 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property bool $grading
  * @property Carbon $deadline_at
  * @property int|null $course_role_id
- * @property int $number_of_tasks
+ * @property int $number_of_projects The amount of projects each user has to give feedback on
  * @property-read bool $is_moderated
+ * @method static Builder undelegated() Maps to scopeUndelegated
  */
 class TaskDelegation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['course_role_id', 'number_of_tasks', 'type', 'grading', 'feedback', 'deadline_at', 'delegated', 'is_moderated'];
+    protected $fillable = ['course_role_id', 'number_of_projects', 'type', 'grading', 'feedback', 'deadline_at', 'delegated', 'is_moderated'];
 
     protected $casts = [
         'type'        => TaskDelegationType::class,
@@ -58,6 +63,8 @@ class TaskDelegation extends Model
     }
 
     /**
+     * Is only used for attaching or getting users for a certain delegation
+     * THIS SHOULD NOT BE USED WHEN DELEGATING {@see delegationUserPool()}
      * @return BelongsToMany<User>
      */
     public function userPool(): BelongsToMany
@@ -91,82 +98,126 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @throws \Throwable
+     * @throws TaskDelegationException
+     * @throws Throwable
      */
     public function delegate(): void
     {
         throw_if($this->task->ends_at->gt(now()), new TaskDelegationException('Cannot delegate before task has ended.'));
         throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
-        /** @var Collection<int,Project> $projects */
-        $projects = $this->task->projects->keyBy('id');
 
-        $remainingTasks = $this->projectCounter($projects);
-        $delayCounter = 0;
-
-
-        foreach($this->pool() as $user)
+        // Max cases where all project gets reviewed.
+        if ($this->number_of_projects === 0 || $this->number_of_projects >= $this->task->projects->count() - 1)
         {
-            if($remainingTasks->count() == 0)
-                $remainingTasks = $this->projectCounter($projects); // out of tasks, replenish to start over
-
-            $ineligibleTasks = [];
-            $userProject = $this->userProject($user);
-            if($userProject != null)
-                $ineligibleTasks[] = $userProject;
-
-            $numberOfTasks = $this->number_of_tasks == 0 ? $this->task->projects->count() : $this->number_of_tasks;
-            for($i = 0; $i < $numberOfTasks; $i++)
-            {
-                $project = null;
-                $projectPush = null;
-                do // keep looking for a valid repo to assign to the user
-                {
-                    $projectId = $this->pickRandomProject($remainingTasks, $ineligibleTasks);
-                    if ($projectId == null)
-                        break; // no valid candidate skipping
-                    $projectPush = $this->relevantPush($projects[$projectId]);
-                    if($projectPush?->after_sha == null)
-                    {
-                        $ineligibleTasks[] = $projectId;
-                        continue;
-                    }
-                    $project = $projects[$projectId];
-                } while($project == null);
-
-                if ($project == null) //project is still null despite us trying to find a solution means we skip
-                    continue;
-
-                $project->feedback()->create([
-                    'sha'                => $projectPush->after_sha,
-                    'task_delegation_id' => $this->id,
-                    'user_id'            => $user->id,
-                ]);
-
-                IndexRepositoryChanges::dispatch($project, $projectPush->after_sha)->onQueue('index')->delay(now()->addMinutes($delayCounter / 2));
-                $delayCounter++;
-                $ineligibleTasks[] = $projectId;
-                if ($project->download()->exists())
-                    continue; // download is already queued.
-
-                /** @var ProjectDownload $download */
-                $download = $project->download()->create([
-                    'ref'       => $projectPush->after_sha,
-                    'expire_at' => now()->addYears(2),
-                ]);
-                DownloadProject::dispatch($download)->onQueue('downloads')->delay(now()->addMinutes($delayCounter / 2));
-                $delayCounter++;
-            }
+            $this->delegateAllProjects();
+        } else if ($this->delegationUserPool()->count() == $this->task->course->students()->count())
+        {
+            $this->delegateCircular();
+        } else
+        {
+            $this->delegateSplitEqually();
         }
         $this->update(['delegated' => true]);
     }
 
     /**
-     * @param Collection<int,Project> $projects
-     * @return Collection<int, int>
+     * Handles delegating projects if every user should review every project.
      */
-    private function projectCounter(Collection $projects): \Illuminate\Support\Collection // @phpstan-ignore-line
+    private function delegateAllProjects(): void
     {
-        return $projects->mapWithKeys(fn(Project $project) => [$project->id => $this->number_of_tasks]);
+        $delayCounter = 0;
+        $allProjects = $this->task->projects->keyBy('id');
+        foreach ($this->delegationUserPool() as $delegationUser)
+        {
+            $userProject = $this->userProject($delegationUser);
+            $ineligibleProjects = $userProject != null ? [$userProject] : [];
+
+            $eligibleProjects = $allProjects->except($ineligibleProjects);
+            foreach ($eligibleProjects as $project)
+            {
+                $this->processProjectUpdate($project, $delegationUser, $delayCounter);
+            }
+
+        }
+    }
+
+    /**
+     * Handles delegating projects if every user should review a subset of projects.
+     * It delegates with the following logic:
+     * - User 0, gets projects 1, 2
+     * - User 1, gets projects 2, 3
+     * - User 2, gets projects 3, 0
+     * - User 3, gets projects 0, 1
+     */
+    private function delegateCircular(): void
+    {
+        $delayCounter = 0;
+        $projects = $this->task->projects->keyBy('id');
+        $userPool = $this->delegationUserPool();
+        for ($userIndex = 0; $userIndex < $userPool->count(); $userIndex++)
+        {
+            $delegationUser = $userPool[$userIndex];
+            $userProject = $this->userProject($delegationUser);
+            $ineligibleProjects = $userProject != null ? [$userProject] : [];
+
+            $eligibleProjects = $projects->except($ineligibleProjects);
+            for ($projectIndex = 0; $projectIndex < $this->number_of_projects; $projectIndex++)
+            {
+                $index = ($userIndex + $projectIndex) % count($eligibleProjects);
+
+                $projectToAssign = $eligibleProjects->slice($index, 1)->first();
+                $this->processProjectUpdate($projectToAssign, $delegationUser, $delayCounter);
+            }
+        }
+    }
+
+    private function delegateSplitEqually(): void
+    {
+        $delayCounter = 0;
+        $userPool = $this->delegationUserPool();
+        $projects = $this->task->projects->keyBy('id');
+        $splitProjects = $projects->split($userPool->count());
+        foreach ($userPool as $delegationUser)
+        {
+
+            $userProject = $this->userProject($delegationUser);
+            //TODO:  Account for group projects.
+
+            $ineligibleProjects = $userProject != null ? [$userProject] : [];
+
+            /** @var Collection $eligibleProjects */
+            $eligibleProjects = $splitProjects->shift()->except($ineligibleProjects);
+            foreach ($eligibleProjects as $projectId)
+            {
+                $this->processProjectUpdate($projects->get($projectId), $delegationUser, $delayCounter);
+            }
+        }
+    }
+
+    private function processProjectUpdate(Project $project, User $delegationUser, int &$delayCounter): void
+    {
+        $projectPush = $this->relevantPush($project);
+        if ($projectPush == null || $projectPush->after_sha == null)
+            return;
+
+        $project->feedback()->create([
+            'sha'                => $projectPush->after_sha,
+            'task_delegation_id' => $this->id,
+            'user_id'            => $delegationUser->id,
+        ]);
+
+        IndexRepositoryChanges::dispatch($project, $projectPush->after_sha)->onQueue('index')->delay(now()->addMinutes($delayCounter / 2));
+        $delayCounter++;
+
+        if ($project->download()->exists())
+            return; // download is already queued.
+
+        $download = $project->download()->create([
+            'ref'       => $projectPush->after_sha,
+            'expire_at' => now()->addYears(2),
+        ]);
+        DownloadProject::dispatch($download)->onQueue('downloads')->delay(now()->addMinutes($delayCounter / 2));
+        $delayCounter++;
     }
 
     /**
@@ -182,54 +233,58 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @param \Illuminate\Support\Collection<int,int> $tasks
-     * @param array $exclude
-     * @return int
-     */
-    private function pickRandomProject(\Illuminate\Support\Collection &$tasks, array $exclude = []): ?int
-    {
-        do
-        {
-            $eligibleTasks = $tasks->reject(fn(int $counter, int $projectId) => in_array($projectId, $exclude));
-            if ($eligibleTasks->count() == 0)
-            {
-                // This user is out of eligible tasks, take frrom general pool.
-                $eligibleTasks = $this->projectCounter($this->task->projects)
-                    ->reject(fn(int $counter, int $projectId) => in_array($projectId, $exclude));
-                $tasks = $eligibleTasks;
-            }
-            if ($tasks->count() == 0)
-                return null; // couldn't find a task for this using within constraints - skipping
-
-            $pickedProjectId = $eligibleTasks->keys()[rand(0, $eligibleTasks->count() - 1)];
-
-            $tasks[$pickedProjectId] = $tasks[$pickedProjectId] - 1;
-            if ($tasks[$pickedProjectId] == 0)
-                $tasks->forget($pickedProjectId);
-        } while($pickedProjectId == null);
-
-        return $pickedProjectId;
-    }
-
-    /**
      * @param Project $project
      * @return ProjectPush|null The push
-     * @throws \Exception
+     * @throws Exception
      */
     private function relevantPush(Project $project): ?ProjectPush
     {
-        return $project->relevantPushes()->first();
+        /** @var ProjectPush|null $latestProjectPush */
+        $latestProjectPush = $project->relevantPushes()->first();
+
+        return $latestProjectPush;
     }
 
     /**
-     * @return array<User>
+     * Returns the pool of users that should be delegated to.
+     * @return Collection<int, User>
      */
-    private function pool(): array
+    private function delegationUserPool(): Collection
     {
-        $pool = [];
-        if($this->course_role_id != null)
-            $pool = $this->task->course->students;
+        if ($this->course_role_id == 1)
+        {
+            return $this->task->course->students;
+        }
+        if ($this->course_role_id == 2)
+        {
+            return $this->task->course->teachers;
+        }
+        if ($this->course_role_id == null)
+        {
+            return $this->userPool;
+        }
 
-        return [...$pool, ...$this->userPool];
+        Log::error("Received unknown course_role_id for task delegation, received: {$this->course_role_id} - Returning empty array.");
+
+        return Collection::empty();
+    }
+
+    public function userPoolCount(): int
+    {
+        return $this->delegationUserPool()->count();
+    }
+
+    public function courseRoleName(): string
+    {
+        if ($this->course_role_id == 1)
+        {
+            return 'Student';
+        }
+        if ($this->course_role_id == 2)
+        {
+            return 'Teacher';
+        }
+
+        return 'User';
     }
 }

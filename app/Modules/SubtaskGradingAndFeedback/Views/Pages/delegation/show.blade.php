@@ -1,7 +1,11 @@
+@php
+    $delegationFolderBase = "module-SubtaskGradingAndFeedback::Pages.delegation.";
+@endphp
+
 @extends('tasks.admin.master')
 
 @section('adminContent')
-    @include('tasks.admin.partials.delegationTabs')
+    @include($delegationFolderBase . "partials.tabs")
     @if($taskDelegation->delegated)
         <div class="grid grid-cols-2 gap-2">
             @foreach($users as $user)
@@ -12,7 +16,7 @@
                                  src="{{ $user->avatar }}">
                             <div>
                                 <h3 class="font-medium dark:text-white leading-4">{{ $user->name }}</h3>
-                                <span class="text-sm text-lime-green-500">Student</span>
+                                <span class="text-sm text-lime-green-500">{{ $taskDelegation->course_role_id == 1 ? "Student" : "Teacher" }}</span>
                             </div>
                         </div>
                         <span
@@ -54,18 +58,15 @@
             @endforeach
         </div>
     @else
-        <div class="flex flex-col items-center mt-8">
-            <h2 class="text-xl font-medium text-gray-500">This task is currently not delegated</h2>
-            <h3 class="text-lg font-thin text-gray-600">It will be delegated automatically shortly
-                after {{ $task->ends_at }} <span class="text-lime-green-700">({{ $task->ends_at->diffForHumans() }}
-                    )</span></h3>
-        </div>
+        @include($delegationFolderBase . "partials.show.notDelegated")
     @endif
 
 @endsection
 
 @section('scripts')
     <script type="text/javascript">
+        // The code below is used to change the color of the project boxes when hovered over
+        // This ensures the same project is highlighted across all users that are giving feedback.
         let classes = [{!! $task->projects->pluck('id')->map(fn($id) => '\'project-' . $id . '\'')->join(', ') !!}]; //list of your classes
         let elms = {};
         let n = {}, nclasses = classes.length;

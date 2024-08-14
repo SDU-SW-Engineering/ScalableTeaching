@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $user_id
  * @property User $user
  * @property bool $reviewed
+ * @property string $pseudonym
  * @property-read Project $project
  * @property TaskDelegation $taskDelegation
  * @property string $sha

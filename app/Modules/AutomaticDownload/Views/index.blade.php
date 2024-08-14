@@ -92,12 +92,12 @@
                                     <span>Expires {{ $download['download']->expire_at->diffForHumans() }}.</span>
                                 </td>
                                 <td class="flex px-6 py-4 gap-2 justify-end align-items-center">
-                                    <!-- TODO: Disabled until code editor is fixed classes: hover:bg-lime-green-500 -->
-                                    <a target="_self" href="#"
-                                       class="py-2 px-4 text-black bg-gray-400 cursor-not-allowed rounded-md disabled-open-btn">Open</a>
+
+                                    <a target="_self" href="{{ route('courses.tasks.show-editor', [$course, $task, $download['project']]) }}"
+                                       class="py-2 px-4 active-btn">Open</a>
 
                                     <a href="{{ route('courses.tasks.admin.automaticDownload.download', [$course, $task, $download['download']]) }}"
-                                       class="py-2 px-4 hover:bg-lime-green-500 text-white rounded-md bg-lime-green-400 flex gap-1 items-center">
+                                       class="py-2 px-4 active-btn flex gap-1 items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                              stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -174,14 +174,4 @@
             </tbody>
         </table>
     </div>
-@endsection
-
-@section('scripts')
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            tippy('.disabled-open-btn', {
-                content: 'Disabled until code editor is fixed',
-            });
-        });
-    </script>
 @endsection

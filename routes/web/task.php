@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Task\Admin\GradingController;
 use App\Http\Controllers\Task\Admin\ModuleController;
 use App\Http\Controllers\Task\Admin\OverviewController;
 use App\Http\Controllers\Task\Admin\SettingsController;
@@ -25,19 +24,6 @@ Route::prefix('{task}')->group(function() {
             Route::post('{module}/configure', 'doConfigure')->name('do-configure');
         });
 
-
-
-        Route::controller(GradingController::class)->group(function() {
-            Route::get('grading-overview', 'gradingOverview')->name('gradingOverview');
-            Route::get('feedback', 'gradingDelegate')->name('gradingDelegate');
-            Route::post('feedback', 'addDelegation')->name('addDelegation');
-            Route::get('feedback/moderation', 'showFeedbackModeration')->name('feedback.moderation');
-            Route::get('feedback/moderation/history', 'showFeedbackModerationHistory')->name('feedback.moderation-history');
-            Route::get('feedback/moderation/comments/{comment}', 'showComment')->name('feedback.moderation.show-comment');
-            Route::put('feedback/moderation/comments/{comment}', 'setStatus')->name('feedback.moderation.set-status');
-            Route::get('feedback/{taskDelegation}', 'showDelegation')->name('showDelegation');
-            Route::delete('feedback/{taskDelegation}', 'removeDelegation')->name('removeDelegation');
-        });
 
         Route::controller(SettingsController::class)->group(function() {
             Route::get('preferences', 'preferences')->name('preferences');

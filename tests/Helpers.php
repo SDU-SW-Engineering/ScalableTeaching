@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Casts\SubTask;
 use App\Models\Task;
 use App\Modules\AutomaticGrading\AutomaticGrading;
 use App\Modules\AutomaticGrading\AutomaticGradingSettings;
@@ -8,6 +9,31 @@ use App\Modules\BuildTracking\BuildTracking;
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\LinkRepository\LinkRepositorySettings;
 use App\Modules\Template\Template;
+
+
+
+/**
+ * @param array{title: string, points?: int} $subtaskData
+ * @return SubTask[]
+ */
+function createSubTasks(array $subtaskData):  array
+{
+    $subTaskArray = [];
+
+    foreach ($subtaskData as $subtask)
+    {
+        $subTask = new SubTask($subtask['title'], $subtask['title']);
+        $subTask->setId(fake()->unique()->randomNumber());
+        if (isset($subtask['points']))
+        {
+            $subTask->setPoints($subtask['points']);
+        }
+        $subTaskArray[] = $subTask;
+    }
+
+    return $subTaskArray;
+}
+
 
 function installLinkRepositoryModule(Task $task): void
 {
@@ -39,6 +65,3 @@ function installAutomaticGradingModule(Task $task, AutomaticGradingType $grading
     $task->module_configuration->update(AutomaticGrading::class, $settings, $task);
     $task->module_configuration->resolveModule(AutomaticGrading::class)->update($task);
 }
-
-
-?>

@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\ProjectCreated;
-use App\Listeners\GitLab\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\FeedbackCommentStatus;
@@ -13,17 +11,13 @@ use App\Models\Grade;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
-use App\Models\ProjectDiffIndex;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
 use App\Models\ProjectFeedbackComment;
 use App\Models\Task;
-use App\Models\TaskDelegation;
 use App\Models\User;
 use App\ProjectStatus;
-use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use Carbon\CarbonPeriod;
 use Domain\Files\Directory;
 use Domain\Files\Highlight;
 use Domain\Files\IsChangeable;
@@ -247,8 +241,9 @@ class ProjectController extends Controller
         return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus);
     }
 
-    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Directory
+    public function showTree(Course $course, Task $task, Project $project): Directory
     {
+        $projectDownload = $project->download;
         $tree = $projectDownload->fileTree()->trim();
         $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
         if($changes != null)
@@ -273,8 +268,9 @@ class ProjectController extends Controller
         return $tree;
     }
 
-    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Response|array
+    public function showFile(Course $course, Task $task, Project $project): Response|array
     {
+        $projectDownload = $project->download;
         $contents = $projectDownload->file(\request('path'));
         $processedLines = (new Highlight(\request('path')))->code($contents);
         if($processedLines == null)

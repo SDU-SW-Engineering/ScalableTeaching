@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\CourseTrackController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GitLabOAuthController;
 use App\Http\Controllers\HomeController;
@@ -12,6 +9,8 @@ use App\Http\Controllers\AdminController;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
+
+// If you can't find the routes in these files, then take a look in the module controllers if's a route related to a module.
 
 Route::get('/', [DashboardController::class, 'index'])->name('home');
 

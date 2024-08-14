@@ -60,10 +60,18 @@ class DownloadProject implements ShouldQueue
             return;
         }
 
-        $fileName = "{$this->download->project_id}_{$this->download->ref}";
+        $tempName = "temp" . str()->random(4);
         $basePath = "tasks/{$this->download->project->task_id}/projects";
-        $fileLocation = "$basePath/$fileName.zip";
-        Storage::disk('local')->put($fileLocation, $archiveContent);
+        $tempZipLocation = "$basePath/$tempName.zip";
+        Storage::disk('local')->put($tempZipLocation, $archiveContent);
+
+        $zip = new ZipArchive();
+        $zip->open(Storage::path($tempZipLocation));
+        $zipBaseDir = $zip->getNameIndex(0);
+        $zip->extractTo(Storage::path("$basePath"));
+        $fileLocation = "$basePath/{$this->download->project_id}_{$this->download->ref}";
+        Storage::move("$basePath/$zipBaseDir", "$fileLocation");
+        Storage::delete($tempZipLocation);
 
         $this->download->update([
             'location'      => $fileLocation,

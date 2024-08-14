@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use ZipStream\ZipStream;
 
 class AutomaticDownloadController extends BaseController
 {
@@ -26,9 +27,14 @@ class AutomaticDownloadController extends BaseController
             'download'      => $project->download,
             'indexed'       => false,
         ]);
+
         $missingOnDisk = $downloads->filter(function($download) {
             /** @var ProjectDownload $projectDownload */
             $projectDownload = $download['download'];
+            if ($projectDownload == null)
+            {
+                return true;
+            }
 
             return $projectDownload->state == DownloadState::Downloaded && $projectDownload->queued_at == null;
         });
@@ -38,7 +44,22 @@ class AutomaticDownloadController extends BaseController
 
     public function download(Course $course, Task $task, ProjectDownload $projectDownload): StreamedResponse
     {
-        return Storage::download($projectDownload->location, str($projectDownload->project->ownable->name)->slug()->append("-$projectDownload->ref"));
+        return new StreamedResponse(function() use ($projectDownload) {
+            $zip = new ZipStream(
+                defaultEnableZeroHeader: true,
+                outputName: str($projectDownload->project->ownable->name)->slug()->append("-$projectDownload->ref")->append(".zip"),
+                contentType: 'application/octet-stream'
+            );
+
+            $allFiles = Storage::allFiles($projectDownload->location);
+            foreach($allFiles as $file)
+            {
+                $innerPath = str($file)->remove($projectDownload->location)->ltrim('/')->toString();
+                $zip->addFileFromPath(fileName: $innerPath, path: Storage::path($file));
+            }
+
+            $zip->finish();
+        });
     }
 
     public function queue(Course $course, Task $task, ProjectDownload $projectDownload)

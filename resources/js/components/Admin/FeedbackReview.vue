@@ -157,10 +157,17 @@ export default {
             if (reason == null)
                 return;
             this.reviewing = true;
-            await axios.put(this.basePath, {
-                status,
-                reason: reason === "" ? null : reason
-            })
+            try {
+                await axios.put(this.basePath, {
+                    status,
+                    reason: reason === "" ? null : reason
+                })
+            } catch (e) {
+                this.$toast.error('Something went wrong saving the review.')
+                console.error(e);
+                this.reviewing = false;
+                return;
+            }
             await this.refresh();
             if (this.showOverlay)
                 this.overlay = true;

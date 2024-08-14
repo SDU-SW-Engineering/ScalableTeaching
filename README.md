@@ -68,6 +68,13 @@ We generate schema query objects with the package [php-graphql-oqm](https://gith
 
 _Last schema generation was: February 19th 2024, and the gitlab.sdu.dk was running on version **16.9**._
 
+### Diagrams
+
+The diagrams in the documentation are generated using [Mermaid](https://mermaid-js.github.io/mermaid/#/).
+
+You can find the diagrams in the [/docs/diagrams](./docs/diagrams) folder.
+
+For it to render properly when previewing, you can download the markdown extension any IDE you're using.
 
 ### Running the application
 

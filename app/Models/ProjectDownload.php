@@ -13,13 +13,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
-use League\Flysystem\FilesystemException;
-use Spatie\ShikiPhp\Shiki;
-use Str;
-use ZipArchive;
 
 /**
  * @property int $project_id
@@ -79,14 +74,8 @@ class ProjectDownload extends Model
     public function fileTree(): Directory
     {
         $root = new Directory(".");
-        $path = Storage::path($this->location);
-        //$baseFolder = opendir($path);
-
-       /* while ($file =  readdir($baseFolder))
-        {
-            dd($file);
-        }*/
         $files = (new Collection(Storage::allFiles($this->location)))->map(fn(string $file) => str($file)->remove($this->location)->ltrim('/')->toString());
+
         foreach($files as $fileName)
         {
             $path = explode('/', $fileName);
