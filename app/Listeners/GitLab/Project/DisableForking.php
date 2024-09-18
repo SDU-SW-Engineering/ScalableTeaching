@@ -6,9 +6,11 @@ use App\Events\ProjectCreated;
 use Exception;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 
 class DisableForking implements ShouldQueue
 {
+
     public int $delay = 5;
 
     public int $tries = 5;
@@ -38,6 +40,8 @@ class DisableForking implements ShouldQueue
     public function handle(ProjectCreated $event)
     {
         if ( ! $event->project->task->isCodeTask()) return;
+
+        Log::info("Disabling GitLab forking for project {$event->project->id}");
 
         $gitLabManager = app(GitLabManager::class);
 

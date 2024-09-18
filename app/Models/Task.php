@@ -53,7 +53,7 @@ use Illuminate\Support\Str;
  * @property string $description
  * @property string $markdown_description
  * @property string $name
- * @method Task findOrFail($id, $columns = []) {
+ * @static Task findOrFail($id, $columns = []) {
  * @property SubTaskCollection $sub_tasks
  * @property-read CourseTrack|null $track
  * @property-read SurveyTask|null $pivot
@@ -611,9 +611,8 @@ class Task extends Model
             $nextUnclaimed = $this->projects()->unclaimed()->first();
             if($nextUnclaimed != null)
             {
-                $claimedProject = $nextUnclaimed->claim($owner);
+                $nextUnclaimed->claim($owner);
                 $lock->release();
-                RefreshMemberAccess::dispatch($claimedProject);
 
                 return;
             }

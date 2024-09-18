@@ -255,8 +255,8 @@ it('ensures pending pipelines gets updated to a running pipeline', function() {
     sendRunningPipeline();
 
     $pipeline->refresh();
-    expect($pipeline->project->status)->toBe(ProjectStatus::Active);
-    expect($pipeline->status)->toBe(PipelineStatusEnum::Running);
+    expect($pipeline->project->status)->toEqual(ProjectStatus::Active);
+    expect($pipeline->status)->toEqual(PipelineStatusEnum::Running);
 });
 
 it('ensures failing pipelines changes the project', function() {

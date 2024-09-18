@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\ProjectCreated;
+use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Enums\CorrectionType;
 use App\Modules\AutomaticGrading\AutomaticGrading;
 use App\Modules\AutomaticGrading\AutomaticGradingSettings;
@@ -98,6 +99,23 @@ class Project extends Model
     protected $dispatchesEvents = [
         'created' => ProjectCreated::class,
     ];
+
+    protected static function booted()
+    {
+        static::created(function(Project $project) {
+            if ($project->ownable != null)
+            {
+                RefreshMemberAccess::dispatch($project)->delay(5);
+            }
+        });
+
+        static::updated(function(Project $project) {
+            if($project->isDirty('ownable_id'))
+            {
+                RefreshMemberAccess::dispatch($project)->delay(5);
+            }
+        });
+    }
 
     /**
      * @return MorphTo<Model,Project>
