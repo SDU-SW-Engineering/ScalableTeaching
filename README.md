@@ -112,7 +112,12 @@ It's also **REQUIRED** to login to the VPN with your employee account so the acc
 Then you can SSH into the server with the account created like so: `<ACCOUNT_NAME>@scalable.srv.sdu.dk` and the password is your account password.
 
 #### Deployment
-TBD
+Once logged in you can navigate to the `/var/www/sites/main` directory, and do a deploy with the latest changes by running the `deploy.sh` script.
+
+**DISCLAIMER: The script needs to be run as sudo to pull the deploy key and ssh config from the root folder**
+
+_In the case that changes are made to the `deploy.sh` script, it needs to be run twice_
+
 
 #### Backup
 
