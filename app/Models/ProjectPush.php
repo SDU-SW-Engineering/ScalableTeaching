@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use function Pest\Laravel\get;
 
+/**
+ * @property string $before_sha
+ * @property string $after_sha
+ */
 class ProjectPush extends Model
 {
     use HasFactory;

@@ -11,6 +11,7 @@ class RootUsersArgumentsObject extends ArgumentsObject
     protected $sort;
     protected $search;
     protected $admins;
+    protected $groupId;
     protected $after;
     protected $before;
     protected $first;
@@ -47,6 +48,13 @@ class RootUsersArgumentsObject extends ArgumentsObject
     public function setAdmins($admins)
     {
         $this->admins = $admins;
+
+        return $this;
+    }
+
+    public function setGroupId($groupId)
+    {
+        $this->groupId = $groupId;
 
         return $this;
     }

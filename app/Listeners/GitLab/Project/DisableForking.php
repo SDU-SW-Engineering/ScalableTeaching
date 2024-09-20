@@ -6,9 +6,11 @@ use App\Events\ProjectCreated;
 use Exception;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 
 class DisableForking implements ShouldQueue
 {
+
     public int $delay = 5;
 
     public int $tries = 5;
@@ -37,13 +39,17 @@ class DisableForking implements ShouldQueue
      */
     public function handle(ProjectCreated $event)
     {
+        if ( ! $event->project->task->isCodeTask()) return;
+
+        Log::info("Disabling GitLab forking for project {$event->project->id}");
+
         $gitLabManager = app(GitLabManager::class);
 
-        $project = $gitLabManager->projects()->show($event->project->project_id);
+        $project = $gitLabManager->projects()->show($event->project->gitlab_project_id);
         if($project['import_error'] != null || $project['import_status'] != 'finished')
             throw new Exception("Import not fully done yet.");
 
-        $gitLabManager->projects()->update($event->project->project_id, [
+        $gitLabManager->projects()->update($event->project->gitlab_project_id, [
             'forking_access_level' => 'disabled',
         ]);
     }

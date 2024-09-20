@@ -3,11 +3,17 @@ name: Formatting
 on:
   pull_request:
     branches: [trunk]
+
 permissions:
   checks: write
   contents: write
+
+
 jobs:
   formatting:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     name: Check formatting
     runs-on: ubuntu-latest
     steps:

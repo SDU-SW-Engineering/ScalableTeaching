@@ -6,6 +6,20 @@ class PackageQueryObject extends QueryObject
 {
     const OBJECT_NAME = "Package";
 
+    public function selectLinks(PackageLinksArgumentsObject $argsObject = null)
+    {
+        $object = new PackageLinksQueryObject("_links");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated Superseded by `user_permissions` field. See `Types::PermissionTypes::Package` type. Deprecated in 16.6.
+     */
     public function selectCanDestroy()
     {
         $this->selectField("canDestroy");
@@ -52,9 +66,6 @@ class PackageQueryObject extends QueryObject
         return $this;
     }
 
-    /**
-     * @deprecated Due to scalability concerns, this field is going to be removed. Deprecated in 14.6.
-     */
     public function selectPipelines(PackagePipelinesArgumentsObject $argsObject = null)
     {
         $object = new PipelineConnectionQueryObject("pipelines");
@@ -84,6 +95,13 @@ class PackageQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectStatusMessage()
+    {
+        $this->selectField("statusMessage");
+
+        return $this;
+    }
+
     public function selectTags(PackageTagsArgumentsObject $argsObject = null)
     {
         $object = new PackageTagConnectionQueryObject("tags");
@@ -102,24 +120,21 @@ class PackageQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectVersion()
+    public function selectUserPermissions(PackageUserPermissionsArgumentsObject $argsObject = null)
     {
-        $this->selectField("version");
-
-        return $this;
-    }
-
-    /**
-     * @deprecated This field is now only returned in the PackageDetailsType. Deprecated in 13.11.
-     */
-    public function selectVersions(PackageVersionsArgumentsObject $argsObject = null)
-    {
-        $object = new PackageConnectionQueryObject("versions");
+        $object = new PackagePermissionsQueryObject("userPermissions");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectVersion()
+    {
+        $this->selectField("version");
+
+        return $this;
     }
 }

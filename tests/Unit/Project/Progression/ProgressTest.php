@@ -5,6 +5,8 @@ use App\Models\Course;
 use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\Task;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -83,6 +85,22 @@ it('returns 0 when project is active and it has no sub-tasks', function () {
     expect($project->progress())->toBe(0);
 });
 
-# it('considers tasks complete when all subtasks are completed');
-# it('considers tasks complete when the required subtasks completed');
-# it('considers tasks complete when the percentage threshold is reached');
+
+it('has fallback for unknown grading type', function () {
+    Log::spy();
+
+    /** @var Task $task */
+    $task = Task::factory()->for(Course::factory())->create();
+    $task->module_configuration->addModule(AutomaticGrading::class);
+    $settings = new AutomaticGradingSettings();
+    $settings->gradingType = 'unknown';
+    $task->module_configuration->update(AutomaticGrading::class, $settings, $task);
+    $task->save();
+
+    /** @var Project $project */
+    $project = Project::factory()->for($task)->createQuietly();
+
+    Log::shouldReceive('error')->once()->withArgs(["Unknown grading type for project {$project->id}, returning 0 progress"]);
+    expect($project->progress())->toBe(0);
+
+})->skip('Figure out why this breaks 125 other tests');

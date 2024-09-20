@@ -110,6 +110,8 @@ class GroupController extends Controller
 
     public function leave(Course $course, Group $group): string
     {
+        \Gate::authorize('group:leave', $group);
+
         $group->members()->detach(auth()->id());
 
         return "ok";
@@ -117,6 +119,12 @@ class GroupController extends Controller
 
     public function deleteInvite(Course $course, Group $group, GroupInvitation $groupInvitation): string
     {
+        $actor = $group->members->find(auth()->id());
+        if ( ! $actor->getRelationValue('pivot')->is_owner)
+        {
+            abort(403);
+        }
+
         $groupInvitation->delete();
 
         return "ok";

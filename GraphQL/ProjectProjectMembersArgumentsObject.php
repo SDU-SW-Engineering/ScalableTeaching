@@ -2,9 +2,12 @@
 
 namespace GraphQL\SchemaObject;
 
+use GraphQL\RawObject;
+
 class ProjectProjectMembersArgumentsObject extends ArgumentsObject
 {
     protected $search;
+    protected $sort;
     protected $relations;
     protected $after;
     protected $before;
@@ -14,6 +17,13 @@ class ProjectProjectMembersArgumentsObject extends ArgumentsObject
     public function setSearch($search)
     {
         $this->search = $search;
+
+        return $this;
+    }
+
+    public function setSort($memberSort)
+    {
+        $this->sort = new RawObject($memberSort);
 
         return $this;
     }

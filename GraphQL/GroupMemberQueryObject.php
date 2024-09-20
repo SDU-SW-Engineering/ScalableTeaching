@@ -71,6 +71,13 @@ class GroupMemberQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectNotificationEmail()
+    {
+        $this->selectField("notificationEmail");
+
+        return $this;
+    }
+
     public function selectUpdatedAt()
     {
         $this->selectField("updatedAt");

@@ -7,11 +7,13 @@ use GraphQL\RawObject;
 class GroupProjectsArgumentsObject extends ArgumentsObject
 {
     protected $includeSubgroups;
+    protected $includeArchived;
+    protected $notAimedForDeletion;
     protected $search;
     protected $sort;
     protected $ids;
-    protected $hasCodeCoverage;
-    protected $hasVulnerabilities;
+    protected $withIssuesEnabled;
+    protected $withMergeRequestsEnabled;
     protected $after;
     protected $before;
     protected $first;
@@ -20,6 +22,20 @@ class GroupProjectsArgumentsObject extends ArgumentsObject
     public function setIncludeSubgroups($includeSubgroups)
     {
         $this->includeSubgroups = $includeSubgroups;
+
+        return $this;
+    }
+
+    public function setIncludeArchived($includeArchived)
+    {
+        $this->includeArchived = $includeArchived;
+
+        return $this;
+    }
+
+    public function setNotAimedForDeletion($notAimedForDeletion)
+    {
+        $this->notAimedForDeletion = $notAimedForDeletion;
 
         return $this;
     }
@@ -45,16 +61,16 @@ class GroupProjectsArgumentsObject extends ArgumentsObject
         return $this;
     }
 
-    public function setHasCodeCoverage($hasCodeCoverage)
+    public function setWithIssuesEnabled($withIssuesEnabled)
     {
-        $this->hasCodeCoverage = $hasCodeCoverage;
+        $this->withIssuesEnabled = $withIssuesEnabled;
 
         return $this;
     }
 
-    public function setHasVulnerabilities($hasVulnerabilities)
+    public function setWithMergeRequestsEnabled($withMergeRequestsEnabled)
     {
-        $this->hasVulnerabilities = $hasVulnerabilities;
+        $this->withMergeRequestsEnabled = $withMergeRequestsEnabled;
 
         return $this;
     }

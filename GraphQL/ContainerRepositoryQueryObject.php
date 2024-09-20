@@ -6,6 +6,9 @@ class ContainerRepositoryQueryObject extends QueryObject
 {
     const OBJECT_NAME = "ContainerRepository";
 
+    /**
+     * @deprecated Use `userPermissions` field. See `ContainerRepositoryPermissions` type. Deprecated in 16.7.
+     */
     public function selectCanDelete()
     {
         $this->selectField("canDelete");
@@ -41,9 +44,23 @@ class ContainerRepositoryQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectLastCleanupDeletedTagsCount()
+    {
+        $this->selectField("lastCleanupDeletedTagsCount");
+
+        return $this;
+    }
+
     public function selectLocation()
     {
         $this->selectField("location");
+
+        return $this;
+    }
+
+    public function selectMigrationState()
+    {
+        $this->selectField("migrationState");
 
         return $this;
     }
@@ -92,5 +109,16 @@ class ContainerRepositoryQueryObject extends QueryObject
         $this->selectField("updatedAt");
 
         return $this;
+    }
+
+    public function selectUserPermissions(ContainerRepositoryUserPermissionsArgumentsObject $argsObject = null)
+    {
+        $object = new ContainerRepositoryPermissionsQueryObject("userPermissions");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 }

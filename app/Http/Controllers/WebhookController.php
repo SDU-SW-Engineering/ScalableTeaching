@@ -7,10 +7,10 @@ use App\Models\Casts\SubTask;
 use App\Models\Enums\PipelineStatusEnum;
 use App\Models\Pipeline;
 use App\Models\Project;
-use App\ProjectStatus;
 use App\WebhookTypes;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
@@ -34,8 +34,9 @@ class WebhookController extends Controller
 
     private function pipeline(): string
     {
+        Log::info("Pipeline event received");
         /** @var Project|null $project */
-        $project = Project::firstWhere('project_id', request('project.id'));
+        $project = Project::firstWhere('gitlab_project_id', request('project.id'));
         abort_if($project == null, 400, "Project not found");
         $startedAt = Carbon::parse(\request('object_attributes.created_at'))->setTimezone(config('app.timezone'));
         abort_if(Pipeline::isOutsideTimeFrame($startedAt, $project), 400, 'Pipeline could not be processed as it is not within the timeframe of the task.');
@@ -44,9 +45,9 @@ class WebhookController extends Controller
         if($pipeline == null)
             $pipeline = $this->createPipeline($project);
 
-        $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
+        $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => strtolower($task->getName())]);
         $builds = new Collection(request('builds'));
-        $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains($build['name']) && $build['status'] == 'success');
+        $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains(strtolower($build['name'])) && $build['status'] == 'success');
         try
         {
             $pipeline->process(
@@ -56,7 +57,7 @@ class WebhookController extends Controller
                 queueDuration: request('object_attributes.queued_duration') ?? null,
                 succeedingBuilds: $succeedingBuilds->pluck('name')->toArray()
             );
-        } catch(PipelineException $exception)
+        } catch(PipelineException)
         {
             abort(400, 'Pipeline could not be processed as it is not within the timeframe of the task.');
         }
@@ -70,7 +71,9 @@ class WebhookController extends Controller
      */
     private function createPipeline(Project $project): Pipeline
     {
-        return $project->pipelines()->create([
+        Log::info("Creating pipeline for project {$project->id} with status " . request('object_attributes.status'));
+        /** @var Pipeline $pipeline */
+        $pipeline = $project->pipelines()->create([
             'pipeline_id'    => request('object_attributes.id'),
             'status'         => request('object_attributes.status'),
             'sha'            => request('object_attributes.sha') ?? null,
@@ -79,20 +82,34 @@ class WebhookController extends Controller
             'queue_duration' => request('object_attributes.queued_duration') ?? null,
             'created_at'     => Carbon::parse(request('object_attributes.created_at'))->setTimezone(config('app.timezone')),
         ]);
+
+        return $pipeline;
     }
 
     private function push(): string
     {
         /** @var Project $project */
-        $project = Project::firstWhere('project_id', request('project.id'));
+        $project = Project::firstWhere('gitlab_project_id', request('project.id'));
         abort_if($project == null, 404);
-        $project->pushes()->create([
+
+        $newProjectPush = [
             'before_sha' => request('before'),
             'after_sha'  => request('after'),
             'ref'        => request('ref'),
             'username'   => request('user_username'),
-            // todo: use the created at from the push request and not application timestamp
-        ]);
+        ];
+
+        if (request()->has('commits'))
+        {
+            $lastCommit = request('commits')[0];
+            $lastCommitTimestamp = $lastCommit['timestamp'] ?? null;
+            if ($lastCommitTimestamp != null)
+            {
+                $newProjectPush['created_at'] = $lastCommitTimestamp;
+            }
+        }
+
+        $project->pushes()->create($newProjectPush);
 
         return "OK";
     }

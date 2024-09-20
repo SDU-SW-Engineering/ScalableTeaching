@@ -6,6 +6,20 @@ class PackageDetailsTypeQueryObject extends QueryObject
 {
     const OBJECT_NAME = "PackageDetailsType";
 
+    public function selectLinks(PackageDetailsTypeLinksArgumentsObject $argsObject = null)
+    {
+        $object = new PackageLinksQueryObject("_links");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated Superseded by `user_permissions` field. See `Types::PermissionTypes::Package` type. Deprecated in 16.6.
+     */
     public function selectCanDestroy()
     {
         $this->selectField("canDestroy");
@@ -55,6 +69,13 @@ class PackageDetailsTypeQueryObject extends QueryObject
     public function selectId()
     {
         $this->selectField("id");
+
+        return $this;
+    }
+
+    public function selectLastDownloadedAt()
+    {
+        $this->selectField("lastDownloadedAt");
 
         return $this;
     }
@@ -116,9 +137,6 @@ class PackageDetailsTypeQueryObject extends QueryObject
         return $this;
     }
 
-    /**
-     * @deprecated Due to scalability concerns, this field is going to be removed. Deprecated in 14.6.
-     */
     public function selectPipelines(PackageDetailsTypePipelinesArgumentsObject $argsObject = null)
     {
         $object = new PipelineConnectionQueryObject("pipelines");
@@ -139,6 +157,13 @@ class PackageDetailsTypeQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectPublicPackage()
+    {
+        $this->selectField("publicPackage");
+
+        return $this;
     }
 
     public function selectPypiSetupUrl()
@@ -162,6 +187,13 @@ class PackageDetailsTypeQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectStatusMessage()
+    {
+        $this->selectField("statusMessage");
+
+        return $this;
+    }
+
     public function selectTags(PackageDetailsTypeTagsArgumentsObject $argsObject = null)
     {
         $object = new PackageTagConnectionQueryObject("tags");
@@ -180,6 +212,17 @@ class PackageDetailsTypeQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectUserPermissions(PackageDetailsTypeUserPermissionsArgumentsObject $argsObject = null)
+    {
+        $object = new PackagePermissionsQueryObject("userPermissions");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectVersion()
     {
         $this->selectField("version");
@@ -189,7 +232,7 @@ class PackageDetailsTypeQueryObject extends QueryObject
 
     public function selectVersions(PackageDetailsTypeVersionsArgumentsObject $argsObject = null)
     {
-        $object = new PackageConnectionQueryObject("versions");
+        $object = new PackageBaseConnectionQueryObject("versions");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }

@@ -18,7 +18,10 @@ yarn-error.log
 .php-cs-fixer.caches
 /public/css/app.css
 /public/css/app.css.map
-/public/js/app.js
-/public/js/app.js.map
-/public/js/app.js.LICENSE.txt
+public/js/*.js
 /public/mix-manifest.json
+dump.rdb
+html-coverage*
+builds
+coverage.xml
+.phpunit.cache

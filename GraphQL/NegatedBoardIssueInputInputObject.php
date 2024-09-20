@@ -13,11 +13,6 @@ class NegatedBoardIssueInputInputObject extends InputObject
     protected $releaseTag;
     protected $types;
     protected $milestoneWildcardId;
-    protected $epicId;
-    protected $iterationTitle;
-    protected $weight;
-    protected $iterationId;
-    protected $iterationWildcardId;
 
     public function setLabelName(array $labelName)
     {
@@ -78,41 +73,6 @@ class NegatedBoardIssueInputInputObject extends InputObject
     public function setMilestoneWildcardId($milestoneWildcardId)
     {
         $this->milestoneWildcardId = $milestoneWildcardId;
-
-        return $this;
-    }
-
-    public function setEpicId($epicId)
-    {
-        $this->epicId = $epicId;
-
-        return $this;
-    }
-
-    public function setIterationTitle($iterationTitle)
-    {
-        $this->iterationTitle = $iterationTitle;
-
-        return $this;
-    }
-
-    public function setWeight($weight)
-    {
-        $this->weight = $weight;
-
-        return $this;
-    }
-
-    public function setIterationId(array $iterationId)
-    {
-        $this->iterationId = $iterationId;
-
-        return $this;
-    }
-
-    public function setIterationWildcardId($iterationWildcardId)
-    {
-        $this->iterationWildcardId = $iterationWildcardId;
 
         return $this;
     }

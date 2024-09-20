@@ -6,6 +6,13 @@ class MetadataQueryObject extends QueryObject
 {
     const OBJECT_NAME = "Metadata";
 
+    public function selectEnterprise()
+    {
+        $this->selectField("enterprise");
+
+        return $this;
+    }
+
     public function selectKas(MetadataKasArgumentsObject $argsObject = null)
     {
         $object = new KasQueryObject("kas");

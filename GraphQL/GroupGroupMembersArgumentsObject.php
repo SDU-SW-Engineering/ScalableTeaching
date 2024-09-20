@@ -2,10 +2,14 @@
 
 namespace GraphQL\SchemaObject;
 
+use GraphQL\RawObject;
+
 class GroupGroupMembersArgumentsObject extends ArgumentsObject
 {
     protected $search;
+    protected $sort;
     protected $relations;
+    protected $accessLevels;
     protected $after;
     protected $before;
     protected $first;
@@ -18,9 +22,23 @@ class GroupGroupMembersArgumentsObject extends ArgumentsObject
         return $this;
     }
 
+    public function setSort($memberSort)
+    {
+        $this->sort = new RawObject($memberSort);
+
+        return $this;
+    }
+
     public function setRelations(array $relations)
     {
         $this->relations = $relations;
+
+        return $this;
+    }
+
+    public function setAccessLevels(array $accessLevels)
+    {
+        $this->accessLevels = $accessLevels;
 
         return $this;
     }

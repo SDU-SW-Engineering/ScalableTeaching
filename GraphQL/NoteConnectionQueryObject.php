@@ -6,6 +6,13 @@ class NoteConnectionQueryObject extends QueryObject
 {
     const OBJECT_NAME = "NoteConnection";
 
+    public function selectCount()
+    {
+        $this->selectField("count");
+
+        return $this;
+    }
+
     public function selectEdges(NoteConnectionEdgesArgumentsObject $argsObject = null)
     {
         $object = new NoteEdgeQueryObject("edges");

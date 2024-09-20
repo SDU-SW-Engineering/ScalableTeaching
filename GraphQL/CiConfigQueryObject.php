@@ -13,6 +13,17 @@ class CiConfigQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectIncludes(CiConfigIncludesArgumentsObject $argsObject = null)
+    {
+        $object = new CiConfigIncludeQueryObject("includes");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectMergedYaml()
     {
         $this->selectField("mergedYaml");

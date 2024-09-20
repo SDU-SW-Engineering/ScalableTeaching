@@ -2,22 +2,12 @@
 
 namespace GraphQL\SchemaObject;
 
-use GraphQL\RawObject;
-
 class ClusterAgentTokensArgumentsObject extends ArgumentsObject
 {
-    protected $status;
     protected $after;
     protected $before;
     protected $first;
     protected $last;
-
-    public function setStatus($agentTokenStatus)
-    {
-        $this->status = new RawObject($agentTokenStatus);
-
-        return $this;
-    }
 
     public function setAfter($after)
     {

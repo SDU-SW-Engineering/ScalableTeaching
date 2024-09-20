@@ -16,10 +16,10 @@ class ProjectFactory extends Factory
     public function definition()
     {
         return [
-            'task_id'         => '',
-            'project_id'      => $this->faker->randomNumber(),
-            'repo_name'       => $this->faker->bothify("?????##"),
-            'status'          => ProjectStatus::Active,
+            'task_id'                => '',
+            'gitlab_project_id'      => $this->faker->randomNumber(),
+            'repo_name'              => $this->faker->bothify("?????##"),
+            'status'                 => ProjectStatus::Active,
         ];
     }
 
@@ -47,6 +47,15 @@ class ProjectFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'status' => ProjectStatus::Finished,
+            ];
+        });
+    }
+
+    public function overdue()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => ProjectStatus::Overdue,
             ];
         });
     }

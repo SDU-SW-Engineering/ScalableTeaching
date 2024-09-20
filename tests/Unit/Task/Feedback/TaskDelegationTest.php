@@ -66,15 +66,16 @@ function createGroup()
     return $group;
 }
 
-function delegateTasks(int $numberOfTasks) : TaskDelegation
+function delegateTasks(int $numberOfProjects) : TaskDelegation
 {
+    /** @var TaskDelegation $delegation */
     $delegation = test()->task->delegations()->create([
-        'number_of_tasks' => $numberOfTasks,
-        'type'            => TaskDelegationType::LastPushes,
-        'course_role_id'  => 1, // students (for now),
-        'feedback'        => 1,
-        'grading'         => 0,
-        'deadline_at'     => test()->taskEndsAt->addDays(2),
+        'number_of_projects' => $numberOfProjects,
+        'type'               => TaskDelegationType::LastPushes,
+        'course_role_id'     => 1, // students (for now),
+        'feedback'           => 1,
+        'grading'            => 0,
+        'deadline_at'        => test()->taskEndsAt->addDays(2),
     ]);
     $delegation->delegate();
 
@@ -88,10 +89,6 @@ it('delegates tasks with type of last pushes', function() {
     delegateTasks(2);
 
     assertDatabaseCount('project_feedback', 8);
-
-    $this->students->each(function(User $user) {
-        expect($this->latestPushes->pluck('after_sha'))->toContain(...$this->latestPushes->pluck('after_sha'));
-    });
 });
 
 it('does not delegate tasks to their owner', function() {
@@ -160,7 +157,7 @@ it('wont delegate tasks if there are not enough members to delegate to', functio
     delegateTasks(2);
 })->throws(TaskDelegationException::class, 'Not enough students to delegate.');
 
-it('only delegates the to the max available', function() {
+it('only delegates tasks to the max available', function() {
     createStudents(2);
     delegateTasks(2);
 

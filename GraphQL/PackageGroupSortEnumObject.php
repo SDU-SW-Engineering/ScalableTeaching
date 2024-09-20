@@ -4,6 +4,8 @@ namespace GraphQL\SchemaObject;
 
 class PackageGroupSortEnumObject extends EnumObject
 {
+    const PROJECT_PATH_DESC = "PROJECT_PATH_DESC";
+    const PROJECT_PATH_ASC = "PROJECT_PATH_ASC";
     const CREATED_DESC = "CREATED_DESC";
     const CREATED_ASC = "CREATED_ASC";
     const NAME_DESC = "NAME_DESC";
@@ -12,6 +14,4 @@ class PackageGroupSortEnumObject extends EnumObject
     const VERSION_ASC = "VERSION_ASC";
     const TYPE_DESC = "TYPE_DESC";
     const TYPE_ASC = "TYPE_ASC";
-    const PROJECT_PATH_DESC = "PROJECT_PATH_DESC";
-    const PROJECT_PATH_ASC = "PROJECT_PATH_ASC";
 }

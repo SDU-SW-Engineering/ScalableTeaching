@@ -20,37 +20,42 @@ class UserFactory extends Factory
      *
      * @return array
      */
-    public function definition()
+    public function definition(): array
     {
         return [
             'name'           => $this->faker->name(),
             'email'          => $this->faker->unique()->safeEmail(),
-            'gitlab_id'      => $this->faker->unique()->randomNumber(),
+            'gitlab_id'      => $this->faker->unique()->numberBetween(1_000_000), // Up this value, to avoid clashing with real gitlab users for test purposes.
             'remember_token' => Str::random(10),
             'username'       => $this->faker->userName,
             'last_login'     => now(),
         ];
     }
 
-    public function admin()
+    /**
+     * Indicate the user should be a system administrator
+     *
+     * @return UserFactory
+     */
+    public function system_admin(): UserFactory
     {
-        return $this->state(function(array $attributes) {
-            return [
-                'is_admin' => true,
-            ];
+        return $this->state(function () {
+           return [
+               'is_sys_admin' => true,
+           ];
         });
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * * Indicate the user should be a professor (Administrator)
      *
-     * @return Factory
+     * @return UserFactory
      */
-    public function unverified()
+    public function admin(): UserFactory
     {
-        return $this->state(function(array $attributes) {
+        return $this->state(function() {
             return [
-                'email_verified_at' => null,
+                'is_admin' => true,
             ];
         });
     }

@@ -1,3 +1,4 @@
+@php use App\Models\Enums\GradeEnum;use Carbon\Carbon; @endphp
 @extends('master')
 
 @section('content')
@@ -12,7 +13,7 @@
                     <div class="flex w-full mb-40 gap-16">
                         <section class="w-2/3 ">
                             <div class="w-full">
-                                @foreach($mainTasks as $groupName => $group)
+                                @foreach($mainTasks as $groupName => $groupTasks)
                                     <div class="rounded-md shadow mb-4">
                                         @if($groupName != null)
                                             <div
@@ -20,13 +21,13 @@
                                                 {{ $groupName }}
                                             </div>
                                         @endif
-                                        @foreach($group as $exercise)
+                                        @foreach($groupTasks as $task)
                                             <a @class(['rounded-t' => $groupName == null,
-                                            'cursor-not-allowed' => $exercise['details']->starts_at?->isFuture(),
-                                            'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-750' =>  !$exercise['details']->starts_at?->isFuture(),
+                                            'cursor-not-allowed' => $task['details']->starts_at?->isFuture(),
+                                            'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-750' =>  !$task['details']->starts_at?->isFuture(),
                                             'flex bg-white dark:bg-gray-800 w-full py-4 px-4 last:rounded-b last:border-0 items-center gap-4 border-b border-gray-400 dark:border-gray-600'])
-                                               href="{{ route('courses.tasks.show', [$exercise['details']->course->id, $exercise['details']->id]) }}">
-                                                @if($exercise['details']->grade() == null)
+                                               href="{{ route('courses.tasks.show', [$task['details']->course->id, $task['details']->id]) }}">
+                                                @if($task['details']->grade() == null)
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                          viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                          class="w-6 h-6 dark:text-gray-400">
@@ -34,7 +35,7 @@
                                                               d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                     </svg>
                                                 @else
-                                                    @if($exercise['details']->grade()->value == \App\Models\Enums\GradeEnum::Passed)
+                                                    @if($task['details']->grade()->value == GradeEnum::Passed)
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                              viewBox="0 0 24 24"
                                                              stroke-width="1.5" stroke="currentColor"
@@ -53,20 +54,32 @@
                                                     @endif
                                                 @endif
                                                 <span
-                                                    class="w-3/6 text-sm text-gray-600 dark:text-white">{{ $exercise['details']->name }}</span>
+                                                    class="w-3/6 text-sm text-gray-600 dark:text-white">{{ $task['details']->name }}</span>
                                                 <div class="w-2/6 flex flex-col">
-                                                    <span class="text-xs dark:text-gray-400">Opens</span>
+                                                    <span class="text-xs dark:text-gray-400">
+                                                        @if(Carbon::now() > $task['details']->starts_at)
+                                                            Opened
+                                                        @else
+                                                            Opens
+                                                        @endif
+                                                    </span>
                                                     <span
-                                                        class="text-sm dark:text-gray-200">{{ $exercise['details']->starts_at?->diffForHumans() }}</span>
+                                                        class="text-sm dark:text-gray-200">{{ $task['details']->starts_at?->diffForHumans() }}</span>
                                                 </div>
                                                 <div class="w-2/6 flex flex-col">
-                                                    <span class="text-xs dark:text-gray-400">Closes</span>
+                                                    <span class="text-xs dark:text-gray-400">
+                                                        @if(Carbon::now() > $task['details']->ends_at)
+                                                            Closed
+                                                        @else
+                                                            Closes
+                                                        @endif
+                                                    </span>
                                                     <span
-                                                        class="text-sm dark:text-gray-200">{{ $exercise['details']->ends_at?->diffForHumans() }}</span>
+                                                        class="text-sm dark:text-gray-200">{{ $task['details']->ends_at?->diffForHumans() }}</span>
                                                 </div>
                                                 @can('viewInvisible', $course)
                                                     <div class="text-lime-green-700 task-visibility">
-                                                        @if($exercise['details']->is_visible)
+                                                        @if($task['details']->is_visible)
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                                  fill="currentColor" class="w-5 h-5">
                                                                 <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
@@ -95,7 +108,8 @@
                         </section>
                         <section class="w-1/3">
                             @foreach($course->tracks()->whereNull('parent_id')->get() as $track)
-                                <a href="{{ route('courses.tracks.show', [$course->id, $track->id]) }}" class="bg-lime-green-400 shadow-lg text-white rounded-md px-4 py-2 flex mb-4">
+                                <a href="{{ route('courses.tracks.show', [$course->id, $track->id]) }}"
+                                   class="bg-lime-green-400 shadow-lg text-white rounded-md px-4 py-2 flex mb-4">
                                     <svg class="text-white flex-shrink-0 h-20 w-20 fill-current -ml-4"
                                          xmlns="http://www.w3.org/2000/svg"
                                          viewBox="0 0 24 24">

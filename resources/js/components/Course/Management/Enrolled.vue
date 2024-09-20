@@ -16,7 +16,7 @@
             <span>No results</span>
         </div>
         <div class="max-vh60 overflow-y-auto mt-4" v-else>
-            <enrolled-member :activity-route="activityRoute" :key="member.id" :member="member" :kick-route="kickRoute" :role-route="roleRoute" v-for="member in filteredUsers"
+            <enrolled-member :activity-route="activityRoute" :key="member.id" :member="member" :is-self="isUserMe(member)" :kick-route="kickRoute" :role-route="roleRoute" v-for="member in filteredUsers"
                              :available-roles="roles"></enrolled-member>
         </div>
     </div>
@@ -28,6 +28,13 @@ import EnrolledMember from "./Partials/EnrolledMember";
 export default {
     components: {EnrolledMember},
     props: {
+        /**
+         * ID of the currently logged-in user.
+         */
+        userId: {
+          type: String,
+          required: true
+        },
         users: {
             type: Array,
             required: true
@@ -64,6 +71,11 @@ export default {
 
                 return user.name.toLowerCase().includes(lc) || this.roles[user.role].toLowerCase().includes(lc)
             });
+        },
+        isUserMe() {
+            return (user) => {
+                return user.id.toString() === this.userId
+            }
         }
     }
 }

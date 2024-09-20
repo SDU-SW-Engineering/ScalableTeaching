@@ -88,6 +88,17 @@ class TimelineEventTypeQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectTimelineEventTags(TimelineEventTypeTimelineEventTagsArgumentsObject $argsObject = null)
+    {
+        $object = new TimelineEventTagTypeConnectionQueryObject("timelineEventTags");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectUpdatedAt()
     {
         $this->selectField("updatedAt");

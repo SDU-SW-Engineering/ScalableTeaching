@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Exceptions\TaskDelegationException;
 use App\Models\TaskDelegation;
 use Illuminate\Console\Command;
+use Throwable;
 
 class DelegateTasks extends Command
 {
@@ -27,17 +28,15 @@ class DelegateTasks extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
+        /** @var TaskDelegation $taskDelegation */
         foreach(TaskDelegation::undelegated()->get() as $taskDelegation)
         {
-            /** @var TaskDelegation $taskDelegation */
-            if (now()->isBefore($taskDelegation->task->ends_at))
-                continue;
             try
             {
                 $taskDelegation->delegate();
-            } catch(TaskDelegationException $e)
+            } catch(TaskDelegationException|Throwable $e)
             {
                 $this->error($e->getMessage());
             }

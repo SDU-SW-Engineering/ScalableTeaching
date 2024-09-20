@@ -1,0 +1,36 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\User\\:\\:\\$pivot\\.$#"
+			count: 1
+			path: app/Http/Resources/Groups/GroupInformation.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of function array_map expects \\(callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model\\)\\: mixed\\)\\|null, Closure\\(App\\\\Models\\\\Project\\)\\: int given\\.$#"
+			count: 1
+			path: app/Http/Resources/Groups/GroupInformation.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: array\\{deleteRoute\\: string, recipient\\: App\\\\Models\\\\User\\|null\\}, Closure\\(App\\\\Models\\\\GroupInvitation\\)\\: array\\{deleteRoute\\: string, recipient\\: App\\\\Models\\\\User\\|null\\} given\\.$#"
+			count: 1
+			path: app/Http/Resources/Groups/GroupInformation.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(int course_id\\)\\: Unexpected token \"course_id\", expected variable at offset 41$#"
+			count: 1
+			path: app/Models/Group.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(int id\\)\\: Unexpected token \"id\", expected variable at offset 21$#"
+			count: 1
+			path: app/Models/Group.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(string name\\)\\: Unexpected token \"name\", expected variable at offset 71$#"
+			count: 1
+			path: app/Models/Group.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:every\\(\\) expects \\(callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: bool\\)\\|Illuminate\\\\Database\\\\Eloquent\\\\Model\\|string, Closure\\(App\\\\Models\\\\Project\\)\\: bool given\\.$#"
+			count: 1
+			path: app/Policies/GroupPolicy.php

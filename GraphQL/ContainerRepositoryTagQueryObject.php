@@ -6,6 +6,9 @@ class ContainerRepositoryTagQueryObject extends QueryObject
 {
     const OBJECT_NAME = "ContainerRepositoryTag";
 
+    /**
+     * @deprecated Use `userPermissions` field. See `ContainerRepositoryTagPermissions` type. Deprecated in 16.7.
+     */
     public function selectCanDelete()
     {
         $this->selectField("canDelete");
@@ -48,6 +51,24 @@ class ContainerRepositoryTagQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectPublishedAt()
+    {
+        $this->selectField("publishedAt");
+
+        return $this;
+    }
+
+    public function selectReferrers(ContainerRepositoryTagReferrersArgumentsObject $argsObject = null)
+    {
+        $object = new ContainerRepositoryReferrerQueryObject("referrers");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectRevision()
     {
         $this->selectField("revision");
@@ -67,5 +88,16 @@ class ContainerRepositoryTagQueryObject extends QueryObject
         $this->selectField("totalSize");
 
         return $this;
+    }
+
+    public function selectUserPermissions(ContainerRepositoryTagUserPermissionsArgumentsObject $argsObject = null)
+    {
+        $object = new ContainerRepositoryTagPermissionsQueryObject("userPermissions");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 }

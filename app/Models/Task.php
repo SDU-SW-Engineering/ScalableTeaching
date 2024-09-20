@@ -6,9 +6,13 @@ use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\LinkRepository\LinkRepositorySettings;
+use App\Modules\MarkAsDone\MarkAsDone;
 use App\Modules\ModuleConfiguration;
+use App\Modules\ProtectFiles\ProtectFiles;
 use App\Modules\Template\Template;
 use App\ProjectStatus;
 use Carbon\Carbon;
@@ -21,7 +25,6 @@ use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
-use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Http\Client\Exception;
@@ -50,7 +53,7 @@ use Illuminate\Support\Str;
  * @property string $description
  * @property string $markdown_description
  * @property string $name
- * @method Task findOrFail($id, $columns = []) {
+ * @static Task findOrFail($id, $columns = []) {
  * @property SubTaskCollection $sub_tasks
  * @property-read CourseTrack|null $track
  * @property-read SurveyTask|null $pivot
@@ -60,6 +63,7 @@ use Illuminate\Support\Str;
  * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
  * @property-read EloquentCollection<int,TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
+ * @property-read Course $course
  * @property int|null $source_project_id
  * @property Carbon|null $starts_at
  * @property Carbon|null $ends_at
@@ -68,6 +72,7 @@ use Illuminate\Support\Str;
  * @property-read bool $is_publishable
  * @property ModuleConfiguration $module_configuration
  * @property int $gitlab_group_id
+ * @property-read Collection<int, Project> $projects
  * @mixin Eloquent
  */
 class Task extends Model
@@ -75,7 +80,7 @@ class Task extends Model
     use HasFactory;
 
     protected $fillable = [
-        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order', 'source_project_id',
+        'description', 'is_visible', 'markdown_description', 'source_project_id', 'name', 'sub_tasks', 'type', 'grouped_by', 'order',
         'short_description', 'starts_at', 'ends_at', 'gitlab_group_id', 'correction_type', 'correction_tasks_required', 'correction_points_required',
         'current_sha',
     ];
@@ -83,10 +88,10 @@ class Task extends Model
     protected $dates = ['ends_at', 'starts_at'];
 
     protected $casts = [
-        'module_configuration' => ModuleConfiguration::class,
-        'sub_tasks'            => SubTaskCollection::class,
-        'correction_type'      => CorrectionType::class,
-        'type'                 => TaskTypeEnum::class,
+        'module_configuration'  => ModuleConfiguration::class,
+        'sub_tasks'             => SubTaskCollection::class,
+        'correction_type'       => CorrectionType::class,
+        'type'                  => TaskTypeEnum::class,
     ];
 
     public function reloadDescriptionFromRepo(): bool
@@ -183,9 +188,9 @@ class Task extends Model
     /**
      * @return HasManyThrough<ProjectDownload>
      */
-    public function download()
+    public function downloads(): HasManyThrough
     {
-        return $this->hasOneThrough(ProjectDownload::class, Project::class);
+        return $this->hasManyThrough(ProjectDownload::class, Project::class);
     }
     // endregion
 
@@ -570,13 +575,12 @@ class Task extends Model
      * Key corresponds to the user id
      * Value corresponds to their associated project
      * Users that haven't created a project won't be in the dictionary
-     * @return EloquentCollection|\Illuminate\Support\Collection<int, int>
      */
     public function userProjectDictionary()
     {
         return $userProjects = $this->projects()->get()
         ->map(fn(Project $project) => $project->owners()->pluck('id')->mapWithKeys(fn(int $id) => [$id => $project->id]))
-            ->mapWithKeys(fn($userProject) => $userProject);
+            ->mapWithKeys(fn($userProject) => $userProject); // @phpstan-ignore-line
     }
 
     /**
@@ -607,9 +611,8 @@ class Task extends Model
             $nextUnclaimed = $this->projects()->unclaimed()->first();
             if($nextUnclaimed != null)
             {
-                $claimedProject = $nextUnclaimed->claim($owner);
+                $nextUnclaimed->claim($owner);
                 $lock->release();
-                RefreshMemberAccess::dispatch($claimedProject);
 
                 return;
             }
@@ -632,28 +635,43 @@ class Task extends Model
      */
     private function newProject(User|Group|null $owner): Project
     {
-        $manager = app(GitLabManager::class);
-        $resultPager = new ResultPager($manager->connection());
-        $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
-        $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
-        $project = $projects->firstWhere('name', $projectName);
-        abort_unless($this->module_configuration->isEnabled(Template::class), 400, 'The template module is not enabled.');
 
-        $linkRepositoryModule = $this->module_configuration->resolveModule(LinkRepository::class);
-        /** @var LinkRepositorySettings $settings */
-        $settings = $linkRepositoryModule->settings();
-        if($project == null)
-            $project = $this->forkProject($manager, $projectName, (int)$settings->repo, $this->gitlab_group_id);
+        if ($this->isCodeTask())
+        {
+            $manager = app(GitLabManager::class);
+            $resultPager = new ResultPager($manager->connection());
+            $projects = collect($resultPager->fetchAll($manager->groups(), 'projects', [$this->gitlab_group_id]));
+            $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
+            $project = $projects->firstWhere('name', $projectName);
 
-        /** @var Project $dbProject */
-        $dbProject = $owner == null ? $this->projects()->create([
-            'project_id' => $project['id'],
-            'repo_name'  => $project['name'],
-        ]) : $owner->projects()->updateOrCreate([
-            'project_id' => $project['id'],
-            'task_id'    => $this->id,
-            'repo_name'  => $project['name'],
-        ]);
+            abort_unless($this->module_configuration->isEnabled(Template::class), 400, 'The template module is not enabled.');
+            $linkRepositoryModule = $this->module_configuration->resolveModule(LinkRepository::class);
+            /** @var LinkRepositorySettings $settings */
+            $settings = $linkRepositoryModule->settings();
+            if ($project == null)
+            {
+                $linkedRepositoryParts = explode('/', $settings->repo);
+                $projectId = (int)$linkedRepositoryParts[sizeof($linkedRepositoryParts) - 1]; // Get the last part, which is the Gitlab project id.
+                $project = $this->forkProject($manager, $projectName, $projectId, $this->gitlab_group_id);
+            }
+
+            /** @var Project $dbProject */
+            $dbProject = $owner == null ? $this->projects()->create([
+                'gitlab_project_id'        => $project['id'],
+                'repo_name'                => $project['name'],
+            ]) : $owner->projects()->updateOrCreate([
+                'gitlab_project_id'        => $project['id'],
+                'task_id'                  => $this->id,
+                'repo_name'                => $project['name'],
+            ]);
+        } else
+        {
+            $dbProject = $owner->projects()->updateOrCreate([
+                'task_id'   => $this->id,
+            ]);
+        }
+
+
 
         return $dbProject;
     }
@@ -674,10 +692,80 @@ class Task extends Model
             'namespace_id'           => $groupId,
             'shared_runners_enabled' => false,
         ];
-
         $id = rawurlencode((string)$sourceProjectId);
         $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
 
         return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Checks if the task is a text task, by checking if the mark as done module is installed.
+     * @return bool
+     */
+    public function isTextTask(): bool
+    {
+        return $this->module_configuration->isEnabled(MarkAsDone::class);
+    }
+
+    /**
+     * Check if it's a coding task, by checking if the first code module is installed.
+     * @return bool
+     */
+    public function isCodeTask(): bool
+    {
+        return $this->module_configuration->isEnabled(LinkRepository::class);
+    }
+
+    /**
+     * Check if the task is being automatically graded
+     * @return bool true or false whether the task is being automatically graded
+     */
+    public function isAutomaticallyGraded(): bool
+    {
+        return $this->module_configuration->isEnabled(AutomaticGrading::class);
+    }
+
+    /**
+     * Checks whether validation is enabled on this task, to show relevant UI and block features.
+     * @return bool Whether validation is enabled based on current module composition
+     */
+    public function isValidationEnabled(): bool
+    {
+        return $this->module_configuration->isEnabled(ProtectFiles::class);
+    }
+
+    public function isMissingRequiredSubtasks(Collection $completedSubTaskIds): bool
+    {
+        if ( ! $this->module_configuration->isEnabled(AutomaticGrading::class))
+        {
+            throw new \Error("Automatic grading module is not enabled.");
+        }
+
+        /** @var AutomaticGradingSettings $moduleSettings */
+        $moduleSettings = $this->module_configuration->resolveModule(AutomaticGrading::class)->settings();
+        $requiredSubTaskIds = $moduleSettings->requiredSubtaskIds;
+
+        $missingRequiredSubtaskIds = array_filter($requiredSubTaskIds, fn ($requiredId) => ! $completedSubTaskIds->contains($requiredId));
+
+        return count($missingRequiredSubtaskIds) > 0;
+    }
+
+    public function hasProjectCompletedPointsRequired(Project $project): bool
+    {
+        if ( ! $this->module_configuration->isEnabled(AutomaticGrading::class))
+        {
+            throw new \Error("Automatic grading module is not enabled.");
+        }
+
+        /** @var AutomaticGradingSettings $moduleSettings */
+        $moduleSettings = $this->module_configuration->resolveModule(AutomaticGrading::class)->settings();
+        $pointsRequired = $moduleSettings->pointsRequired;
+
+        $completedSubTaskPoints = $project->subTasks->map(function ($subTask) {
+            /** @var ProjectSubTask $subTask */
+            return $subTask->points;
+        })->sum();
+
+        return $completedSubTaskPoints >= $pointsRequired;
     }
 }

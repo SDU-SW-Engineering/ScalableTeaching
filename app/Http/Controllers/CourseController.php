@@ -4,19 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Jobs\Course\AddMemberToCourseGroup;
 use App\Models\Course;
-use App\Models\Enums\TaskTypeEnum;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
 use GrahamCampbell\GitLab\GitLabManager;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use function Ramsey\Uuid\v1;
 use Illuminate\View\View;
 
 class CourseController extends Controller
@@ -86,18 +80,21 @@ class CourseController extends Controller
             'course-name' => 'required|max:255',
         ]);
 
-        $pathName = Str::slug($validated['course-name']);
-        $currentGroup = $manager->groups()->subgroups(getenv('GITLAB_GROUP'), ['search' => $pathName]);
+        $courseNameSlug = Str::slug($validated['course-name']);
+
+        // Check if group already exists in GitLab.
+        $currentGroup = $manager->groups()->subgroups(getenv('GITLAB_GROUP'), ['search' => $courseNameSlug]);
         if(count($currentGroup) > 0)
             return redirect()->back()->withErrors(['course-name' => 'A course with that name already exists in GitLab.'])->withInput();
 
         $gitlabGroup = [
             'name'       => $validated['course-name'],
-            'path'       => $pathName,
+            'path'       => $courseNameSlug,
             'visibility' => 'private',
             'parent_id'  => getenv('GITLAB_GROUP'),
         ];
 
+        // Create new gitlab subgroup under parent group.
         $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($gitlabGroup));
         $groupResponse = json_decode($response->getBody()->getContents(), true);
         if($response->getStatusCode() != 201)

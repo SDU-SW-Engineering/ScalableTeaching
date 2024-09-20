@@ -14,5 +14,5 @@
           warning="{{ session()->has('warning') ? session('warning') : '' }}" :groups="{{ $availableGroups }}"
           user-name="{{ auth()->user()->name }}" :total-builds="{{ $builds->sum() }}"
           :total-my-builds="{{ $myBuilds->sum() }}" csrf="{{ csrf_token() }}"
-          new-project-url="{{ $newProjectRoute }}"></task>
+          new-project-url="{{ $newProjectRoute }}" is-text-task="{{ $task->isTextTask() }}" is-code-task="{{ $task->isCodeTask() }}"></task>
 @endsection

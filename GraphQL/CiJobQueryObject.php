@@ -31,6 +31,20 @@ class CiJobQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectBrowseArtifactsPath()
+    {
+        $this->selectField("browseArtifactsPath");
+
+        return $this;
+    }
+
+    public function selectCanPlayJob()
+    {
+        $this->selectField("canPlayJob");
+
+        return $this;
+    }
+
     public function selectCancelable()
     {
         $this->selectField("cancelable");
@@ -95,6 +109,20 @@ class CiJobQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectErasedAt()
+    {
+        $this->selectField("erasedAt");
+
+        return $this;
+    }
+
+    public function selectFailureMessage()
+    {
+        $this->selectField("failureMessage");
+
+        return $this;
+    }
+
     public function selectFinishedAt()
     {
         $this->selectField("finishedAt");
@@ -109,11 +137,29 @@ class CiJobQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectKind()
+    {
+        $this->selectField("kind");
+
+        return $this;
+    }
+
     public function selectManualJob()
     {
         $this->selectField("manualJob");
 
         return $this;
+    }
+
+    public function selectManualVariables(CiJobManualVariablesArgumentsObject $argsObject = null)
+    {
+        $object = new CiManualVariableConnectionQueryObject("manualVariables");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectName()
@@ -145,6 +191,13 @@ class CiJobQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectPlayPath()
+    {
+        $this->selectField("playPath");
+
+        return $this;
+    }
+
     public function selectPlayable()
     {
         $this->selectField("playable");
@@ -152,9 +205,34 @@ class CiJobQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectPreviousStageJobs(CiJobPreviousStageJobsArgumentsObject $argsObject = null)
+    {
+        $object = new CiJobConnectionQueryObject("previousStageJobs");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated Replaced by previousStageJobs and needs fields. Deprecated in 16.4.
+     */
     public function selectPreviousStageJobsOrNeeds(CiJobPreviousStageJobsOrNeedsArgumentsObject $argsObject = null)
     {
         $object = new JobNeedUnionConnectionQueryObject("previousStageJobsOrNeeds");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectProject(CiJobProjectArgumentsObject $argsObject = null)
+    {
+        $object = new ProjectQueryObject("project");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -191,9 +269,48 @@ class CiJobQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectRetried()
+    {
+        $this->selectField("retried");
+
+        return $this;
+    }
+
     public function selectRetryable()
     {
         $this->selectField("retryable");
+
+        return $this;
+    }
+
+    public function selectRunner(CiJobRunnerArgumentsObject $argsObject = null)
+    {
+        $object = new CiRunnerQueryObject("runner");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.11.
+     */
+    public function selectRunnerManager(CiJobRunnerManagerArgumentsObject $argsObject = null)
+    {
+        $object = new CiRunnerManagerQueryObject("runnerManager");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectScheduled()
+    {
+        $this->selectField("scheduled");
 
         return $this;
     }
@@ -258,6 +375,17 @@ class CiJobQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectTrace(CiJobTraceArgumentsObject $argsObject = null)
+    {
+        $object = new CiJobTraceQueryObject("trace");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectTriggered()
     {
         $this->selectField("triggered");
@@ -274,5 +402,12 @@ class CiJobQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectWebPath()
+    {
+        $this->selectField("webPath");
+
+        return $this;
     }
 }

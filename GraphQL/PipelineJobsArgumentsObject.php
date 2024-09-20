@@ -2,10 +2,15 @@
 
 namespace GraphQL\SchemaObject;
 
+use GraphQL\RawObject;
+
 class PipelineJobsArgumentsObject extends ArgumentsObject
 {
     protected $securityReportTypes;
     protected $statuses;
+    protected $retried;
+    protected $whenExecuted;
+    protected $jobKind;
     protected $after;
     protected $before;
     protected $first;
@@ -21,6 +26,27 @@ class PipelineJobsArgumentsObject extends ArgumentsObject
     public function setStatuses(array $statuses)
     {
         $this->statuses = $statuses;
+
+        return $this;
+    }
+
+    public function setRetried($retried)
+    {
+        $this->retried = $retried;
+
+        return $this;
+    }
+
+    public function setWhenExecuted(array $whenExecuted)
+    {
+        $this->whenExecuted = $whenExecuted;
+
+        return $this;
+    }
+
+    public function setJobKind($ciJobKind)
+    {
+        $this->jobKind = new RawObject($ciJobKind);
 
         return $this;
     }

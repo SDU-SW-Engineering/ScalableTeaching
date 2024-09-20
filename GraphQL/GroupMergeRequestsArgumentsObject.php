@@ -11,6 +11,7 @@ class GroupMergeRequestsArgumentsObject extends ArgumentsObject
     protected $targetBranches;
     protected $state;
     protected $draft;
+    protected $approved;
     protected $createdAfter;
     protected $createdBefore;
     protected $updatedAfter;
@@ -22,6 +23,7 @@ class GroupMergeRequestsArgumentsObject extends ArgumentsObject
     protected $sort;
     protected $not;
     protected $includeSubgroups;
+    protected $includeArchived;
     protected $assigneeUsername;
     protected $authorUsername;
     protected $after;
@@ -60,6 +62,13 @@ class GroupMergeRequestsArgumentsObject extends ArgumentsObject
     public function setDraft($draft)
     {
         $this->draft = $draft;
+
+        return $this;
+    }
+
+    public function setApproved($approved)
+    {
+        $this->approved = $approved;
 
         return $this;
     }
@@ -137,6 +146,13 @@ class GroupMergeRequestsArgumentsObject extends ArgumentsObject
     public function setIncludeSubgroups($includeSubgroups)
     {
         $this->includeSubgroups = $includeSubgroups;
+
+        return $this;
+    }
+
+    public function setIncludeArchived($includeArchived)
+    {
+        $this->includeArchived = $includeArchived;
 
         return $this;
     }

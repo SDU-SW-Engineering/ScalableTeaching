@@ -12,6 +12,8 @@ class RootRunnersArgumentsObject extends ArgumentsObject
     protected $tagList;
     protected $search;
     protected $sort;
+    protected $upgradeStatus;
+    protected $creatorId;
     protected $after;
     protected $before;
     protected $first;
@@ -55,6 +57,20 @@ class RootRunnersArgumentsObject extends ArgumentsObject
     public function setSort($ciRunnerSort)
     {
         $this->sort = new RawObject($ciRunnerSort);
+
+        return $this;
+    }
+
+    public function setUpgradeStatus($ciRunnerUpgradeStatus)
+    {
+        $this->upgradeStatus = new RawObject($ciRunnerUpgradeStatus);
+
+        return $this;
+    }
+
+    public function setCreatorId($creatorId)
+    {
+        $this->creatorId = $creatorId;
 
         return $this;
     }

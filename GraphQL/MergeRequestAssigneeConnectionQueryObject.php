@@ -6,6 +6,13 @@ class MergeRequestAssigneeConnectionQueryObject extends QueryObject
 {
     const OBJECT_NAME = "MergeRequestAssigneeConnection";
 
+    public function selectCount()
+    {
+        $this->selectField("count");
+
+        return $this;
+    }
+
     public function selectEdges(MergeRequestAssigneeConnectionEdgesArgumentsObject $argsObject = null)
     {
         $object = new MergeRequestAssigneeEdgeQueryObject("edges");

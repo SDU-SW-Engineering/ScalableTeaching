@@ -2,17 +2,17 @@
 
 namespace App\Jobs\Project;
 
-use App\Events\ProjectCreated;
 use App\Models\Project;
 use App\Models\User;
+use Domain\GitLab\Definitions\GitLabUserAccessLevelEnum;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class RefreshMemberAccess implements ShouldQueue
 {
@@ -40,56 +40,65 @@ class RefreshMemberAccess implements ShouldQueue
 
     public function handle() : void
     {
+        if ( ! $this->project->task->isCodeTask()) return;
+
         $gitLabManager = app(GitLabManager::class);
-        $supposedMembers = $this->project->owners()->map(function(User $user) use ($gitLabManager) {
-            $users = $gitLabManager->users()->all([
-                'username' => $user->username,
-            ]);
-            if(count($users) == 1)
-                return $users[0]['id'];
 
-            return null;
-        })->reject(function($gitlabId) {
-            return $gitlabId == null;
+        $supposedMemberIds = $this->project->owners()->map(function(User $user) {
+            return $user->gitlab_id;
         });
-        $currentMembers = (new Collection($gitLabManager->projects()->members($this->project->project_id)))->pluck('id');
-        $add = $supposedMembers->diff($currentMembers);
-        $remove = $currentMembers->diff($supposedMembers);
-        $this->addUsersToGitlab($this->project, $add);
-        $remove->each(function($gitlabUserId) use ($gitLabManager) {
-            try
-            {
-                $gitLabManager->projects()->removeMember($this->project->project_id, $gitlabUserId);
-            } catch(\Exception $ignored)
-            {
 
-            }
-        });
+        $currentMemberIds = (new Collection($gitLabManager->projects()->members($this->project->gitlab_project_id)))->pluck('id');
+
+        $memberIdsToAdd = $supposedMemberIds->diff($currentMemberIds);
+        $memberIdsToRemove = $currentMemberIds->diff($supposedMemberIds);
+
+        $this->addUsersToGitlabProject($this->project, $memberIdsToAdd);
+        $this->removeUsersFromGitlabProject($this->project, $memberIdsToRemove);
     }
 
     /**
      * @param Project $project
-     * @param Collection<int,int> $gitlabIds
-     * @param string[] $errors
+     * @param Collection<int,int> $gitlabUserIds
      * @return void
      */
-    public function addUsersToGitlab(Project $project, Collection $gitlabIds, array &$errors = []) : void
+    public function addUsersToGitlabProject(Project $project, Collection $gitlabUserIds) : void
     {
-        foreach($gitlabIds as $user => $gitlabId)
+        foreach($gitlabUserIds as $user => $gitlabId)
         {
             $gitLabManager = app(GitLabManager::class);
             try
             {
-                $gitLabManager->projects()->addMember($project->project_id, $gitlabId, 30);
+                $gitLabManager->projects()->addMember($project->gitlab_project_id, $gitlabId, GitLabUserAccessLevelEnum::DEVELOPER->value);
             } catch(\Exception $e)
             {
                 $message = strtolower($e->getMessage());
-                if(\Str::contains($message, 'should be greater than or equal to'))
+                if(\Str::contains($message, 'should be greater than or equal to')) // TODO: Figure out what these errors mean, and document it.
                     continue;
                 if($message == 'member already exists')
                     continue;
 
-                $errors[] = "$user: " . $e->getMessage();
+                Log::error("Failed to add user {$user} to project {$project->id} - Error: {$e->getMessage()}");
+            }
+        }
+    }
+
+    /**
+     * @param Project $project
+     * @param Collection<int,int> $gitlabUserIds
+     * @return void
+     */
+    public function removeUsersFromGitlabProject(Project $project, Collection $gitlabUserIds) : void
+    {
+        foreach($gitlabUserIds as $user => $gitlabId)
+        {
+            $gitLabManager = app(GitLabManager::class);
+            try
+            {
+                $gitLabManager->projects()->removeMember($project->gitlab_project_id, $gitlabId);
+            } catch(\Exception $e)
+            {
+                Log::error("Failed to remove user {$user} from project {$project->id} - Error: {$e->getMessage()}");
             }
         }
     }

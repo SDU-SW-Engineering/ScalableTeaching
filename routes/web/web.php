@@ -1,18 +1,16 @@
 <?php
 
-use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\CourseTrackController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GitLabOAuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SurveyController;
-use App\Http\Controllers\VSCodeController;
 use App\Http\Controllers\AdminController;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
+
+// If you can't find the routes in these files, then take a look in the module controllers if's a route related to a module.
 
 Route::get('/', [DashboardController::class, 'index'])->name('home');
 
@@ -38,7 +36,6 @@ Route::group(['prefix' => 'projects/{project}', 'as' => 'projects.', 'middleware
     });
 });
 
-Route::get('vs-code/authenticate', [VSCodeController::class, 'authenticate'])->middleware('auth');
 
 Route::get('random-name', function() {
     return PhraseGenerator::generate();
@@ -68,5 +65,5 @@ Route::controller(AdminController::class)->prefix('admin')->name('admin.')->grou
 Route::get('logout', function() {
     auth()->logout();
 
-    return redirect()->home();
-});
+    return redirect()->route('home');
+})->name("logout");

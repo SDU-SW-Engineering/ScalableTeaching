@@ -1,0 +1,27 @@
+version: '3.8'
+
+
+services:
+    database:
+        image: mysql:latest
+        ports:
+            - "3306:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+            - MYSQL_DATABASE=${DB_DATABASE}
+        command: mysqld
+        volumes:
+            -   dev-db:/var/lib/mysql
+    test-database:
+        image: mysql:latest
+        ports:
+            - "3307:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=testroot
+            - MYSQL_DATABASE=test
+        command: mysqld --sql_mode="NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+        tmpfs:
+            - /var/lib/mysql:rw
+
+volumes:
+    dev-db:

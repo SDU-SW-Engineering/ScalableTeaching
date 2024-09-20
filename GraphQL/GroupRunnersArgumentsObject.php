@@ -12,6 +12,8 @@ class GroupRunnersArgumentsObject extends ArgumentsObject
     protected $tagList;
     protected $search;
     protected $sort;
+    protected $upgradeStatus;
+    protected $creatorId;
     protected $membership;
     protected $after;
     protected $before;
@@ -60,9 +62,23 @@ class GroupRunnersArgumentsObject extends ArgumentsObject
         return $this;
     }
 
-    public function setMembership($runnerMembershipFilter)
+    public function setUpgradeStatus($ciRunnerUpgradeStatus)
     {
-        $this->membership = new RawObject($runnerMembershipFilter);
+        $this->upgradeStatus = new RawObject($ciRunnerUpgradeStatus);
+
+        return $this;
+    }
+
+    public function setCreatorId($creatorId)
+    {
+        $this->creatorId = $creatorId;
+
+        return $this;
+    }
+
+    public function setMembership($ciRunnerMembershipFilter)
+    {
+        $this->membership = new RawObject($ciRunnerMembershipFilter);
 
         return $this;
     }

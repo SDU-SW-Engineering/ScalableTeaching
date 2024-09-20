@@ -27,15 +27,11 @@ class PipelineQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectCodeQualityReports(PipelineCodeQualityReportsArgumentsObject $argsObject = null)
+    public function selectChild()
     {
-        $object = new CodeQualityDegradationConnectionQueryObject("codeQualityReports");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
+        $this->selectField("child");
 
-        return $object;
+        return $this;
     }
 
     public function selectCommit(PipelineCommitArgumentsObject $argsObject = null)
@@ -91,17 +87,6 @@ class PipelineQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectDastProfile(PipelineDastProfileArgumentsObject $argsObject = null)
-    {
-        $object = new DastProfileQueryObject("dastProfile");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectDetailedStatus(PipelineDetailedStatusArgumentsObject $argsObject = null)
     {
         $object = new DetailedStatusQueryObject("detailedStatus");
@@ -127,6 +112,13 @@ class PipelineQueryObject extends QueryObject
     public function selectDuration()
     {
         $this->selectField("duration");
+
+        return $this;
+    }
+
+    public function selectFailureReason()
+    {
+        $this->selectField("failureReason");
 
         return $this;
     }
@@ -185,6 +177,38 @@ class PipelineQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectLatest()
+    {
+        $this->selectField("latest");
+
+        return $this;
+    }
+
+    public function selectMergeRequest(PipelineMergeRequestArgumentsObject $argsObject = null)
+    {
+        $object = new MergeRequestQueryObject("mergeRequest");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectMergeRequestEventType()
+    {
+        $this->selectField("mergeRequestEventType");
+
+        return $this;
+    }
+
+    public function selectName()
+    {
+        $this->selectField("name");
+
+        return $this;
+    }
+
     public function selectPath()
     {
         $this->selectField("path");
@@ -224,6 +248,13 @@ class PipelineQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectRefText()
+    {
+        $this->selectField("refText");
+
+        return $this;
+    }
+
     public function selectRetryable()
     {
         $this->selectField("retryable");
@@ -231,31 +262,16 @@ class PipelineQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectSecurityReportFindings(PipelineSecurityReportFindingsArgumentsObject $argsObject = null)
-    {
-        $object = new PipelineSecurityReportFindingConnectionQueryObject("securityReportFindings");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectSecurityReportSummary(PipelineSecurityReportSummaryArgumentsObject $argsObject = null)
-    {
-        $object = new SecurityReportSummaryQueryObject("securityReportSummary");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
     public function selectSha()
     {
         $this->selectField("sha");
+
+        return $this;
+    }
+
+    public function selectSource()
+    {
+        $this->selectField("source");
 
         return $this;
     }
@@ -296,6 +312,13 @@ class PipelineQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectStuck()
+    {
+        $this->selectField("stuck");
+
+        return $this;
+    }
+
     public function selectTestReportSummary(PipelineTestReportSummaryArgumentsObject $argsObject = null)
     {
         $object = new TestReportSummaryQueryObject("testReportSummary");
@@ -316,6 +339,27 @@ class PipelineQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectTotalJobs()
+    {
+        $this->selectField("totalJobs");
+
+        return $this;
+    }
+
+    public function selectTrigger()
+    {
+        $this->selectField("trigger");
+
+        return $this;
+    }
+
+    public function selectTriggeredByPath()
+    {
+        $this->selectField("triggeredByPath");
+
+        return $this;
     }
 
     public function selectUpdatedAt()
@@ -379,6 +423,13 @@ class PipelineQueryObject extends QueryObject
     public function selectWarnings()
     {
         $this->selectField("warnings");
+
+        return $this;
+    }
+
+    public function selectYamlErrors()
+    {
+        $this->selectField("yamlErrors");
 
         return $this;
     }

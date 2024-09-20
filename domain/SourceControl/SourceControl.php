@@ -22,6 +22,11 @@ interface SourceControl
 
     public function addUserToGroup(string|int $groupId, string|int $userId, int $level, array $options = []) : void;
 
+    /**
+     * @param string $name The name of the group that is going to be created.
+     * @param array $params {@link https://docs.gitlab.com/ee/api/groups.html#new-group Gitlab Group Docs}
+     * @return Group|null
+     */
     public function createGroup(string $name, array $params) : ?Group;
 
     public function forkProject(string $sourceId, string $groupId, string $newName) : ?Project;

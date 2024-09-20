@@ -6,6 +6,13 @@ class ProjectCiCdSettingQueryObject extends QueryObject
 {
     const OBJECT_NAME = "ProjectCiCdSetting";
 
+    public function selectInboundJobTokenScopeEnabled()
+    {
+        $this->selectField("inboundJobTokenScopeEnabled");
+
+        return $this;
+    }
+
     public function selectJobTokenScopeEnabled()
     {
         $this->selectField("jobTokenScopeEnabled");
@@ -23,13 +30,6 @@ class ProjectCiCdSettingQueryObject extends QueryObject
     public function selectMergePipelinesEnabled()
     {
         $this->selectField("mergePipelinesEnabled");
-
-        return $this;
-    }
-
-    public function selectMergeTrainsEnabled()
-    {
-        $this->selectField("mergeTrainsEnabled");
 
         return $this;
     }

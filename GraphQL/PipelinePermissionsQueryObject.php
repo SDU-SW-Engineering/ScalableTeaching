@@ -13,6 +13,13 @@ class PipelinePermissionsQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectCancelPipeline()
+    {
+        $this->selectField("cancelPipeline");
+
+        return $this;
+    }
+
     public function selectDestroyPipeline()
     {
         $this->selectField("destroyPipeline");

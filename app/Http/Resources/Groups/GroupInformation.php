@@ -4,6 +4,9 @@ namespace App\Http\Resources\Groups;
 
 use App\Models\Group;
 use App\Models\GroupInvitation;
+use App\Models\GroupUser;
+use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Gate;
 use Illuminate\Contracts\Support\Arrayable;
@@ -27,19 +30,29 @@ class GroupInformation extends JsonResource
         $course = $group->course;
         $projects = $group->projects;
 
+        $tasks = Task::findMany(array_map(function (Project $project) {
+            return $project->task_id;
+        }, $projects->all()));
+
+        /** @var User $owner */
+        $owner = $group->members->get($group->members->search(function(User $user) {
+            return $user->pivot->is_owner;
+        }));
+
         return [
             'id'          => $group->id,
             'name'        => $group->name,
+            'courseId'    => $group->course_id,
             'memberCap'   => $course->max_group_size,
             'invitations' => $group->invitations->map(fn(GroupInvitation $invitation) => [
                 'deleteRoute' => route('courses.groups.invitations.delete', [$group->course_id, $group->id, $invitation->id]),
                 'recipient'   => $invitation->recipient,
             ]),
+            'tasks'       => $tasks,
             'projects'    => $projects,
-            'users'       => $group->members->map(fn(User $member) => [
+            'users'       => $group->members->map(fn(GroupUser|User $member) => [
                 'name'            => $member->name,
                 'isYou'           => $member->id == auth()->id(),
-                'is_owner'        => $member->is_admin,
                 'avatar'          => $member->avatar,
                 'removeUserRoute' => route('courses.groups.removeMember', [$group->course_id, $group->id, $member->id]),
             ]),
@@ -47,8 +60,8 @@ class GroupInformation extends JsonResource
             'inviteRoute' => route('courses.groups.invite', [$group->course_id, $group->id]),
             'leaveRoute'  => route('courses.groups.leave', [$group->course_id, $group->id]),
             'canDelete'   => Gate::inspect('delete', $group)->toArray(),
-            'canLeave'    => Gate::inspect('leave', $group)->toArray(),
-            'isOwner'     => $group->members()->where('user_id', auth()->id())->wherePivot('is_owner', true)->exists(),
+            'canLeave'    => Gate::inspect('group:leave', $group)->toArray(),
+            'isOwner'     => $owner->id == auth()->id(),
         ];
     }
 }

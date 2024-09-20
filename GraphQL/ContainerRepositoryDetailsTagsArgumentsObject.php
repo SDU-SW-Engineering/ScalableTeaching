@@ -8,6 +8,7 @@ class ContainerRepositoryDetailsTagsArgumentsObject extends ArgumentsObject
 {
     protected $sort;
     protected $name;
+    protected $referrers;
     protected $after;
     protected $before;
     protected $first;
@@ -23,6 +24,13 @@ class ContainerRepositoryDetailsTagsArgumentsObject extends ArgumentsObject
     public function setName($name)
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function setReferrers($referrers)
+    {
+        $this->referrers = $referrers;
 
         return $this;
     }

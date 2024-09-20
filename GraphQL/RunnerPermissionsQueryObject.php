@@ -6,6 +6,13 @@ class RunnerPermissionsQueryObject extends QueryObject
 {
     const OBJECT_NAME = "RunnerPermissions";
 
+    public function selectAssignRunner()
+    {
+        $this->selectField("assignRunner");
+
+        return $this;
+    }
+
     public function selectDeleteRunner()
     {
         $this->selectField("deleteRunner");

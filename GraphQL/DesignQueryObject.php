@@ -6,6 +6,17 @@ class DesignQueryObject extends QueryObject
 {
     const OBJECT_NAME = "Design";
 
+    public function selectCommenters(DesignCommentersArgumentsObject $argsObject = null)
+    {
+        $object = new UserCoreConnectionQueryObject("commenters");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectCurrentUserTodos(DesignCurrentUserTodosArgumentsObject $argsObject = null)
     {
         $object = new TodoConnectionQueryObject("currentUserTodos");
@@ -15,6 +26,20 @@ class DesignQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectDescription()
+    {
+        $this->selectField("description");
+
+        return $this;
+    }
+
+    public function selectDescriptionHtml()
+    {
+        $this->selectField("descriptionHtml");
+
+        return $this;
     }
 
     public function selectDiffRefs(DesignDiffRefsArgumentsObject $argsObject = null)
@@ -130,5 +155,12 @@ class DesignQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectWebUrl()
+    {
+        $this->selectField("webUrl");
+
+        return $this;
     }
 }

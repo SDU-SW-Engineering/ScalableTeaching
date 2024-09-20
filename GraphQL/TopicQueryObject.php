@@ -40,4 +40,11 @@ class TopicQueryObject extends QueryObject
 
         return $this;
     }
+
+    public function selectTitle()
+    {
+        $this->selectField("title");
+
+        return $this;
+    }
 }

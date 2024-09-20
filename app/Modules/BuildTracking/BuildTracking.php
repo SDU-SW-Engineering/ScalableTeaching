@@ -4,6 +4,7 @@ namespace App\Modules\BuildTracking;
 
 use App\Modules\Module;
 use App\Modules\Template\Template;
+use Illuminate\Support\Facades\Route;
 
 class BuildTracking extends Module
 {
@@ -18,4 +19,12 @@ class BuildTracking extends Module
     protected string $description = "Monitors builds based on the .gitlab-ci.yml file in the repository. Creates subtasks that maps to the jobs defined.";
 
     protected array $dependencies = [Template::class];
+
+    public static function configRoutes(): void
+    {
+        Route::get('builds', [BuildTrackingController::class, 'builds'])->name('builds');
+        Route::get('redirect_pipeline/{project}', [BuildTrackingController::class, 'browseGitlabPipeline'])->name('redirect_pipeline');
+    }
+
+
 }

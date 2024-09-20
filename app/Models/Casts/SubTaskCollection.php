@@ -61,7 +61,7 @@ class SubTaskCollection implements Castable
 
     public function maxPoints() : int
     {
-        return $this->tasks->reduce(fn($carry, SubTask $task) => $carry + $task->getPoints());
+        return $this->tasks->sum('points');
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Models\ProjectFeedbackComment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log;
 
 class ProjectPolicy
 {
@@ -71,17 +72,23 @@ class ProjectPolicy
         return false;
     }
 
-    public function accessCode(User $user, Project $project, ProjectDownload $projectDownload) : bool | Response
+    public function accessCode(User $user, Project $project) : bool | Response
     {
-        if ($projectDownload->project->id != $project->id)
-            return false;
+        Log::debug("Checking access code for user {$user->id} and project {$project->id}");
+        $projectDownload = $project->download;
+
+        if ($projectDownload == null)
+        {
+            Log::info("Project download was null for project");
+
+            return $this->deny('Project download not available');
+        }
 
         if($this->view($user, $project))
             return true;
 
-        if ($project->isNot($projectDownload->project))
-            return $this->deny('Project and associated files mismatch');
-
+        Log::debug("User does not have access to view project");
+        Log::debug("Validating project feedback sha against project download ref: {$projectDownload->ref}");
         if(ProjectFeedback::where('sha', $projectDownload->ref)
             ->where('user_id', $user->id)
             ->exists())
@@ -92,7 +99,7 @@ class ProjectPolicy
 
     public function createFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload) : bool
     {
-        if ( ! $this->accessCode($user, $project, $projectDownload))
+        if ( ! $this->accessCode($user, $project))
             return false;
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', $user->id)->first();
@@ -107,7 +114,7 @@ class ProjectPolicy
 
     public function updateFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): bool
     {
-        if( ! $this->accessCode($user, $project, $projectDownload))
+        if( ! $this->accessCode($user, $project))
             return false;
         if($projectFeedbackComment->author->isNot($user))
             return false;
@@ -119,7 +126,7 @@ class ProjectPolicy
 
     public function markFeedbackComment(User $user, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): bool
     {
-        if ( ! $this->accessCode($user, $project, $projectDownload))
+        if ( ! $this->accessCode($user, $project))
             return false;
 
         if ($projectFeedbackComment->status !== FeedbackCommentStatus::Approved)

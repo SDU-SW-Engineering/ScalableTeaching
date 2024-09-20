@@ -2,6 +2,7 @@
 
 namespace App\Modules;
 
+use App\Models\Task;
 use Illuminate\Support\Str;
 use ReflectionClass;
 
@@ -146,5 +147,10 @@ abstract class Module
             return [];
 
         return array_values(preg_filter('/(.)(?:\.blade)?\.php/', '${1}', scandir($path)));
+    }
+
+    public function update(Task $task): void
+    {
+
     }
 }

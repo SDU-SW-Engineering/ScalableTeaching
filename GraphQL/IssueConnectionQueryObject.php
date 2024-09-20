@@ -45,11 +45,4 @@ class IssueConnectionQueryObject extends QueryObject
 
         return $object;
     }
-
-    public function selectWeight()
-    {
-        $this->selectField("weight");
-
-        return $this;
-    }
 }

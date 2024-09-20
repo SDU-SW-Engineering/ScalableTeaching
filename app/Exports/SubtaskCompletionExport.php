@@ -2,8 +2,9 @@
 
 namespace App\Exports;
 
-use App\Models\Casts\SubTask;
+use App\Models\Project;
 use App\Models\Task;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -14,7 +15,7 @@ class SubtaskCompletionExport implements FromQuery, WithTitle, WithMapping, With
 {
     private Collection $subTasks;
 
-    public function __construct(private Task $task)
+    public function __construct(private readonly Task $task)
     {
         $this->subTasks = $this->task->sub_tasks->all()
             ->pluck('name', 'id');
@@ -26,9 +27,9 @@ class SubtaskCompletionExport implements FromQuery, WithTitle, WithMapping, With
     }
 
 
-    public function query()
+    public function query(): Builder
     {
-        return $this->task->projects()->with('subTasks')->claimed();
+        return Project::query()->claimed()->where("task_id", $this->task->id)->with("subTasks");
     }
 
     public function prepareRows($rows)

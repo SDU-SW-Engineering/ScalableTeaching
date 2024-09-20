@@ -6,10 +6,13 @@ class RootProjectsArgumentsObject extends ArgumentsObject
 {
     protected $membership;
     protected $search;
-    protected $ids;
     protected $searchNamespaces;
-    protected $sort;
     protected $topics;
+    protected $ids;
+    protected $fullPaths;
+    protected $sort;
+    protected $withIssuesEnabled;
+    protected $withMergeRequestsEnabled;
     protected $after;
     protected $before;
     protected $first;
@@ -29,6 +32,20 @@ class RootProjectsArgumentsObject extends ArgumentsObject
         return $this;
     }
 
+    public function setSearchNamespaces($searchNamespaces)
+    {
+        $this->searchNamespaces = $searchNamespaces;
+
+        return $this;
+    }
+
+    public function setTopics(array $topics)
+    {
+        $this->topics = $topics;
+
+        return $this;
+    }
+
     public function setIds(array $ids)
     {
         $this->ids = $ids;
@@ -36,9 +53,9 @@ class RootProjectsArgumentsObject extends ArgumentsObject
         return $this;
     }
 
-    public function setSearchNamespaces($searchNamespaces)
+    public function setFullPaths(array $fullPaths)
     {
-        $this->searchNamespaces = $searchNamespaces;
+        $this->fullPaths = $fullPaths;
 
         return $this;
     }
@@ -50,9 +67,16 @@ class RootProjectsArgumentsObject extends ArgumentsObject
         return $this;
     }
 
-    public function setTopics(array $topics)
+    public function setWithIssuesEnabled($withIssuesEnabled)
     {
-        $this->topics = $topics;
+        $this->withIssuesEnabled = $withIssuesEnabled;
+
+        return $this;
+    }
+
+    public function setWithMergeRequestsEnabled($withMergeRequestsEnabled)
+    {
+        $this->withMergeRequestsEnabled = $withMergeRequestsEnabled;
 
         return $this;
     }

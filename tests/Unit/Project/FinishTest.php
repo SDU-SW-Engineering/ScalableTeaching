@@ -5,9 +5,10 @@ use App\Models\Project;
 use App\Models\Task;
 use App\ProjectStatus;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\assertDatabaseHas;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 it('sets the finished_at timestamp when a project is marked as finished', function() {
     Carbon::setTestNow(Carbon::create(2022, 1, 23, 12, 0, 0));

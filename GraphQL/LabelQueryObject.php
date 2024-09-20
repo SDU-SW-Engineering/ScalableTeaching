@@ -41,6 +41,13 @@ class LabelQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectLockOnMerge()
+    {
+        $this->selectField("lockOnMerge");
+
+        return $this;
+    }
+
     public function selectTextColor()
     {
         $this->selectField("textColor");

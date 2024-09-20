@@ -62,9 +62,9 @@ class MilestoneQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectReport(MilestoneReportArgumentsObject $argsObject = null)
+    public function selectReleases(MilestoneReleasesArgumentsObject $argsObject = null)
     {
-        $object = new TimeboxReportQueryObject("report");
+        $object = new ReleaseConnectionQueryObject("releases");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }

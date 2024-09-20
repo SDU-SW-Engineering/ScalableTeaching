@@ -30,7 +30,7 @@ return new class extends Migration {
                 /** @var LinkRepository $linkModule */
                 $linkModule = $task->module_configuration->resolveModule(LinkRepository::class);
                 $linkModule->settings()->repo = $task->source_project_id;
-                $task->module_configuration->update(LinkRepository::class, $linkModule->settings());
+                $task->module_configuration->update(LinkRepository::class, $linkModule->settings(), $task);
 
                 if($task->correction_type != CorrectionType::Self)
                 {

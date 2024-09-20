@@ -35,6 +35,13 @@ class MergeRequestReviewerQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectBio()
+    {
+        $this->selectField("bio");
+
+        return $this;
+    }
+
     public function selectBot()
     {
         $this->selectField("bot");
@@ -53,12 +60,51 @@ class MergeRequestReviewerQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectCommitEmail()
+    {
+        $this->selectField("commitEmail");
+
+        return $this;
+    }
+
+    public function selectCreatedAt()
+    {
+        $this->selectField("createdAt");
+
+        return $this;
+    }
+
+    public function selectDiscord()
+    {
+        $this->selectField("discord");
+
+        return $this;
+    }
+
     /**
      * @deprecated This was renamed. Please use `User.publicEmail`. Deprecated in 13.7.
      */
     public function selectEmail()
     {
         $this->selectField("email");
+
+        return $this;
+    }
+
+    public function selectEmails(MergeRequestReviewerEmailsArgumentsObject $argsObject = null)
+    {
+        $object = new EmailConnectionQueryObject("emails");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectGitpodEnabled()
+    {
+        $this->selectField("gitpodEnabled");
 
         return $this;
     }
@@ -99,6 +145,38 @@ class MergeRequestReviewerQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectIde(MergeRequestReviewerIdeArgumentsObject $argsObject = null)
+    {
+        $object = new IdeQueryObject("ide");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectJobTitle()
+    {
+        $this->selectField("jobTitle");
+
+        return $this;
+    }
+
+    public function selectLastActivityOn()
+    {
+        $this->selectField("lastActivityOn");
+
+        return $this;
+    }
+
+    public function selectLinkedin()
+    {
+        $this->selectField("linkedin");
+
+        return $this;
+    }
+
     public function selectLocation()
     {
         $this->selectField("location");
@@ -135,6 +213,52 @@ class MergeRequestReviewerQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectNamespaceCommitEmails(MergeRequestReviewerNamespaceCommitEmailsArgumentsObject $argsObject = null)
+    {
+        $object = new NamespaceCommitEmailConnectionQueryObject("namespaceCommitEmails");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectOrganization()
+    {
+        $this->selectField("organization");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.6.
+     */
+    public function selectOrganizations(MergeRequestReviewerOrganizationsArgumentsObject $argsObject = null)
+    {
+        $object = new OrganizationConnectionQueryObject("organizations");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectPreferencesGitpodPath()
+    {
+        $this->selectField("preferencesGitpodPath");
+
+        return $this;
+    }
+
+    public function selectProfileEnableGitpodPath()
+    {
+        $this->selectField("profileEnableGitpodPath");
+
+        return $this;
+    }
+
     public function selectProjectMemberships(MergeRequestReviewerProjectMembershipsArgumentsObject $argsObject = null)
     {
         $object = new ProjectMemberConnectionQueryObject("projectMemberships");
@@ -144,6 +268,13 @@ class MergeRequestReviewerQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectPronouns()
+    {
+        $this->selectField("pronouns");
+
+        return $this;
     }
 
     public function selectPublicEmail()
@@ -156,6 +287,28 @@ class MergeRequestReviewerQueryObject extends QueryObject
     public function selectReviewRequestedMergeRequests(MergeRequestReviewerReviewRequestedMergeRequestsArgumentsObject $argsObject = null)
     {
         $object = new MergeRequestConnectionQueryObject("reviewRequestedMergeRequests");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectSavedReplies(MergeRequestReviewerSavedRepliesArgumentsObject $argsObject = null)
+    {
+        $object = new SavedReplyConnectionQueryObject("savedReplies");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectSavedReply(MergeRequestReviewerSavedReplyArgumentsObject $argsObject = null)
+    {
+        $object = new SavedReplyQueryObject("savedReply");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -218,6 +371,27 @@ class MergeRequestReviewerQueryObject extends QueryObject
     public function selectTodos(MergeRequestReviewerTodosArgumentsObject $argsObject = null)
     {
         $object = new TodoConnectionQueryObject("todos");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectTwitter()
+    {
+        $this->selectField("twitter");
+
+        return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 15.10.
+     */
+    public function selectUserAchievements(MergeRequestReviewerUserAchievementsArgumentsObject $argsObject = null)
+    {
+        $object = new UserAchievementConnectionQueryObject("userAchievements");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }

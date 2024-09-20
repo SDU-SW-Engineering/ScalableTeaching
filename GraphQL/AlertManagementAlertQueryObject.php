@@ -17,6 +17,17 @@ class AlertManagementAlertQueryObject extends QueryObject
         return $object;
     }
 
+    public function selectCommenters(AlertManagementAlertCommentersArgumentsObject $argsObject = null)
+    {
+        $object = new UserCoreConnectionQueryObject("commenters");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectCreatedAt()
     {
         $this->selectField("createdAt");
@@ -88,6 +99,13 @@ class AlertManagementAlertQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectId()
+    {
+        $this->selectField("id");
+
+        return $this;
+    }
+
     public function selectIid()
     {
         $this->selectField("iid");
@@ -116,6 +134,9 @@ class AlertManagementAlertQueryObject extends QueryObject
         return $this;
     }
 
+    /**
+     * @deprecated Returns no data. Underlying feature was removed in 16.0. Deprecated in 16.0.
+     */
     public function selectMetricsDashboardUrl()
     {
         $this->selectField("metricsDashboardUrl");
@@ -208,6 +229,13 @@ class AlertManagementAlertQueryObject extends QueryObject
     public function selectUpdatedAt()
     {
         $this->selectField("updatedAt");
+
+        return $this;
+    }
+
+    public function selectWebUrl()
+    {
+        $this->selectField("webUrl");
 
         return $this;
     }

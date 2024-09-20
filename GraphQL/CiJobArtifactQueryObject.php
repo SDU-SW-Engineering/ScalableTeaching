@@ -13,6 +13,13 @@ class CiJobArtifactQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectExpireAt()
+    {
+        $this->selectField("expireAt");
+
+        return $this;
+    }
+
     public function selectFileType()
     {
         $this->selectField("fileType");
@@ -20,9 +27,23 @@ class CiJobArtifactQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectId()
+    {
+        $this->selectField("id");
+
+        return $this;
+    }
+
     public function selectName()
     {
         $this->selectField("name");
+
+        return $this;
+    }
+
+    public function selectSize()
+    {
+        $this->selectField("size");
 
         return $this;
     }

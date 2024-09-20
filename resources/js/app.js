@@ -1,3 +1,6 @@
+import ToastPlugin from "vue-toast-notification";
+import 'vue-toast-notification/dist/theme-bootstrap.css';
+
 require("./bootstrap");
 require("chart.js");
 
@@ -11,7 +14,7 @@ Vue.component(
     "simple-doughnut-chart",
     require("./components/SimpleDoughnutChart").default
 );
-Vue.component("task", require("./components/Task").default);
+Vue.component("task", require("./components/Task/Task").default);
 Vue.component("line-chart", require("./components/LineChart").default);
 Vue.component("bar-chart", require("./components/BarChart").default);
 Vue.component("groups", require("./components/Groups").default);
@@ -74,6 +77,9 @@ Vue.component(
 Vue.component("admin-preferences", () =>
     import("./components/Admin/Preferences/Preferences")
 );
+
+// Module configuration entries
+Vue.component("automatic-grading-configuration", () => import("./components/Tasks/Modules/AutomaticGrading/AutomaticGradingConfiguration"));
 
 const settings = {
     "t-rich-select": {
@@ -238,6 +244,10 @@ const settings = {
 };
 
 Vue.use(VueTailwind, settings);
+Vue.use(ToastPlugin, {
+    duration: 6_000,
+    position: 'top-right'
+})
 
 const app = new Vue({
     el: "#app",

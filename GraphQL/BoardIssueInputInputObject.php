@@ -13,18 +13,11 @@ class BoardIssueInputInputObject extends InputObject
     protected $releaseTag;
     protected $types;
     protected $milestoneWildcardId;
-    protected $epicId;
-    protected $iterationTitle;
-    protected $weight;
-    protected $iterationId;
     protected $not;
+    protected $or;
     protected $search;
     protected $assigneeWildcardId;
     protected $confidential;
-    protected $epicWildcardId;
-    protected $iterationWildcardId;
-    protected $iterationCadenceId;
-    protected $weightWildcardId;
 
     public function setLabelName(array $labelName)
     {
@@ -89,37 +82,16 @@ class BoardIssueInputInputObject extends InputObject
         return $this;
     }
 
-    public function setEpicId($epicId)
-    {
-        $this->epicId = $epicId;
-
-        return $this;
-    }
-
-    public function setIterationTitle($iterationTitle)
-    {
-        $this->iterationTitle = $iterationTitle;
-
-        return $this;
-    }
-
-    public function setWeight($weight)
-    {
-        $this->weight = $weight;
-
-        return $this;
-    }
-
-    public function setIterationId(array $iterationId)
-    {
-        $this->iterationId = $iterationId;
-
-        return $this;
-    }
-
     public function setNot(NegatedBoardIssueInputInputObject $negatedBoardIssueInputInputObject)
     {
         $this->not = $negatedBoardIssueInputInputObject;
+
+        return $this;
+    }
+
+    public function setOr(UnionedIssueFilterInputInputObject $unionedIssueFilterInputInputObject)
+    {
+        $this->or = $unionedIssueFilterInputInputObject;
 
         return $this;
     }
@@ -141,34 +113,6 @@ class BoardIssueInputInputObject extends InputObject
     public function setConfidential($confidential)
     {
         $this->confidential = $confidential;
-
-        return $this;
-    }
-
-    public function setEpicWildcardId($epicWildcardId)
-    {
-        $this->epicWildcardId = $epicWildcardId;
-
-        return $this;
-    }
-
-    public function setIterationWildcardId($iterationWildcardId)
-    {
-        $this->iterationWildcardId = $iterationWildcardId;
-
-        return $this;
-    }
-
-    public function setIterationCadenceId(array $iterationCadenceId)
-    {
-        $this->iterationCadenceId = $iterationCadenceId;
-
-        return $this;
-    }
-
-    public function setWeightWildcardId($weightWildcardId)
-    {
-        $this->weightWildcardId = $weightWildcardId;
 
         return $this;
     }

@@ -2,12 +2,22 @@
 
 namespace GraphQL\SchemaObject;
 
+use GraphQL\RawObject;
+
 class DesignNotesArgumentsObject extends ArgumentsObject
 {
+    protected $filter;
     protected $after;
     protected $before;
     protected $first;
     protected $last;
+
+    public function setFilter($notesFilterType)
+    {
+        $this->filter = new RawObject($notesFilterType);
+
+        return $this;
+    }
 
     public function setAfter($after)
     {

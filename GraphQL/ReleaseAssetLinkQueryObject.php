@@ -20,13 +20,6 @@ class ReleaseAssetLinkQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectExternal()
-    {
-        $this->selectField("external");
-
-        return $this;
-    }
-
     public function selectId()
     {
         $this->selectField("id");

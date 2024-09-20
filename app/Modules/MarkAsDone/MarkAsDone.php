@@ -2,6 +2,7 @@
 
 namespace App\Modules\MarkAsDone;
 
+use App\Modules\LinkRepository\LinkRepository;
 use App\Modules\Module;
 
 class MarkAsDone extends Module
@@ -12,4 +13,8 @@ class MarkAsDone extends Module
     protected string $name = "Mark As Done";
 
     protected string $description = "Task can be marked as done by participants. Useful for small tasks and exercises where there is no hand-in.";
+
+    protected array $conflicts = [
+        LinkRepository::class,
+    ];
 }

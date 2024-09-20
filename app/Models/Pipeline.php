@@ -4,11 +4,13 @@ namespace App\Models;
 
 use App\Exceptions\PipelineException;
 use App\Models\Casts\SubTask;
-use App\Models\Enums\CorrectionType;
 use App\Models\Enums\PipelineStatusEnum;
+use App\Modules\AutomaticGrading\AutomaticGrading;
+use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use Database\Factories\PipelineFactory;
 use Domain\SourceControl\Job;
 use Domain\SourceControl\SourceControl;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -44,6 +47,7 @@ use Throwable;
  * @property-read Collection<int,array{name:string,completed:bool}> $pretty_sub_tasks
  * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereUserEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Pipeline whereUserName($value)
+ * @method static PipelineFactory factory()
  */
 class Pipeline extends Model
 {
@@ -60,30 +64,58 @@ class Pipeline extends Model
      * @var array<string,array<int,PipelineStatusEnum>>
      */
     public static array $upgradable = [
-        'pending' => [PipelineStatusEnum::Running, PipelineStatusEnum::Failed, PipelineStatusEnum::Success, PipelineStatusEnum::Canceled],
-        'failed'  => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
-        'success' => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
-        'running' => [PipelineStatusEnum::Failed, PipelineStatusEnum::Success, PipelineStatusEnum::Canceled],
+        'canceled'  => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed, PipelineStatusEnum::Running],
+        'pending'   => [PipelineStatusEnum::Running, PipelineStatusEnum::Failed, PipelineStatusEnum::Success, PipelineStatusEnum::Canceled],
+        'failed'    => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
+        'success'   => [PipelineStatusEnum::Success, PipelineStatusEnum::Failed],
+        'running'   => [PipelineStatusEnum::Failed, PipelineStatusEnum::Success, PipelineStatusEnum::Canceled],
     ];
 
     protected static function booted()
     {
-        static::created(function(Pipeline $pipeline) {
-            if($pipeline->project->task->correction_type != CorrectionType::PipelineSuccess)
-                return;
-
-            if($pipeline->status != PipelineStatusEnum::Success)
-                return;
-
-            $pipeline->project->update([
-                'status' => ProjectStatus::Finished,
-            ]);
+        static::created(function (Pipeline $pipeline) {
+            Pipeline::checkAutomaticGrading($pipeline);
         });
+    }
+
+    /**
+     * @param Pipeline $pipeline
+     * @return bool Whether or not this automatic grading check handled the project status.
+     * @throws \Exception
+     */
+    private static function checkAutomaticGrading(Pipeline $pipeline): bool
+    {
+        Log::info("Checking automatic grading for pipeline {$pipeline->pipeline_id}");
+        $automaticGradingModule = $pipeline->project->task->module_configuration->resolveModule(AutomaticGrading::class);
+        if ($automaticGradingModule == null)
+            return false;
+
+
+        /** @var AutomaticGradingSettings $settings */
+        $settings = $automaticGradingModule->settings();
+        if ( ! $settings->isPipelineBased())
+        {
+            return false;
+        }
+
+        if ($pipeline->status != PipelineStatusEnum::Success)
+        {
+            Log::info("Pipeline {$pipeline->pipeline_id} is not successful, setting project {$pipeline->project_id} to active");
+            $pipeline->project->setProjectStatusFor(ProjectStatus::Active, Pipeline::class, $pipeline->id);
+
+            return true;
+        }
+
+        Log::info("Pipeline {$pipeline->pipeline_id} is successful, automatically grading project {$pipeline->project_id}");
+
+        $pipeline->project->setProjectStatusFor(ProjectStatus::Finished, Pipeline::class, $pipeline->id);
+
+        return true;
     }
 
     public function isUpgradable(PipelineStatusEnum $to): bool
     {
-        if( ! array_key_exists($this->status->value, static::$upgradable))
+        if ( ! array_key_exists($this->status->value, static::$upgradable))
             return false;
 
         return in_array($to, static::$upgradable[$this->status->value]);
@@ -105,29 +137,42 @@ class Pipeline extends Model
      */
     public function process(Carbon $startedAt, PipelineStatusEnum $status, float $duration = null, float $queueDuration = null, array $succeedingBuilds = [])
     {
+        Log::info("Processing pipeline {$this->pipeline_id} for project {$this->project_id}");
         throw_if(self::isOutsideTimeFrame($startedAt, $this->project), PipelineException::class, "Past deadline");
-        if( ! $this->isUpgradable($status))
+        if ( ! $this->isUpgradable($status))
             return;
 
-        DB::transaction(function() use ($succeedingBuilds, $queueDuration, $duration, $status) {
+        DB::transaction(function () use ($succeedingBuilds, $queueDuration, $duration, $status) {
             $this->update([
                 'status'         => $status->value,
                 'duration'       => $duration,
                 'queue_duration' => $queueDuration,
             ]);
-            $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getName() => $task]);
-            $this->project->subTasks()->delete(); // reset subtasks
-            (new Collection($succeedingBuilds))->each(function($build) use ($tracking) {
+            $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [strtolower($task->getName()) => $task]);
+
+            /** @var ProjectSubTask[] $subTasksToCreate */
+            $subTasksToCreate = array_map(function ($build) use ($tracking) {
                 /** @var SubTask $subTask */
                 $subTask = $tracking->get($build);
-                $this->project->subTasks()->firstOrCreate([
+
+                return new ProjectSubTask([
                     'sub_task_id' => $subTask->getId(),
                     'source_type' => Pipeline::class,
                     'source_id'   => $this->id,
                     'points'      => $subTask->getPoints(),
                 ]);
-            });
+            }, $succeedingBuilds);
+
+            $this->project->createSubTasks($subTasksToCreate);
         });
+
+        $gradeResult = Pipeline::checkAutomaticGrading($this);
+        // Since some checks run on sub task creation, we have this clause here
+        // to overwrite finished projects, if all jobs fail, but it requires all jobs or something along the lines.
+        if ($gradeResult == false && count($succeedingBuilds) < 1)
+        {
+            $this->project->setProjectStatus(ProjectStatus::Active);
+        }
     }
 
     /**
@@ -135,22 +180,28 @@ class Pipeline extends Model
      */
     public function refreshPipeline(): void
     {
+        Log::info("Refreshing pipeline {$this->pipeline_id} for project {$this->project_id}");
         $sourceControl = app(SourceControl::class);
+
         if($this->project == null) // project is deleted
         {
+            Log::warning("Project {$this->project_id} is deleted, canceling pipeline {$this->pipeline_id}");
             $this->update(['status' => PipelineStatusEnum::Canceled]);
 
             return;
         }
-        $pipeline = $sourceControl->getPipeline($this->project->project_id, $this->pipeline_id);
-        if($pipeline == null || $this->project->status == ProjectStatus::Finished)
+
+        $pipeline = $sourceControl->getPipeline($this->project->gitlab_project_id, $this->pipeline_id);
+        if($pipeline == null)
         {
-            // pipeline no longer exists -> failed
-            $this->update(['status' => PipelineStatusEnum::Canceled]);
+            Log::error("Pipeline {$this->pipeline_id} for project {$this->project_id} does not exist");
 
+            // pipeline no longer exists -> failed
+            // TODO: Check if this should still contain update to Canceled status
             return;
         }
-        $jobs = $sourceControl->getPipelineJobs($this->project->project_id, $this->pipeline_id);
+
+        $jobs = $sourceControl->getPipelineJobs($this->project->gitlab_project_id, $this->pipeline_id);
         $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
         $succeedingBuilds = array_filter($jobs, fn(Job $job) => $tracking->contains($job->name) && $job->status == 'success');
         $this->process(

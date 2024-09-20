@@ -45,6 +45,27 @@ class CommitQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectCommittedDate()
+    {
+        $this->selectField("committedDate");
+
+        return $this;
+    }
+
+    public function selectCommitterEmail()
+    {
+        $this->selectField("committerEmail");
+
+        return $this;
+    }
+
+    public function selectCommitterName()
+    {
+        $this->selectField("committerName");
+
+        return $this;
+    }
+
     public function selectDescription()
     {
         $this->selectField("description");
@@ -57,6 +78,17 @@ class CommitQueryObject extends QueryObject
         $this->selectField("descriptionHtml");
 
         return $this;
+    }
+
+    public function selectDiffs(CommitDiffsArgumentsObject $argsObject = null)
+    {
+        $object = new DiffQueryObject("diffs");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectFullTitle()

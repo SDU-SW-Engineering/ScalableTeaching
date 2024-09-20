@@ -6,6 +6,13 @@ class CustomEmojiConnectionQueryObject extends QueryObject
 {
     const OBJECT_NAME = "CustomEmojiConnection";
 
+    public function selectCount()
+    {
+        $this->selectField("count");
+
+        return $this;
+    }
+
     public function selectEdges(CustomEmojiConnectionEdgesArgumentsObject $argsObject = null)
     {
         $object = new CustomEmojiEdgeQueryObject("edges");

@@ -6,6 +6,13 @@ class MergeRequestReviewerConnectionQueryObject extends QueryObject
 {
     const OBJECT_NAME = "MergeRequestReviewerConnection";
 
+    public function selectCount()
+    {
+        $this->selectField("count");
+
+        return $this;
+    }
+
     public function selectEdges(MergeRequestReviewerConnectionEdgesArgumentsObject $argsObject = null)
     {
         $object = new MergeRequestReviewerEdgeQueryObject("edges");

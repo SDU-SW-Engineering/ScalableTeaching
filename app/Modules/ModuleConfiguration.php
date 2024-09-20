@@ -112,11 +112,12 @@ class ModuleConfiguration implements Castable
         $this->installed[$baseName] = $model;
     }
 
-    public function update(string $module, Settings $settings): void
+    public function update(string $module, Settings $settings, Task $task): void
     {
         $module = $this->resolveIdentifier($module);
         /** @var ModuleModel $moduleModel */
         $moduleModel = $this->installed[$module];
+        /** @var Module $module */
         $module = $this->resolveModule($module);
         $moduleModel->setSettings($settings);
         $moduleModel->setEnabled($module->isEnabled($settings));

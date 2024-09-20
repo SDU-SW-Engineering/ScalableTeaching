@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\ProjectCreated;
-use App\Listeners\GitLab\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
 use App\Models\Enums\FeedbackCommentStatus;
@@ -13,17 +11,13 @@ use App\Models\Grade;
 use App\Models\Group;
 use App\Models\Pipeline;
 use App\Models\Project;
-use App\Models\ProjectDiffIndex;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
 use App\Models\ProjectFeedbackComment;
 use App\Models\Task;
-use App\Models\TaskDelegation;
 use App\Models\User;
 use App\ProjectStatus;
-use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use Carbon\CarbonPeriod;
 use Domain\Files\Directory;
 use Domain\Files\Highlight;
 use Domain\Files\IsChangeable;
@@ -34,14 +28,11 @@ use GraphQL\SchemaObject\RepositoryTreeArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
-use Spatie\ShikiPhp\Shiki;
 use Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use function Pest\Laravel\get;
 
 class ProjectController extends Controller
 {
@@ -69,21 +60,51 @@ class ProjectController extends Controller
     {
         abort_unless($project->status == ProjectStatus::Active, 400);
         \DB::transaction(function() use ($gitLabManager, $project) {
-            $found = true;
+            $found = $project->gitlab_project_id != null;
             try
             {
-                $gitLabManager->projects()->show($project->project_id);
+                // Be aware if passed in value is null, then it will return all projects and therefore not throwing.
+                $gitLabManager->projects()->show($project->gitlab_project_id);
             } catch(RuntimeException $runtimeException)
             {
                 $found = $runtimeException->getCode() != 404;
             }
 
             if($found)
-                $gitLabManager->projects()->remove($project->project_id);
+                $gitLabManager->projects()->remove($project->gitlab_project_id);
 
 
             $project->delete();
+
+            /** @var ?Grade $grade */
+            $grade = Grade::where("task_id", "=", $project->task->id)
+                ->where("source_type", "=", User::class)
+                ->where("source_id", "=", auth()->id())->first();
+            if ($grade)
+            {
+                $grade->delete();
+            }
+
         });
+
+        return "OK";
+    }
+
+    public function markComplete(Course $course, Task $task, Project $project): string|Response
+    {
+        if( ! $task->isTextTask())
+            return response('Bad request', 400);
+        if(Grade::where(['task_id' => $task->id, 'user_id' => auth()->id()])->exists())
+            return response('Bad request', 400);
+
+        $foundProject = $project->owners()->find(auth()->id());
+
+        if ( ! $foundProject)
+        {
+            return response('Forbidden', 403);
+        }
+
+        $project->setProjectStatus(ProjectStatus::Finished);
 
         return "OK";
     }
@@ -119,7 +140,7 @@ class ProjectController extends Controller
         abort_if($sha == null, 404);
 
         return response()->streamDownload(function() use ($sha, $project, $gitLabManager) {
-            echo $gitLabManager->repositories()->archive($project->project_id, [
+            echo $gitLabManager->repositories()->archive($project->gitlab_project_id, [
                 'sha' => $sha,
             ], 'zip');
         }, "$project->repo_name.zip");
@@ -131,7 +152,9 @@ class ProjectController extends Controller
     public function validateProject(Course $course, Task $task, Project $project): RedirectResponse
     {
         if($project->final_commit_sha == null)
+        {
             return redirect()->back()->withErrors('Can\'t validate this project as it isn\' finished yet');
+        }
 
         $files = $project->task->protectedFiles;
         $directories = $files->groupBy('directory');
@@ -140,7 +163,7 @@ class ProjectController extends Controller
         {
             $rootObject = new RootQueryObject();
             $rootObject->selectProjects((new RootProjectsArgumentsObject())
-                ->setIds(["gid://gitlab/Project/$project->project_id"])
+                ->setIds(["gid://gitlab/Project/$project->gitlab_project_id"])
                 ->setFirst(1))
                 ->selectNodes()
                 ->selectRepository()
@@ -218,8 +241,9 @@ class ProjectController extends Controller
         return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus);
     }
 
-    public function showTree(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Directory
+    public function showTree(Course $course, Task $task, Project $project): Directory
     {
+        $projectDownload = $project->download;
         $tree = $projectDownload->fileTree()->trim();
         $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
         if($changes != null)
@@ -229,7 +253,8 @@ class ProjectController extends Controller
                 $path = str_replace('/', '\/', preg_quote($item->path()));// @phpstan-ignore-line
 
                 foreach($filesChanged as $file) // @phpstan-ignore-line
-                {$pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
+                {
+                $pathMatches = ! ($path == '') && preg_match("/^$path/i", $file) === 1;
                     if($pathMatches)
                     {
 
@@ -243,8 +268,9 @@ class ProjectController extends Controller
         return $tree;
     }
 
-    public function showFile(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): Response|array
+    public function showFile(Course $course, Task $task, Project $project): Response|array
     {
+        $projectDownload = $project->download;
         $contents = $projectDownload->file(\request('path'));
         $processedLines = (new Highlight(\request('path')))->code($contents);
         if($processedLines == null)

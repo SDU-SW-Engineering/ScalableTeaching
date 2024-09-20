@@ -25,7 +25,7 @@ beforeEach(function () {
     ])->create();
     $this->group = Group::factory()->for($this->course)->create();
     $this->user = User::factory()->hasAttached($this->course)->create();
-    $this->user->groups()->attach($this->group);
+    $this->user->groups()->attach($this->group, ['is_owner' => true]);
     $this->user2 = User::factory()->hasAttached($this->course)->create();
 });
 
@@ -133,6 +133,13 @@ it('allows students to leave groups', function () {
 
     postJson(route('courses.groups.leave', [$this->course, $this->group]))->assertStatus(200);
     expect($this->group->hasMember($this->user2))->toBeFalse();
+});
+
+it('prohibits last group member to leave', function () {
+    actingAs($this->user);
+
+    postJson(route('courses.groups.leave', [$this->course, $this->group]))->assertStatus(403);
+    expect($this->group->hasMember($this->user))->toBeTrue();
 });
 
 it('prohibits students from leaving groups they are not member of', function () {

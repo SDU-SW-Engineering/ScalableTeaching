@@ -54,7 +54,7 @@
 
 <script>
 export default {
-    props: ['grade', 'csrf', 'course-id', 'task-id'],
+    props: ['grade', 'csrf', 'courseId', 'taskId', 'projectId'],
     data: function () {
         return {
             marking: false,
@@ -66,7 +66,7 @@ export default {
             if (this.marking === true)
                 return;
             this.marking = true;
-            await axios.post(`/courses/${this.courseId}/tasks/${this.taskId}/mark-complete`);
+            await axios.post(`/courses/${this.courseId}/tasks/${this.taskId}/projects/${this.projectId}/mark-complete`);
             location.reload();
         }
     },

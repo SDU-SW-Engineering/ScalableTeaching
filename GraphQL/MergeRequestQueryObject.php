@@ -13,27 +13,16 @@ class MergeRequestQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectApprovalState(MergeRequestApprovalStateArgumentsObject $argsObject = null)
+    public function selectAllowsMultipleAssignees()
     {
-        $object = new MergeRequestApprovalStateQueryObject("approvalState");
-        if ($argsObject !== null) {
-            $object->appendArguments($argsObject->toArray());
-        }
-        $this->selectField($object);
-
-        return $object;
-    }
-
-    public function selectApprovalsLeft()
-    {
-        $this->selectField("approvalsLeft");
+        $this->selectField("allowsMultipleAssignees");
 
         return $this;
     }
 
-    public function selectApprovalsRequired()
+    public function selectAllowsMultipleReviewers()
     {
-        $this->selectField("approvalsRequired");
+        $this->selectField("allowsMultipleReviewers");
 
         return $this;
     }
@@ -69,7 +58,7 @@ class MergeRequestQueryObject extends QueryObject
 
     public function selectAuthor(MergeRequestAuthorArgumentsObject $argsObject = null)
     {
-        $object = new UserCoreQueryObject("author");
+        $object = new MergeRequestAuthorQueryObject("author");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -99,6 +88,39 @@ class MergeRequestQueryObject extends QueryObject
         return $this;
     }
 
+    public function selectAwardEmoji(MergeRequestAwardEmojiArgumentsObject $argsObject = null)
+    {
+        $object = new AwardEmojiConnectionQueryObject("awardEmoji");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectCodequalityReportsComparer(MergeRequestCodequalityReportsComparerArgumentsObject $argsObject = null)
+    {
+        $object = new CodequalityReportsComparerQueryObject("codequalityReportsComparer");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectCommenters(MergeRequestCommentersArgumentsObject $argsObject = null)
+    {
+        $object = new UserCoreConnectionQueryObject("commenters");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
     public function selectCommitCount()
     {
         $this->selectField("commitCount");
@@ -120,6 +142,17 @@ class MergeRequestQueryObject extends QueryObject
     public function selectCommitsWithoutMergeCommits(MergeRequestCommitsWithoutMergeCommitsArgumentsObject $argsObject = null)
     {
         $object = new CommitConnectionQueryObject("commitsWithoutMergeCommits");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
+    }
+
+    public function selectCommitters(MergeRequestCommittersArgumentsObject $argsObject = null)
+    {
+        $object = new UserCoreConnectionQueryObject("committers");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -160,16 +193,6 @@ class MergeRequestQueryObject extends QueryObject
         return $this;
     }
 
-    /**
-     * @deprecated Define merge commit template in project and use `defaultMergeCommitMessage`. Deprecated in 14.5.
-     */
-    public function selectDefaultMergeCommitMessageWithDescription()
-    {
-        $this->selectField("defaultMergeCommitMessageWithDescription");
-
-        return $this;
-    }
-
     public function selectDefaultSquashCommitMessage()
     {
         $this->selectField("defaultSquashCommitMessage");
@@ -187,6 +210,13 @@ class MergeRequestQueryObject extends QueryObject
     public function selectDescriptionHtml()
     {
         $this->selectField("descriptionHtml");
+
+        return $this;
+    }
+
+    public function selectDetailedMergeStatus()
+    {
+        $this->selectField("detailedMergeStatus");
 
         return $this;
     }
@@ -280,13 +310,6 @@ class MergeRequestQueryObject extends QueryObject
     public function selectHasCi()
     {
         $this->selectField("hasCi");
-
-        return $this;
-    }
-
-    public function selectHasSecurityReports()
-    {
-        $this->selectField("hasSecurityReports");
 
         return $this;
     }
@@ -386,13 +409,6 @@ class MergeRequestQueryObject extends QueryObject
         return $this;
     }
 
-    public function selectMergeTrainsCount()
-    {
-        $this->selectField("mergeTrainsCount");
-
-        return $this;
-    }
-
     public function selectMergeUser(MergeRequestMergeUserArgumentsObject $argsObject = null)
     {
         $object = new UserCoreQueryObject("mergeUser");
@@ -409,6 +425,20 @@ class MergeRequestQueryObject extends QueryObject
         $this->selectField("mergeWhenPipelineSucceeds");
 
         return $this;
+    }
+
+    /**
+     * @deprecated **Status**: Experiment. Introduced in 16.5.
+     */
+    public function selectMergeabilityChecks(MergeRequestMergeabilityChecksArgumentsObject $argsObject = null)
+    {
+        $object = new MergeRequestMergeabilityCheckQueryObject("mergeabilityChecks");
+        if ($argsObject !== null) {
+            $object->appendArguments($argsObject->toArray());
+        }
+        $this->selectField($object);
+
+        return $object;
     }
 
     public function selectMergeable()
@@ -456,7 +486,7 @@ class MergeRequestQueryObject extends QueryObject
 
     public function selectParticipants(MergeRequestParticipantsArgumentsObject $argsObject = null)
     {
-        $object = new UserCoreConnectionQueryObject("participants");
+        $object = new MergeRequestParticipantConnectionQueryObject("participants");
         if ($argsObject !== null) {
             $object->appendArguments($argsObject->toArray());
         }
@@ -474,6 +504,13 @@ class MergeRequestQueryObject extends QueryObject
         $this->selectField($object);
 
         return $object;
+    }
+
+    public function selectPreparedAt()
+    {
+        $this->selectField("preparedAt");
+
+        return $this;
     }
 
     public function selectProject(MergeRequestProjectArgumentsObject $argsObject = null)
@@ -529,13 +566,6 @@ class MergeRequestQueryObject extends QueryObject
     public function selectSecurityAutoFix()
     {
         $this->selectField("securityAutoFix");
-
-        return $this;
-    }
-
-    public function selectSecurityReportsUpToDateOnTargetBranch()
-    {
-        $this->selectField("securityReportsUpToDateOnTargetBranch");
 
         return $this;
     }
@@ -617,6 +647,13 @@ class MergeRequestQueryObject extends QueryObject
     public function selectSubscribed()
     {
         $this->selectField("subscribed");
+
+        return $this;
+    }
+
+    public function selectSupportsLockOnMerge()
+    {
+        $this->selectField("supportsLockOnMerge");
 
         return $this;
     }

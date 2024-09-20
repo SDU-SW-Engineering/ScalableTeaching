@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Survey;
 use App\Models\Task;
 use App\Models\User;
+use App\ProjectStatus;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class SurveyPolicy
@@ -41,7 +42,7 @@ class SurveyPolicy
         if ($task->correction_type == CorrectionType::None && ! $task->hasEnded)
             return false;
 
-        if ($task->correction_type != CorrectionType::None && $project->status == 'active')
+        if ($task->correction_type != CorrectionType::None && $project->status == ProjectStatus::Active)
             return false;
 
         return ! $task->pivot->isPastDeadline;

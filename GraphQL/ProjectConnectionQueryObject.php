@@ -6,6 +6,13 @@ class ProjectConnectionQueryObject extends QueryObject
 {
     const OBJECT_NAME = "ProjectConnection";
 
+    public function selectCount()
+    {
+        $this->selectField("count");
+
+        return $this;
+    }
+
     public function selectEdges(ProjectConnectionEdgesArgumentsObject $argsObject = null)
     {
         $object = new ProjectEdgeQueryObject("edges");
