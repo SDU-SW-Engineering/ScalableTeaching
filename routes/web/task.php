@@ -27,7 +27,7 @@ Route::prefix('{task}')->group(function() {
 
         Route::controller(SettingsController::class)->group(function() {
             Route::get('preferences', 'preferences')->name('preferences');
-            Route::put('preferences', 'savePreferences')->name('preferences');
+            Route::put('preferences', 'savePreferences')->name('save-preferences');
             Route::post('save-description', 'saveDescription')->name('save-description');
             Route::get('load-description-from-repo', 'loadDescription')->name('load-description');
             Route::post('update-title', 'updateTitle')->name('update-title');
