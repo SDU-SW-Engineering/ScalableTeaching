@@ -24,8 +24,8 @@ class BasicAuthForStaging
 
         if($request->server('PHP_AUTH_USER') && $request->server('PHP_AUTH_PW'))
         {
-            if ( ! ($request->server('PHP_AUTH_USER') == getenv('STAGING_USER') &&
-                $request->server('PHP_AUTH_PW') == getenv('STAGING_PASS')))
+            if ( ! ($request->server('PHP_AUTH_USER') == env('STAGING_USER') &&
+                $request->server('PHP_AUTH_PW') == env('STAGING_PASS')))
                 $this->basic();
             session()->put('staging-authed', true);
 
