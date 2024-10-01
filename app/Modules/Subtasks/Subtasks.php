@@ -23,7 +23,7 @@ class Subtasks extends Module
     public static function configRoutes(): void
     {
         Route::get('/', [SubtasksController::class, 'subTasks'])->name('subTasks');
-        Route::post('/', [SubtasksController::class, 'saveSubTasks'])->name('subTasks');
+        Route::post('/', [SubtasksController::class, 'saveSubTasks'])->name('save-subTasks');
         Route::get('export-results', [SubtasksController::class, 'exportResults'])->name('export');
         Route::get('task-completion', [SubtasksController::class, 'studentTaskCompletion'])->name('task-completion');
         Route::get('task-completion/aggregate', [SubtasksController::class, 'aggregatedTaskCompletion'])->name('aggregate-task-completion');
