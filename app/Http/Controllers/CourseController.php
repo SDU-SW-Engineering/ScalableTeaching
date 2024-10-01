@@ -83,7 +83,7 @@ class CourseController extends Controller
         $courseNameSlug = Str::slug($validated['course-name']);
 
         // Check if group already exists in GitLab.
-        $currentGroup = $manager->groups()->subgroups(getenv('GITLAB_GROUP'), ['search' => $courseNameSlug]);
+        $currentGroup = $manager->groups()->subgroups(env('GITLAB_GROUP'), ['search' => $courseNameSlug]);
         if(count($currentGroup) > 0)
             return redirect()->back()->withErrors(['course-name' => 'A course with that name already exists in GitLab.'])->withInput();
 
@@ -91,7 +91,7 @@ class CourseController extends Controller
             'name'       => $validated['course-name'],
             'path'       => $courseNameSlug,
             'visibility' => 'private',
-            'parent_id'  => getenv('GITLAB_GROUP'),
+            'parent_id'  => env('GITLAB_GROUP'),
         ];
 
         // Create new gitlab subgroup under parent group.

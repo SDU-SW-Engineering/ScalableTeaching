@@ -44,7 +44,7 @@ class GitLabActions implements SourceControl
             ->selectTree()
             ->selectLastCommit()
             ->selectSha();
-        $client = new Client(getenv('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . $token]);
+        $client = new Client(env('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . $token]);
 
         $projects = $client->runQuery($rootObject)->getResults()->data->projects->nodes; // @phpstan-ignore-line
         if(count($projects) == 0)
@@ -64,7 +64,7 @@ class GitLabActions implements SourceControl
             ->selectName()
             ->selectId();
 
-        $client = new Client(getenv('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . User::token($user)]);
+        $client = new Client(env('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . User::token($user)]);
         $user = $client->runQuery($rootObject)->getResults()->data->currentUser; // @phpstan-ignore-line
 
         return new User($user->id, $user->name);
@@ -146,7 +146,7 @@ class GitLabActions implements SourceControl
                 ->selectName()
                 ->selectSha();
         });
-        $client = new Client(getenv('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
+        $client = new Client(env('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
         $directoryAndFiles = (array)$client->runQuery($rootObject)->getResults()->data->projects->nodes[0]->repository; // @phpstan-ignore-line
         $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) use ($directoryAndFiles) {
             $queryPath = $directory->graphQlSanitized()->replace("/", "_")->toString();
