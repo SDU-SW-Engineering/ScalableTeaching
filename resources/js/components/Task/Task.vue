@@ -153,6 +153,9 @@
                                :tasks="subTasks" :tasks-required="task.correction_tasks_required"
                                :points-required="task.correction_points_required"
                                :correction-type="task.correction_type"
+                               :is-code-task="this.isCodeTask"
+                               :is-text-task="this.isTextTask"
+                               :grading-config="this.gradingConfig"
                                :project-status="project !== null ? project.status : null"></sub-tasks>
                 </div>
                 <div v-show="tab === 'builds'">
@@ -234,14 +237,16 @@ export default {
         SubTasks,
         Warning, BarChart, Overdue, Started, NotStarted, Settings, BuildTable, LineChart, Completed, Alert, Waiting
     },
-    props: ['editRoute', 'task', 'grade', 'survey', 'pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks', 'codeRoute', 'isTextTask', 'isCodeTask'],
+    props: ['editRoute', 'task', 'grade', 'survey', 'pushes', 'project', 'progress', 'totalMyBuilds', 'totalBuilds', 'newProjectUrl', 'csrf', 'buildGraph', 'groups', 'userName', 'warning', 'subTasks', 'codeRoute', 'isTextTask', 'isCodeTask',
+        'gradingConfig' // {gradingType: AutomaticGradingType enum, requiredSubtaskIds?: [int], pointsRequired?: int}
+    ],
     methods: {
         startAssignment: async function (startAs) {
             let createAs = startAs == null ? this.startAs : startAs;
             this.startingAssignment = true;
             this.errorMessage = "";
             try {
-                let response = await axios.post(this.newProjectUrl, {
+                await axios.post(this.newProjectUrl, {
                     _token: this.csrf,
                     as: createAs
                 });
