@@ -1,11 +1,8 @@
 <template>
     <div>
         <div class="bg-gray-500 border border-gray-600 border-2 rounded-md flex justify-between items-center text-white" v-if="!update">
-            <div class="px-2">
-                <span>Repo: </span>
-                <span>{{ value }}</span>
-            </div>
-            <button type="button" @click="update = true" class="bg-gray-200 p-2 rounded-r md text-black hover:bg-gray-300 transition-colors">Change</button>
+            <span class="px-2 text-wrap">{{ repoName }}</span>
+            <button type="button" @click="update = true" class="bg-gray-200 p-2 min-h-full rounded-r md text-black hover:bg-gray-300 transition-colors">Change</button>
         </div>
         <t-rich-select v-else v-model="value" :fetch-options="fetchOptions" :minimum-input-length="3"
                        placeholder="Pick a repository"
@@ -57,7 +54,7 @@
 
 <script>
 export default {
-    props: ["name", "currentValue"],
+    props: ["name", "currentValue", "repoName"],
     data() {
         return {
             value: null,

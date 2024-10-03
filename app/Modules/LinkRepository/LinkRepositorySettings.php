@@ -4,6 +4,7 @@ namespace App\Modules\LinkRepository;
 
 use App\Models\Task;
 use App\Modules\Settings;
+use GrahamCampbell\GitLab\GitLabManager;
 
 class LinkRepositorySettings extends Settings
 {
@@ -15,4 +16,24 @@ class LinkRepositorySettings extends Settings
             'repo' => ['required'],
         ];
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function additionalValues(): array
+    {
+        if ($this->repo == null)
+        {
+            return [];
+        }
+
+        $gitlabManager = app(GitLabManager::class);
+        $project = $gitlabManager->projects()->show(explode("/", $this->repo)[4]);
+
+        return [
+            'repoName' => $project['name_with_namespace'],
+        ];
+    }
+
+
 }
