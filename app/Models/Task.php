@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
@@ -21,13 +20,14 @@ use Domain\SourceControl\DirectoryCollection;
 use Domain\SourceControl\File;
 use Domain\SourceControl\SourceControl;
 use Eloquent;
+use Exception;
 use Gitlab\ResultPager;
 use GrahamCampbell\GitLab\GitLabManager;
 use GraphQL\Client;
 use GraphQL\SchemaObject\RepositoryBlobsArgumentsObject;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
-use Http\Client\Exception;
+use Http\Client\Exception as HttpException;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
@@ -42,6 +42,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -556,7 +557,7 @@ class Task extends Model
             get: fn($value, $attributes) => (bool)$value,
             set: function($value) {
                 if( ! $this->is_publishable)
-                    throw new \Exception("Task is not publishable.");
+                    throw new Exception("Task is not publishable.");
 
                 return $value;
             }
@@ -599,7 +600,7 @@ class Task extends Model
     }
 
     /**
-     * @throws Exception
+     * @throws HttpException|Exception
      */
     public function createProject(User|Group $owner): void
     {
@@ -621,7 +622,7 @@ class Task extends Model
             $this->newProject($owner);
         } catch(LockTimeoutException $exception)
         {
-            throw new \Exception("Unable to acquire lock.");
+            throw new Exception("Unable to acquire lock.");
         } finally
         {
             $lock->release();
@@ -629,9 +630,9 @@ class Task extends Model
     }
 
     /**
-     * @param Group|User $owner
+     * @param User|Group|null $owner
      * @return Project
-     * @throws Exception
+     * @throws HttpException|Exception
      */
     private function newProject(User|Group|null $owner): Project
     {
@@ -686,16 +687,24 @@ class Task extends Model
      */
     private function forkProject(GitLabManager $manager, string $username, int $sourceProjectId, int $groupId): array
     {
+        Log::info("Forking project $sourceProjectId for $username");
+
         $params = [
             'name'                   => $username,
             'path'                   => $username,
-            'namespace_id'           => $groupId,
-            'shared_runners_enabled' => false,
+            'namespace'           => $groupId,
         ];
-        $id = rawurlencode((string)$sourceProjectId);
-        $response = $manager->getHttpClient()->post("api/v4/projects/$id/fork", ['Content-type' => 'application/json'], json_encode($params));
 
-        return json_decode($response->getBody()->getContents(), true);
+        try
+        {
+            $response = $manager->projects()->fork($sourceProjectId, $params);
+        } catch (HttpException $e)
+        {
+            throw new Exception("Failed forking gitlab project with id ${$sourceProjectId} - Error: " . $e->getMessage());
+        }
+
+        Log::info("Successfully forked project $sourceProjectId for $username");
+        return $response;
     }
 
     /**
