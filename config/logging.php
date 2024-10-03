@@ -104,6 +104,6 @@ return [
         'teams' => [
             'driver'        => 'custom',
             'via'           => App\Logging\CreateTeamsLogger::class,
-        ]
+        ],
     ],
 ];

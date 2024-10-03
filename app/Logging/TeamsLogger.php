@@ -38,13 +38,13 @@ class TeamsLogger extends AbstractProcessingHandler
 
         $ch = curl_init();
         $options = [
-            CURLOPT_URL => $this->webhookUrl,
-            CURLOPT_POST => true,
+            CURLOPT_URL        => $this->webhookUrl,
+            CURLOPT_POST       => true,
             CURLOPT_POSTFIELDS => $postString,
             CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json'
+                'Content-Type: application/json',
             ],
-            CURLOPT_RETURNTRANSFER => true
+            CURLOPT_RETURNTRANSFER => true,
         ];
 
         curl_setopt_array($ch, $options);
@@ -59,41 +59,41 @@ class TeamsLogger extends AbstractProcessingHandler
     private function createAdaptiveCard(LogRecord|array $record): string
     {
         $data = [
-            'type' => 'message',
+            'type'        => 'message',
             'attachments' => [
                 [
                     'contentType' => 'application/vnd.microsoft.card.adaptive',
-                    'content' => [
+                    'content'     => [
                         '$schema' => 'http://adaptivecards.io/schemas/adaptive-card.json',
-                        'type' => 'AdaptiveCard',
+                        'type'    => 'AdaptiveCard',
                         'version' => '1.2',
-                        'body' => [
+                        'body'    => [
                             [
                                 'type' => 'TextBlock',
                                 'text' => $record['message'],
-                                'wrap' => true
+                                'wrap' => true,
                             ],
                             [
-                                'type' => 'FactSet',
+                                'type'  => 'FactSet',
                                 'facts' => [
                                     [
                                         'title' => 'Level',
-                                        'value' => $record['level_name']
+                                        'value' => $record['level_name'],
                                     ],
                                     [
                                         'title' => 'Time',
-                                        'value' => $record['datetime']->format('Y-m-d H:i:s')
+                                        'value' => $record['datetime']->format('Y-m-d H:i:s'),
                                     ],
                                     [
                                         'title' => 'Environment',
-                                        'value' => App::environment()
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                        'value' => App::environment(),
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         return Utils::jsonEncode($data);
