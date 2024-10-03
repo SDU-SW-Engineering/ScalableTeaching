@@ -37,7 +37,7 @@ return [
     'channels' => [
         'stack' => [
             'driver'            => 'stack',
-            'channels'          => ['single'],
+            'channels'          => ['single', 'teams'],
             'ignore_exceptions' => false,
         ],
 
@@ -100,6 +100,10 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
-    ],
 
+        'teams' => [
+            'driver'        => 'custom',
+            'via'           => App\Logging\CreateTeamsLogger::class,
+        ]
+    ],
 ];
