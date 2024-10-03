@@ -89,9 +89,9 @@ class TeamsLogger extends AbstractProcessingHandler
                                         'value' => App::environment(),
                                     ],
                                     [
-                                        'title' => 'User',
-                                        'value' => \Auth::check() ? \Auth::id() : 'N/A'
-                                    ]
+                                        'title' => 'UserId',
+                                        'value' => \Auth::check() ? \Auth::id() : 'N/A',
+                                    ],
                                 ],
                             ],
                         ],
