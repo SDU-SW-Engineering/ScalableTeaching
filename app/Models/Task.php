@@ -692,7 +692,7 @@ class Task extends Model
         $params = [
             'name'                   => $username,
             'path'                   => $username,
-            'namespace'           => $groupId,
+            'namespace'              => $groupId,
         ];
 
         try
@@ -704,6 +704,7 @@ class Task extends Model
         }
 
         Log::info("Successfully forked project $sourceProjectId for $username");
+
         return $response;
     }
 
