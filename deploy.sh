@@ -1,7 +1,7 @@
 # The following command pulls the latest changes from the default branch.
 # It's based on the custom ssh remote defined in `/root/.ssh/config`.
 # It also points to a public/private key, that is used as a deploy key in the ST repo, to avoid putting the responsibility on 1 person to maintain the key.
-git pull git@github.com-st:MagnusHJensen/ScalableTeaching.git
+git pull git@github.com-st:SDU-SW-Engineering/ScalableTeaching.git
 
 
 php artisan down --refresh=15 # Put app into maintenance mode
