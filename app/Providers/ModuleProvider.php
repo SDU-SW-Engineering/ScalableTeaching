@@ -45,7 +45,12 @@ class ModuleProvider extends ServiceProvider
             $module = new $module;
             $id = $module->identifier();
             $groupName = str($id)->camel()->toString();
-            $this->loadViewsFrom(app_path("Modules/$id/Views"), "module-$id");
+
+            if (file_exists(app_path("Modules/$id/Views")))
+            {
+                $this->loadViewsFrom(app_path("Modules/$id/Views"), "module-$id");
+            }
+
             $path = Str::kebab($module->identifier());
             Route::prefix("courses/{course}/tasks/{task}/admin/modules/$path")
                 ->middleware(['web', 'auth', 'can:viewDashboard,task', 'moduleInstalled'])
