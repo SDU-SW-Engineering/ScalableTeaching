@@ -187,7 +187,7 @@
                     <waiting
                         v-else-if="project != null && project.status === 'active' && progress.ended && pushes.length > 0"></waiting>
                     <completed v-else-if="project != null && project.status === 'finished'"
-                               :validation="project.validationStatus"></completed>
+                               :project="project"></completed>
                     <overdue v-else-if="project != null && project.isMissed"></overdue>
                 </div>
                 <go-to-repo v-if="task.source_project_id != null && task.type === 'exercise'" :url="'https://gitlab.sdu.dk/projects/' + task.source_project_id"/>
