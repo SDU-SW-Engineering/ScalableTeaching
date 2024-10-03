@@ -150,6 +150,10 @@ it('should handle errors from GitLab API gracefully', function() {
         ], 'zip')->andThrow(new \Exception('Mocked GitLab API error'));
     });
 
+    \Illuminate\Support\Facades\Log::shouldReceive('info')->once();
+    \Illuminate\Support\Facades\Log::shouldReceive('error')->once();
+
+
     $job = new DownloadProject($projectDownload);
     $job->handle();
 
