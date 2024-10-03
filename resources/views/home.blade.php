@@ -8,16 +8,15 @@
                 {{ session('error') }}
             </div>
         @endif
-        <nav class="container p-6 mx-auto lg:flex lg:justify-between lg:items-center">
-            <div class="flex items-center justify-between">
-                <div>
-                    <a class=""
-                       href="{{ route('home') }}">
-                        <svg width="100%" height="100%" viewBox="0 0 1179 122" version="1.1"
-                             class="fill-current text-gray-800   dark:text-white"
-                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                             xml:space="preserve"
-                             style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;height: 25px;margin-top:4px">
+        <nav class="container p-6 mx-auto flex justify-between items-center">
+            <div>
+                <a class=""
+                   href="{{ route('home') }}">
+                    <svg width="100%" height="100%" viewBox="0 0 1179 122" version="1.1"
+                         class="fill-current text-gray-800   dark:text-white"
+                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                         xml:space="preserve"
+                         style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;height: 25px;margin-top:4px">
     <g transform="matrix(1,0,0,1,-73.9597,-87.9925)">
         <g transform="matrix(125.644,0,0,125.644,200,178.072)">
             <path
@@ -100,47 +99,37 @@
                 style="fill-rule:nonzero;"/>
         </g>
     </g>
-                            <g transform="matrix(1,0,0,1,-211.614,-178.072)">
-                                <g transform="matrix(0.836124,6.15741e-17,-9.22742e-17,-0.499529,34.6784,401.981)">
-                                    <rect x="211.614" y="268.072" width="35.88" height="60.057"/>
-                                </g>
-                                <g transform="matrix(0.836124,2.07526e-17,-3.10995e-17,-0.999057,74.6784,535.89)">
-                                    <rect x="211.614" y="268.072" width="35.88" height="60.057"/>
-                                </g>
-                                <g transform="matrix(0.836124,-2.0069e-17,3.00751e-17,-1.49859,114.678,669.8)">
-                                    <rect x="211.614" y="268.072" width="35.88" height="60.057"/>
-                                </g>
+                        <g transform="matrix(1,0,0,1,-211.614,-178.072)">
+                            <g transform="matrix(0.836124,6.15741e-17,-9.22742e-17,-0.499529,34.6784,401.981)">
+                                <rect x="211.614" y="268.072" width="35.88" height="60.057"/>
                             </g>
+                            <g transform="matrix(0.836124,2.07526e-17,-3.10995e-17,-0.999057,74.6784,535.89)">
+                                <rect x="211.614" y="268.072" width="35.88" height="60.057"/>
+                            </g>
+                            <g transform="matrix(0.836124,-2.0069e-17,3.00751e-17,-1.49859,114.678,669.8)">
+                                <rect x="211.614" y="268.072" width="35.88" height="60.057"/>
+                            </g>
+                        </g>
 </svg>
-                    </a>
-                </div>
-                <div class="flex lg:hidden">
-                    <button @click="show = !show" type="button"
-                            class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600"
-                            aria-label="toggle menu">
-                        <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current">
-                            <path fill-rule="evenodd"
-                                  d="M4 5h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2z">
-                            </path>
-                        </svg>
-                    </button>
-                </div>
+                </a>
             </div>
 
             <!-- Mobile Menu open: "block", Menu closed: "hidden" -->
-            <div class="flex gap-12">
-                <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
-                    <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
-                       href="{{ route('courses.index') }}">Courses</a>
-                </div>
-                @if(auth()->check() && auth()->user()->surveys()->count() > 0)
+            @auth()
+                <div class="flex gap-12">
+
                     <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
                         <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
-                           href="{{ route('surveys.index') }}">Surveys</a>
+                           href="{{ route('courses.index') }}">Courses</a>
                     </div>
-                @endif
-            </div>
-            @auth
+                    @if(auth()->user()->surveys()->count() > 0)
+                        <div class="flex flex-col mt-4 space-y-2 lg:mt-0 lg:flex-row lg:space-x-16 lg:space-y-0">
+                            <a class="text-gray-700 dark:text-gray-200 dark:hover:text-lime-green-400 hover:text-lime-green-500"
+                               href="{{ route('surveys.index') }}">Surveys</a>
+                        </div>
+                    @endif
+
+                </div>
                 <a class="block px-5 py-2 mt-4 font-medium leading-5 text-center text-white hover:text-white capitalize bg-lime-green-500 rounded-lg lg:mt-0 hover:bg-lime-green-400 lg:w-auto"
                    href="{{ route('dashboard') }}">
                     Dashboard

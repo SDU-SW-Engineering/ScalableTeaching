@@ -9,31 +9,25 @@
         <div class="flex-1">
             <div class="flex">
                 <div class="flex-1">
-                    <h1 class="text-black dark:text-white text-2xl font-medium"
-                        v-if="correctionType === 'points_required'">{{ pointSum }}/{{ pointMax }} points</h1>
-                    <h1 class="text-black dark:text-white text-2xl font-medium"
-                        v-if="correctionType === 'all_tasks' || correctionType === 'required_tasks' || correctionType === 'number_of_tasks' || correctionType === 'manual'">
+                    <h1 class="text-black dark:text-white text-2xl font-medium">
                         Tasks</h1>
-                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'all_tasks'">All tasks
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="gradingConfig.gradingType === 'all_subtasks'">All tasks
                         required</h2>
-                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'required_tasks'">
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="gradingConfig.gradingType === 'required_subtasks'">
                         Specific tasks required</h2>
-                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'number_of_tasks'"><b>{{
-                            tasksRequired
-                        }}</b> tasks required</h2>
-                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="correctionType === 'points_required'"><b>{{
-                            pointsRequired
-                        }}</b> points required to complete</h2>
+                    <h2 class="text-gray-600 dark:text-gray-300 text-lg" v-if="gradingConfig.gradingType === 'points_required'"><b>{{
+                            gradingConfig.pointsRequired
+                        }}</b> points required to complete assignment</h2>
                     <div v-if="projectStatus != null">
                         <h2 class="text-gray-600 dark:text-gray-300 text-lg"
-                            v-if="correctionType === 'manual' && !graded">Your assignment has <strong
+                            v-if="!graded">Your assignment has <strong
                             class="text-lime-green-500 dark:text-lime-green-400">not</strong> been graded yet.</h2>
                         <h2 class="text-gray-600 dark:text-gray-300 text-lg"
-                            v-if="correctionType === 'manual' && graded">Your assignment has been graded.</h2>
+                            v-if="graded">Your assignment has been graded.</h2>
                     </div>
                 </div>
                 <h3 v-if="graded" class="font-thin dark:text-lime-green-400 text-2xl flex-shrink-0">
-                    <span v-if="correctionType === 'all_tasks'">{{ pointSum }} / {{ lengthMax }}</span>
+                    <span v-if="gradingConfig.gradingType === 'all_subtasks'">{{ pointSum }} / {{ lengthMax }}</span>
                     <span v-else>{{ pointSum }} / {{ pointMax }} points</span>
                 </h3>
             </div>
@@ -48,28 +42,6 @@
                 </ul>
                 <span
                     class="text-xs text-gray-500 dark:text-gray-400">Use the id when communicating with the grader.</span>
-            </div>
-
-            <div class="mt-4" v-if="tasks.list.length === 1 && correctionType !== 'all_tasks'">
-                <div v-for="task in tasks.list"
-                     class="flex items-center bg-gray-300 dark:bg-gray-600 rounded-lg mb-4 w-full py-2">
-                    <i class="bx bx-x text-3xl w-12 text-center text-red-400" v-if="ended && !task.completed"></i>
-                    <i class="bx bx-check text-3xl w-12 text-center" v-else
-                       :class="[ task.completed ? 'text-lime-green-300' : 'text-gray-400' ]"></i>
-                    <div class="flex flex-col">
-                        <span class="text-black dark:text-white text-md">{{ task.name }}</span>
-                        <span v-if="correctionType === 'required_tasks' && task.required"
-                              class="text-gray-500 dark:text-gray-400"><i>Required</i></span>
-                        <span v-if="correctionType === 'required_tasks' && !task.required"
-                              class="text-gray-500 dark:text-gray-400"><i>Not required</i></span>
-                        <span v-if="correctionType === 'points_required'"
-                              class="text-gray-500 dark:text-gray-400">{{ task.points }} points</span>
-                    </div>
-                    <div class="flex-1 flex flex-col text-right mr-4">
-                        <span class="text-gray-700 dark:text-white text-md">Completed</span>
-                        <span class="text-gray-500 dark:text-gray-400">{{ task.when == null ? '-' : task.when }}</span>
-                    </div>
-                </div>
             </div>
             <div class="mt-4">
                 <div v-for="group in tasks.list"
@@ -151,7 +123,7 @@
 
 <script>
 export default {
-    props: ['tasks', 'correctionType', 'tasksRequired', 'pointsRequired', 'ended', 'projectStatus'],
+    props: ['tasks', 'correctionType', 'tasksRequired', 'pointsRequired', 'ended', 'projectStatus', 'isCodeTask', 'isTextTask', 'gradingConfig'],
     computed: {
         pointSum: function () {
             return this.tasks.list.reduce((total, group) => {
@@ -171,7 +143,7 @@ export default {
         graded: function () {
             if (this.projectStatus === null)
                 return false;
-            if (this.correctionType === 'manual')
+            if (this.isTextTask)
                 return this.projectStatus === 'finished';
 
             return true;

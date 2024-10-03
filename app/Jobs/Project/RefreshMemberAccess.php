@@ -64,7 +64,7 @@ class RefreshMemberAccess implements ShouldQueue
      */
     public function addUsersToGitlabProject(Project $project, Collection $gitlabUserIds) : void
     {
-        foreach($gitlabUserIds as $user => $gitlabId)
+        foreach($gitlabUserIds as $gitlabId)
         {
             $gitLabManager = app(GitLabManager::class);
             try
@@ -78,7 +78,7 @@ class RefreshMemberAccess implements ShouldQueue
                 if($message == 'member already exists')
                     continue;
 
-                Log::error("Failed to add user {$user} to project {$project->id} - Error: {$e->getMessage()}");
+                Log::error("Failed to add user with gitlabId {$gitlabId} to project {$project->id} - Error: {$e->getMessage()}");
             }
         }
     }
@@ -90,7 +90,7 @@ class RefreshMemberAccess implements ShouldQueue
      */
     public function removeUsersFromGitlabProject(Project $project, Collection $gitlabUserIds) : void
     {
-        foreach($gitlabUserIds as $user => $gitlabId)
+        foreach($gitlabUserIds as $gitlabId)
         {
             $gitLabManager = app(GitLabManager::class);
             try
@@ -98,7 +98,7 @@ class RefreshMemberAccess implements ShouldQueue
                 $gitLabManager->projects()->removeMember($project->gitlab_project_id, $gitlabId);
             } catch(\Exception $e)
             {
-                Log::error("Failed to remove user {$user} from project {$project->id} - Error: {$e->getMessage()}");
+                Log::error("Failed to remove user with gitlab id {$gitlabId} from project {$project->id} - Error: {$e->getMessage()}");
             }
         }
     }

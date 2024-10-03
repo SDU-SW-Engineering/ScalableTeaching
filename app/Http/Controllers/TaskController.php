@@ -4,25 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Casts\SubTask;
 use App\Models\Course;
-use App\Models\Enums\CorrectionType;
-use App\Models\Enums\GradeEnum;
-use App\Models\Grade;
 use App\Models\ProjectFeedback;
 use App\Models\Group;
 use App\Models\Project;
 use App\Models\ProjectSubTaskComment;
 use App\Models\Task;
-use App\Models\User;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\Graph;
 use GrahamCampbell\GitLab\GitLabManager;
+use Http\Client\Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class TaskController extends Controller
@@ -151,7 +148,15 @@ class TaskController extends Controller
         abort_if( ! $task->canStart($isSolo ? auth()->user() : $group, $message), 410, $message);
 
         $owner = $isSolo ? auth()->user() : $group;
-        $task->createProject($owner);
+        try
+        {
+            $task->createProject($owner);
+        } catch (\Exception|Exception $e)
+        {
+            Log::error("Failed creating project: " . $e->getMessage());
+
+            return abort(500, "Couldn't create project, try again later.");
+        }
 
         return "OK";
     }

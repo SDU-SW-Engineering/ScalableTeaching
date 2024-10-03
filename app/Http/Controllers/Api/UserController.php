@@ -8,7 +8,6 @@ use GraphQL\Client;
 use GraphQL\SchemaObject\RootProjectsArgumentsObject;
 use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\App;
 
 class UserController extends Controller
 {
@@ -43,7 +42,7 @@ class UserController extends Controller
             ->selectName()
             ->selectCreatedAt()
             ->selectNamespace()->selectName()->selectFullName();
-        $token = App::environment(['local']) ? env('GITLAB_ACCESS_TOKEN') : auth()->user()->access_token;
+        $token = env('GITLAB_ACCESS_TOKEN');
         $client = new Client(env('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . $token]);
 
         // @phpstan-ignore-next-line

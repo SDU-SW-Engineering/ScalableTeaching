@@ -54,6 +54,11 @@ class ModuleController extends Controller
             $variables[$property->getName()] = $property->getValue($module->settings());
         }
 
+        foreach($module->settings()->additionalValues() as $key => $value)
+        {
+            $variables[$key] = $value;
+        }
+
         $subTasks = null;
         if ($module instanceof AutomaticGrading)
         {

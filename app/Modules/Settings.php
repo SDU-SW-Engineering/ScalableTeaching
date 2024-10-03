@@ -17,6 +17,14 @@ abstract class Settings implements \JsonSerializable
         return [];
     }
 
+    /**
+     * This method can be overwritten to add additional values that can be used in the UI to further enhance the experience.
+     */
+    public function additionalValues(): array
+    {
+        return [];
+    }
+
     public function jsonSerialize(): mixed
     {
         $values = [];

@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
+use Gitlab\Exception\ValidationFailedException;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -95,13 +96,26 @@ class CourseController extends Controller
         ];
 
         // Create new gitlab subgroup under parent group.
-        $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($gitlabGroup));
-        $groupResponse = json_decode($response->getBody()->getContents(), true);
-        if($response->getStatusCode() != 201)
+        try
+        {
+            $response = $manager->getHttpClient()->post('api/v4/groups', ['Content-type' => 'application/json'], json_encode($gitlabGroup));
+            if($response->getStatusCode() != 201)
+                return back()
+                    ->withErrors(['form' => 'Couldn\'t create associated GitLab group, try again later.'])
+                    ->withInput();
+        } catch (ValidationFailedException $e)
+        {
             return back()
-                ->withErrors(['course-name' => 'Couldn\'t create associated GitLab group, try again later.'])
+                ->withErrors(['form' => $e->getMessage()])
                 ->withInput();
+        } catch (\Exception)
+        {
+            return back()
+                ->withErrors(['form' => 'Couldn\'t create associated GitLab group, try again later.'])
+                ->withInput();
+        }
 
+        $groupResponse = json_decode($response->getBody()->getContents(), true);
         $course = Course::create([
             'name'            => $validated['course-name'],
             'gitlab_group_id' => $groupResponse['id'],
