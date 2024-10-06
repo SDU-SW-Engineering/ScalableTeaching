@@ -19,6 +19,8 @@ yarn-error.log
 /public/css/app.css
 /public/css/app.css.map
 public/js/*.js
+public/js/*.js.map
+public/js/app.js.LICENSE.txt
 /public/mix-manifest.json
 dump.rdb
 html-coverage*
