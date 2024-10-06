@@ -700,7 +700,7 @@ class Task extends Model
             $response = $manager->projects()->fork($sourceProjectId, $params);
         } catch (HttpException $e)
         {
-            throw new Exception("Failed forking gitlab project with id ${$sourceProjectId} - Error: " . $e->getMessage());
+            throw new Exception("Failed forking gitlab project with id $sourceProjectId - Error: " . $e->getMessage());
         }
 
         Log::info("Successfully forked project $sourceProjectId for $username");
