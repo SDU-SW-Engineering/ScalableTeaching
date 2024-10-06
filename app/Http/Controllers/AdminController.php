@@ -2,29 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Closure;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
 
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function(Request $request, Closure $next) {
-            abort_unless($request->user()->is_sys_admin, 403);
 
-            return $next($request);
-        });
-    }
-
-    public function index()
+    public function index(): View
     {
         $professors = User::where('is_admin', true)->orderBy('name')->get();
 
         return view('admin.index')->with('professors', $professors);
     }
 
-    public function addProfessor(Request $request)
+    public function addProfessor(Request $request): RedirectResponse
     {
         $request->validate([
             'email' => ['required', 'email'],
@@ -40,7 +33,7 @@ class AdminController extends Controller
         return redirect()->back();
     }
 
-    public function removeProfessor(Request $request, User $user)
+    public function removeProfessor(Request $request, User $user): RedirectResponse
     {
         $user->is_admin = false;
         $user->is_sys_admin = false;
@@ -49,7 +42,7 @@ class AdminController extends Controller
         return redirect()->back();
     }
 
-    public function togglePromotion(Request $request, User $user)
+    public function togglePromotion(Request $request, User $user): RedirectResponse
     {
         $user->is_sys_admin = ! $user->is_sys_admin;
         $user->save();

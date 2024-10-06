@@ -7,10 +7,14 @@ git pull git@github.com-st:SDU-SW-Engineering/ScalableTeaching.git
 php artisan down --refresh=15 # Put app into maintenance mode
 
 # Build the frontend assets
-npm run production # Build and minify the frontend assets
+sudo npm run production # Build and minify the frontend assets
 
 # Laravel related commands
-php artisan optimize # Optimize config, events, routes, and views.
+#php artisan config:cache <-- This is commented out because it causes issues with the .env file https://laravel.com/docs/11.x/deployment#optimizing-configuration-loading
+php artisan event:cache
+php artisan route:cache
+php artisan view:cache
+
 php artisan migrate # Migrate the db
 
 # Ensure correct permissions are set.
