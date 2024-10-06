@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\AdminController;
+use App\Http\Middleware\EnsureUserIsSystemAdmin;
 use App\Models\User;
 use Badcow\PhraseGenerator\PhraseGenerator;
 use Illuminate\Support\Facades\Route;
@@ -55,12 +56,13 @@ Route::controller(GitLabOAuthController::class)->prefix('login')->middleware('gu
     Route::get('callback', 'callback')->name('callback');
 });
 
-Route::controller(AdminController::class)->prefix('admin')->name('admin.')->group(function() {
-    Route::get('/', 'index')->name('index');
-    Route::post('add-professor', 'addProfessor')->name('add-professor');
-    Route::get('professors/{user}/remove', 'removeProfessor')->name('remove-professor');
-    Route::get('professors/{user}/toggle-promotion', 'togglePromotion')->name('toggle-promotion');
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => [EnsureUserIsSystemAdmin::class]], function() {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::post('add-professor', [AdminController::class, 'addProfessor'])->name('add-professor');
+    Route::get('professors/{user}/remove', [AdminController::class, 'removeProfessor'])->name('remove-professor');
+    Route::get('professors/{user}/toggle-promotion', [AdminController::class, 'togglePromotion'])->name('toggle-promotion');
 });
+
 
 Route::get('logout', function() {
     auth()->logout();
