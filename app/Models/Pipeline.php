@@ -150,10 +150,17 @@ class Pipeline extends Model
             ]);
             $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [strtolower($task->getName()) => $task]);
 
-            /** @var ProjectSubTask[] $subTasksToCreate */
+            /** @var (ProjectSubTask|null)[] $subTasksToCreate */
             $subTasksToCreate = array_map(function ($build) use ($tracking) {
-                /** @var SubTask $subTask */
+                /** @var SubTask|null $subTask */
                 $subTask = $tracking->get($build);
+
+                if ( ! $subTask)
+                {
+                    Log::debug("Sub task {$build} not found in project {$this->project_id}");
+
+                    return null;
+                }
 
                 return new ProjectSubTask([
                     'sub_task_id' => $subTask->getId(),
@@ -163,7 +170,12 @@ class Pipeline extends Model
                 ]);
             }, $succeedingBuilds);
 
-            $this->project->createSubTasks($subTasksToCreate);
+            /** @var ProjectSubTask[] $validSubTasksToCreate */
+            $validSubTasksToCreate = array_filter($subTasksToCreate, function ($subTask) {
+                return $subTask != null;
+            });
+
+            $this->project->createSubTasks($validSubTasksToCreate);
         });
 
         $gradeResult = Pipeline::checkAutomaticGrading($this);
