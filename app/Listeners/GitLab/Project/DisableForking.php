@@ -45,8 +45,8 @@ class DisableForking implements ShouldQueue
 
         $attempts = 3;
         $gitLabManager = app(GitLabManager::class);
-        do{ // The system is sometimes too fast for the Gitlab server,
-            // this buys the Gitlab server some more time before Scalable moves on.
+        do // The system is sometimes too fast for the Gitlab server,
+        {  // this buys the Gitlab server some more time before Scalable moves on.
             usleep(100000);
             $project = $gitLabManager->projects()->show($event->project->gitlab_project_id);
             $attempts--;
