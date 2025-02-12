@@ -1,11 +1,10 @@
 <?php
 
 use App\Events\ProjectCreated;
-use App\Listeners\GitLab\Project\UnprotectDefaultBranch;
+use App\Listeners\GitLab\Project\DisableForking;
 use App\Models\Course;
 use App\Models\Project;
 use App\Models\Task;
-use App\Modules\LinkRepository\LinkRepository;
 use Carbon\Carbon;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,14 +34,13 @@ it('should skip if the project is not a code task', function() {
     $this->project->task->module_configuration->uninstall($this->project->task->module_configuration->resolveModule(LinkRepository::class));
     $this->project->task->save();
 
-    $job = new UnprotectDefaultBranch();
+    $job = new DisableForking();
     $job->handle(new ProjectCreated($this->project));
 
     $this->mock(GitLabManager::class, function (MockInterface $mock) {
         $mock->shouldNotHaveBeenCalled();
     });
 });
-
 
 it('should throw an exception if the project import is not finished after 3 attempts', function() {
 
@@ -58,11 +56,11 @@ it('should throw an exception if the project import is not finished after 3 atte
 
     $this->expectException(Exception::class);
 
-    $job = new UnprotectDefaultBranch();
+    $job = new DisableForking();
     $job->handle(new ProjectCreated($this->project));
 });
 
-it('should unprotect the default branch', function() {
+it('should disable forking of the repository', function() {
 
     $this->project->gitlab_project_id = 1;
     $this->project->save();
@@ -71,14 +69,11 @@ it('should unprotect the default branch', function() {
         $mock->shouldReceive('projects->show')->once()->andReturn([
             'import_error'   => null,
             'import_status'  => 'finished',
-            'default_branch' => 'master',
         ]);
 
-        $mock->shouldReceive('repositories->unprotectBranch')->once()->with(1, 'master');
+        $mock->shouldReceive('projects->update')->once()->with(1, ['forking_access_level' => 'disabled']);
     });
 
-    $job = new UnprotectDefaultBranch();
+    $job = new DisableForking();
     $job->handle(new ProjectCreated($this->project));
 });
-
-
