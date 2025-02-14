@@ -162,7 +162,7 @@
                     <build-table :project-id="project.id" v-if="project != null"></build-table>
                 </div>
                 <div v-show="tab === 'settings'">
-                    <settings :groups="groups" :project="project" :is-code-task="this.isCodeTask" v-if="project != null"></settings>
+                    <settings :groups="groups" :project="project" :is-template-task="this.isTemplateTask" v-if="project != null"></settings>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 mt-4 mb-4">

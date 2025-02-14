@@ -665,7 +665,8 @@ class Task extends Model
             ]);
         } else
         {
-            if ($this->isCodeTask() && $owner != null){
+            if ($this->isCodeTask() && $owner != null)
+            {
                 $projectId = $this->getGitlabProjectId();
                 $manager = app(GitLabManager::class);
 
@@ -675,6 +676,7 @@ class Task extends Model
                 'task_id'   => $this->id,
             ]);
         }
+
         return $dbProject;
     }
 
@@ -842,20 +844,25 @@ class Task extends Model
      */
     private function addMembersToProject(User|Group $owner, GitLabManager $manager, int $projectId, int $accessLevel): void
     {
-        try {
-            if ($owner instanceof Group) {
+        try
+        {
+            if ($owner instanceof Group)
+            {
                 Log::info("Adding members of group $owner->name to project $projectId");
                 $members = $owner->members()->get();
-                foreach ($members as $member) {
+                foreach ($members as $member)
+                {
                     $response = $manager->projects()->addMember($projectId, $member->gitlab_id, $accessLevel);
                     log::info("Successfully added member $member->gitlab_id to project $projectId");
                 }
-            } elseif ($owner instanceof User) {
+            } elseif ($owner instanceof User)
+            {
                 Log::info("Adding user $owner->projectName to project $projectId");
                 $response = $manager->projects()->addMember($projectId, $owner->gitlab_id, $accessLevel);
                 log::info("Successfully added user $owner->projectName to project $projectId");
             }
-        } catch (HttpException $e) {
+        } catch (HttpException $e)
+        {
             throw new Exception("Failed adding owner $owner->name, with id GitLab id $owner->gitlab_id to project $projectId - Error: " . $e->getMessage());
         }
     }
