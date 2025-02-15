@@ -11,6 +11,7 @@ use App\Modules\LinkRepository\LinkRepositorySettings;
 use Carbon\Carbon;
 use Gitlab\Api\Projects;
 use GrahamCampbell\GitLab\GitLabManager;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -20,14 +21,12 @@ use Tests\TestCase;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 
+uses(RefreshDatabase::class);
+
 beforeEach(function() {
     $this->course = Course::factory()->create();
-    $this->task = Task::factory([
-        'starts_at' => Carbon::create(2022, 8, 8, 12),
-        'ends_at'   => Carbon::create(2022, 8, 24, 23, 59, 59),
-    ])->for($this->course)->create();
+    $this->task = Task::factory()->for($this->course)->create();
     $this->user = User::factory()->hasAttached($this->course)->create();
-    Carbon::setTestNow(Carbon::create(2022, 8, 16));
 });
 
 it('returns null if LinkRepository module is not enabled', function () {
