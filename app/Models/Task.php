@@ -646,15 +646,12 @@ class Task extends Model
             $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
             $project = $projects->firstWhere('name', $projectName);
 
-            abort_unless($this->isTemplateTask(), 400, 'The template module is not enabled.');
-            $linkRepositoryModule = $this->module_configuration->resolveModule(LinkRepository::class);
-            /** @var LinkRepositorySettings $settings */
-            $settings = $linkRepositoryModule->settings();
+
             if ($project == null)
             {
-                $linkedRepositoryParts = explode('/', $settings->repo);
-                $projectId = (int)$linkedRepositoryParts[sizeof($linkedRepositoryParts) - 1]; // Get the last part, which is the Gitlab project id.
+                $projectId = $this->getGitlabProjectId();
                 $project = $this->forkProject($manager, $projectName, $projectId, $this->gitlab_group_id);
+
             }
 
             /** @var Project $dbProject */
@@ -668,12 +665,17 @@ class Task extends Model
             ]);
         } else
         {
+            if ($this->isCodeTask() && $owner != null)
+            {
+                $projectId = $this->getGitlabProjectId();
+                $manager = app(GitLabManager::class);
+
+                $this->addMembersToProject($owner, $manager, $projectId, 20);  // 20 is "Planner" level which gives them access to view and pull code but no more  https://docs.gitlab.com/ee/api/access_requests.html
+            }
             $dbProject = $owner->projects()->updateOrCreate([
                 'task_id'   => $this->id,
             ]);
         }
-
-
 
         return $dbProject;
     }
@@ -702,7 +704,7 @@ class Task extends Model
             'name'                   => $username,
             'path'                   => $username,
             'namespace'              => $groupId,
-            'branches'               => $sourceProject['default_branch'], // Only include the default branch.
+            //'branches'               => $sourceProject['default_branch'], // Only include the default branch.
         ];
 
         try
@@ -833,4 +835,35 @@ class Task extends Model
         return intval($project_id);
     }
 
+    /**
+     * @param User|Group $owner
+     * @param GitLabManager $manager
+     * @param int $projectId
+     * @return void
+     * @throws Exception
+     */
+    private function addMembersToProject(User|Group $owner, GitLabManager $manager, int $projectId, int $accessLevel): void
+    {
+        try
+        {
+            if ($owner instanceof Group)
+            {
+                Log::info("Adding members of group $owner->name to project $projectId");
+                $members = $owner->members()->get();
+                foreach ($members as $member)
+                {
+                    $response = $manager->projects()->addMember($projectId, $member->gitlab_id, $accessLevel);
+                    log::info("Successfully added member $member->gitlab_id to project $projectId");
+                }
+            } elseif ($owner instanceof User)
+            {
+                Log::info("Adding user $owner->projectName to project $projectId");
+                $response = $manager->projects()->addMember($projectId, $owner->gitlab_id, $accessLevel);
+                log::info("Successfully added user $owner->projectName to project $projectId");
+            }
+        } catch (HttpException $e)
+        {
+            throw new Exception("Failed adding owner $owner->name, with id GitLab id $owner->gitlab_id to project $projectId - Error: " . $e->getMessage());
+        }
+    }
 }

@@ -39,7 +39,7 @@ class DisableForking implements ShouldQueue
      */
     public function handle(ProjectCreated $event)
     {
-        if ( ! $event->project->task->isCodeTask()) return;
+        if ( ! $event->project->task->isTemplateTask()) return;
 
         Log::info("Disabling GitLab forking for project {$event->project->id}");
 

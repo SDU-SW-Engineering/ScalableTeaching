@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Project;
 use App\Models\Task;
 use App\Modules\LinkRepository\LinkRepository;
+use App\Modules\Template\Template;
 use Carbon\Carbon;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,6 +23,7 @@ beforeEach(function() {
     ])->for(Course::factory())->make();
 
     installLinkRepositoryModule($task);
+    installTemplateModule($task);
     $task->save();
     $this->task = $task;
 
@@ -30,9 +32,9 @@ beforeEach(function() {
     ])->createQuietly();
 });
 
-it('should skip if the project is not a code task', function() {
+it('should skip if the project is not a template task', function() {
 
-    $this->project->task->module_configuration->uninstall($this->project->task->module_configuration->resolveModule(LinkRepository::class));
+    $this->project->task->module_configuration->uninstall($this->project->task->module_configuration->resolveModule(Template::class));
     $this->project->task->save();
 
     $job = new UnprotectDefaultBranch();
