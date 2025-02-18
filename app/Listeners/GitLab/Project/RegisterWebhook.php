@@ -37,7 +37,7 @@ class RegisterWebhook implements ShouldQueue
      */
     public function handle(ProjectCreated $event)
     {
-        if ( ! $event->project->task->isCodeTask())
+        if ( ! $event->project->task->isTemplateTask())
         {
             return;
         }

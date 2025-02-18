@@ -153,7 +153,7 @@ class Pipeline extends Model
             /** @var (ProjectSubTask|null)[] $subTasksToCreate */
             $subTasksToCreate = array_map(function ($build) use ($tracking) {
                 /** @var SubTask|null $subTask */
-                $subTask = $tracking->get($build);
+                $subTask = $tracking->get(strtolower($build));
 
                 if ( ! $subTask)
                 {
