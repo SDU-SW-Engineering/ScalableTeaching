@@ -21,8 +21,9 @@ beforeEach(function() {
         'ends_at'   => Carbon::create(2022, 8, 24, 23, 59),
     ])->for(Course::factory())->make();
 
-    installLinkRepositoryModule($task);
+
     installTemplateModule($task);
+
     $task->save();
     $this->task = $task;
 
@@ -30,6 +31,7 @@ beforeEach(function() {
         "task_id" => $task,
     ])->createQuietly();
 });
+
 
 it('should skip if the project is not a template task', function() {
 
