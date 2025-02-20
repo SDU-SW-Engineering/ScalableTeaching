@@ -1,4 +1,8 @@
-<a href="{{ route(auth()->user()->can('viewDashboard', $task['details']) ? 'courses.tasks.admin.index' : 'courses.tasks.show', [$task['details']->course->id, $task['details']->id]) }}" class="hover:shadow-md shadow rounded-lg mb-4">
+@if($task['details']->starts_at?->isFuture() && !auth()->user()->can('viewDashboard', $task['details']))
+    <div class="hover:shadow-md shadow rounded-lg mb-4 cursor-not-allowed">
+@else
+    <a href="{{ route(auth()->user()->can('viewDashboard', $task['details']) ? 'courses.tasks.admin.index' : 'courses.tasks.show', [$task['details']->course->id, $task['details']->id]) }}" class="hover:shadow-md shadow rounded-lg mb-4">
+@endif
     <div @class([
         'px-8 py-4 mx-auto bg-white dark:bg-gray-600 rounded-lg']) class="">
         <div class="flex items-center justify-between">
@@ -48,4 +52,9 @@
             </div>
         </div>
     </div>
-</a>
+@if($task['details']->starts_at?->isFuture() && !auth()->user()->can('viewDashboard', $task['details']))
+    </div>
+@else
+    </a>
+@endif
+
