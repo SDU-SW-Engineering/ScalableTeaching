@@ -63,7 +63,8 @@ class ProjectController extends Controller
         abort_unless($project->status == ProjectStatus::Active, 400);
         \DB::transaction(function() use ($gitLabManager, $project) {
             $task = $project->task;
-            if ($task->isTemplateTask()) {
+            if ($task->isTemplateTask())
+            {
                 $found = $project->gitlab_project_id != null;
                 try
                 {
@@ -73,12 +74,15 @@ class ProjectController extends Controller
                 {
                     $found = $runtimeException->getCode() != 404;
                 }
-                if ($found) {
+                if ($found)
+                {
                     $gitLabManager->projects()->remove($project->gitlab_project_id);
                     Log::info("Deleted GitLab repository {$project->gitlab_project_id}");
                 }
-            } elseif ($task->isCodeTask()) {
-                foreach ($project->owners()->all() as $user) {
+            } elseif ($task->isCodeTask())
+            {
+                foreach ($project->owners()->all() as $user)
+                {
                     Log::info("Removing user {$user->id} from gitlab project {$task->getGitlabProjectId()}");
                     $gitLabManager->projects()->removeMember($task->getGitlabProjectId(), $user->gitlab_id);
                 }
@@ -98,6 +102,7 @@ class ProjectController extends Controller
 
         });
         Log::info("Project was successfully reset");
+
         return "OK";
     }
 

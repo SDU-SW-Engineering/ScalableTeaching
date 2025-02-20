@@ -70,9 +70,9 @@ it('also deletes grades', function () {
     auth()->login($user);
 
     $grade = Grade::factory([
-        'user_id' => $user2->id,
+        'user_id'     => $user2->id,
         'source_type' => User::class,
-        'source_id' => $user->id
+        'source_id'   => $user->id,
     ])->for($this->project->task)->create();
 
     $this->projectController->reset($this->gitLabManager, $this->project);
