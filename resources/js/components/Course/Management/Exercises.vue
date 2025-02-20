@@ -231,6 +231,7 @@
                                 ]"
                                 class="mt-4 py-4 px-3 rounded-md"
                                 group="inner"
+                                draggable=".item:not(.not-draggable-item)"
                             >
                                 <div
                                     :class="[
@@ -238,7 +239,7 @@
                                             ? 'bg-gray-400 dark:bg-gray-600'
                                             : 'bg-gray-400 dark:bg-gray-700',
                                     ]"
-                                    class="flex items-center justify-between px-3 py-1.5 rounded text-white dark:text-gray-100 mb-4 last:mb-0 cursor-pointer"
+                                    class="flex items-center justify-between px-3 py-1.5 rounded text-white dark:text-gray-100 mb-4 last:mb-0 cursor-pointer item"
                                     v-for="exercise in group.exercises"
                                 >
                                     <span
@@ -289,7 +290,7 @@
                                 >
                                     <button
                                         @click="createTask(group.name)"
-                                        class="btn btn-secondary text-center block bg-lime-green-400 w-full text-white rounded py-1 hover:bg-lime-green-500 transition-colors mb-4"
+                                        class="btn btn-secondary text-center block bg-lime-green-400 w-full text-white rounded py-1 hover:bg-lime-green-500 transition-colors mb-4 item not-draggable-item"
                                     >
                                         Create task
                                     </button>
@@ -308,9 +309,10 @@
                     :list="sidebarGroup"
                     group="inner"
                     class="py-4 rounded-md bg-gray-300 px-3"
+                    draggable=".item:not(.not-draggable-item)"
                 >
                     <div
-                        class="bg-gray-400 dark:bg-gray-700 flex items-center justify-between px-3 py-1.5 rounded text-white dark:text-gray-100 mb-4 last:mb-0 cursor-pointer"
+                        class="bg-gray-400 dark:bg-gray-700 flex items-center justify-between px-3 py-1.5 rounded text-white dark:text-gray-100 mb-4 last:mb-0 cursor-pointer item"
                         v-for="task in sidebarGroup"
                     >
                         <span class="text-sm" v-text="task.name"></span>
@@ -358,7 +360,7 @@
                     >
                         <button
                             @click="createTask('sidebar')"
-                            class="btn btn-secondary text-center block bg-lime-green-400 w-full text-white rounded py-1 hover:bg-lime-green-500 transition-colors mb-4"
+                            class="btn btn-secondary text-center block bg-lime-green-400 w-full text-white rounded py-1 hover:bg-lime-green-500 transition-colors mb-4 item not-draggable-item"
                         >
                             Create task
                         </button>
