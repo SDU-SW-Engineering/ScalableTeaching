@@ -186,7 +186,7 @@ it('only adds members of a group if they are not already a member of the templat
     $mockProjects->shouldReceive('addMember')
         ->with('9033', Mockery::any(), 20)
         ->times(3)
-        ->andReturnNull();  // Prevent actual execution
+        ->andReturnNull();
 
     $mockProjects->shouldReceive('allMembers')
         ->with('9033')

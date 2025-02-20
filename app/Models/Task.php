@@ -852,16 +852,20 @@ class Task extends Model
                 $members = $owner->members()->get();
                 foreach ($members as $member)
                 {
-                    if (in_array($member->gitlab_id, array_column($manager->projects()->allMembers($projectId), 'id'))){
+                    if (in_array($member->gitlab_id, array_column($manager->projects()->allMembers($projectId), 'id')))
+                    {
                         Log::info("$member->name is already a member of project $projectId");
                         continue;
                     }
                     $response = $manager->projects()->addMember($projectId, $member->gitlab_id, $accessLevel);
                     log::info("Successfully added member $member->gitlab_id to project $projectId");
                 }
-            } else {
-                if (in_array($owner->gitlab_id, array_column($manager->projects()->allMembers($projectId), 'id'))){
+            } else
+            {
+                if (in_array($owner->gitlab_id, array_column($manager->projects()->allMembers($projectId), 'id')))
+                {
                     Log::info("$owner->name is already a member of project $projectId");
+
                     return;
                 }
                 Log::info("Adding user $owner->projectName to project $projectId");
