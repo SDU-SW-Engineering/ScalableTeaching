@@ -94,11 +94,7 @@ class ProjectController extends Controller
             $grade = Grade::where("task_id", "=", $project->task->id)
                 ->where("source_type", "=", User::class)
                 ->where("source_id", "=", auth()->id())->first();
-            Log::info("GRADES! = {$grade}");
-            if ($grade)
-            {
-                $grade->delete();
-            }
+            $grade?->delete();
 
         });
         Log::info("Project was successfully reset");
