@@ -33,10 +33,10 @@
                         d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/>
                 </svg>
             </a>
-            <tippy to="kick" placement="bottom" v-if="!isSelf">
+            <tippy :to="'kick' + userInfo.id" placement="bottom" v-if="!isSelf">
                 Kick
             </tippy>
-                <button @click="kick(userInfo)" name="kick" :disabled="isSelf"
+                <button @click="kick(userInfo)" :name="'kick' + userInfo.id" :disabled="isSelf"
                         :class="{'hover:bg-gray-50 dark:hover:bg-gray-500': !isSelf, 'cursor-not-allowed': isSelf}"
                         class="justify-between flex transition-colors duration-200 focus:ring-4 focus:outline-none
                     bg-white dark:bg-gray-600 rounded-r-lg  focus:ring-gray-300 dark:focus:ring-gray-600 text-gray-500 dark:text-gray-200
