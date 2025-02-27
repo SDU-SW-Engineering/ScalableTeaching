@@ -26,6 +26,12 @@
                             </div>
                         @endif
                     </div>
+                    <form method="post" action="{{route('courses.tasks.admin.destroy', [$course, $task]) }}" onsubmit="return confirm('Are you sure you want to delete {{$task->name}}?\nThis will also delete all projects and students grades');">
+                        @csrf
+                        @method('DELETE')
+                        <input type="submit" value="Delete"
+                               class="flex items-center bg-white hover:bg-red-700 dark:bg-gray-600 text-gray-500 font-medium dark:text-gray-200 dark:border-none dark:hover:bg-red-700 transition-colors ml-3 text-sm border rounded-lg px-4 py-3">
+                    </form>
                     <visibility-dropdown route="{{ route('courses.tasks.admin.toggle-visibility', [$course, $task]) }}"
                                          :is-visible="{{ $task->is_visible ? 'true' : 'false' }}"
                                          :is-publishable="{{ $task->is_publishable ? 'true' : 'false' }}"></visibility-dropdown>
