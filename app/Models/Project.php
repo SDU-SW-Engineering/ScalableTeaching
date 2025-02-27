@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\ProjectCreated;
+use App\Events\ProjectDeleting;
 use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Enums\CorrectionType;
 use App\Modules\AutomaticGrading\AutomaticGrading;
@@ -97,7 +98,8 @@ class Project extends Model
     ];
 
     protected $dispatchesEvents = [
-        'created' => ProjectCreated::class,
+        'created'  => ProjectCreated::class,
+        'deleting' => ProjectDeleting::class,
     ];
 
     protected static function booted()

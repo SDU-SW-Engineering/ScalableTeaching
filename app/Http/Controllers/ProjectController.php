@@ -61,42 +61,15 @@ class ProjectController extends Controller
     {
         Log::info("Attempting to reset project {$project->id}");
         abort_unless($project->status == ProjectStatus::Active, 400);
-        \DB::transaction(function() use ($gitLabManager, $project) {
-            $task = $project->task;
-            if ($task->isTemplateTask())
-            {
-                $found = $project->gitlab_project_id != null;
-                try
-                {
-                    // Be aware if passed in value is null, then it will return all projects and therefore not throwing.
-                    $gitLabManager->projects()->show($project->gitlab_project_id);
-                } catch(RuntimeException $runtimeException)
-                {
-                    $found = $runtimeException->getCode() != 404;
-                }
-                if ($found)
-                {
-                    $gitLabManager->projects()->remove($project->gitlab_project_id);
-                    Log::info("Deleted GitLab repository {$project->gitlab_project_id}");
-                }
-            } elseif ($task->isCodeTask())
-            {
-                foreach ($project->owners()->all() as $user)
-                {
-                    Log::info("Removing user {$user->id} from gitlab project {$task->getGitlabProjectId()}");
-                    $gitLabManager->projects()->removeMember($task->getGitlabProjectId(), $user->gitlab_id);
-                }
-            }
 
-            $project->delete();
+        $project->delete();
 
-            /** @var ?Grade $grade */
-            $grade = Grade::where("task_id", "=", $project->task->id)
-                ->where("source_type", "=", User::class)
-                ->where("source_id", "=", auth()->id())->first();
-            $grade?->delete();
+        /** @var ?Grade $grade */
+        $grade = Grade::where("task_id", "=", $project->task->id)
+            ->where("source_type", "=", User::class)
+            ->where("source_id", "=", auth()->id())->first();
+        $grade?->delete();
 
-        });
         Log::info("Project was successfully reset");
 
         return "OK";

@@ -37,7 +37,7 @@ class DisableForking implements ShouldQueue
      * @return void
      * @throws Exception
      */
-    public function handle(ProjectCreated $event)
+    public function handle(ProjectCreated $event): void
     {
         if ( ! $event->project->task->isTemplateTask()) return;
 
