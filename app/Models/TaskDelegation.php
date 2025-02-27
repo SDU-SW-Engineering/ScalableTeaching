@@ -106,17 +106,21 @@ class TaskDelegation extends Model
         throw_if($this->task->ends_at->gt(now()), new TaskDelegationException('Cannot delegate before task has ended.'));
         throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
 
-        // Max cases where all project gets reviewed.
+
         if ($this->number_of_projects === 0 || $this->number_of_projects >= $this->task->projects->count() - 1)
-        {
+        { // Max cases where all project gets reviewed by all reviewers.
             $this->delegateAllProjects();
+        } elseif ($this->course_role_id == 2 && $this->number_of_projects != 0 )
+        { // If projects should be equally distributed amongst teachers.
+            $this->delegateSplitEqually();
         } else if ($this->delegationUserPool()->count() == $this->task->course->students()->count())
-        {
+        { // If all students should review "$this->number_of_projects" projects each.
             $this->delegateCircular();
         } else
-        {
+        { // IDK when this would be hit, but in case I missed something projects will be split equally.
             $this->delegateSplitEqually();
         }
+
         $this->update(['delegated' => true]);
     }
 
@@ -187,9 +191,10 @@ class TaskDelegation extends Model
 
             /** @var Collection $eligibleProjects */
             $eligibleProjects = $splitProjects->shift()->except($ineligibleProjects);
-            foreach ($eligibleProjects as $projectId)
+            foreach ($eligibleProjects as $project)
             {
-                $this->processProjectUpdate($projects->get($projectId), $delegationUser, $delayCounter);
+                /** @var Project $project */
+                $this->processProjectUpdate($project, $delegationUser, $delayCounter);
             }
         }
     }

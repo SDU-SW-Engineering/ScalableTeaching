@@ -8,6 +8,7 @@ use App\Models\Enums\TaskDelegationType;
 use App\Models\Group;
 use App\Models\Project;
 use App\Models\ProjectDownload;
+use App\Models\ProjectFeedback;
 use App\Models\ProjectPush;
 use App\Models\Task;
 use App\Models\TaskDelegation;
@@ -17,6 +18,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
 
 uses(RefreshDatabase::class);
 
@@ -52,6 +54,13 @@ function createStudents(int $count, bool $withPushes = true)
     });
 }
 
+function createTeachers(int $count)
+{
+    $count--; // Because each course a born with a teacher, see: beforeEach()
+    test()->teachers = User::factory($count)->hasAttached(test()->course, ['role' => 'teacher'])->create()->each(function(User $user) {
+    });
+}
+
 function createGroup()
 {
     $group = Group::factory()->for(test()->course)->create();
@@ -66,7 +75,7 @@ function createGroup()
     return $group;
 }
 
-function delegateTasks(int $numberOfProjects) : TaskDelegation
+function delegateTasks_feedbackFromStudents(int $numberOfProjects) : TaskDelegation
 {
     /** @var TaskDelegation $delegation */
     $delegation = test()->task->delegations()->create([
@@ -84,16 +93,59 @@ function delegateTasks(int $numberOfProjects) : TaskDelegation
     return $delegation;
 }
 
+function delegateTasks_feedbackFromTeachers(int $numberOfProjects) : TaskDelegation
+{
+    /** @var TaskDelegation $delegation */
+    $delegation = test()->task->delegations()->create([
+        'number_of_projects' => $numberOfProjects,
+        'type'               => TaskDelegationType::LastPushes,
+        'course_role_id'     => 2, // Teachers (for now),
+        'feedback'           => 1,
+        'grading'            => 0,
+        'deadline_at'        => test()->taskEndsAt->addDays(2),
+    ]);
+    $delegation->delegate();
+
+    $delegation->refresh();
+
+    return $delegation;
+}
+
+it('Delegates all projects to all teachers', function () {
+    createStudents(4);
+    createTeachers(2);
+
+    delegateTasks_feedbackFromTeachers(0);
+
+    assertDatabaseCount('project_feedback', 8);
+    test()->teachers->each(function($teacher) {
+        expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(4);
+    });
+
+});
+
+it('Distributes projects evenly amongst teachers', function () {
+    createStudents(8);
+    createTeachers(4);
+
+    delegateTasks_feedbackFromTeachers(1);
+
+    assertDatabaseCount('project_feedback', 8);
+    test()->teachers->each(function($teacher) {
+        expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(2);
+    });
+});
+
 it('delegates tasks with type of last pushes', function() {
     createStudents(4);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     assertDatabaseCount('project_feedback', 8);
 });
 
 it('does not delegate tasks to their owner', function() {
     createStudents(4);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     $this->students->each(function(User $user) {
         $project = $user->projects()->where('task_id', $this->task->id)->first();
@@ -107,7 +159,7 @@ it('delegates tasks to group members', function() {
     $group1Users = User::factory(2)->hasAttached($this->course)->hasAttached($group1)->create();
     $group2 = createGroup();
     $group2Users = User::factory(2)->hasAttached($this->course)->hasAttached($group2)->createQuietly();
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     $group1Users->each(function(User $user) use ($group1) {
         $project = $group1->projects()->first();
@@ -132,7 +184,7 @@ it('delegates tasks to group members and users', function() {
     $group1 = createGroup();
     $group1Users = User::factory(2)->hasAttached($this->course)->hasAttached($group1)->create();
     createStudents(1);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     $group1Users->each(function(User $user) use ($group1) {
         $project = $group1->projects()->first();
@@ -154,19 +206,19 @@ it('delegates tasks to group members and users', function() {
 
 it('wont delegate tasks if there are not enough members to delegate to', function() {
     createStudents(1);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 })->throws(TaskDelegationException::class, 'Not enough students to delegate.');
 
 it('only delegates tasks to the max available', function() {
     createStudents(2);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     assertDatabaseCount('project_feedback', 2);
 });
 
 it('delegates the correct amount if possible', function() {
     createStudents(3);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     assertDatabaseCount('project_feedback', 6);
 });
@@ -174,12 +226,12 @@ it('delegates the correct amount if possible', function() {
 it('fails to delegate if task has not ended yet', function() {
     Carbon::setTestNow(Carbon::create(2022, 7, 24, 23, 59));
     createStudents(2);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 })->throws(TaskDelegationException::class, "Cannot delegate before task has ended.");
 
 it('adds projects to the projects_download table', function() {
     createStudents(3);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     assertDatabaseCount('project_downloads', 3);
     $downloads = ProjectDownload::pluck('ref');
@@ -189,7 +241,7 @@ it('adds projects to the projects_download table', function() {
 
 it('queues delegated tasks for download', function() {
     createStudents(3);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     Queue::assertPushedOn('downloads', DownloadProject::class);
     Queue::assertPushed(DownloadProject::class, 3);
@@ -197,7 +249,7 @@ it('queues delegated tasks for download', function() {
 
 it('queues indexing of repository changes when tasks are delegated', function() {
     createStudents(3);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
 
     Queue::assertPushedOn('index', IndexRepositoryChanges::class);
     Queue::assertPushed(IndexRepositoryChanges::class, 6);;
@@ -205,13 +257,13 @@ it('queues indexing of repository changes when tasks are delegated', function() 
 
 it('marks itself as delegated when done delegating', function() {
     createStudents(3);
-    $delegation = delegateTasks(2);
+    $delegation = delegateTasks_feedbackFromStudents(2);
     expect($delegation->delegated)->toBeTrue();
 });
 
 it('skips tasks that have zero pushes', function() {
     createStudents(1, false);
     createStudents(2);
-    delegateTasks(2);
+    delegateTasks_feedbackFromStudents(2);
     assertDatabaseCount('project_feedback', 4);
 });
