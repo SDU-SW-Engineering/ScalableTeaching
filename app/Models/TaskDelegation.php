@@ -110,7 +110,7 @@ class TaskDelegation extends Model
         if ($this->number_of_projects === 0 || $this->number_of_projects >= $this->task->projects->count() - 1)
         { // Max cases where all project gets reviewed by all reviewers.
             $this->delegateAllProjects();
-        } elseif ($this->course_role_id == 2 && $this->number_of_projects != 0 )
+        } elseif ($this->course_role_id == 2)
         { // If projects should be equally distributed amongst teachers.
             $this->delegateSplitEqually();
         } else if ($this->delegationUserPool()->count() == $this->task->course->students()->count())
