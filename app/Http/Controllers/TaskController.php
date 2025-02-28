@@ -227,7 +227,8 @@ class TaskController extends Controller
 
     public function destroy(Course $course, Task $task): RedirectResponse
     {
-        if ($task->downloads() != null){
+        if ($task->downloads() != null)
+        {
             $task->downloads()->delete();
         }
         if ($task->protectedFiles() != null)

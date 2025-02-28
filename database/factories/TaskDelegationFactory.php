@@ -21,13 +21,13 @@ class TaskDelegationFactory extends Factory
     {
         return [
             'number_of_projects' => $this->faker->numberBetween(0, 10),
-            'type' => $this->faker->randomElement(TaskDelegationType::cases()),
-            'grading' => $this->faker->boolean(),
-            'feedback' => $this->faker->boolean(),
-            'is_anonymous' => $this->faker->boolean(),
-            'is_moderated' => $this->faker->boolean(),
-            'deadline_at' => now()->addDays(2),
-            'delegated' => $this->faker->boolean(),
+            'type'               => $this->faker->randomElement(TaskDelegationType::cases()),
+            'grading'            => $this->faker->boolean(),
+            'feedback'           => $this->faker->boolean(),
+            'is_anonymous'       => $this->faker->boolean(),
+            'is_moderated'       => $this->faker->boolean(),
+            'deadline_at'        => now()->addDays(2),
+            'delegated'          => $this->faker->boolean(),
         ];
     }
 }

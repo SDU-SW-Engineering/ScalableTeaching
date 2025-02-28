@@ -16,7 +16,7 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
-    function installLinkRepositoryModule(Task $task, string $repoID = "mock-id"): void
+    public function installLinkRepositoryModule(Task $task, string $repoID = "mock-id"): void
     {
         $task->module_configuration->addModule(LinkRepository::class);
         $settings = new LinkRepositorySettings();

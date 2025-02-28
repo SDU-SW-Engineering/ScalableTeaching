@@ -18,8 +18,8 @@ class ProjectFeedbackFactory extends Factory
     {
         return [
             'pseudonym' => $this->faker->word(),
-            'sha' => $this->faker->sha256(),
-            'reviewed' => $this->faker->boolean(),
+            'sha'       => $this->faker->sha256(),
+            'reviewed'  => $this->faker->boolean(),
         ];
     }
 }
