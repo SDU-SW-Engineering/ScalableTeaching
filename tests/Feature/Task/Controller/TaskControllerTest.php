@@ -56,13 +56,14 @@ beforeEach(function() {
     $this->professor = User::factory()->admin()->hasAttached($this->task->course)->create();
 
 
-    foreach (User::factory()->count(3)->createQuietly() as $teacher) {
+    foreach (User::factory()->count(3)->createQuietly() as $teacher)
+    {
         $this->task->course->teachers()->attach($teacher->id, ['role' => 'teacher']);
     }
 
 });
 
-it("Deletes all task dependencies (projects, delegations, grades, ect...)", function (){
+it("Deletes all task dependencies (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
     createProjectsForTask($this->task, 3);
 
@@ -90,13 +91,13 @@ it("Deletes all task dependencies (projects, delegations, grades, ect...)", func
 
 });
 
-it("Deletes all task dependencies, Task is CodeTask (projects, delegations, grades, ect...)", function (){
+it("Deletes all task dependencies, Task is CodeTask (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
     Event::fake(ProjectDeleting::class);// Need to inhibit this event to stop Scalable from attempting to delete the repos from the gitlab
     $this->installLinkRepositoryModule($this->task);
     createProjectsForTask($this->task, 3);
 
-    $response = call('delete',route("courses.tasks.admin.destroy", [$this->task->course, $this->task]));
+    $response = call('delete', route("courses.tasks.admin.destroy", [$this->task->course, $this->task]));
 
     $response->assertRedirect();
 
@@ -120,14 +121,14 @@ it("Deletes all task dependencies, Task is CodeTask (projects, delegations, grad
 
 });
 
-it("Deletes all task dependencies, Task is TemplateTask (projects, delegations, grades, ect...)", function (){
+it("Deletes all task dependencies, Task is TemplateTask (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
     Event::fake(ProjectDeleting::class);// Need to inhibit this event to stop Scalable from attempting to delete the repos from the gitlab
     $this->installLinkRepositoryModule($this->task);
     $this->installTemplateModule($this->task);
     createProjectsForTask($this->task, 3);
 
-    $response = call('delete',route("courses.tasks.admin.destroy", [$this->task->course, $this->task]));
+    $response = call('delete', route("courses.tasks.admin.destroy", [$this->task->course, $this->task]));
 
     $response->assertRedirect();
 
@@ -150,7 +151,7 @@ it("Deletes all task dependencies, Task is TemplateTask (projects, delegations, 
         })->count())->toBe(0);
 });
 
-it("Deletes all task dependencies, Task is TemplateTask and has protected files (projects, delegations, grades, ect...)", function (){
+it("Deletes all task dependencies, Task is TemplateTask and has protected files (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
     Event::fake(ProjectDeleting::class);// Need to inhibit this event to stop Scalable from attempting to delete the repos from the gitlab
     $this->installLinkRepositoryModule($this->task);
@@ -158,7 +159,7 @@ it("Deletes all task dependencies, Task is TemplateTask and has protected files 
     addProtectedFiles($this->task);
     createProjectsForTask($this->task, 3);
 
-    $response = call('delete',route("courses.tasks.admin.destroy", [$this->task->course, $this->task]));
+    $response = call('delete', route("courses.tasks.admin.destroy", [$this->task->course, $this->task]));
 
     $response->assertRedirect();
 
@@ -181,7 +182,7 @@ it("Deletes all task dependencies, Task is TemplateTask and has protected files 
         })->count())->toBe(0);
 });
 
-it("Deletes all task dependencies, Task is TemplateTask and is automatically graded (projects, delegations, grades, ect...)", function (){
+it("Deletes all task dependencies, Task is TemplateTask and is automatically graded (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
     Event::fake(ProjectDeleting::class);// Need to inhibit this event to stop Scalable from attempting to delete the repos from the gitlab
     $this->installLinkRepositoryModule($this->task);
@@ -189,7 +190,7 @@ it("Deletes all task dependencies, Task is TemplateTask and is automatically gra
     $this->installAutomaticGradingModule($this->task, AutomaticGradingType::PIPELINE_SUCCESS);
     createProjectsForTask($this->task, 3);
 
-    $response = call('delete',route("courses.tasks.admin.destroy", [$this->task->course, $this->task]));
+    $response = call('delete', route("courses.tasks.admin.destroy", [$this->task->course, $this->task]));
 
     $response->assertRedirect();
 
@@ -215,19 +216,20 @@ it("Deletes all task dependencies, Task is TemplateTask and is automatically gra
 function createProjectsForTask(Task $task, int $amount): Collection
 {
     $collection = new Collection();
-    for ($i = 0; $i < $amount; $i++) {
+    for ($i = 0; $i < $amount; $i++)
+    {
         /** @var Project $project */
         $project = Project::factory()->for($task)->createQuietly();
         $task->sub_tasks->all()->each(function ($subTask) use ($task, $project) {
             $projectSubtask = $project->subTasks()->createQuietly([
                 'sub_task_id' => $subTask->getId(),
                 'source_type' => Task::class,
-                'source_id' => $task->id,
-                'points' => $subTask->getPoints(),
+                'source_id'   => $task->id,
+                'points'      => $subTask->getPoints(),
             ]);
             ProjectSubTaskComment::factory()->createQuietly([
-                'sub_task_id' => $projectSubtask->id,
-                'project_id' => $project->id,
+                'sub_task_id'    => $projectSubtask->id,
+                'project_id'     => $project->id,
                 'author_id'      => $project->task->course->teachers()->first()->id,
             ]);
             Pipeline::factory()->createQuietly(['project_id' => $project->id]);
@@ -244,13 +246,15 @@ function createProjectsForTask(Task $task, int $amount): Collection
 
         $project->feedback()->saveMany(
             ProjectFeedback::factory()->createQuietly([
-            'project_id' => $project->id,
+            'project_id'         => $project->id,
             'task_delegation_id' => $task->delegations()->first()->id,
             'user_id'            => User::factory()->createQuietly()->id,
-        ])->all());
+        ])->all()
+        );
 
         $collection->push($project);
     }
+
     return $collection;
 }
 
@@ -258,23 +262,23 @@ function addProtectedFiles(Task $task): void
 {
     $task->protectedFiles()->createMany([
         [
-            'path' => '.gitlab-ci.yml',
+            'path'       => '.gitlab-ci.yml',
             'sha_values' => ['d470caf7cdb76a728911f4934adc1ba17aff6be9'],
         ],
         [
-            'path' => 'src/test/java/task1/Task1Test.java',
+            'path'       => 'src/test/java/task1/Task1Test.java',
             'sha_values' => ['9faefc1a0c1c371e1f274975aab675ef29f4ac5f'],
         ],
         [
-            'path' => 'src/test/java/task2/Task2Test.java',
+            'path'       => 'src/test/java/task2/Task2Test.java',
             'sha_values' => ['0eec204f6515fa3b005bf7735f33d1b5508712c9'],
         ],
         [
-            'path' => 'src/test/java/task3/Task3Test.java',
+            'path'       => 'src/test/java/task3/Task3Test.java',
             'sha_values' => ['fd63e2e589d03e2f52cbd0b9b6c32d0fcf95fde0'],
         ],
         [
-            'path' => 'src/test/java/task4/Task4Test.java',
+            'path'       => 'src/test/java/task4/Task4Test.java',
             'sha_values' => ['925098a56f12008148878a49166888d075925f4e'],
         ],
     ]);
