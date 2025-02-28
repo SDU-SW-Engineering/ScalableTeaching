@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Models\ProjectSubTask;
 use App\Models\ProjectSubTaskComment;
 use App\Models\Task;
+use App\Models\TaskDelegation;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -226,6 +227,27 @@ class TaskController extends Controller
 
     public function destroy(Course $course, Task $task): RedirectResponse
     {
+        if ($task->downloads() != null){
+            $task->downloads()->delete();
+        }
+        if ($task->protectedFiles() != null)
+        {
+            $task->protectedFiles()->delete();
+        }
+        if ($task->grades() != null)
+        {
+            $task->grades()->delete();
+        }
+        if ($task->delegations() != null)
+        {
+            $task->delegations()->get()->each(function ($delegation) {
+                /**
+                 * @var TaskDelegation $delegation
+                 */
+                $delegation->feedback()->delete();
+                $delegation->delete();
+            });
+        }
         // This has to be done this way because:
         // When executing a mass delete statement via Eloquent, the deleting events will not be fired for the deleted models.
         // Read more: https://laravel.com/docs/5.6/eloquent#events
@@ -234,33 +256,10 @@ class TaskController extends Controller
             if ($project->subTasks() != null)
             {
                 $project->subTasks()->delete();
-            }
-            if ($project->download() != null)
-            {
-                $project->download()->delete();
-            }
-            if ($project->feedback() != null)
-            {
-                $project->feedback()->delete();
+                $project->pipelines()->delete();
             }
             $project->delete();
         });
-
-        if ($task->delegations() != null)
-        {
-            $task->delegations()->delete();
-        }
-
-        if ($task->protectedFiles() != null)
-        {
-            $task->protectedFiles()->delete();
-        }
-
-        if ($task->grades() != null)
-        {
-            $task->grades()->delete();
-        }
-
         $task->delete();
 
         return redirect()->route('courses.manage.exercises.index', [$course]);

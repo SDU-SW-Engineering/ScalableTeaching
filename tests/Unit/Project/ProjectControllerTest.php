@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\ProjectDeleting;
 use App\Http\Controllers\ProjectController;
 use App\Models\Casts\SubTask;
 use App\Models\Course;
@@ -21,6 +22,7 @@ use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use function Pest\Laravel\assertDatabaseMissing;
+use function Pest\Laravel\instance;
 
 uses(RefreshDatabase::class);
 
@@ -40,26 +42,25 @@ beforeEach(function () {
 
     $this->gitLabManager->shouldReceive('projects')
         ->andReturn($this->mockProjects);
-
+    instance(GitLabManager::class, $this->gitLabManager);
 });
 
 it('does not attempt to reset a project that is finished', function () {
     $this->project->status = ProjectStatus::Finished;
     $this->project->save();
 
-
-    expect(fn () => $this->projectController->reset($this->gitLabManager, $this->project))->toThrow(HttpException::class);
+    expect(fn () => $this->projectController->reset($this->project))->toThrow(HttpException::class);
 });
 
 it('does not attempt to reset a project that is over due', function () {
     $this->project->task()->ends_at = Carbon::now()->subDay();
     $this->project->status = ProjectStatus::Overdue;
     $this->project->save();
-    expect(fn () => $this->projectController->reset($this->gitLabManager, $this->project))->toThrow(HttpException::class);
+    expect(fn () => $this->projectController->reset($this->project))->toThrow(HttpException::class);
 });
 
 it('deletes the project; No modules installed on task', function () {
-    $this->projectController->reset($this->gitLabManager, $this->project);
+    $this->projectController->reset($this->project);
 
     assertDatabaseMissing('projects', ['id' => $this->project->id, 'deleted_at' => null]);
 });
@@ -75,16 +76,17 @@ it('also deletes grades', function () {
         'source_id'   => $user->id,
     ])->for($this->project->task)->create();
 
-    $this->projectController->reset($this->gitLabManager, $this->project);
-
+    $this->projectController->reset($this->project);
 
     assertDatabaseMissing('projects', ['id' => $this->project->id, 'deleted_at' => null]);
     assertDatabaseMissing('grades', ['id' => $grade->id]);
 });
 
 it('removes (user) project owner from template repository and deletes the project', function () {
-    addLinkRepositoryModule($this->project->task);
+    $this->installLinkRepositoryModule($this->project->task, "id://gitlab/Project/9033");
     $user = User::factory()->create();
+    //Disable all events to prevent unintented interactions with mocked GitLabManager (Except for ProjectDeleting event which is needed for proper deletion)
+    Event::fakeExcept(ProjectDeleting::class);
     $this->project->claim($user);
 
     $this->mockProjects->shouldReceive('removeMember')
@@ -92,15 +94,17 @@ it('removes (user) project owner from template repository and deletes the projec
         ->once()
         ->andReturnNull();
 
-    $this->projectController->reset($this->gitLabManager, $this->project);
+    $this->projectController->reset($this->project);
 
     assertDatabaseMissing('projects', ['id' => $this->project->id, 'deleted_at' => null]);
 });
 
 it('removes (group) project owner(s) from template repository and deletes the project', function () {
-    addLinkRepositoryModule($this->project->task);
+    $this->installLinkRepositoryModule($this->project->task, "id://gitlab/Project/9033");
     $group = Group::factory()->create(['course_id' => $this->project->task->course->id]);
     $group->members()->attach(User::factory()->count(3)->create());
+    //Disable all events to prevent unintented interactions with mocked GitLabManager (Except for ProjectDeleting event which is needed for proper deletion)
+    Event::fakeExcept(ProjectDeleting::class);
     $this->project->claim($group);
 
     $this->mockProjects->shouldReceive('removeMember')
@@ -108,43 +112,27 @@ it('removes (group) project owner(s) from template repository and deletes the pr
         ->times(3)
         ->andReturnNull();
 
-    $this->projectController->reset($this->gitLabManager, $this->project);
+    $this->projectController->reset($this->project);
 
     assertDatabaseMissing('projects', ['id' => $this->project->id, 'deleted_at' => null]);
 });
 
 it('deletes repository and deletes the project if task is templateTask', function () {
-    addLinkRepositoryModule($this->project->task);
-    addTemplateModule($this->project->task);
+    $this->installLinkRepositoryModule($this->project->task, "id://gitlab/Project/9033");
+    $this->installTemplateModule($this->project->task);
     $user = User::factory()->create();
+    //Disable all events to prevent unintended interactions with mocked GitLabManager (Except for ProjectDeleting event which is needed for proper deletion)
+    Event::fakeExcept(ProjectDeleting::class);
     $this->project->claim($user);
     $this->project->gitlab_project_id = 1234;
-
-    $this->mockProjects->shouldReceive('show')
-        ->with(1234)
-        ->once()
-        ->andReturnNull();
+    $this->project->save();
 
     $this->mockProjects->shouldReceive('remove')
         ->with(1234)
         ->once()
         ->andReturnNull();
 
-    $this->projectController->reset($this->gitLabManager, $this->project);
+    $this->projectController->reset($this->project);
 
     assertDatabaseMissing('projects', ['id' => $this->project->id, 'deleted_at' => null]);
 });
-
-function addLinkRepositoryModule(Task $task): void
-{
-    $task->module_configuration->addModule(LinkRepository::class);
-    $settings = new LinkRepositorySettings();
-    $settings->repo = "id://gitlab/Project/9033";
-    $task->module_configuration->update(LinkRepository::class, $settings, $task);
-    $task->module_configuration->resolveModule(LinkRepository::class)->update($task);
-}
-
-function addTemplateModule(Task $task): void
-{
-    $task->module_configuration->addModule(Template::class);
-}

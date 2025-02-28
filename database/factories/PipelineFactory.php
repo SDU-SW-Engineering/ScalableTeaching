@@ -22,6 +22,7 @@ class PipelineFactory extends Factory
                 PipelineStatusEnum::Running,
                 PipelineStatusEnum::Pending,
             ]),
+            'sha'            => $this->faker->sha256(),
             'runners'        => [$this->faker->text(30)],
             'user_name'      => $this->faker->bothify('?????##'),
             'duration'       => $this->faker->randomFloat(1, 5, 30),

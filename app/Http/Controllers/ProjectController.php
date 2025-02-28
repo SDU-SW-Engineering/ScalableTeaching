@@ -57,7 +57,7 @@ class ProjectController extends Controller
     /**
      * @throws \Throwable
      */
-    public function reset(GitLabManager $gitLabManager, Project $project): string
+    public function reset(Project $project): string
     {
         Log::info("Attempting to reset project {$project->id}");
         abort_unless($project->status == ProjectStatus::Active, 400);

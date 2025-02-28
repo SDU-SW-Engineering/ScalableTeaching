@@ -5,6 +5,7 @@ namespace App\Listeners\GitLab\Project;
 use App\Events\ProjectDeleting;
 use App\Models\Project;
 use App\Models\Task;
+use App\Modules\LinkRepository\LinkRepository;
 use GrahamCampbell\GitLab\GitLabManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -36,6 +37,7 @@ class CleanupRepositoryOnProjectDelete implements ShouldQueue
     {
         $project = $event->project;
         $task = $project->task;
+
         if ($task->isTemplateTask())
         {
             Log::info("Deleting repository associated project {$project->id} (Owner(s):{$project->ownerNames})");

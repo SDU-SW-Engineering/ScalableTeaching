@@ -35,11 +35,11 @@ function createSubTasks(array $subtaskData):  array
 }
 
 
-function installLinkRepositoryModule(Task $task): void
+function installLinkRepositoryModule(Task $task, string $repoID = "mock-id"): void
 {
     $task->module_configuration->addModule(LinkRepository::class);
     $settings = new LinkRepositorySettings();
-    $settings->repo = "mock-id";
+    $settings->repo = $repoID;
     $task->module_configuration->update(LinkRepository::class, $settings, $task);
     $task->module_configuration->resolveModule(LinkRepository::class)->update($task);
 }

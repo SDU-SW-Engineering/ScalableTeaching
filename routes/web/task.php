@@ -18,7 +18,6 @@ Route::prefix('{task}')->group(function() {
         Route::controller(StudentController::class)->group(function() {
             Route::get('students', 'students')->name('students');
             Route::get('downloads', 'downloads')->name('downloads');
-            Route::get('log', 'log')->name('log');
         });
 
         Route::controller(ModuleController::class)->prefix('modules')->as('modules.')->group(function() {
