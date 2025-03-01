@@ -25,7 +25,6 @@ class TaskController extends Controller
         ])->values();
 
         $reorganizeRoute = route('courses.manage.exercises.reorganize', $course);
-
         return view('courses.manage.exercises', compact('groups', 'reorganizeRoute'));
     }
 
