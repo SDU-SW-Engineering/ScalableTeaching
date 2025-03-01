@@ -16,10 +16,10 @@ class TaskController extends Controller
             'name'      => $groupName == '' ? null : $groupName,
             'editing'   => false,
             'exercises' => $exercises->map(fn(Task $exercise) => [
-                'id'      => $exercise->id,
-                'name'    => $exercise->name,
-                'visible' => $exercise->is_visible,
-                'manage'  => route('courses.tasks.admin.index', [$course, $exercise]),
+                'id'                    => $exercise->id,
+                'name'                  => $exercise->name,
+                'visible'               => $exercise->is_visible,
+                'manage'                => route('courses.tasks.admin.index', [$course, $exercise]),
                 'toggleVisibilityRoute' => route('courses.tasks.admin.toggle-visibility', [$course, $exercise]),
             ]),
         ])->values();
