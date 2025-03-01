@@ -20,6 +20,7 @@ class TaskController extends Controller
                 'name'    => $exercise->name,
                 'visible' => $exercise->is_visible,
                 'manage'  => route('courses.tasks.admin.index', [$course, $exercise]),
+                'toggleVisibilityRoute' => route('courses.tasks.admin.toggle-visibility', [$course, $exercise]),
             ]),
         ])->values();
 
