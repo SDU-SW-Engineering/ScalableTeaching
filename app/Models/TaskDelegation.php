@@ -130,7 +130,7 @@ class TaskDelegation extends Model
     private function delegateAllProjects(): void
     {
         $delayCounter = 0;
-        $allProjects = $this->task->projects->keyBy('id');
+        $allProjects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade
         foreach ($this->delegationUserPool() as $delegationUser)
         {
             $userProject = $this->userProject($delegationUser);
@@ -156,7 +156,7 @@ class TaskDelegation extends Model
     private function delegateCircular(): void
     {
         $delayCounter = 0;
-        $projects = $this->task->projects->keyBy('id');
+        $projects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade;
         $userPool = $this->delegationUserPool();
         for ($userIndex = 0; $userIndex < $userPool->count(); $userIndex++)
         {
@@ -179,7 +179,7 @@ class TaskDelegation extends Model
     {
         $delayCounter = 0;
         $userPool = $this->delegationUserPool();
-        $projects = $this->task->projects->keyBy('id');
+        $projects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade;
         $splitProjects = $projects->split($userPool->count());
         foreach ($userPool as $delegationUser)
         {
