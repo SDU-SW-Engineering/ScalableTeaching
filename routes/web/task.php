@@ -11,9 +11,9 @@ Route::prefix('{task}')->group(function() {
 
         Route::get('/', [OverviewController::class, 'index'])->name('index');
 
-        Route::controller(TaskController::class)->group(function() {
-            Route::delete('destroy', 'destroy')->name('destroy');
-        });
+//        Route::controller(TaskController::class)->group(function() { TODO: Enable this when deleting has been made save
+//            Route::delete('destroy', 'destroy')->name('destroy');
+//        });
 
         Route::controller(StudentController::class)->group(function() {
             Route::get('students', 'students')->name('students');

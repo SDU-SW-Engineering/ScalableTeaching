@@ -9,39 +9,19 @@ use App\Models\Pipeline;
 use App\Models\Project;
 use App\Models\ProjectDownload;
 use App\Models\ProjectFeedback;
-use App\Models\ProjectPush;
 use App\Models\ProjectSubTaskComment;
 use App\Models\Task;
 use App\Models\TaskDelegation;
 use App\Models\TaskProtectedFile;
 use App\Models\User;
-use App\Modules\AutomaticGrading\AutomaticGrading;
-use App\Modules\AutomaticGrading\AutomaticGradingSettings;
 use App\Modules\AutomaticGrading\AutomaticGradingType;
-use App\Modules\LinkRepository\LinkRepository;
-use App\Modules\LinkRepository\LinkRepositorySettings;
-use App\Modules\Template\Template;
-use App\ProjectStatus;
-use Domain\SourceControl\SourceControl;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
-use PHPUnit\Framework\TestCase;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\call;
 
 uses(RefreshDatabase::class);
-
-/**
- * @param Task $task
- * @return void
- */
-
-/**
- * @param Task $task
- * @param TestCase $this
- * @return void
- */
 
 beforeEach(function() {
     /** @var Task $task */
@@ -60,7 +40,6 @@ beforeEach(function() {
     {
         $this->task->course->teachers()->attach($teacher->id, ['role' => 'teacher']);
     }
-
 });
 
 it("Deletes all task dependencies (projects, delegations, grades, ect...)", function () {
@@ -89,7 +68,7 @@ it("Deletes all task dependencies (projects, delegations, grades, ect...)", func
             $query->where('task_id', $this->task->id);
         })->count())->toBe(0);
 
-});
+})->skip('Left out till Task deletion is added back in');
 
 it("Deletes all task dependencies, Task is CodeTask (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
@@ -119,7 +98,7 @@ it("Deletes all task dependencies, Task is CodeTask (projects, delegations, grad
             $query->where('task_id', $this->task->id);
         })->count())->toBe(0);
 
-});
+})->skip('Left out till Task deletion is added back in');
 
 it("Deletes all task dependencies, Task is TemplateTask (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
@@ -149,7 +128,7 @@ it("Deletes all task dependencies, Task is TemplateTask (projects, delegations, 
         ->and(ProjectDownload::whereHas('project', function ($query) {
             $query->where('task_id', $this->task->id);
         })->count())->toBe(0);
-});
+})->skip('Left out till Task deletion is added back in');
 
 it("Deletes all task dependencies, Task is TemplateTask and has protected files (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
@@ -180,7 +159,7 @@ it("Deletes all task dependencies, Task is TemplateTask and has protected files 
         ->and(ProjectDownload::whereHas('project', function ($query) {
             $query->where('task_id', $this->task->id);
         })->count())->toBe(0);
-});
+})->skip('Left out till Task deletion is added back in');
 
 it("Deletes all task dependencies, Task is TemplateTask and is automatically graded (projects, delegations, grades, ect...)", function () {
     actingAs($this->professor);
@@ -211,7 +190,7 @@ it("Deletes all task dependencies, Task is TemplateTask and is automatically gra
         ->and(ProjectDownload::whereHas('project', function ($query) {
             $query->where('task_id', $this->task->id);
         })->count())->toBe(0);
-});
+})->skip('Left out till Task deletion is added back in');
 
 function createProjectsForTask(Task $task, int $amount): Collection
 {
