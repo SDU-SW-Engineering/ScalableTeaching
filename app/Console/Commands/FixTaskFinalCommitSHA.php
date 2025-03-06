@@ -2,11 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Project;
 use App\Models\Task;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
+/**
+ *
+ */
 class FixTaskFinalCommitSHA extends Command
 {
     /**
@@ -56,12 +60,16 @@ class FixTaskFinalCommitSHA extends Command
 
         foreach ($projects as $project)
         {
-
             if ($project->final_commit_sha != null)
             {
                 continue; // Skips if a project already has a final SHA
             }
-            $lastPush = $project->pushes()->whereDate("created_at", "<=", $task->ends_at)->orderBy("created_at", "desc")->limit(1)->first();
+            $lastPush = $project->relevantPushes()->first(); // Gets the last push before deadline
+            if ( ! $lastPush)
+            {
+                $this->error("The project {$project->id} has no valid pushes");
+                continue;
+            }
             $project->final_commit_sha = $lastPush->after_sha;
             $project->status = ProjectStatus::Finished;
             /** @var \Illuminate\Support\Carbon $taskEndsAt */
