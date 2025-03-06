@@ -7,8 +7,10 @@ use App\Models\Course;
 use App\Models\ProjectFeedback;
 use App\Models\Group;
 use App\Models\Project;
+use App\Models\ProjectSubTask;
 use App\Models\ProjectSubTaskComment;
 use App\Models\Task;
+use App\Models\TaskDelegation;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -221,5 +223,46 @@ class TaskController extends Controller
         return [
             'route' => $nextExercise != null ? route('courses.tasks.show', [$course, $nextExercise]) : null,
         ];
+    }
+
+    public function destroy(Course $course, Task $task): RedirectResponse
+    {
+        if ($task->downloads() != null)
+        {
+            $task->downloads()->delete();
+        }
+        if ($task->protectedFiles() != null)
+        {
+            $task->protectedFiles()->delete();
+        }
+        if ($task->grades() != null)
+        {
+            $task->grades()->delete();
+        }
+        if ($task->delegations() != null)
+        {
+            $task->delegations()->get()->each(function ($delegation) {
+                /**
+                 * @var TaskDelegation $delegation
+                 */
+                $delegation->feedback()->delete();
+                $delegation->delete();
+            });
+        }
+        // This has to be done this way because:
+        // When executing a mass delete statement via Eloquent, the deleting events will not be fired for the deleted models.
+        // Read more: https://laravel.com/docs/5.6/eloquent#events
+        $task->projects()->get()->each(function ($project) {
+            /** @var Project $project */
+            if ($project->subTasks() != null)
+            {
+                $project->subTasks()->delete();
+                $project->pipelines()->delete();
+            }
+            $project->delete();
+        });
+        $task->delete();
+
+        return redirect()->route('courses.manage.exercises.index', [$course]);
     }
 }

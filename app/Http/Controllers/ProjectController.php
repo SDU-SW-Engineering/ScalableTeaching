@@ -30,6 +30,7 @@ use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -56,36 +57,20 @@ class ProjectController extends Controller
     /**
      * @throws \Throwable
      */
-    public function reset(GitLabManager $gitLabManager, Project $project): string
+    public function reset(Project $project): string
     {
+        Log::info("Attempting to reset project {$project->id}");
         abort_unless($project->status == ProjectStatus::Active, 400);
-        \DB::transaction(function() use ($gitLabManager, $project) {
-            $found = $project->gitlab_project_id != null;
-            try
-            {
-                // Be aware if passed in value is null, then it will return all projects and therefore not throwing.
-                $gitLabManager->projects()->show($project->gitlab_project_id);
-            } catch(RuntimeException $runtimeException)
-            {
-                $found = $runtimeException->getCode() != 404;
-            }
 
-            if($found)
-                $gitLabManager->projects()->remove($project->gitlab_project_id);
+        $project->delete();
 
+        /** @var ?Grade $grade */
+        $grade = Grade::where("task_id", "=", $project->task->id)
+            ->where("source_type", "=", User::class)
+            ->where("source_id", "=", auth()->id())->first();
+        $grade?->delete();
 
-            $project->delete();
-
-            /** @var ?Grade $grade */
-            $grade = Grade::where("task_id", "=", $project->task->id)
-                ->where("source_type", "=", User::class)
-                ->where("source_id", "=", auth()->id())->first();
-            if ($grade)
-            {
-                $grade->delete();
-            }
-
-        });
+        Log::info("Project was successfully reset");
 
         return "OK";
     }

@@ -13,6 +13,4 @@ class StudentController extends Controller
     {
         return view('tasks.admin.students', compact('course', 'task'));
     }
-
-
 }

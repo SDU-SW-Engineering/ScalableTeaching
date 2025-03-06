@@ -78,7 +78,7 @@ class DelegationController extends BaseController
     public function store(Request $request, Course $course, Task $task): RedirectResponse
     {
         Log::info("Adding delegation for task {$task->id} in course {$course->id}.");
-        $maxNumberOfProjectsToDelegate = $task->projects->count() - 1; // We don't want to delegate the task to the owner.
+        $maxNumberOfProjectsToDelegate = $task->projects->count() - 1 > 0 ? $task->projects->count() - 1 : 1; // We don't want to delegate the task to the owner. But also don't want to only allow -1 if no projects are created
         $validated = $request->validate([
             'role'               => ['required_if:pool,role'/*Rule::in($course->roles->pluck('id')), Rule::notIn($task->delegations->pluck('course_role_id'))*/], // todo: enable when roles are better defined
             'users'              => ['required_if:pool,user'],

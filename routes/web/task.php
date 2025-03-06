@@ -4,16 +4,20 @@ use App\Http\Controllers\Task\Admin\ModuleController;
 use App\Http\Controllers\Task\Admin\OverviewController;
 use App\Http\Controllers\Task\Admin\SettingsController;
 use App\Http\Controllers\Task\Admin\StudentController;
+use App\Http\Controllers\TaskController;
 
 Route::prefix('{task}')->group(function() {
     Route::prefix('admin')->as('admin.')->middleware('can:viewDashboard,task')->group(function() {
 
         Route::get('/', [OverviewController::class, 'index'])->name('index');
 
+//        Route::controller(TaskController::class)->group(function() { TODO: Enable this when deleting has been made save
+//            Route::delete('destroy', 'destroy')->name('destroy');
+//        });
+
         Route::controller(StudentController::class)->group(function() {
             Route::get('students', 'students')->name('students');
             Route::get('downloads', 'downloads')->name('downloads');
-            Route::get('log', 'log')->name('log');
         });
 
         Route::controller(ModuleController::class)->prefix('modules')->as('modules.')->group(function() {

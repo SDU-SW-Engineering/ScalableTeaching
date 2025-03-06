@@ -670,7 +670,7 @@ class Task extends Model
                 $projectId = $this->getGitlabProjectId();
                 $manager = app(GitLabManager::class);
 
-                $this->addMembersToProject($owner, $manager, $projectId, 20);  // 20 is "Planner" level which gives them access to view and pull code but no more  https://docs.gitlab.com/ee/api/access_requests.html
+                $this->addMembersToProject($owner, $manager, $projectId, 20);  // 20 is "Reporter" level which gives them access to view and pull code but no more  https://docs.gitlab.com/ee/api/access_requests.html
             }
             $dbProject = $owner->projects()->updateOrCreate([
                 'task_id'   => $this->id,
@@ -852,11 +852,22 @@ class Task extends Model
                 $members = $owner->members()->get();
                 foreach ($members as $member)
                 {
+                    if (in_array($member->gitlab_id, array_column($manager->projects()->allMembers($projectId), 'id')))
+                    {
+                        Log::info("$member->name is already a member of project $projectId");
+                        continue;
+                    }
                     $response = $manager->projects()->addMember($projectId, $member->gitlab_id, $accessLevel);
                     log::info("Successfully added member $member->gitlab_id to project $projectId");
                 }
-            } elseif ($owner instanceof User)
+            } else
             {
+                if (in_array($owner->gitlab_id, array_column($manager->projects()->allMembers($projectId), 'id')))
+                {
+                    Log::info("$owner->name is already a member of project $projectId");
+
+                    return;
+                }
                 Log::info("Adding user $owner->projectName to project $projectId");
                 $response = $manager->projects()->addMember($projectId, $owner->gitlab_id, $accessLevel);
                 log::info("Successfully added user $owner->projectName to project $projectId");

@@ -94,19 +94,36 @@
                             >Feedback moderation</label>
                         </div>
                     </div>
-                    <div>
+                    <div id="NOP_delegation_student">
                         <label for="tasks" class="text-left text-sm font-bold dark:text-white">Number of
                             Projects</label>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Specify how many projects each user
-                            should give feedback on.</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 italic">Inputting 0 means each user has
-                            to review ALL projects.</p>
+                        @if($task->projects->count() == 0)
+                            <p class="text-base font-bold text-red-700">Warning! There are currently no projects created!</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 italic">
+                                Since it is not possible to delegate more projects than actually exists you might consider waiting with queuing delegations till after projects are created, currently only 0 will be accepted which means all students must review all projects.
+                            </p>
+                        @else
+                            <p class="text-sm text-gray-400 dark:text-gray-400">Specify how many projects each user
+                                should give feedback on.</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 italic">Inputting 0 means each user has
+                                to review ALL projects.</p>
+                        @endif
                         <input value="1" name="tasks"
                                min="0"
-                               max="{{ $task->projects->count() }}"
-                               id="tasks"
+                               max="{{ $task->projects->count() - 1 > 0 ? $task->projects->count() - 1 : 0 }}"
+                               id="NOP_input"
                                class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-lime-green-500 focus:border-lime-green-500 block p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500"
                                type="number">
+                    </div>
+                    <div id="NOP_delegation_teacher" hidden="">
+                        <label for="tasks" class="text-left text-sm font-bold dark:text-white">Number of
+                            Projects</label><br>
+                        <label class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                            <input id="NOP_radio_0" type="radio" name="tasks" value="0" class="w-4 h-4 text-lime-green-500 bg-gray-100 border-gray-300 focus:ring-lime-green-500 dark:focus:ring-lime-green-500 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"> Each teacher should review ALL projects<br>
+                        </label>
+                        <label class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                            <input id="NOP_radio_1" type="radio" name="tasks" value="1" class="w-4 h-4 text-lime-green-500 bg-gray-100 border-gray-300 focus:ring-lime-green-500 dark:focus:ring-lime-green-500 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"> Projects should be distributed equally amongst teachers<br>
+                        </label>
                     </div>
                     <div class="flex flex-col justify-center">
                         <button type="submit"
@@ -150,5 +167,29 @@
             },
         };
         window.IMask(document.getElementById('deadline'), config)
+
+        function updateNOPView(){
+            if(this.value === "student"){
+                document.getElementById("NOP_delegation_teacher").hidden = true;
+                document.getElementById("NOP_delegation_student").hidden = false;
+
+                document.getElementById("NOP_radio_0").disabled = true;
+                document.getElementById("NOP_radio_0").disabled = true;
+                document.getElementById("NOP_input").disabled = false;
+
+
+            } else if(this.value === "teacher"){
+                document.getElementById("NOP_delegation_student").hidden = true;
+                document.getElementById("NOP_delegation_teacher").hidden = false;
+
+                document.getElementById("NOP_radio_0").disabled = false;
+                document.getElementById("NOP_radio_0").disabled = false;
+                document.getElementById("NOP_input").disabled = true;
+            }
+        }
+        const element = document.getElementById("role_selector");
+        if(typeof(element) != 'undefined' && element != null){
+            element.addEventListener("change", updateNOPView)
+        }
     </script>
 @endsection

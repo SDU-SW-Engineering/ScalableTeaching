@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Events\ProjectCreated;
+use App\Events\ProjectDeleting;
+use App\Listeners\GitLab\Project\CleanupRepositoryOnProjectDelete;
 use App\Listeners\GitLab\Project\DisableForking;
 use App\Listeners\GitLab\Project\RegisterWebhook;
 use App\Listeners\GitLab\Project\UnprotectDefaultBranch;
@@ -24,6 +26,9 @@ class EventServiceProvider extends ServiceProvider
             DisableForking::class,
             RegisterWebhook::class,
             UnprotectDefaultBranch::class,
+        ],
+        ProjectDeleting::class => [
+            CleanupRepositoryOnProjectDelete::class,
         ],
     ];
 
