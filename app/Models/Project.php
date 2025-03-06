@@ -36,8 +36,8 @@ use Illuminate\Support\Facades\Log;
  * @property int $task_id
  * @property string $repo_name
  * @property ProjectStatus $status
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @method static Builder|Project newModelQuery()
  * @method static Builder|Project newQuery()
  * @method static Builder|Project query()
