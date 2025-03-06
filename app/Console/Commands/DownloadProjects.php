@@ -8,6 +8,7 @@ use App\Models\ProjectDownload;
 use App\Models\ProjectPush;
 use App\Models\Task;
 use Illuminate\Console\Command;
+use Ramsey\Collection\Collection;
 
 class DownloadProjects extends Command
 {
@@ -42,7 +43,9 @@ class DownloadProjects extends Command
      */
     public function handle()
     {
-        $eligibleTasks = Task::whereIn('correction_type', ['manual'])->pluck('ends_at', 'id');
+        $eligibleTasks_DEPRECATED = Task::whereIn('correction_type', ['manual'])->pluck('ends_at', 'id'); // This is deprecated... But not removed yet TODO:Remove this line when all old tasks have been deleted
+        $eligibleTasks = Task::whereJsonContains("module_configuration->BuildTracking->enabled", true)->pluck('ends_at', 'id'); // This is the new way of doing it
+        $eligibleTasks->merge($eligibleTasks_DEPRECATED);
         $projects = Project::whereIn('task_id', $eligibleTasks->keys())->get();
         $queuedCount = ProjectDownload::queued()->count();
 
