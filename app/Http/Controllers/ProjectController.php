@@ -197,11 +197,13 @@ class ProjectController extends Controller
 
         /** @var ProjectFeedback|null $feedback */
         $feedback = $project->feedback()->where('user_id', auth()->id())->first();
-        if ($feedback == null && $projectDownload->ref != null){
+        if ($feedback == null && $projectDownload->ref != null)
+        {
             $feedback = $project->feedback()->where('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
         }
 
-        if($feedback == null){
+        if($feedback == null)
+        {
             return view('tasks.editor')->with('context', 'view');
         }
 
