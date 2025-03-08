@@ -194,11 +194,17 @@ class ProjectController extends Controller
 
     public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
     {
-        /** @var ProjectFeedback|null $feedback */
-        $feedback = $project->feedback()->where('user_id', auth()->id())->orWhere('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
 
-        if($feedback == null)
+        /** @var ProjectFeedback|null $feedback */
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first();
+        if ($feedback == null && $projectDownload->ref != null){
+            $feedback = $project->feedback()->where('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
+        }
+
+        if($feedback == null){
             return view('tasks.editor')->with('context', 'view');
+        }
+
         $context = match (true)
         {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
