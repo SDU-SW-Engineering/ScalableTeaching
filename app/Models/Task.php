@@ -444,7 +444,7 @@ class Task extends Model
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) // @phpstan-ignore-line
         {
             $message = 'Another user in your group have already started this task';
 

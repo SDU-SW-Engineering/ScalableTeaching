@@ -56,7 +56,7 @@ return [
 
         'sentry' => [
             'driver' => 'sentry',
-            'level' => env('LOG_LEVEL', 'error'),
+            'level'  => env('LOG_LEVEL', 'error'),
             'bubble' => true, // Whether the messages that are handled can bubble up the stack or not
         ],
 
