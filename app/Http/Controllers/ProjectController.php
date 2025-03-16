@@ -207,6 +207,8 @@ class ProjectController extends Controller
             return view('tasks.editor')->with('context', 'view');
         }
 
+        $downloadRoute = route("courses.tasks.downloadProject", [$course, $task, $project]);
+
         $context = match (true)
         {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
@@ -232,7 +234,7 @@ class ProjectController extends Controller
             ])->values(); // we convert to an ordinary array as we don't want JS to sort the output json based on keys
         }
 
-        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus);
+        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus)->with('downloadLink', $downloadRoute);
     }
 
     public function showTree(Course $course, Task $task, Project $project): Directory
