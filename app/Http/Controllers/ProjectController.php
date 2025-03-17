@@ -194,11 +194,21 @@ class ProjectController extends Controller
 
     public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
     {
+
         /** @var ProjectFeedback|null $feedback */
-        $feedback = $project->feedback()->where('user_id', auth()->id())->orWhere('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first();
+        if ($feedback == null && $projectDownload->ref != null)
+        {
+            $feedback = $project->feedback()->where('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
+        }
 
         if($feedback == null)
+        {
             return view('tasks.editor')->with('context', 'view');
+        }
+
+        $downloadRoute = route("courses.tasks.downloadProject", [$course, $task, $project]);
+
         $context = match (true)
         {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
@@ -224,7 +234,7 @@ class ProjectController extends Controller
             ])->values(); // we convert to an ordinary array as we don't want JS to sort the output json based on keys
         }
 
-        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus);
+        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus)->with('downloadLink', $downloadRoute);
     }
 
     public function showTree(Course $course, Task $task, Project $project): Directory

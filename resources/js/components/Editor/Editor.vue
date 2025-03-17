@@ -2,7 +2,7 @@
     <div>
         <overlay v-if="initialLoad"></overlay>
         <toolbar :context="context" :file="openedFile" @toggleFeedback="showFeedbackList = !showFeedbackList"
-                 @toggleSubTasks="showSubtasks = !showSubtasks"/>
+                 @toggleSubTasks="showSubtasks = !showSubtasks" :delegation="delegation" :downloadLink="downloadLink"/>
         <div class="flex">
             <div class="flex">
                 <side-bar @openFile="openFile" :file-tree="fileTree"/>
@@ -15,7 +15,7 @@
                 <subtasks-grading-view :sub-tasks.sync="subTasks"></subtasks-grading-view>
             </div>
             <div class="flex" style="height: calc(100vh - 112px)">
-                <feedback-list :should-grade="delegation.grading" :context="context" @openFile="openFile"
+                <feedback-list :should-grade="delegation.feedback" :context="context" @openFile="openFile"
                                @close="showFeedbackList = false"
                                v-if="showFeedbackList"/>
             </div>
@@ -96,6 +96,10 @@ export default {
         },
         subTasks: {
             type: Array | null,
+            required: false
+        },
+        downloadLink: {
+            type: String,
             required: false
         }
     },
