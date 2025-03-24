@@ -158,7 +158,7 @@ class ProjectController extends Controller
                 ->selectNodes()
                 ->selectName()
                 ->selectSha();
-            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . config('GITLAB_ACCESS_TOKEN')]);
+            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
             if(count($projects) == 0)
