@@ -122,12 +122,12 @@ abstract class Module
         return dirname($reflection->getFileName());
     }
 
-    private function viewPath(string $path = null): string
+    private function viewPath(?string $path = null): string
     {
         return $this->basePath() . DIRECTORY_SEPARATOR . 'Views' . DIRECTORY_SEPARATOR . ($path == null ? '' : $path);
     }
 
-    private function widgetPath(string $path = null): string
+    private function widgetPath(?string $path = null): string
     {
         return $this->viewPath('Widgets') . DIRECTORY_SEPARATOR . ($path == null ? '' : $path);
     }

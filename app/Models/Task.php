@@ -61,8 +61,8 @@ use Illuminate\Support\Str;
  * @property-read SurveyTask|null $pivot
  * @property-read bool $hasEnded
  * @property-read EloquentCollection|TaskDelegation[] $delegations
- * @property-read \Illuminate\Support\Collection<string,int> $totalProjectsPerDay
- * @property-read \Illuminate\Support\Collection<string,int> $totalCompletedTasksPerDay
+ * @property-read Collection<string,int> $totalProjectsPerDay
+ * @property-read Collection<string,int> $totalCompletedTasksPerDay
  * @property-read EloquentCollection<int,TaskProtectedFile> $protectedFiles
  * @property-read TaskTypeEnum $type
  * @property-read Course $course
@@ -87,13 +87,13 @@ class Task extends Model
         'current_sha',
     ];
 
-    protected $dates = ['ends_at', 'starts_at'];
-
     protected $casts = [
         'module_configuration'  => ModuleConfiguration::class,
         'sub_tasks'             => SubTaskCollection::class,
         'correction_type'       => CorrectionType::class,
         'type'                  => TaskTypeEnum::class,
+        'ends_at'               => 'datetime',
+        'starts_at'             => 'datetime',
     ];
 
     public function reloadDescriptionFromRepo(): bool
@@ -125,7 +125,7 @@ class Task extends Model
     // region relationships
 
     /**
-     * @return BelongsTo<Course, Task>
+     * @return BelongsTo<Course, $this>
      */
     public function course(): BelongsTo
     {
@@ -133,7 +133,7 @@ class Task extends Model
     }
 
     /**
-     * @return HasManyThrough<Pipeline>
+     * @return HasManyThrough<Pipeline, Project, $this>
      */
     public function jobs(): HasManyThrough
     {
@@ -141,7 +141,7 @@ class Task extends Model
     }
 
     /**
-     * @return HasManyThrough<ProjectFeedback>
+     * @return HasManyThrough<ProjectFeedback, TaskDelegation, $this>
      */
     public function feedbacks(): HasManyThrough
     {
@@ -149,7 +149,7 @@ class Task extends Model
     }
 
     /**
-     * @return HasMany<Grade>
+     * @return HasMany<Grade, $this>
      */
     public function grades(): HasMany
     {
@@ -157,7 +157,7 @@ class Task extends Model
     }
 
     /**
-     * @return BelongsTo<CourseTrack,Task>|null
+     * @return BelongsTo<CourseTrack, $this>|null
      */
     public function track(): ?BelongsTo
     {
@@ -172,7 +172,7 @@ class Task extends Model
     }
 
     /**
-     * @return HasManyThrough<ProjectPush>
+     * @return HasManyThrough<ProjectPush, Project, $this>
      */
     public function pushes(): HasManyThrough
     {
@@ -180,7 +180,7 @@ class Task extends Model
     }
 
     /**
-     * @return HasMany<TaskDelegation>
+     * @return HasMany<TaskDelegation, $this>
      */
     public function delegations(): HasMany
     {
@@ -188,7 +188,7 @@ class Task extends Model
     }
 
     /**
-     * @return HasManyThrough<ProjectDownload>
+     * @return HasManyThrough<ProjectDownload, Project, $this>
      */
     public function downloads(): HasManyThrough
     {
@@ -209,9 +209,9 @@ class Task extends Model
     /**
      * @param bool $withTrash
      * @param bool $withToday
-     * @return \Illuminate\Support\Collection<string,int>|null
+     * @return Collection<string,int>|null
      */
-    public function dailyBuilds(bool $withTrash = false, bool $withToday = false): \Illuminate\Support\Collection|null
+    public function dailyBuilds(bool $withTrash = false, bool $withToday = false): Collection|null
     {
         if( ! $this->is_publishable)
             return null;
@@ -223,7 +223,7 @@ class Task extends Model
     }
 
     /**
-     * @return HasMany<Project>
+     * @return HasMany<Project, $this>
      */
     public function projects(): HasMany
     {
@@ -231,7 +231,7 @@ class Task extends Model
     }
 
     /**
-     * @return HasMany<TaskProtectedFile>
+     * @return HasMany<TaskProtectedFile, $this>
      */
     public function protectedFiles(): HasMany
     {
@@ -239,7 +239,7 @@ class Task extends Model
     }
 
     /**
-     * @return Attribute<\Illuminate\Support\Collection<int|string,int>,null>
+     * @return Attribute<Collection<int|string,int>,null>
      */
     public function projectsPerDay(): Attribute
     {
@@ -247,7 +247,7 @@ class Task extends Model
     }
 
     /**
-     * @return Attribute<\Illuminate\Support\Collection<int|string, int>|null,null>
+     * @return Attribute<Collection<int|string, int>|null,null>
      */
     public function totalProjectsPerDay(): Attribute
     {
@@ -267,7 +267,7 @@ class Task extends Model
     }
 
     /**
-     * @return Attribute<\Illuminate\Support\Collection<string, int>|null,null>
+     * @return Attribute<Collection<string, int>|null,null>
      */
     public function totalCompletedTasksPerDay(): Attribute
     {
@@ -367,9 +367,9 @@ class Task extends Model
 
 
     /**
-     * @return \Illuminate\Support\Collection<int, ProjectStatus>
+     * @return Collection<int, ProjectStatus>
      */
-    public function participants(): \Illuminate\Support\Collection
+    public function participants(): Collection
     {
         return $this->projects->reject(function(Project $project) {
             return $project->ownable_type == null;
@@ -384,7 +384,7 @@ class Task extends Model
      * @param User|null $user
      * @return Grade|null
      */
-    public function grade(User $user = null)
+    public function grade(?User $user = null)
     {
         if($user == null)
             $user = auth()->user();
@@ -395,7 +395,7 @@ class Task extends Model
     }
 
     /**
-     * @return MorphMany<Grade>
+     * @return MorphMany<Grade, $this>
      */
     public function sourcedGrades(): MorphMany
     {
@@ -422,7 +422,7 @@ class Task extends Model
         return $files[0]->rawBlob;
     }
 
-    public function canStart(Group|User $entity, string &$message = null): bool
+    public function canStart(Group|User $entity, ?string &$message = null): bool
     {
         if( ! now()->isBetween($this->starts_at, $this->ends_at))
         {
@@ -444,7 +444,7 @@ class Task extends Model
         }
 
 
-        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0)
+        if($entity instanceof Group && self::usersHaveBegunTasks($usersInGroups->pluck('id'), $this->id)->count() > 0) // @phpstan-ignore argument.type
         {
             $message = 'Another user in your group have already started this task';
 

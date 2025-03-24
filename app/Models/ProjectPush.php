@@ -20,7 +20,7 @@ class ProjectPush extends Model
     protected $fillable = ['before_sha', 'after_sha', 'ref', 'username'];
 
     /**
-     * @return BelongsTo<Project,ProjectPush>
+     * @return BelongsTo<Project, $this>
      */
     public function project(): BelongsTo
     {

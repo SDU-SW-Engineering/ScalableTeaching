@@ -19,7 +19,7 @@ class SurveyResponse extends Model
     ];
 
     /**
-     * @return BelongsTo<User, SurveyResponse>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -27,7 +27,7 @@ class SurveyResponse extends Model
     }
 
     /**
-     * @return MorphTo<Model,SurveyResponse>
+     * @return MorphTo<Model, $this>
      */
     public function ownable(): MorphTo
     {

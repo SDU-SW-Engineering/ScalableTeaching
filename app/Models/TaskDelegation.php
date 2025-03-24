@@ -47,7 +47,7 @@ class TaskDelegation extends Model
     ];
 
     /**
-     * @return BelongsTo<CourseRole,TaskDelegation>
+     * @return BelongsTo<CourseRole, $this>
      */
     public function role(): BelongsTo
     {
@@ -55,7 +55,7 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @return BelongsTo<Task, TaskDelegation>
+     * @return BelongsTo<Task, $this>
      */
     public function task(): BelongsTo
     {
@@ -65,7 +65,7 @@ class TaskDelegation extends Model
     /**
      * Is only used for attaching or getting users for a certain delegation
      * THIS SHOULD NOT BE USED WHEN DELEGATING {@see delegationUserPool()}
-     * @return BelongsToMany<User>
+     * @return BelongsToMany<User, $this>
      */
     public function userPool(): BelongsToMany
     {
@@ -73,7 +73,7 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @return HasMany<ProjectFeedback>
+     * @return HasMany<ProjectFeedback, $this>
      */
     public function feedback(): HasMany
     {
@@ -81,7 +81,7 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @return HasManyThrough<ProjectFeedbackComment>
+     * @return HasManyThrough<ProjectFeedbackComment, ProjectFeedback, $this>
      */
     public function comments(): HasManyThrough
     {

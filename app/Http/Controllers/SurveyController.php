@@ -27,7 +27,7 @@ class SurveyController extends Controller
     }
 
     /**
-     * @return Collection<int, array{id:int,name:string,responses_count:int|null,created_at:Carbon}>
+     * @return Collection<int, covariant array{id:int,name:string,responses_count:int|null,created_at:Carbon}>
      */
     public function all() : Collection
     {

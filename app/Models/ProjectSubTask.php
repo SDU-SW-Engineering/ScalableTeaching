@@ -114,7 +114,7 @@ class ProjectSubTask extends Model
     }
 
     /**
-     * @return BelongsTo<Project,ProjectSubTask>
+     * @return BelongsTo<Project, $this>
      */
     public function project()
     {

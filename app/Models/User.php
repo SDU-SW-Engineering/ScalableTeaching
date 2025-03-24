@@ -53,11 +53,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'username',
         'name',
@@ -65,11 +60,6 @@ class User extends Authenticatable
         'gitlab_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int,string>
-     */
     protected $hidden = [
         'remember_token',
         'is_sys_admin',
@@ -77,21 +67,15 @@ class User extends Authenticatable
         'last_login',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string,string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login'        => 'datetime',
         'is_admin'          => 'bool',
         'is_sys_admin'      => 'bool',
     ];
 
-    protected $dates = ['last_login'];
-
     /**
-     * @return BelongsToMany<Group>
+     * @return BelongsToMany<Group, $this>
      */
     public function groups(): BelongsToMany
     {
@@ -102,7 +86,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return MorphMany<Project>
+     * @return MorphMany<Project, $this>
      */
     public function projects(): MorphMany
     {
@@ -115,7 +99,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return BelongsToMany<Course>
+     * @return BelongsToMany<Course, $this>
      */
     public function courses(): BelongsToMany
     {
@@ -125,7 +109,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<Grade>
+     * @return HasMany<Grade, $this>
      */
     public function grades(): HasMany
     {
@@ -133,7 +117,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return BelongsToMany<Survey>
+     * @return BelongsToMany<Survey, $this>
      */
     public function surveys(): BelongsToMany
     {
@@ -141,7 +125,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<ProjectFeedback>
+     * @return HasMany<ProjectFeedback, $this>
      */
     public function feedback(): HasMany
     {

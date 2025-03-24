@@ -20,7 +20,7 @@ class Survey extends Model
     protected $hidden = ['created_at', 'updated_at'];
 
     /**
-     * @return HasMany<SurveyField>
+     * @return HasMany<SurveyField, $this>
      */
     public function fields(): HasMany
     {
@@ -28,7 +28,7 @@ class Survey extends Model
     }
 
     /**
-     * @return HasMany<SurveyResponse>
+     * @return HasMany<SurveyResponse, $this>
      */
     public function responses() : HasMany
     {
@@ -41,7 +41,7 @@ class Survey extends Model
     }
 
     /**
-     * @return BelongsToMany<Task>
+     * @return BelongsToMany<Task, $this>
      */
     public function tasks(): BelongsToMany
     {
@@ -51,7 +51,7 @@ class Survey extends Model
     }
 
     /**
-     * @return BelongsToMany<User>
+     * @return BelongsToMany<User, $this>
      */
     public function owners(): BelongsToMany
     {

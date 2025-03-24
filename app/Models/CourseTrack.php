@@ -29,7 +29,7 @@ class CourseTrack extends Model
     }
 
     /**
-     * @return BelongsTo<Course,CourseTrack>
+     * @return BelongsTo<Course, $this>
      */
     public function course(): BelongsTo
     {
@@ -37,7 +37,7 @@ class CourseTrack extends Model
     }
 
     /**
-     * @return BelongsTo<CourseTrack,CourseTrack>|null
+     * @return BelongsTo<CourseTrack, $this>|null
      */
     public function parent(): ?BelongsTo
     {
@@ -45,7 +45,7 @@ class CourseTrack extends Model
     }
 
     /**
-     * @return HasMany<CourseTrack>
+     * @return HasMany<CourseTrack, $this>
      */
     public function immediateChildren(): HasMany
     {
@@ -92,7 +92,7 @@ class CourseTrack extends Model
     }
 
     /**
-     * @return HasMany<Task>
+     * @return HasMany<Task, $this>
      */
     public function tasks(): HasMany
     {

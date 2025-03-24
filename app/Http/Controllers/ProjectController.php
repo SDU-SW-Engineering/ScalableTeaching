@@ -158,7 +158,7 @@ class ProjectController extends Controller
                 ->selectNodes()
                 ->selectName()
                 ->selectSha();
-            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . config('GITLAB_ACCESS_TOKEN')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
             if(count($projects) == 0)
@@ -222,13 +222,13 @@ class ProjectController extends Controller
             $achievedPoints = $project->subTasks->pluck('points', 'sub_task_id');
             $comments = $project->subTaskComments->pluck('text', 'sub_task_id');
             $subTaskStatus = $task->sub_tasks->all()->map(fn(SubTask $subTask) => [
-                'id'        => $subTask->getId(),
+                'id'        => $subTask->getId() ?? null,
                 'name'      => $subTask->getName(),
-                'group'     => $subTask->getGroup(),
-                'maxPoints' => $subTask->getPoints(),
-                'comment'   => $comments->get($subTask->getId()),
+                'group'     => $subTask->getGroup() ?? null,
+                'maxPoints' => $subTask->getPoints() ?? null,
+                'comment'   => $comments->get($subTask->getId()) ?? null,
                 'points'    => $achievedPoints->get($subTask->getId()) ?? null,
-            ])->groupBy('group')->map(fn($tasks, $groupName) => [
+            ])->groupBy('group')->map(fn($tasks, $groupName) => [ // @phpstan-ignore return.type, argument.type
                 'group_name' => $groupName,
                 'tasks'      => $tasks,
             ])->values(); // we convert to an ordinary array as we don't want JS to sort the output json based on keys

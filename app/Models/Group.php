@@ -33,7 +33,7 @@ class Group extends Model
     protected $fillable = ['name'];
 
     /**
-     * @return BelongsToMany<User>
+     * @return BelongsToMany<User, $this>
      */
     public function members() : BelongsToMany
     {
@@ -44,7 +44,7 @@ class Group extends Model
     }
 
     /**
-     * @return HasMany<GroupInvitation>
+     * @return HasMany<GroupInvitation, $this>
      */
     public function invitations() : HasMany
     {
@@ -52,7 +52,7 @@ class Group extends Model
     }
 
     /**
-     * @return BelongsTo<Course,Group>
+     * @return BelongsTo<Course, $this>
      */
     public function course() : BelongsTo
     {
@@ -60,7 +60,7 @@ class Group extends Model
     }
 
     /**
-     * @return MorphMany<Project>
+     * @return MorphMany<Project, $this>
      */
     public function projects() : MorphMany
     {

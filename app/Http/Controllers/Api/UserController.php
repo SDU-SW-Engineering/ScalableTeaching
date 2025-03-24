@@ -45,8 +45,8 @@ class UserController extends Controller
             ->selectName()
             ->selectCreatedAt()
             ->selectNamespace()->selectName()->selectFullName();
-        $token = env('GITLAB_ACCESS_TOKEN');
-        $client = new Client(env('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . $token]);
+        $token = config('GITLAB_ACCESS_TOKEN');
+        $client = new Client(config('GITLAB_URL') . '/api/graphql', ["Authorization" => 'Bearer ' . $token]);
         // @phpstan-ignore-next-line
         $results = new \Illuminate\Support\Collection($client->runQuery($rootObject)->getResults()->data->projects->nodes);
         Log::debug("Found " . $results->count() . " repositories");
