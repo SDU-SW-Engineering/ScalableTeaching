@@ -17,7 +17,7 @@ class SubTaskCollection implements Castable
     /**
      * @param Collection<int, SubTask>|null $tasks
      */
-    public function __construct(Collection $tasks = null)
+    public function __construct(?Collection $tasks = null)
     {
         if ($tasks == null)
             $tasks = new Collection();
@@ -51,7 +51,7 @@ class SubTaskCollection implements Castable
     }
 
     /**
-     * @return Collection<int,int|null>
+     * @return Collection<int,covariant int|null>
      */
     private function ids(): Collection
     {
@@ -65,7 +65,7 @@ class SubTaskCollection implements Castable
     }
 
     /**
-     * @return Collection<int,int|null>
+     * @return Collection<int,covariant int|null>
      */
     private function requiredIds(): Collection
     {
@@ -76,7 +76,7 @@ class SubTaskCollection implements Castable
 
     /**
      * @param Collection<int,int|null> $completedIds
-     * @return Collection<int,int|null>
+     * @return Collection<int, covariant int|null>
      */
     public function missing(Collection $completedIds) : Collection
     {
@@ -84,12 +84,12 @@ class SubTaskCollection implements Castable
     }
 
     /**
-     * @param Collection<int,int|null> $completedIds
+     * @param Collection<int, int|null> $completedIds
      * @return bool
      */
     public function isMissingAny(Collection $completedIds) : bool
     {
-        return $this->missing($completedIds)->count() > 0;
+        return $this->missing($completedIds)->count() > 0; // @phpstan-ignore argument.type
     }
 
     /**
@@ -157,10 +157,10 @@ class SubTaskCollection implements Castable
                 }));
             }
 
-            public function set($model, string $key, $value, array $attributes) : bool|string
+            public function set($model, string $key, $value, array $attributes) : string
             {
                 $values = $value instanceof SubTaskCollection ? $value->all() : new Collection($value);
-                throw_unless($values->every(fn($v) => $v instanceof SubTask), InvalidArgumentException::class, "Every item must be a SubTask instance.");
+                throw_unless($values->every(fn($v) => $v instanceof SubTask), InvalidArgumentException::class, "Every item must be a SubTask instance.");  // @phpstan-ignore instanceof.alwaysTrue
                 $id = $values->max(fn(SubTask $task) => $task->getId()) ?? 0;
 
                 return $values->map(function (SubTask $subTask) use (&$id) {

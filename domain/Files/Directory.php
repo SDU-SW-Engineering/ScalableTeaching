@@ -18,7 +18,7 @@ class Directory implements \JsonSerializable, IsChangeable
         return $this->path;
     }
 
-    public function __construct(string $path, Directory $parent = null)
+    public function __construct(string $path, ?Directory $parent = null)
     {
         $paths = explode("/", $path);
         $this->path = $paths[count($paths) - 1];
@@ -70,7 +70,7 @@ class Directory implements \JsonSerializable, IsChangeable
         return null;
     }
 
-    public function trim(string $what = null): Directory
+    public function trim(?string $what = null): Directory
     {
         if($what == null && $this->parent == null)
             $what = trim($this->path, '/');

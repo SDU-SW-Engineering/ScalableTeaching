@@ -50,7 +50,7 @@ class Course extends Model
     // region Relationships
 
     /**
-     * @return HasMany<Task>
+     * @return HasMany<Task, covariant Course>
      */
     public function tasks(): HasMany
     {
@@ -58,7 +58,7 @@ class Course extends Model
     }
 
     /**
-     * @return HasMany<Group>
+     * @return HasMany<Group, covariant Course>
      */
     public function groups(): HasMany
     {
@@ -66,7 +66,7 @@ class Course extends Model
     }
 
     /**
-     * @return BelongsToMany<User>
+     * @return BelongsToMany<User, $this>
      */
     public function members(): BelongsToMany
     {
@@ -78,7 +78,7 @@ class Course extends Model
     }
 
     /**
-     * @return HasMany<CourseRole>
+     * @return HasMany<CourseRole, covariant Course>
      */
     public function roles(): HasMany
     {
@@ -86,7 +86,7 @@ class Course extends Model
     }
 
     /**
-     * @return HasManyThrough<Project>
+     * @return HasManyThrough<Project, Task, $this>
      */
     public function projects(): HasManyThrough
     {
@@ -94,7 +94,7 @@ class Course extends Model
     }
 
     /**
-     * @return HasManyThrough<GroupInvitation>
+     * @return HasManyThrough<GroupInvitation, Group, $this>
      */
     public function groupInvitations(): HasManyThrough
     {
@@ -102,7 +102,7 @@ class Course extends Model
     }
 
     /**
-     * @return BelongsToMany<User>
+     * @return BelongsToMany<User, $this>
      */
     public function teachers(): BelongsToMany
     {
@@ -114,7 +114,7 @@ class Course extends Model
     }
 
     /**
-     * @return BelongsToMany<User>
+     * @return BelongsToMany<User, $this>
      */
     public function students(): BelongsToMany
     {
@@ -126,7 +126,7 @@ class Course extends Model
     }
 
     /**
-     * @return HasMany<CourseTrack>
+     * @return HasMany<CourseTrack, $this>
      */
     public function tracks(): HasMany
     {
@@ -134,7 +134,7 @@ class Course extends Model
     }
 
     /**
-     * @return HasMany<CourseActivity>
+     * @return HasMany<CourseActivity, $this>
      */
     public function activities() : HasMany
     {

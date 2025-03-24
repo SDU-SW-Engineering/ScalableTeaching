@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enums\GradeEnum;
+use DB;
 use Domain\ActivityLogging\Course\CourseActivityLogging;
 use Domain\ActivityLogging\Course\CourseActivityMessage;
 use Eloquent;
@@ -34,17 +35,17 @@ class Grade extends Model
     protected $fillable = ['task_id', 'user_id', 'source_id', 'source_type', 'value', 'value_raw', 'selected', 'task_id', 'started_at', 'ended_at'];
 
     protected $casts = [
-        'value'     => Enums\GradeEnum::class,
-        'selected'  => 'boolean',
-        'value_raw' => 'array',
+        'value'      => Enums\GradeEnum::class,
+        'selected'   => 'boolean',
+        'value_raw'  => 'array',
+        'started_at' => 'datetime',
+        'ended_at'   => 'datetime',
     ];
-
-    public $dates = ['started_at', 'ended_at'];
 
     // region relationships
 
     /**
-     * @return BelongsTo<User,Grade>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -52,7 +53,7 @@ class Grade extends Model
     }
 
     /**
-     * @return BelongsTo<Task,Grade>
+     * @return BelongsTo<Task, $this>
      */
     public function task(): BelongsTo
     {
@@ -60,7 +61,7 @@ class Grade extends Model
     }
 
     /**
-     * @return MorphTo<Model,Grade>
+     * @return MorphTo<Model, $this>
      */
     public function source(): MorphTo
     {

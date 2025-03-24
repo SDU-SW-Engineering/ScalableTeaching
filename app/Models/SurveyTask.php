@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  */
 class SurveyTask extends Pivot
 {
-    protected $dates = ['deadline'];
+    protected $casts = [
+        'deadline' => 'datetime',
+    ];
 
     /**
      * @return Attribute<bool, null>

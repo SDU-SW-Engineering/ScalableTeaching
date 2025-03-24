@@ -17,13 +17,13 @@ class AnalyticsServiceProvider extends ServiceProvider
     {
         HasMany::macro("daily", function (Carbon $start, Carbon $end, $column = 'created_at')
         {
-            /** @var HasMany<Model> $this */
+            /** @var HasMany<Model, Model> $this */
             return (new DailyQuery($this->getQuery(), $column))->daily($start, $end);
         });
 
         HasManyThrough::macro("daily", function (Carbon $start, Carbon $end, $column = 'created_at')
         {
-            /** @var HasManyThrough<Model> $this */
+            /** @var HasManyThrough<Model, Model, Model> $this */
             return (new DailyQuery($this->getQuery(), $column))->daily($start, $end);
         });
 

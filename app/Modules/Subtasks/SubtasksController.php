@@ -12,6 +12,7 @@ use App\Models\ProjectSubTask;
 use App\Models\Task;
 use App\Modules\AutomaticGrading\AutomaticGrading;
 use App\Modules\AutomaticGrading\AutomaticGradingSettings;
+use DB;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Excel;
@@ -21,7 +22,7 @@ class SubtasksController extends BaseController
 {
     public function subTasks(Course $course, Task $task): View
     {
-        $subTasks = $task->sub_tasks->all()->groupBy("group")->map(fn($tasks, $group) => [
+        $subTasks = $task->sub_tasks->all()->groupBy("group")->map(fn($tasks, $group) => [ // @phpstan-ignore-line
             'name'  => $group,
             'tasks' => $tasks->map(fn(SubTask $t) => [
                 'id'     => $t->id,
@@ -40,11 +41,11 @@ class SubtasksController extends BaseController
         $projectIds = $task->projects()->pluck('id');
 
         $completionPercentages = ProjectSubTask::whereIn('project_id', $projectIds)
-            ->select(\DB::raw('sub_task_id, avg(points) as points'))
+            ->select(DB::raw('sub_task_id, avg(points) as points'))
             ->groupBy('sub_task_id')
             ->pluck('points', 'sub_task_id');
 
-        $subtaskGroups = $task->sub_tasks->all()->groupBy('group')->map(fn(Collection $subTasks, $group) => [
+        $subtaskGroups = $task->sub_tasks->all()->groupBy('group')->map(fn(Collection $subTasks, $group) => [ // @phpstan-ignore-line
             'group'     => $group,
             'average'   => round($completionPercentages->filter(fn($v, $k) => $subTasks->pluck('id')->contains($k))->sum(), 2),
             'maxPoints' => $subTasks->sum(fn(SubTask $task) => $task->getPoints()),

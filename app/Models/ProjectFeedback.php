@@ -60,7 +60,7 @@ class ProjectFeedback extends Model
         return $query->where('reviewed', true);
     }
     /**
-     * @return BelongsTo<User,ProjectFeedback>
+     * @return BelongsTo<User, $this>
      */
     public function user() : BelongsTo
     {
@@ -68,7 +68,7 @@ class ProjectFeedback extends Model
     }
 
     /**
-     * @return BelongsTo<Project,ProjectFeedback>
+     * @return BelongsTo<Project, $this>
      */
     public function project() : BelongsTo
     {
@@ -76,7 +76,7 @@ class ProjectFeedback extends Model
     }
 
     /**
-     * @return HasMany<ProjectFeedbackComment>
+     * @return HasMany<ProjectFeedbackComment, $this>
      */
     public function comments() : HasMany
     {
@@ -84,7 +84,7 @@ class ProjectFeedback extends Model
     }
 
     /**
-     * @return BelongsTo<TaskDelegation,ProjectFeedback>
+     * @return BelongsTo<TaskDelegation, $this>
      */
     public function taskDelegation() : BelongsTo
     {

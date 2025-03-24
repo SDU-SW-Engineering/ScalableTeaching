@@ -20,7 +20,7 @@ class SurveyField extends Model
     ];
 
     /**
-     * @return HasMany<SurveyFieldItem>
+     * @return HasMany<SurveyFieldItem, $this>
      */
     public function items(): HasMany
     {

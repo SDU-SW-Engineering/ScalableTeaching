@@ -31,7 +31,7 @@ class GradingController extends Controller
                         'id'   => $task->id,
                         'name' => $task->name,
                     ],
-                    'grade'          => $taskGrades[$task->id]->grades->where('user_id', $student->id)->firstWhere('selected', true)?->toArray(),
+                    'grade' => optional($taskGrades[$task->id]->grades->where('user_id', $student->id)->firstWhere('selected', true))->toArray() ?: null,
                 ]),
             ];
         })->sortBy('student.name');

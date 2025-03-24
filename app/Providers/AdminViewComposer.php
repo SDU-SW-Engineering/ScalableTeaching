@@ -30,7 +30,7 @@ class AdminViewComposer
         $view->with(
             'commentCount',
             $task->delegations()
-                ->with(['comments' => function(HasManyThrough $query) {
+                ->with(['comments' => function(HasManyThrough $query) { // @phpstan-ignore argument.type
                     $query->whereIn('status', ['pending', 'approved', 'rejected']);
                 }])
                 ->get()->map(fn(TaskDelegation $taskDelegation) => $taskDelegation->comments)
@@ -40,7 +40,7 @@ class AdminViewComposer
         $view->with(
             'commentPendingCount',
             $task->delegations()
-                ->with(['comments' => function(HasManyThrough $query) {
+                ->with(['comments' => function(HasManyThrough $query) { // @phpstan-ignore argument.type
                     $query->where('status', 'pending');
                 }])
                 ->get()->map(fn(TaskDelegation $taskDelegation) => $taskDelegation->comments)
@@ -50,7 +50,7 @@ class AdminViewComposer
         $view->with(
             'commentHistoryCount',
             $task->delegations()
-                ->with(['comments' => function(HasManyThrough $query) {
+                ->with(['comments' => function(HasManyThrough $query) { // @phpstan-ignore argument.type
                     $query->whereIn('status', ['approved', 'rejected']);
                 }])
                 ->get()->map(fn(TaskDelegation $taskDelegation) => $taskDelegation->comments)

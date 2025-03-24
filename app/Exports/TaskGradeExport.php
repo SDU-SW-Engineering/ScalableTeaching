@@ -31,7 +31,7 @@ class TaskGradeExport implements WithTitle, FromQuery, WithMapping, WithHeadings
     }
 
     /**
-     * @return HasMany<Project>
+     * @return HasMany<Project, Task>
      */
     public function query(): HasMany
     {

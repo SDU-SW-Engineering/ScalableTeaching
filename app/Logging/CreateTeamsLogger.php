@@ -13,7 +13,7 @@ class CreateTeamsLogger
             "teams",
             [
                 new TeamsLogger(
-                    env('TEAMS_WEBHOOK_URL')
+                    config('TEAMS_WEBHOOK_URL')
                 ),
             ]
         );

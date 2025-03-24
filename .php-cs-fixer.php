@@ -4,7 +4,7 @@ use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
 $rules = [
-    '@PHP81Migration'                       => true,
+    '@PHP84Migration'                       => true,
     'binary_operator_spaces'                => [
         'operators' => [
             '=>' => 'align_single_space'

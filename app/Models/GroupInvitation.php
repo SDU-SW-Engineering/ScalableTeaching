@@ -38,7 +38,7 @@ class GroupInvitation extends Model
     protected $fillable = ['recipient_user_id', 'invited_by_user_id'];
 
     /**
-     * @return BelongsTo<Group,GroupInvitation>
+     * @return BelongsTo<Group, $this>
      */
     public function group() : BelongsTo
     {
@@ -46,7 +46,7 @@ class GroupInvitation extends Model
     }
 
     /**
-     * @return BelongsTo<User,GroupInvitation>
+     * @return BelongsTo<User, $this>
      */
     public function invitedBy(): BelongsTo
     {
@@ -54,7 +54,7 @@ class GroupInvitation extends Model
     }
 
     /**
-     * @return BelongsTo<User,GroupInvitation>
+     * @return BelongsTo<User, $this>
      */
     public function recipient(): BelongsTo
     {
