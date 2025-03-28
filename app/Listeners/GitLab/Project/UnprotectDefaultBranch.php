@@ -38,7 +38,7 @@ class UnprotectDefaultBranch implements ShouldQueue
      */
     public function handle(ProjectCreated $event): void
     {
-        if (!$event->project->task->isTemplateTask()) return;
+        if ( ! $event->project->task->isTemplateTask()) return;
 
         Log::info("Unprotecting default branch for project {$event->project->id}");
 
