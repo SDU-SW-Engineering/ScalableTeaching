@@ -51,4 +51,23 @@ class BuildTrackingController extends Controller
 
         return redirect($gitLabRedirectUrl);
     }
+
+    public function browseGitlabCommit(Course $course, Task $task, Project $project): RedirectResponse
+    {
+        $commitHash = request()->query('commitHash');
+        if ($commitHash == null)
+        {
+            flash()->addError('Commit hash, can not be null.');
+
+            return redirect()->back();
+        }
+
+        $gitLabManager = app(GitLabManager::class);
+        $gitLabProject = $gitLabManager->projects()->show($project->gitlab_project_id);
+
+
+        $gitLabRedirectUrl = $gitLabProject['web_url'] . '/commit/' . $commitHash;
+
+        return redirect($gitLabRedirectUrl);
+    }
 }
