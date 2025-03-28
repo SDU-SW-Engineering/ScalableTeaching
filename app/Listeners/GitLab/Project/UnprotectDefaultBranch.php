@@ -38,21 +38,23 @@ class UnprotectDefaultBranch implements ShouldQueue
      */
     public function handle(ProjectCreated $event): void
     {
-        if ( ! $event->project->task->isTemplateTask()) return;
+        if (!$event->project->task->isTemplateTask()) return;
 
         Log::info("Unprotecting default branch for project {$event->project->id}");
 
         $gitLabManager = app(GitLabManager::class);
 
         $attempts = 3;
-        do // The system is sometimes too fast for the Gitlab server,
-        {  // this buys the Gitlab server some more time before Scalable moves on.
-            usleep(100000);
-            $project = $gitLabManager->projects()->show($event->project->gitlab_project_id);
-            $attempts--;
-        } while (($project['import_error'] != null || $project['import_status'] != 'finished') && $attempts > 0);
 
-        if($project['import_error'] != null || $project['import_status'] != 'finished')
+        $project = $gitLabManager->projects()->show($event->project->gitlab_project_id);
+
+
+        while (($project['import_error'] != null || $project['import_status'] != 'finished') && $attempts > 0)
+        { // The system is sometimes too fast for the Gitlab server, this buys the Gitlab server some more time before Scalable moves on.
+            usleep(50000);
+            $attempts--;
+        }
+        if ($project['import_error'] != null || $project['import_status'] != 'finished')
             throw new Exception("Import not fully done yet.");
 
         $gitLabManager->repositories()->unprotectBranch($event->project->gitlab_project_id, $project['default_branch']);
