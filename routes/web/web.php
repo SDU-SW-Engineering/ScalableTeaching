@@ -28,7 +28,7 @@ Route::prefix('surveys')->as('surveys.')->middleware('auth')->controller(SurveyC
 
 Route::group(['prefix' => 'projects/{project}', 'as' => 'projects.', 'middleware' => ['auth']], function() {
     Route::get('builds', [ProjectController::class, 'builds'])->middleware('can:view,project');
-    Route::get('reset', [ProjectController::class, 'reset'])->middleware('can:view,project');
+    Route::get('reset', [ProjectController::class, 'reset'])->name('reset')->middleware('can:view,project');
     Route::post('migrate/{group}', [ProjectController::class, 'migrate'])->middleware(['can:migrate,project,group', 'throttle:5']);
     Route::post('refresh-access', [ProjectController::class, 'refreshAccess'])->middleware(['can:refreshAccess,project', 'throttle:5']);
 

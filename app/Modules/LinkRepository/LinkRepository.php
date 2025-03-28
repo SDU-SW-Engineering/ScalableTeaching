@@ -2,9 +2,11 @@
 
 namespace App\Modules\LinkRepository;
 
+use App\Http\Controllers\ProjectController;
 use App\Modules\MarkAsDone\MarkAsDone;
 use App\Modules\Module;
 use App\Modules\Settings;
+use Illuminate\Support\Facades\Route;
 
 class LinkRepository extends Module
 {
@@ -19,6 +21,11 @@ class LinkRepository extends Module
     protected function loadSettings(): ?Settings
     {
         return new LinkRepositorySettings();
+    }
+
+    public static function configRoutes(): void
+    {
+        Route::get('redirect_repository/{project}', [ProjectController::class, 'redirect_repository'])->name('redirect.repository');
     }
 
     public function isEnabled(LinkRepositorySettings|Settings|null $settings): bool

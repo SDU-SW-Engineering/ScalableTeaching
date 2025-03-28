@@ -11,6 +11,7 @@ class StudentController extends Controller
 {
     public function students(Course $course, Task $task): View
     {
-        return view('tasks.admin.students', compact('course', 'task'));
+        $students = $course->students()->get();
+        return view('tasks.admin.students', compact('course', 'task', 'students'));
     }
 }

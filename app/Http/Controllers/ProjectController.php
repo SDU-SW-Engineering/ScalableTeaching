@@ -404,6 +404,15 @@ class ProjectController extends Controller
         return "ok";
     }
 
+    public function redirect_repository(Course $course, Task $task, Project $project): RedirectResponse
+    {
+
+        $gitLabManager = app(GitLabManager::class);
+        $gitLabProject = $gitLabManager->projects()->show($project->gitlab_project_id);
+
+        return redirect($gitLabProject['web_url']);
+    }
+
     public function markComment(Course $course, Task $task, Project $project, ProjectDownload $projectDownload, ProjectFeedbackComment $projectFeedbackComment): string
     {
         $projectFeedbackComment->marked_as = \request('mark');
