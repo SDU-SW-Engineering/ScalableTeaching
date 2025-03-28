@@ -23,7 +23,7 @@ class DefaultController extends Controller
         {
             auth()->logout();
 
-            return redirect()->home();
+            return redirect(route('home'));
         }
 
         auth()->loginUsingId($userId);

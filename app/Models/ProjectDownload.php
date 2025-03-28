@@ -34,15 +34,14 @@ class ProjectDownload extends Model
 
     protected $fillable = ['downloaded_at', 'location', 'expire_at', 'ref', 'queued_at'];
 
-    protected $dates = ['downloaded_at'];
-
     protected $casts = [
-        'expire_at' => 'datetime',
-        'queued_at' => 'datetime',
+        'expire_at'     => 'datetime',
+        'queued_at'     => 'datetime',
+        'downloaded_at' => 'datetime',
     ];
 
     /**
-     * @return BelongsTo<Project,ProjectDownload>
+     * @return BelongsTo<Project, $this>
      */
     public function project(): BelongsTo
     {

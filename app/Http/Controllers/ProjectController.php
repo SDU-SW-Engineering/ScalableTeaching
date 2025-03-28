@@ -30,6 +30,7 @@ use GraphQL\SchemaObject\RootQueryObject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -56,43 +57,28 @@ class ProjectController extends Controller
     /**
      * @throws \Throwable
      */
-    public function reset(GitLabManager $gitLabManager, Project $project): string
+    public function reset(Project $project): string
     {
+        Log::info("Attempting to reset project {$project->id}");
         abort_unless($project->status == ProjectStatus::Active, 400);
-        \DB::transaction(function() use ($gitLabManager, $project) {
-            $found = $project->gitlab_project_id != null;
-            try
-            {
-                // Be aware if passed in value is null, then it will return all projects and therefore not throwing.
-                $gitLabManager->projects()->show($project->gitlab_project_id);
-            } catch(RuntimeException $runtimeException)
-            {
-                $found = $runtimeException->getCode() != 404;
-            }
 
-            if($found)
-                $gitLabManager->projects()->remove($project->gitlab_project_id);
+        $project->delete();
 
+        /** @var ?Grade $grade */
+        $grade = Grade::where("task_id", "=", $project->task->id)
+            ->where("source_type", "=", User::class)
+            ->where("source_id", "=", auth()->id())->first();
+        $grade?->delete();
 
-            $project->delete();
-
-            /** @var ?Grade $grade */
-            $grade = Grade::where("task_id", "=", $project->task->id)
-                ->where("source_type", "=", User::class)
-                ->where("source_id", "=", auth()->id())->first();
-            if ($grade)
-            {
-                $grade->delete();
-            }
-
-        });
+        Log::info("Project was successfully reset");
 
         return "OK";
     }
 
     public function markComplete(Course $course, Task $task, Project $project): string|Response
     {
-        if( ! $task->isTextTask())
+
+        if( ! $task->isMarkAsCompleteTask())
             return response('Bad request', 400);
         if(Grade::where(['task_id' => $task->id, 'user_id' => auth()->id()])->exists())
             return response('Bad request', 400);
@@ -172,7 +158,7 @@ class ProjectController extends Controller
                 ->selectNodes()
                 ->selectName()
                 ->selectSha();
-            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . env('GITLAB_ACCESS_TOKEN')]);
+            $client = new Client('https://gitlab.sdu.dk/api/graphql', ["Authorization" => 'Bearer ' . config('scalable.gitlab_token')]);
             $projects = $client->runQuery($rootObject->getQuery())->getResults()->data->projects->nodes; // @phpstan-ignore-line
 
             if(count($projects) == 0)
@@ -208,11 +194,21 @@ class ProjectController extends Controller
 
     public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
     {
+
         /** @var ProjectFeedback|null $feedback */
-        $feedback = $project->feedback()->where('user_id', auth()->id())->orWhere('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first();
+        if ($feedback == null && $projectDownload->ref != null)
+        {
+            $feedback = $project->feedback()->where('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
+        }
 
         if($feedback == null)
+        {
             return view('tasks.editor')->with('context', 'view');
+        }
+
+        $downloadRoute = route("courses.tasks.downloadProject", [$course, $task, $project]);
+
         $context = match (true)
         {
             $project->owners()->contains(fn(User $user) => $user->is(auth()->user())) => 'recipient',
@@ -226,19 +222,19 @@ class ProjectController extends Controller
             $achievedPoints = $project->subTasks->pluck('points', 'sub_task_id');
             $comments = $project->subTaskComments->pluck('text', 'sub_task_id');
             $subTaskStatus = $task->sub_tasks->all()->map(fn(SubTask $subTask) => [
-                'id'        => $subTask->getId(),
+                'id'        => $subTask->getId() ?? null,
                 'name'      => $subTask->getName(),
-                'group'     => $subTask->getGroup(),
-                'maxPoints' => $subTask->getPoints(),
-                'comment'   => $comments->get($subTask->getId()),
+                'group'     => $subTask->getGroup() ?? null,
+                'maxPoints' => $subTask->getPoints() ?? null,
+                'comment'   => $comments->get($subTask->getId()) ?? null,
                 'points'    => $achievedPoints->get($subTask->getId()) ?? null,
-            ])->groupBy('group')->map(fn($tasks, $groupName) => [
+            ])->groupBy('group')->map(fn($tasks, $groupName) => [ // @phpstan-ignore return.type, argument.type
                 'group_name' => $groupName,
                 'tasks'      => $tasks,
             ])->values(); // we convert to an ordinary array as we don't want JS to sort the output json based on keys
         }
 
-        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus);
+        return view('tasks.editor')->with('context', $context)->with('delegation', $delegation)->with('subtasks', $subTaskStatus)->with('downloadLink', $downloadRoute);
     }
 
     public function showTree(Course $course, Task $task, Project $project): Directory

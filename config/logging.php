@@ -37,7 +37,7 @@ return [
     'channels' => [
         'stack' => [
             'driver'            => 'stack',
-            'channels'          => ['single', 'teams'],
+            'channels'          => ['single', 'teams', 'sentry'],
             'ignore_exceptions' => false,
         ],
 
@@ -52,6 +52,12 @@ return [
             'path'   => storage_path('logs/laravel.log'),
             'level'  => env('LOG_LEVEL', 'debug'),
             'days'   => 14,
+        ],
+
+        'sentry' => [
+            'driver' => 'sentry',
+            'level'  => env('LOG_LEVEL', 'error'),
+            'bubble' => true, // Whether the messages that are handled can bubble up the stack or not
         ],
 
         'slack' => [

@@ -16,7 +16,7 @@ class ProjectSubTaskComment extends Model
     protected $fillable = ['author_id', 'text', 'sub_task_id'];
 
     /**
-     * @return BelongsTo<User,ProjectSubTaskComment>
+     * @return BelongsTo<User, $this>
      */
     public function author()
     {

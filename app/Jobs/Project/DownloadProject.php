@@ -56,6 +56,8 @@ class DownloadProject implements ShouldQueue
             Log::error("Something went wrong while getting the archive of project {$this->download->project_id} with ref {$this->download->ref}", [
                 'exception' => $e,
             ]);
+            Log::info("Deleting ProjectDownload for project {$this->download->project_id} because the download was aborted");
+            $this->download->project->download()->delete();
 
             return;
         }

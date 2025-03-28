@@ -36,7 +36,7 @@ class CourseActivity extends Model
     }
 
     /**
-     * @return MorphTo<Model,CourseActivity>
+     * @return MorphTo<Model, $this>
      */
     public function resource(): MorphTo
     {
@@ -44,7 +44,7 @@ class CourseActivity extends Model
     }
 
     /**
-     * @return BelongsTo<User,CourseActivity>
+     * @return BelongsTo<User, $this>
      */
     public function affected(): BelongsTo
     {
@@ -52,7 +52,7 @@ class CourseActivity extends Model
     }
 
     /**
-     * @return BelongsTo<User,CourseActivity>
+     * @return BelongsTo<User, $this>
      */
     public function affectedBy(): BelongsTo
     {

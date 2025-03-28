@@ -60,7 +60,7 @@ class MockedGitlabActions implements SourceControl
      * @param string|null $ref
      * @return Collection<int,File>
      */
-    public function getFiles(string $projectId, string $path = null, bool $recursive = false, string $ref = null): Collection
+    public function getFiles(string $projectId, ?string $path = null, bool $recursive = false, ?string $ref = null): Collection
     {
         return $this->files->filter(function(File $file) use ($path, $recursive) {
             if ($recursive)
@@ -85,7 +85,7 @@ class MockedGitlabActions implements SourceControl
      * @param string|null $ref
      * @return void
      */
-    public function getFilesFromDirectories(string|int $projectId, DirectoryCollection $directoryCollection, string $ref = null): void
+    public function getFilesFromDirectories(string|int $projectId, DirectoryCollection $directoryCollection, ?string $ref = null): void
     {
         $directoryCollection->directories->reject(fn(Directory $directory) => $directory->fetched)->each(function(Directory $directory) {
             if ($directory->path == "/")

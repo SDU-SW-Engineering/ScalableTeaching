@@ -135,7 +135,7 @@ class Pipeline extends Model
      * @return void
      * @throws Throwable
      */
-    public function process(Carbon $startedAt, PipelineStatusEnum $status, float $duration = null, float $queueDuration = null, array $succeedingBuilds = [])
+    public function process(Carbon $startedAt, PipelineStatusEnum $status, ?float $duration = null, ?float $queueDuration = null, array $succeedingBuilds = [])
     {
         Log::info("Processing pipeline {$this->pipeline_id} for project {$this->project_id}");
         throw_if(self::isOutsideTimeFrame($startedAt, $this->project), PipelineException::class, "Past deadline");
@@ -153,7 +153,7 @@ class Pipeline extends Model
             /** @var (ProjectSubTask|null)[] $subTasksToCreate */
             $subTasksToCreate = array_map(function ($build) use ($tracking) {
                 /** @var SubTask|null $subTask */
-                $subTask = $tracking->get($build);
+                $subTask = $tracking->get(strtolower($build));
 
                 if ( ! $subTask)
                 {
@@ -244,7 +244,7 @@ class Pipeline extends Model
     }
 
     /**
-     * @return BelongsTo<Project,Pipeline>
+     * @return BelongsTo<Project, $this>
      */
     public function project(): BelongsTo
     {
@@ -252,7 +252,7 @@ class Pipeline extends Model
     }
 
     /**
-     * @return MorphMany<ProjectSubTask>
+     * @return MorphMany<ProjectSubTask, $this>
      */
     public function subTasks(): MorphMany
     {

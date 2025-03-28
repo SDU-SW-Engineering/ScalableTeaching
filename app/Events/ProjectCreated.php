@@ -27,6 +27,4 @@ class ProjectCreated
     {
         $this->project = $project;
     }
-
-
 }

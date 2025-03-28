@@ -37,7 +37,7 @@ class RegisterWebhook implements ShouldQueue
      */
     public function handle(ProjectCreated $event)
     {
-        if ( ! $event->project->task->isCodeTask())
+        if ( ! $event->project->task->isTemplateTask())
         {
             return;
         }
@@ -46,7 +46,7 @@ class RegisterWebhook implements ShouldQueue
         $currentHooks = new Collection($manager->projects()->hooks($event->project->gitlab_project_id));
         if($currentHooks->isEmpty())
         {
-            $webhookUrl = env('GITLAB_WEBHOOK_URL');
+            $webhookUrl = config('scalable.webhook_url');
             $response = $manager->projects()->addHook($event->project->gitlab_project_id, $webhookUrl, [
                 'pipeline_events'         => true,
                 'token'                   => Project::token($event->project),

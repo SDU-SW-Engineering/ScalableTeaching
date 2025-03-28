@@ -7,8 +7,10 @@ use App\Models\Course;
 use App\Models\ProjectFeedback;
 use App\Models\Group;
 use App\Models\Project;
+use App\Models\ProjectSubTask;
 use App\Models\ProjectSubTaskComment;
 use App\Models\Task;
+use App\Models\TaskDelegation;
 use App\ProjectStatus;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -59,9 +61,9 @@ class TaskController extends Controller
             'text'        => $comment->text,
         ])->groupBy('sub_task_id');
 
-        $subTasks = $task->sub_tasks->all()->groupBy('group')->map(fn(\Illuminate\Support\Collection $subTasks, $group) => [
+        $subTasks = $task->sub_tasks->all()->groupBy('group')->map(fn(Collection $subTasks, $group) => [ // @phpstan-ignore argument.unresolvableType, argument.type
             'group' => $group,
-            'tasks' => $subTasks->map(fn(SubTask $subTask) => [
+            'tasks' => $subTasks->map(fn(SubTask $subTask) => [ // @phpstan-ignore argument.type
                 'name'           => $subTask->getDisplayName(),
                 'pointsAcquired' => $completedSubTasks?->has($subTask->getId()) ? $completedSubTasks->get($subTask->getId())->points ?? 1 : null,
                 'comments'       => $completedSubTaskComments?->has($subTask->getId()) ? $completedSubTaskComments->get($subTask->getId()) : [],
@@ -97,6 +99,8 @@ class TaskController extends Controller
         return view('tasks.show', [
             'course'               => $course,
             'task'                 => $task->setHidden(['markdown_description']),
+            'isTemplateTask'       => $task->isTemplateTask(),
+            'isMarkAsCompleteTask' => $task->isMarkAsCompleteTask(),
             'bg'                   => 'bg-gray-50 dark:bg-gray-600',
             'project'              => $project,
             'subTasks'             => count($subTasks) > 0
@@ -219,5 +223,46 @@ class TaskController extends Controller
         return [
             'route' => $nextExercise != null ? route('courses.tasks.show', [$course, $nextExercise]) : null,
         ];
+    }
+
+    public function destroy(Course $course, Task $task): RedirectResponse
+    {
+        if ($task->downloads() != null)
+        {
+            $task->downloads()->delete();
+        }
+        if ($task->protectedFiles() != null)
+        {
+            $task->protectedFiles()->delete();
+        }
+        if ($task->grades() != null)
+        {
+            $task->grades()->delete();
+        }
+        if ($task->delegations() != null)
+        {
+            $task->delegations()->get()->each(function ($delegation) {
+                /**
+                 * @var TaskDelegation $delegation
+                 */
+                $delegation->feedback()->delete();
+                $delegation->delete();
+            });
+        }
+        // This has to be done this way because:
+        // When executing a mass delete statement via Eloquent, the deleting events will not be fired for the deleted models.
+        // Read more: https://laravel.com/docs/5.6/eloquent#events
+        $task->projects()->get()->each(function ($project) {
+            /** @var Project $project */
+            if ($project->subTasks() != null)
+            {
+                $project->subTasks()->delete();
+                $project->pipelines()->delete();
+            }
+            $project->delete();
+        });
+        $task->delete();
+
+        return redirect()->route('courses.manage.exercises.index', [$course]);
     }
 }

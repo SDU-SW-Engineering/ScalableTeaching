@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\ProjectCreated;
+use App\Events\ProjectDeleting;
 use App\Jobs\Project\RefreshMemberAccess;
 use App\Models\Enums\CorrectionType;
 use App\Modules\AutomaticGrading\AutomaticGrading;
@@ -35,8 +36,8 @@ use Illuminate\Support\Facades\Log;
  * @property int $task_id
  * @property string $repo_name
  * @property ProjectStatus $status
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @method static Builder|Project newModelQuery()
  * @method static Builder|Project newQuery()
  * @method static Builder|Project query()
@@ -81,12 +82,11 @@ class Project extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $dates = ['finished_at'];
-
     protected $casts = [
         'validation_errors' => 'collection',
         'status'            => ProjectStatus::class,
         'validated_at'      => 'datetime',
+        'finished_at'       => 'datetime',
     ];
 
     protected $hidden = ['final_commit_sha'];
@@ -97,7 +97,8 @@ class Project extends Model
     ];
 
     protected $dispatchesEvents = [
-        'created' => ProjectCreated::class,
+        'created'  => ProjectCreated::class,
+        'deleting' => ProjectDeleting::class,
     ];
 
     protected static function booted()
@@ -118,7 +119,7 @@ class Project extends Model
     }
 
     /**
-     * @return MorphTo<Model,Project>
+     * @return MorphTo<Model, $this>
      */
     public function ownable(): MorphTo
     {
@@ -126,7 +127,7 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<Pipeline>
+     * @return HasMany<Pipeline, $this>
      */
     public function pipelines(): HasMany
     {
@@ -134,7 +135,7 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<ProjectPush>
+     * @return HasMany<ProjectPush, $this>
      */
     public function pushes(): HasMany
     {
@@ -142,7 +143,7 @@ class Project extends Model
     }
 
     /**
-     * @return BelongsTo<Task,Project>
+     * @return BelongsTo<Task, $this>
      */
     public function task(): BelongsTo
     {
@@ -150,7 +151,7 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<ProjectSubTask>
+     * @return HasMany<ProjectSubTask, $this>
      */
     public function subTasks(): HasMany
     {
@@ -158,7 +159,7 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<ProjectSubTaskComment>
+     * @return HasMany<ProjectSubTaskComment, $this>
      */
     public function subTaskComments(): HasMany
     {
@@ -166,7 +167,7 @@ class Project extends Model
     }
 
     /**
-     * @return HasOne<ProjectDownload>
+     * @return HasOne<ProjectDownload, $this>
      */
     public function download(): HasOne
     {
@@ -174,7 +175,7 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<ProjectFeedback>
+     * @return HasMany<ProjectFeedback, $this>
      */
     public function feedback(): HasMany
     {
@@ -182,7 +183,7 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<ProjectDiffIndex>
+     * @return HasMany<ProjectDiffIndex, $this>
      */
     public function changes(): HasMany
     {
@@ -274,7 +275,7 @@ class Project extends Model
 
     public function progress(): int
     {
-        if ($this->task->isTextTask())
+        if ($this->task->isMarkAsCompleteTask())
         {
             return $this->getProgressBasedOnFinished();
         }
@@ -387,7 +388,7 @@ class Project extends Model
         return $latestPush?->download();
     }
 
-    public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, ?array $gradeMeta = [], Carbon $startedAt = null, Carbon $endedAt = null): void
+    public function setProjectStatusFor(ProjectStatus $status, string $ownableType, int $ownableId, ?array $gradeMeta = [], ?Carbon $startedAt = null, ?Carbon $endedAt = null): void
     {
         $this->update([
             'status'      => $status,
@@ -473,7 +474,7 @@ class Project extends Model
 
     /**
      * Returns all pushes that have been made within the deadline of the project with a valid sha.
-     * @return HasMany<ProjectPush> a list of pushes in descending order
+     * @return HasMany<ProjectPush, $this> a list of pushes in descending order
      */
     public function relevantPushes() : HasMany
     {

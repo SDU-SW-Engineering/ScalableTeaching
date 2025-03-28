@@ -111,7 +111,7 @@ test('dailyBuilds returns an array of days between start date and day before now
     $days = $dailyBuilds->map(fn($v, $k) => $k)->values();
     expect($days[0])->toBe($start->format('Y-m-d'))
         ->and($days[count($days) - 1])->toBe(now()->subDay()->format('Y-m-d'))
-        ->and($dailyBuilds)->toHaveLength($start->diff(now())->days);
+        ->and($dailyBuilds)->toHaveLength($start->diffInDays(now()));
 });
 
 test('dailyBuilds returns an array of days between start date and now', function() {
@@ -126,7 +126,7 @@ test('dailyBuilds returns an array of days between start date and now', function
     $days = $dailyBuilds->map(fn($v, $k) => $k)->values();
     expect($days[0])->toBe($start->format('Y-m-d'));
     expect($days[count($days) - 1])->toBe(now()->format('Y-m-d'));
-    expect($dailyBuilds)->toHaveLength($start->diff(now())->days + 1);
+    expect($dailyBuilds)->toHaveLength($start->diffInDays(now()) + 1);
 });
 
 test('dailyBuilds returns an array with appropriate count of builds', function() {

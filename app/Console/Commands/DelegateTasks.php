@@ -36,7 +36,7 @@ class DelegateTasks extends Command
             try
             {
                 $taskDelegation->delegate();
-            } catch(TaskDelegationException|Throwable $e)
+            } catch(TaskDelegationException|Throwable $e) //@phpstan-ignore catch.neverThrown
             {
                 $this->error($e->getMessage());
             }

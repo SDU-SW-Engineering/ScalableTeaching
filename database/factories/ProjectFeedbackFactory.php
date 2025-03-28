@@ -17,7 +17,9 @@ class ProjectFeedbackFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'pseudonym' => $this->faker->word(),
+            'sha'       => $this->faker->sha256(),
+            'reviewed'  => $this->faker->boolean(),
         ];
     }
 }

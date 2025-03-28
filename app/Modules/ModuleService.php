@@ -65,10 +65,10 @@ class ModuleService
     {
         $unmetDependencies = $this->unmetDependencies((new $module), $configuration);
         if(count($unmetDependencies) > 0)
-            return "Requires the \"${unmetDependencies[0]}\" module.";
+            return "Requires the \"{$unmetDependencies[0]}\" module.";
         $conflictingInstallations = $this->conflictingInstallations((new $module), $configuration);
         if (count($conflictingInstallations) > 0)
-            return "Conflicts with the \"${conflictingInstallations[0]}\" module.";
+            return "Conflicts with the \"{$conflictingInstallations[0]}\" module.";
 
         // check dependencies
         // individual requiremnts for each module

@@ -20,7 +20,7 @@ class GroupUser extends Pivot
     protected $casts = ['is_owner' => 'bool'];
 
     /**
-     * @return BelongsTo<Group,GroupUser>
+     * @return BelongsTo<Group, $this>
      */
     public function group() : BelongsTo
     {

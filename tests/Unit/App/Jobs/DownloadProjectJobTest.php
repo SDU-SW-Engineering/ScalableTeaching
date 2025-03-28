@@ -144,13 +144,14 @@ it('should handle errors from GitLab API gracefully', function() {
         'queued_at'     => Carbon::now(),
     ])->for($this->project)->create();
 
+
     $this->mock(GitLabManager::class, function (MockInterface $mock) use ($projectDownload) {
         $mock->shouldReceive('repositories->archive')->once()->with($projectDownload->project->gitlab_project_id, [
             'sha' => $projectDownload->ref,
         ], 'zip')->andThrow(new \Exception('Mocked GitLab API error'));
     });
 
-    \Illuminate\Support\Facades\Log::shouldReceive('info')->once();
+    \Illuminate\Support\Facades\Log::shouldReceive('info')->twice();
     \Illuminate\Support\Facades\Log::shouldReceive('error')->once();
 
 
@@ -158,10 +159,7 @@ it('should handle errors from GitLab API gracefully', function() {
     $job->handle();
 
     // Assert
-    $projectDownload->refresh();
-    expect($projectDownload->location)->toBeNull();
-    expect($projectDownload->downloaded_at)->toBeNull();
-    expect($projectDownload->queued_at)->not()->toBeNull();
+    expect(ProjectDownload::find($projectDownload->id))->toBeNull();
 });
 
-?>
+

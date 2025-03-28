@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Task;
 use App\ProjectStatus;
+use DB;
 use Domain\Analytics\Graph\DataSets\BarDataSet;
 use Domain\Analytics\Graph\DataSets\LineDataSet;
 use Domain\Analytics\Graph\Graph;
@@ -26,7 +27,7 @@ class OverviewController extends Controller
         $buildsToday = $task->jobs()->whereRaw("date(pipelines.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
 
         $projectQuery = $task->projects()
-            ->select('*', \DB::raw('TIMESTAMPDIFF(second,created_at, finished_at) as duration'))
+            ->select('*', DB::raw('TIMESTAMPDIFF(second,created_at, finished_at) as duration'))
             ->withCount('pipelines')
             ->orderBy(request('sort', 'created_at'), request('direction', 'desc'));
 

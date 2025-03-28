@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enums\FeedbackCommentStatus;
+use DateTime;
 use Domain\Files\Highlight;
 use Domain\Files\HighlightedLine;
 use Eloquent;
@@ -29,7 +30,7 @@ class ProjectFeedbackComment extends Model
 
     protected $hidden = ['mark_as'];
 
-    protected $appends = ['time_since'];
+    protected $appends = ['time_since']; // @phpstan-ignore rules.modelAppends
 
     protected $casts = [
         'status'      => FeedbackCommentStatus::class,
@@ -55,7 +56,7 @@ class ProjectFeedbackComment extends Model
 
 
     /**
-     * @return BelongsTo<ProjectFeedback,ProjectFeedbackComment>
+     * @return BelongsTo<ProjectFeedback, $this>
      */
     public function feedback(): BelongsTo
     {
@@ -63,7 +64,7 @@ class ProjectFeedbackComment extends Model
     }
 
     /**
-     * @return BelongsTo<User,ProjectFeedbackComment>
+     * @return BelongsTo<User, $this>
      */
     public function reviewer(): BelongsTo
     {

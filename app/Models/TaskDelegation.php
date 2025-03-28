@@ -47,7 +47,7 @@ class TaskDelegation extends Model
     ];
 
     /**
-     * @return BelongsTo<CourseRole,TaskDelegation>
+     * @return BelongsTo<CourseRole, $this>
      */
     public function role(): BelongsTo
     {
@@ -55,7 +55,7 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @return BelongsTo<Task, TaskDelegation>
+     * @return BelongsTo<Task, $this>
      */
     public function task(): BelongsTo
     {
@@ -65,7 +65,7 @@ class TaskDelegation extends Model
     /**
      * Is only used for attaching or getting users for a certain delegation
      * THIS SHOULD NOT BE USED WHEN DELEGATING {@see delegationUserPool()}
-     * @return BelongsToMany<User>
+     * @return BelongsToMany<User, $this>
      */
     public function userPool(): BelongsToMany
     {
@@ -73,7 +73,7 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @return HasMany<ProjectFeedback>
+     * @return HasMany<ProjectFeedback, $this>
      */
     public function feedback(): HasMany
     {
@@ -81,7 +81,7 @@ class TaskDelegation extends Model
     }
 
     /**
-     * @return HasManyThrough<ProjectFeedbackComment>
+     * @return HasManyThrough<ProjectFeedbackComment, ProjectFeedback, $this>
      */
     public function comments(): HasManyThrough
     {
@@ -106,17 +106,21 @@ class TaskDelegation extends Model
         throw_if($this->task->ends_at->gt(now()), new TaskDelegationException('Cannot delegate before task has ended.'));
         throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
 
-        // Max cases where all project gets reviewed.
+
         if ($this->number_of_projects === 0 || $this->number_of_projects >= $this->task->projects->count() - 1)
-        {
+        { // Max cases where all project gets reviewed by all reviewers.
             $this->delegateAllProjects();
+        } elseif ($this->course_role_id == 2)
+        { // If projects should be equally distributed amongst teachers.
+            $this->delegateSplitEqually();
         } else if ($this->delegationUserPool()->count() == $this->task->course->students()->count())
-        {
+        { // If all students should review "$this->number_of_projects" projects each.
             $this->delegateCircular();
         } else
-        {
+        { // IDK when this would be hit, but in case I missed something projects will be split equally.
             $this->delegateSplitEqually();
         }
+
         $this->update(['delegated' => true]);
     }
 
@@ -126,7 +130,7 @@ class TaskDelegation extends Model
     private function delegateAllProjects(): void
     {
         $delayCounter = 0;
-        $allProjects = $this->task->projects->keyBy('id');
+        $allProjects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade
         foreach ($this->delegationUserPool() as $delegationUser)
         {
             $userProject = $this->userProject($delegationUser);
@@ -152,7 +156,7 @@ class TaskDelegation extends Model
     private function delegateCircular(): void
     {
         $delayCounter = 0;
-        $projects = $this->task->projects->keyBy('id');
+        $projects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade;
         $userPool = $this->delegationUserPool();
         for ($userIndex = 0; $userIndex < $userPool->count(); $userIndex++)
         {
@@ -175,7 +179,7 @@ class TaskDelegation extends Model
     {
         $delayCounter = 0;
         $userPool = $this->delegationUserPool();
-        $projects = $this->task->projects->keyBy('id');
+        $projects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade;
         $splitProjects = $projects->split($userPool->count());
         foreach ($userPool as $delegationUser)
         {
@@ -187,9 +191,10 @@ class TaskDelegation extends Model
 
             /** @var Collection $eligibleProjects */
             $eligibleProjects = $splitProjects->shift()->except($ineligibleProjects);
-            foreach ($eligibleProjects as $projectId)
+            foreach ($eligibleProjects as $project)
             {
-                $this->processProjectUpdate($projects->get($projectId), $delegationUser, $delayCounter);
+                /** @var Project $project */
+                $this->processProjectUpdate($project, $delegationUser, $delayCounter);
             }
         }
     }
