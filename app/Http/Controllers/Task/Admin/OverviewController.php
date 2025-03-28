@@ -17,10 +17,12 @@ class OverviewController extends Controller
 {
     public function index(Course $course, Task $task) : View
     {
-        if ($task->starts_at->isAfter(now())){
+        if ($task->starts_at->isAfter(now()))
+        {
             $projectCount = $task->projects()->where('ownable_id', '!=', null )->count();
             $projectsToday = $task->projects()->where('ownable_id', '!=', null )->whereRaw('date(created_at) = ?', now()->toDateString())->count();
-        } else {
+        } else
+        {
             $projectCount = $task->projects()->count();
             $projectsToday = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
         }
