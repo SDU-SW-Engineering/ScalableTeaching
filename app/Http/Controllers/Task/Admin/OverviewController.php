@@ -17,8 +17,13 @@ class OverviewController extends Controller
 {
     public function index(Course $course, Task $task) : View
     {
-        $projectCount = $task->projects()->count();
-        $projectsToday = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
+        if ($task->starts_at->isAfter(now())){
+            $projectCount = $task->projects()->where('ownable_id', '!=', null )->count();
+            $projectsToday = $task->projects()->where('ownable_id', '!=', null )->whereRaw('date(created_at) = ?', now()->toDateString())->count();
+        } else {
+            $projectCount = $task->projects()->count();
+            $projectsToday = $task->projects()->whereRaw('date(created_at) = ?', now()->toDateString())->count();
+        }
         $finishedCount = $task->projects()->where('status', ProjectStatus::Finished)->count();
         $finishedPercent = $projectCount == 0 ? 0 : $finishedCount / $projectCount * 100;
         $failedCount = $task->projects()->where('status', ProjectStatus::Overdue)->count();
