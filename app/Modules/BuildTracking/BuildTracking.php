@@ -28,6 +28,7 @@ class BuildTracking extends Module
     {
         Route::get('builds', [BuildTrackingController::class, 'builds'])->name('builds');
         Route::get('redirect_pipeline/{project}', [BuildTrackingController::class, 'browseGitlabPipeline'])->name('redirect_pipeline');
+        Route::get('redirect_commit/{project}', [BuildTrackingController::class, 'browseGitlabCommit'])->name('redirect_push');
     }
 
 

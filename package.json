@@ -45,5 +45,5 @@
     "vue-toast-notification": "^1",
     "vuedraggable": "^2.24.3"
   },
-    "packageManager": "yarn@1.22.1"
+  "packageManager": "yarn@1.22.1"
 }

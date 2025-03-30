@@ -1,3 +1,4 @@
+@php use App\Models\Group; @endphp
 @extends('tasks.admin.master')
 
 @section('adminContent')
@@ -7,7 +8,7 @@
         @foreach($pushes as $push)
             <div class="bg-gray-200 dark:bg-gray-700 flex mb-4 rounded-md items-center py-3 px-2">
                 <div class="px-4 flex items-center flex-col flex-shrink-0 w-40">
-                    @if($push->project->ownable_type == \App\Models\Group::class)
+                    @if($push->project->ownable_type == Group::class)
                         <div class="flex justify-end sm:justify-start lg:justify-end xl:justify-start -space-x-4">
                             @foreach($push->project->ownable->members as $member)
                                 <img alt="avatar" src="{{ $member->avatar }}"
@@ -77,7 +78,7 @@
                     </div>
                 </div>
                 <div>
-                    <a href="#"
+                    <a href="{{ route('courses.tasks.admin.buildTracking.redirect_commit', [$course, $task, $build->project, "commit_hash" => $push->after_sha]) }}"
                        class="text-sm flex items-center bg-gray-500 hover:bg-gray-400 transition-colors text-gray-100 py-1 px-1 rounded-md">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor" stroke-width="2">
