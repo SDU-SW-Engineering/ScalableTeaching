@@ -11,7 +11,8 @@
                 <welcome v-if="openedFile === null"/>
                 <code-viewer :context="context" :file="openedFile" :scrollTo="goToLine" v-else/>
             </div>
-            <div v-if="delegation != null && delegation.grading && showSubtasks" class="flex" style="height: calc(100vh - 112px)">
+            <div v-if="delegation != null && delegation.grading && showSubtasks" class="flex"
+                 style="height: calc(100vh - 112px)">
                 <subtasks-grading-view :sub-tasks.sync="subTasks"></subtasks-grading-view>
             </div>
             <div class="flex" style="height: calc(100vh - 112px)">
@@ -26,7 +27,7 @@
                    :loading="dialogLoading"
                    :error-text="dialogError"
                    type="danger" v-if="showSendFeedbackDialog" confirm-button-text="Submit">
-            <div>
+            <div class="gap-2">
                 <div v-if="delegation.grading" class="flex gap-2">
                     <div class="flex items-center">
                         <input v-model="grade"
@@ -55,7 +56,40 @@
                             Reject
                         </label>
                     </div>
-
+                </div>
+                <div>
+                    <div v-if="delegation.grading && true" class="flex-col gap-2">
+                        <p class="dark:text-white text-sm font-medium mt-1">Should unmarked subtasks be set to 0?</p>
+                        <div class="flex gap-2">
+                            <div class="flex items-center">
+                                <input class="relative float-left mt-0.5 mr-1 -ml-[1.5rem] h-4 w-4 appearance-none rounded-full border-2 border-solid border-neutral-300 dark:border-neutral-600 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary dark:checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary dark:checked:after:border-primary dark:checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:border-primary dark:checked:focus:border-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s]"
+                                       type="radio"
+                                       v-model="shouldSetToZero"
+                                       value="true"
+                                       name="shouldSetToZero"
+                                       id="radioDefault04"/>
+                                <label
+                                    class="mt-px inline-block pl-[0.15rem] text-sm text-lime-green-500 hover:cursor-pointer"
+                                    for="radioDefault04">
+                                    Yes
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input
+                                    class="relative float-left mt-0.5 mr-1 -ml-[1.5rem] h-4 w-4 appearance-none rounded-full border-2 border-solid border-neutral-300 dark:border-neutral-600 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary dark:checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary dark:checked:after:border-primary dark:checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:border-primary dark:checked:focus:border-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s]"
+                                    type="radio"
+                                    v-model="shouldSetToZero"
+                                    name="shouldSetToZero"
+                                    value="false"
+                                    id="radioDefault03"/>
+                                <label
+                                    class="mt-px inline-block text-sm pl-[0.15rem] text-red-500 hover:cursor-pointer"
+                                    for="radioDefault03">
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <p class="dark:text-white text-sm font-medium mt-1">General feedback:</p>
                 <textarea v-model="generalFeedback"
@@ -101,7 +135,7 @@ export default {
         downloadLink: {
             type: String,
             required: false
-        }
+        },
     },
     data() {
         return {
@@ -116,6 +150,7 @@ export default {
             dialogError: "",
             dialogLoading: false,
             grade: null,
+            shouldSetToZero: "true",
         }
     },
     methods: {
@@ -140,6 +175,17 @@ export default {
                 this.dialogError = "No grade selected"
                 return;
             }
+
+            if (this.shouldSetToZero === "true"){
+                for (const subtaskGroup of this.subTasks) {
+                    for (const subtask of subtaskGroup.tasks) {
+                        if (subtask.points === null){
+                            subtask.points = 0
+                        }
+                    }
+                }
+            }
+
             this.dialogError = "";
             this.dialogLoading = true;
             await axios.post(this.currentPath() + '/feedback', {
