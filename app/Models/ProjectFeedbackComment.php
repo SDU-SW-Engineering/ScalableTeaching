@@ -86,7 +86,7 @@ class ProjectFeedbackComment extends Model
     {
         $content = $this->feedback->project->download()->first()?->file($this->filename);
 
-        return (new Highlight($this->filename))->code($content);
+        return new Highlight($this->filename)->code($content);
     }
 
     /**

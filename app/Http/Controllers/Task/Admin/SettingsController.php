@@ -75,7 +75,7 @@ class SettingsController extends Controller
         $removeIds = $task->sub_tasks->all()->map(fn(SubTask $subTask) => $subTask->getId())->diff($selected->pluck('id'));
         $currentSubTasks->remove($removeIds->toArray());
         $selected->each(function($task) use ($currentSubTasks) {
-            $subTask = (new SubTask($task['name'], $task['alias'] == '' ? null : $task['alias']))
+            $subTask = new SubTask($task['name'], $task['alias'] == '' ? null : $task['alias'])
                 ->setPoints($task['points'])
                 ->setIsRequired($task['required']);
             if($task['id'] == null)
@@ -99,7 +99,7 @@ class SettingsController extends Controller
      */
     private function getSubTasks(?string $ciFile, Task $task): array
     {
-        $subTasks = collect((new CIReader($ciFile))->tasks())->map(fn(CITask $task) => [
+        $subTasks = collect(new CIReader($ciFile)->tasks())->map(fn(CITask $task) => [
             'stage'      => $task->getStage(),
             'name'       => $task->getName(),
             'id'         => null,

@@ -66,7 +66,7 @@ class Course extends Model
     }
 
     /**
-     * @return BelongsToMany<User, $this>
+     * @return BelongsToMany<User, $this, CourseUser, 'courseMembership'>
      */
     public function members(): BelongsToMany
     {
@@ -102,7 +102,7 @@ class Course extends Model
     }
 
     /**
-     * @return BelongsToMany<User, $this>
+     * @return BelongsToMany<User, $this, CourseUser, 'courseMembership'>
      */
     public function teachers(): BelongsToMany
     {
@@ -114,7 +114,7 @@ class Course extends Model
     }
 
     /**
-     * @return BelongsToMany<User, $this>
+     * @return BelongsToMany<User, $this, CourseUser, 'courseMembership'>
      */
     public function students(): BelongsToMany
     {

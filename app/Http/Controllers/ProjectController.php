@@ -148,12 +148,12 @@ class ProjectController extends Controller
         foreach($directories as $directory => $files)
         {
             $rootObject = new RootQueryObject();
-            $rootObject->selectProjects((new RootProjectsArgumentsObject())
+            $rootObject->selectProjects(new RootProjectsArgumentsObject()
                 ->setIds(["gid://gitlab/Project/$project->gitlab_project_id"])
                 ->setFirst(1))
                 ->selectNodes()
                 ->selectRepository()
-                ->selectTree((new RepositoryTreeArgumentsObject())->setPath(trim($directory, '/'))->setRef($project->final_commit_sha))
+                ->selectTree(new RepositoryTreeArgumentsObject()->setPath(trim($directory, '/'))->setRef($project->final_commit_sha))
                 ->selectBlobs()
                 ->selectNodes()
                 ->selectName()
@@ -268,7 +268,7 @@ class ProjectController extends Controller
     {
         $projectDownload = $project->download;
         $contents = $projectDownload->file(\request('path'));
-        $processedLines = (new Highlight(\request('path')))->code($contents);
+        $processedLines = new Highlight(\request('path'))->code($contents);
         if($processedLines == null)
             return response("Can't be opened", 400);
 
@@ -381,7 +381,7 @@ class ProjectController extends Controller
                     'user_id'     => $user->id,
                 ]);
             });
-            $tasks = (new Collection(request('tasks')))->map(fn($group) => $group['tasks'])->flatten(1);
+            $tasks = new Collection(request('tasks'))->map(fn($group) => $group['tasks'])->flatten(1);
             $tasksToCreate = $tasks->reject(fn($task) => $task['points'] === null)->map(fn($task) => [
                 'source_type' => $feedback::class,
                 'source_id'   => $feedback->id,

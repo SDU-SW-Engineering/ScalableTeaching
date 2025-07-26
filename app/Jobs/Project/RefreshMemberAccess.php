@@ -48,7 +48,7 @@ class RefreshMemberAccess implements ShouldQueue
             return $user->gitlab_id;
         });
 
-        $currentMemberIds = (new Collection($gitLabManager->projects()->members($this->project->gitlab_project_id)))->pluck('id');
+        $currentMemberIds = new Collection($gitLabManager->projects()->members($this->project->gitlab_project_id))->pluck('id');
 
         $memberIdsToAdd = $supposedMemberIds->diff($currentMemberIds);
         $memberIdsToRemove = $currentMemberIds->diff($supposedMemberIds);

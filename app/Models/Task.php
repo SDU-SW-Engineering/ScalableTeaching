@@ -405,12 +405,12 @@ class Task extends Model
     public function ciFile(): ?string
     {
         $rootObject = new RootQueryObject();
-        $rootObject->selectProjects((new RootProjectsArgumentsObject())
+        $rootObject->selectProjects(new RootProjectsArgumentsObject()
             ->setIds(["gid://gitlab/Project/$this->source_project_id"])
             ->setFirst(1))
             ->selectNodes()
             ->selectRepository()
-            ->selectBlobs((new RepositoryBlobsArgumentsObject())->setPaths(['.gitlab-ci.yml']))
+            ->selectBlobs(new RepositoryBlobsArgumentsObject()->setPaths(['.gitlab-ci.yml']))
             ->selectNodes()
             ->selectName()
             ->selectRawBlob();

@@ -17,9 +17,9 @@ beforeEach(function () {
     /** @var Task $task */
     $task = Task::factory([
         'sub_tasks'       => [
-            (new SubTask('11 Equals [10, 1]', 'test 11 equals [10, 1]'))->setIsRequired(true),
+            new SubTask('11 Equals [10, 1]', 'test 11 equals [10, 1]')->setIsRequired(true),
             new SubTask('9 Equals [5,2,2]', 'test 9 equals [5,2,2]'),
-            (new SubTask('2 Equals [2]', 'test 2 equals [2]'))->setIsRequired(true),
+            new SubTask('2 Equals [2]', 'test 2 equals [2]')->setIsRequired(true),
         ],
     ])->for(Course::factory())->make();
 

@@ -24,4 +24,4 @@ jobs:
       - name: Install php-cs-fixer
         run: composer global require friendsofphp/php-cs-fixer
       - name: Check formatting
-        run: PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --dry-run --diff --verbose
+        run: php-cs-fixer fix --dry-run --diff --verbose
