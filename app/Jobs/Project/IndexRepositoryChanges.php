@@ -22,7 +22,7 @@ class IndexRepositoryChanges implements ShouldQueue
     public function middleware(): array
     {
         return [
-            (new WithoutOverlapping($this->project->id . '-' . $this->comparisonSha))->dontRelease(),
+            new WithoutOverlapping($this->project->id . '-' . $this->comparisonSha)->dontRelease(),
         ];
     }
 

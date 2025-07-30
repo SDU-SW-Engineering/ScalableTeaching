@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
@@ -75,7 +76,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * @return BelongsToMany<Group, $this>
+     * @return BelongsToMany<Group, $this, GroupUser>
      */
     public function groups(): BelongsToMany
     {
@@ -99,7 +100,7 @@ class User extends Authenticatable
     }
 
     /**
-     * @return BelongsToMany<Course, $this>
+     * @return BelongsToMany<Course, $this, Pivot, 'App\\Models\\CourseUser'>
      */
     public function courses(): BelongsToMany
     {

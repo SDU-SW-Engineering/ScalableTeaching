@@ -45,7 +45,7 @@ class WebhookController extends Controller
         if($pipeline == null)
             $pipeline = $this->createPipeline($project);
 
-        $tracking = (new Collection($project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => strtolower($task->getName())]);
+        $tracking = new Collection($project->task->sub_tasks->all())->mapWithKeys(fn(SubTask $task) => [$task->getId() => strtolower($task->getName())]);
         $builds = new Collection(request('builds'));
         $succeedingBuilds = $builds->filter(fn($build) => $tracking->contains(strtolower($build['name'])) && $build['status'] == 'success');
         try

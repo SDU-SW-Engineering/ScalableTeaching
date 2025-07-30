@@ -146,7 +146,7 @@ class SubTaskCollection implements Castable
                 if ($value == null)
                     return new SubTaskCollection();
 
-                return new SubTaskCollection((new Collection(json_decode($value, true)))->map(function ($v) {
+                return new SubTaskCollection(new Collection(json_decode($value, true))->map(function ($v) {
                     $task = new SubTask($v['name'], $v['alias']);
                     $task->setId($v['id']);
                     $task->setIsRequired($v['required'] ?? null);

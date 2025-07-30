@@ -83,8 +83,8 @@ class SubtasksController extends BaseController
     public function saveSubTasks(Course $course, Task $task): string
     {
         $subTaskCollection = new SubTaskCollection();
-        (new Collection(request()->json()))->map(fn($group) => [
-            ...(new Collection($group['tasks']))->map(function($task) use ($group) {
+        new Collection(request()->json())->map(fn($group) => [
+            ...new Collection($group['tasks'])->map(function($task) use ($group) {
                 abort_if($task['points'] == 0, 400, "Unable to save: \"{$task['name']}\" must have more then 0 points");
                 $subTask = new SubTask($task['name'], null, $group['name']);
                 $subTask->setPoints($task['points']);

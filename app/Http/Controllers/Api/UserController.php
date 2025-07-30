@@ -35,7 +35,7 @@ class UserController extends Controller
         Log::debug("Searching for repositories with query: $query");
 
         $rootObject = new RootQueryObject();
-        $rootObject->selectProjects((new RootProjectsArgumentsObject())
+        $rootObject->selectProjects(new RootProjectsArgumentsObject()
             ->setMembership(true)
             ->setFirst(10)
             ->setSearch($query)

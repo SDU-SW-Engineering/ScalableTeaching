@@ -148,7 +148,7 @@ class Pipeline extends Model
                 'duration'       => $duration,
                 'queue_duration' => $queueDuration,
             ]);
-            $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [strtolower($task->getName()) => $task]);
+            $tracking = new Collection($this->project->task->sub_tasks->all())->mapWithKeys(fn(SubTask $task) => [strtolower($task->getName()) => $task]);
 
             /** @var (ProjectSubTask|null)[] $subTasksToCreate */
             $subTasksToCreate = array_map(function ($build) use ($tracking) {
@@ -214,7 +214,7 @@ class Pipeline extends Model
         }
 
         $jobs = $sourceControl->getPipelineJobs($this->project->gitlab_project_id, $this->pipeline_id);
-        $tracking = (new Collection($this->project->task->sub_tasks->all()))->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
+        $tracking = new Collection($this->project->task->sub_tasks->all())->mapWithKeys(fn(SubTask $task) => [$task->getId() => $task->getName()]);
         $succeedingBuilds = array_filter($jobs, fn(Job $job) => $tracking->contains($job->name) && $job->status == 'success');
         $this->process(
             startedAt: Carbon::parse($pipeline->createdAt)->setTimezone(config('app.timezone')),

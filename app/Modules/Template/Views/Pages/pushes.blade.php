@@ -78,7 +78,7 @@
                     </div>
                 </div>
                 <div>
-                    <a href="{{ route('courses.tasks.admin.buildTracking.redirect_commit', [$course, $task, $build->project, "commit_hash" => $push->after_sha]) }}"
+                    <a href="{{ route('courses.tasks.admin.buildTracking.redirect_commit', [$course, $task, $push->project()->first(), "commitHash" => $push->after_sha]) }}"
                        class="text-sm flex items-center bg-gray-500 hover:bg-gray-400 transition-colors text-gray-100 py-1 px-1 rounded-md">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor" stroke-width="2">

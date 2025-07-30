@@ -73,7 +73,7 @@ class ProjectDownload extends Model
     public function fileTree(): Directory
     {
         $root = new Directory(".");
-        $files = (new Collection(Storage::allFiles($this->location)))->map(fn(string $file) => str($file)->remove($this->location)->ltrim('/')->toString());
+        $files = new Collection(Storage::allFiles($this->location))->map(fn(string $file) => str($file)->remove($this->location)->ltrim('/')->toString());
 
         foreach($files as $fileName)
         {

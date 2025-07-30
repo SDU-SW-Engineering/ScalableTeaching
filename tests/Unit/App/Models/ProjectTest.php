@@ -157,9 +157,9 @@ test('progress returns 0 when correction type is PointsRequired and no subtasks 
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add(new SubTask("Test 1")->setPoints(30));
+    $subTasks->add(new SubTask("Test 2")->setPoints(40));
+    $subTasks->add(new SubTask("Test 3")->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 
@@ -173,9 +173,9 @@ test('progress returns 0 when correction type is not PointsRequired and no subta
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add(new SubTask("Test 1")->setPoints(30));
+    $subTasks->add(new SubTask("Test 2")->setPoints(40));
+    $subTasks->add(new SubTask("Test 3")->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 
@@ -189,9 +189,9 @@ test('progress returns 25 when correction type is not PointsRequired and one of 
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add(new SubTask("Test 1")->setPoints(30));
+    $subTasks->add(new SubTask("Test 2")->setPoints(40));
+    $subTasks->add(new SubTask("Test 3")->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 
@@ -213,9 +213,9 @@ test('progress returns 100 when correction type is not manual or required tasks 
     ])->for(Course::factory()))->createQuietly();
 
     $subTasks = new SubTaskCollection();
-    $subTasks->add((new SubTask("Test 1"))->setPoints(30));
-    $subTasks->add((new SubTask("Test 2"))->setPoints(40));
-    $subTasks->add((new SubTask("Test 3"))->setPoints(50));
+    $subTasks->add(new SubTask("Test 1")->setPoints(30));
+    $subTasks->add(new SubTask("Test 2")->setPoints(40));
+    $subTasks->add(new SubTask("Test 3")->setPoints(50));
     $project->task->update(['sub_tasks' => $subTasks]);
     $project->refresh();
 

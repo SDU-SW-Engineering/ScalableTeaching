@@ -41,7 +41,7 @@ class Survey extends Model
     }
 
     /**
-     * @return BelongsToMany<Task, $this>
+     * @return BelongsToMany<Task, $this, SurveyTask>
      */
     public function tasks(): BelongsToMany
     {

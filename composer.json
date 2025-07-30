@@ -18,7 +18,7 @@
         "barryvdh/laravel-ide-helper": "^v3.5.5",
         "cweagans/composer-patches": "^1.7",
         "erusev/parsedown": "^1.7",
-        "friendsofphp/php-cs-fixer": "^3.10",
+        "friendsofphp/php-cs-fixer": "^v3.84.0",
         "gmostafa/php-graphql-oqm": "^1.4",
         "graham-campbell/gitlab": "^7.6",
         "guzzlehttp/guzzle": "^7.2",

@@ -25,6 +25,7 @@
                 </span>
             @endif
         </div>
+
         <div class="flex items-end justify-between mt-4">
             <div class="flex gap-2 text-lime-green-600 dark:text-lime-green-400 text-sm">
                 <div class="flex flex-col">

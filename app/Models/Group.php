@@ -33,7 +33,7 @@ class Group extends Model
     protected $fillable = ['name'];
 
     /**
-     * @return BelongsToMany<User, $this>
+     * @return BelongsToMany<User, $this, GroupUser>
      */
     public function members() : BelongsToMany
     {
