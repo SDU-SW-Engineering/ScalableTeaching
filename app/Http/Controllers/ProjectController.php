@@ -192,12 +192,14 @@ class ProjectController extends Controller
         return redirect()->back();
     }
 
-    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
+    public function showEditor(Course $course, Task $task, Project $project): View
     {
+        /** @var ProjectFeedback|null $feedback*/
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // This is the case when the user that should be grading/giving feedback is logged in
 
-        /** @var ProjectFeedback|null $feedback */
-        $feedback = $project->feedback()->where('user_id', auth()->id())->first();
-        if ($feedback == null && $projectDownload->ref != null)
+        $projectDownload = ProjectDownload::find(array_keys(request()->input())[0]); // This is a severely bad way of acquiring the projectDownload TODO: Find a better way to acquire the projectDownload
+
+        if ($feedback == null && $projectDownload->ref != null) //this "$projectDownload" seem to be broken, I don't know when we hit this
         {
             $feedback = $project->feedback()->where('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
         }
@@ -215,6 +217,7 @@ class ProjectController extends Controller
             $feedback->reviewed == false                                              => 'pre-submission',
             $feedback->reviewed                                                       => 'submitted'
         };
+
         $delegation = $feedback->taskDelegation;
         $subTaskStatus = null;
         if($delegation->grading)
