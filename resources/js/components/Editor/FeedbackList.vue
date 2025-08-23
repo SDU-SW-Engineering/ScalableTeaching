@@ -36,6 +36,27 @@
                     </div>
                 </div>
             </div>
+
+            <div class="flex flex-col overflow-auto" :class="[context === 'recipient' ? 'feedback-list' : 'feedback-list-full']">
+                <div @click="goToFile(comment)" :class="[comment.shortFile == null ? '' : 'hover:bg-gray-700 cursor-pointer']" class=" transition-colors  p-2 flex flex-col" :key="comment.id" v-for="comment in comments">
+                    <span v-if="comment.shortFile != null" class="text-xs font-medium text-lime-green-400">{{ comment.shortFile }}:{{ comment.line }}</span>
+                    <span v-else class="text-xs font-medium text-lime-green-400">General feedback</span>
+                    <div :class="[comment.reviewer_feedback == null ? 'my-1 rounded' : 'mt-1 rounded-t']" class="bg-gray-600 p-2 text-white text-sm">
+                        <span v-text="comment.comment"></span>
+                    </div>
+                    <div class="flex flex-col bg-gray-900 p-2 rounded-b text-xs mb-2" v-if="comment.reviewer_feedback != null">
+                        <span class="text-white font-italic">Response from reviewer:</span>
+                        <span class="italic text-gray-300" v-text="comment.reviewer_feedback"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-white text-xs" v-text="comment.time_since"></span>
+                        <span class="text-yellow-300 text-xs font-medium" v-if="comment.status === 'pending'">Pending review</span>
+                        <span class="text-lime-green-300 text-xs font-medium" v-else-if="comment.status === 'approved'">Approved</span>
+                        <span class="text-red-400 text-xs font-medium" v-else-if="comment.status === 'rejected'">Rejected</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div v-if="context === 'pre-submission'">
             <div v-if="shouldGrade" class="flex items-center justify-center gap-4 my-4 mx-auto">
