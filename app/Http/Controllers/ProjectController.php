@@ -196,8 +196,10 @@ class ProjectController extends Controller
     {
         /** @var ProjectFeedback|null $feedback*/
         $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // This is the case when the user that should be grading/giving feedback is logged in
-
-        $projectDownload = ProjectDownload::find(array_keys(request()->input())[0]); // This is a severely bad way of acquiring the projectDownload TODO: Find a better way to acquire the projectDownload
+        $projectDownload = null;
+        if (request()->input() != []){
+            $projectDownload = ProjectDownload::find(array_keys(request()->input())[0]); // This is a severely bad way of acquiring the projectDownload TODO: Find a better way to acquire the projectDownload
+        }
 
         if ($feedback == null && $projectDownload->ref != null) //this "$projectDownload" seem to be broken, I don't know when we hit this
         {

@@ -221,6 +221,7 @@ class TaskDelegation extends Model
             'ref'       => $projectPush->after_sha,
             'expire_at' => now()->addYears(2),
         ]);
+
         DownloadProject::dispatch($download)->onQueue('downloads')->delay(now()->addMinutes($delayCounter / 2));
         $delayCounter++;
     }
