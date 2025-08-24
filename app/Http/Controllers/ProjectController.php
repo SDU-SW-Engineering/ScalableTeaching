@@ -195,13 +195,15 @@ class ProjectController extends Controller
     public function showEditor(Course $course, Task $task, Project $project): View
     {
         /** @var ProjectFeedback|null $feedback*/
-        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // This is the case when the user that should be grading/giving feedback is logged in
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // This is the case the user that should be grading/giving feedback is logged in
+
         $projectDownload = null;
-        if (request()->input() != []){
-            $projectDownload = ProjectDownload::find(array_keys(request()->input())[0]); // This is a severely bad way of acquiring the projectDownload TODO: Find a better way to acquire the projectDownload
+        if (array_key_exists('projectDownload', request()->input()))
+        {
+            $projectDownload = ProjectDownload::find(request('projectDownload'));
         }
 
-        if ($feedback == null && $projectDownload->ref != null) //this "$projectDownload" seem to be broken, I don't know when we hit this
+        if ($feedback == null && $projectDownload != null && $projectDownload->ref != null)
         {
             $feedback = $project->feedback()->where('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
         }
