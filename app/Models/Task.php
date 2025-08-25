@@ -568,9 +568,11 @@ class Task extends Model
     public function getSha(): ?string
     {
         $project = app(SourceControl::class)->showProject((string)$this->getGitlabProjectId());
-        if($project == null){
+        if($project == null)
+        {
             return null;
         }
+
         return $project->lastSha;
     }
 
