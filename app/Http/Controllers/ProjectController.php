@@ -248,7 +248,7 @@ class ProjectController extends Controller
     {
         $projectDownload = $project->download;
         $tree = $projectDownload->fileTree()->trim();
-        $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
+        $changes = $project->changes()->where('from', $project->task->getSha())->where('to', $projectDownload->ref)->first()?->changes;
         if($changes != null)
         {
             $filesChanged = array_column($changes, 'file');

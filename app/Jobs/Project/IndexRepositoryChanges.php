@@ -55,7 +55,8 @@ class IndexRepositoryChanges implements ShouldQueue
         /** @var ProjectDiffIndex|null $index */
         $index = $this->project->changes()->where('from', $this->project->task->getSha())->where('to', $this->comparisonSha)->first();
         if($index != null && $index->status == ProjectDiffIndexStatus::Success) // don't reindex if already successful
-        {\Log::info("A successful index of the changes is already created, aborting...");
+        {
+        \Log::info("A successful index of the changes is already created, aborting...");
 
             return;
         }
