@@ -49,7 +49,7 @@ class UnprotectDefaultBranch implements ShouldQueue
         $project = $gitLabManager->projects()->show($event->project->gitlab_project_id);
 
 
-        while (($project['import_error'] != null || $project['import_status'] != 'finished') && $attempts > 0)
+        while (($project['import_error'] != null || $project['import_status'] != 'finished') && $attempts > 1)
         { // The system is sometimes too fast for the Gitlab server, this buys the Gitlab server some more time before Scalable moves on.
             usleep(250000);
             $attempts--;

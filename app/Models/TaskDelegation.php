@@ -257,15 +257,22 @@ class TaskDelegation extends Model
      */
     private function delegationUserPool(): Collection
     {
-        if ($this->course_role_id == 1)
+        $userPoolCount = $this->userPool()->count();
+        if ($this->course_role_id == 1 && $userPoolCount == 0)
         {
             return $this->task->course->students;
         }
-        if ($this->course_role_id == 2)
+        elseif ($this->course_role_id == 1 && $userPoolCount != 0){
+            return $this->task->course->students->diff($this->userPool);
+        }
+        elseif ($this->course_role_id == 2 && $userPoolCount == 0)
         {
             return $this->task->course->teachers;
         }
-        if ($this->course_role_id == null)
+        elseif ($this->course_role_id == 2 && $userPoolCount != 0){
+            return $this->task->course->teachers->diff($this->userPool);
+        }
+        elseif ($this->course_role_id == null || $userPoolCount != 0)
         {
             return $this->userPool;
         }
