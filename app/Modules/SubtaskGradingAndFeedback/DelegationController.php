@@ -80,9 +80,11 @@ class DelegationController extends BaseController
         Log::info("Adding delegation for task {$task->id} in course {$course->id}.");
         $maxNumberOfProjectsToDelegate = $task->projects->count() - 1 > 0 ? $task->projects->count() - 1 : 1; // We don't want to delegate the task to the owner. But also don't want to only allow -1 if no projects are created
         $allowedIds = [];
-        if ($request->role === 'student') {
+        if ($request->role === 'student')
+        {
             $allowedIds = $course->students()->get()->pluck('id')->toArray();
-        } elseif ($request->role === 'teacher') {
+        } elseif ($request->role === 'teacher')
+        {
             $allowedIds = $course->teachers()->get()->pluck('id')->toArray();
         }
 
@@ -97,16 +99,18 @@ class DelegationController extends BaseController
             'options.moderation' => ['required_without_all:options.feedback,options.grade'],
             'options.grade'      => ['required_without_all:options.feedback,options.moderation'],
             'pool'               => [Rule::in(['user', 'role'])],
-            'excludedUsers' => [
+            'excludedUsers'      => [
                 'array',
                 function ($attribute, $value, $fail) use ($allowedIds) {
-                    if (count(array_diff($value, $allowedIds)) > 0) {
+                    if (count(array_diff($value, $allowedIds)) > 0)
+                    {
                         $fail('Some excluded users are not valid for the selected role.');
                     }
-                    if (count($value) === count($allowedIds) && !array_diff($allowedIds, $value)) {
+                    if (count($value) === count($allowedIds) && ! array_diff($allowedIds, $value))
+                    {
                         $fail('You cannot exclude all available users.');
                     }
-                }
+                },
             ],
         ]);
 
@@ -129,12 +133,16 @@ class DelegationController extends BaseController
                 'grading'            => $request->has('options.grade'),
             ]);
 
-            if($validated['pool'] == 'user'){
+            if($validated['pool'] == 'user')
+            {
                 $delegation->userPool()->attach($validated['users']);
-            } elseif (array_key_exists('excludedUsers', $validated)){
-                if($delegation->course_role_id == 1){
+            } elseif (array_key_exists('excludedUsers', $validated))
+            {
+                if($delegation->course_role_id == 1)
+                {
                     $delegation->userPool()->attach(array_diff($course->students()->get()->pluck('id')->toArray(), $validated['excludedUsers']));
-                } else {
+                } else
+                {
                     $delegation->userPool()->attach(array_diff($course->teachers()->get()->pluck('id')->toArray(), $validated['excludedUsers']));
                 }
             }

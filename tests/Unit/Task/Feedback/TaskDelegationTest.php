@@ -60,6 +60,7 @@ function createTeachers(int $count)
     $createdTeachers = User::factory($count)->hasAttached(test()->course, ['role' => 'teacher'])->create()->each(function(User $user) {
     });
     test()->teachers = $createdTeachers;
+
     return $createdTeachers;
 }
 
@@ -106,7 +107,8 @@ function delegateTasks_feedbackFromTeachers(int $numberOfProjects, ?array $excus
         'grading'            => 0,
         'deadline_at'        => test()->taskEndsAt->addDays(2),
     ]);
-    if ($excusedTeachers){
+    if ($excusedTeachers)
+    {
         $delegation->userPool()->attach($excusedTeachers);
     }
 
@@ -132,15 +134,17 @@ it('Delegates all projects to all teachers', function () {
 it('Delegates all projects to all teachers except excused teachers', function () {
     createStudents(4);
     $teachers = createTeachers(4)->pluck('id')->toArray();
-    test()->excusedTeachers = array_slice($teachers,1);
+    test()->excusedTeachers = array_slice($teachers, 1);
 
     delegateTasks_feedbackFromTeachers(0, test()->excusedTeachers);
 
     assertDatabaseCount('project_feedback', 8);
     test()->teachers->each(function($teacher) {
-        if (in_array($teacher->id, test()->excusedTeachers)) {
+        if (in_array($teacher->id, test()->excusedTeachers))
+        {
             expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(0);
-        } else {
+        } else
+        {
             expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(4);
         }
     });
@@ -161,15 +165,17 @@ it('Distributes projects evenly amongst teachers', function () {
 it('Distributes projects evenly amongst teachers except excused teachers', function () {
     createStudents(8);
     $teachers = createTeachers(4)->pluck('id')->toArray();
-    test()->excusedTeachers = array_slice($teachers,1);
+    test()->excusedTeachers = array_slice($teachers, 1);
 
     delegateTasks_feedbackFromTeachers(1, test()->excusedTeachers);
 
     assertDatabaseCount('project_feedback', 8);
     test()->teachers->each(function($teacher) {
-        if (in_array($teacher->id, test()->excusedTeachers)) {
+        if (in_array($teacher->id, test()->excusedTeachers))
+        {
             expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(0);
-        } else {
+        } else
+        {
             expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(4);
         }
     });

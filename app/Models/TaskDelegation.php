@@ -262,17 +262,19 @@ class TaskDelegation extends Model
         {
             return $this->task->course->students;
         }
-        elseif ($this->course_role_id == 1 && $userPoolCount != 0){
+        if ($this->course_role_id == 1 && $userPoolCount != 0)
+        {
             return $this->task->course->students->diff($this->userPool);
         }
-        elseif ($this->course_role_id == 2 && $userPoolCount == 0)
+        if ($this->course_role_id == 2 && $userPoolCount == 0)
         {
             return $this->task->course->teachers;
         }
-        elseif ($this->course_role_id == 2 && $userPoolCount != 0){
+        if ($this->course_role_id == 2 && $userPoolCount != 0)
+        {
             return $this->task->course->teachers->diff($this->userPool);
         }
-        elseif ($this->course_role_id == null || $userPoolCount != 0)
+        if ($this->course_role_id == null || $userPoolCount != 0)
         {
             return $this->userPool;
         }
