@@ -127,7 +127,8 @@ class CourseController extends Controller
         ]);
 
         $course->members()->attach(auth()->id(), ['role' => 'teacher']);
-        if ($course->teacher_access_to_gitlab_group){
+        if ($course->teacher_access_to_gitlab_group)
+        {
             AddMemberToCourseGroup::dispatch(auth()->user()->gitlab_id, $course->gitlab_group_id, GitLabUserAccessLevelEnum::OWNER->value);
         }
 
@@ -207,6 +208,7 @@ class CourseController extends Controller
         $course->teacher_access_to_gitlab_group = ! $course->teacher_access_to_gitlab_group;
         $course->save();
         UpdateTeachersAccessToCourseGitlabGroup::dispatch($course);
+
         return redirect()->back()->with('success-task', 'The access was updated.');
     }
 }

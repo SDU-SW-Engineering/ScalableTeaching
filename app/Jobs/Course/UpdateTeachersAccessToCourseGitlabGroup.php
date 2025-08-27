@@ -27,22 +27,30 @@ class UpdateTeachersAccessToCourseGitlabGroup implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->course->teacher_access_to_gitlab_group) {
-            foreach ($this->course->teachers()->get() as $teacher) {
-                try{
+        if ($this->course->teacher_access_to_gitlab_group)
+        {
+            foreach ($this->course->teachers()->get() as $teacher)
+            {
+                try
+                {
                     app(GitLabManager::class)->groups()->addMember($this->course->gitlab_group_id, $teacher->gitlab_id, $this->level);
                     continue;
-                } catch (Exception $exception) {
+                } catch (Exception $exception)
+                {
                     Log::error("An error occured trying to add teacher: ". $teacher->name . " From the Gitlab group of course: ".$this->course->name);
                     Log::error($exception->getMessage());
                 }
             }
-        } else {
-            foreach ($this->course->teachers()->get() as $teacher){
-                try{
+        } else
+        {
+            foreach ($this->course->teachers()->get() as $teacher)
+            {
+                try
+                {
                     app(GitLabManager::class)->groups()->removeMember($this->course->gitlab_group_id, $teacher->gitlab_id);
                     continue;
-                } catch (Exception $exception) {
+                } catch (Exception $exception)
+                {
                     Log::error("An error occured trying to remove teacher: ". $teacher->name . " From the Gitlab group of course: ".$this->course->name);
                     Log::error($exception->getMessage());
                 }

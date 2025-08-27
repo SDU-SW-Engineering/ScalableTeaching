@@ -29,8 +29,8 @@ it('allows admins to create courses', function () {
     ])->assertStatus(200)->assertSee('ScalableTeachingAutomatedTestCourse');
 
     $this->assertDatabaseHas('courses', [
-        'name' => 'ScalableTeachingAutomatedTestCourse',
-        'gitlab_group_id' => 123,
+        'name'                           => 'ScalableTeachingAutomatedTestCourse',
+        'gitlab_group_id'                => 123,
         'teacher_access_to_gitlab_group' => false,
     ]);
 });
@@ -49,8 +49,8 @@ it('does not attempt to add teachers to gitlab group when not selected', functio
     ])->assertStatus(200)->assertSee('ScalableTeachingAutomatedTestCourse');
 
     $this->assertDatabaseHas('courses', [
-        'name' => 'ScalableTeachingAutomatedTestCourse',
-        'gitlab_group_id' => 123,
+        'name'                           => 'ScalableTeachingAutomatedTestCourse',
+        'gitlab_group_id'                => 123,
         'teacher_access_to_gitlab_group' => false,
     ]);
 
@@ -67,13 +67,13 @@ it('attempts to teachers to gitlab group when selected', function () {
     $this->app->instance(GitLabManager::class, $mockManager);
 
     $this->followingRedirects()->post('/courses', [
-        'course-name' => 'ScalableTeachingAutomatedTestCourse',
+        'course-name'            => 'ScalableTeachingAutomatedTestCourse',
         'access-to-gitlab-group' => '1',
     ])->assertStatus(200)->assertSee('ScalableTeachingAutomatedTestCourse');
 
     $this->assertDatabaseHas('courses', [
-        'name' => 'ScalableTeachingAutomatedTestCourse',
-        'gitlab_group_id' => 123,
+        'name'                           => 'ScalableTeachingAutomatedTestCourse',
+        'gitlab_group_id'                => 123,
         'teacher_access_to_gitlab_group' => true,
     ]);
 
@@ -93,8 +93,8 @@ it('attempts to add teacher to the gitlab group', function () {
      * @var $course Course
      */
     $course = Course::factory()->create([
-        'name'=>'ScalableTeachingAutomatedTestCourse',
-        'gitlab_group_id' => 123,
+        'name'                           => 'ScalableTeachingAutomatedTestCourse',
+        'gitlab_group_id'                => 123,
         'teacher_access_to_gitlab_group' => false,
     ]);
 
@@ -117,8 +117,8 @@ it('attempts to remove teacher to the gitlab group', function () {
      * @var $course Course
      */
     $course = Course::factory()->create([
-        'name'=>'ScalableTeachingAutomatedTestCourse',
-        'gitlab_group_id' => 123,
+        'name'                           => 'ScalableTeachingAutomatedTestCourse',
+        'gitlab_group_id'                => 123,
         'teacher_access_to_gitlab_group' => true,
     ]);
 
@@ -172,5 +172,6 @@ function generateMockedGitlabManager(): GitLabManager
         ->andReturn($mockResponse);
 
     $mockManager->shouldReceive('getHttpClient')->andReturn($mockHttpClient);
+
     return $mockManager;
 }
