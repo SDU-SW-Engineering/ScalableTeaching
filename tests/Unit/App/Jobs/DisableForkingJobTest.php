@@ -21,14 +21,6 @@ beforeEach(function() {
         'ends_at'   => Carbon::create(2022, 8, 24, 23, 59),
     ])->for(Course::factory())->make();
 
-    $mockManager = Mockery::mock(GitLabManager::class);
-    $groupsMock = Mockery::mock();
-
-    $mockManager->shouldReceive('groups')->andReturn($groupsMock)->once();
-    $groupsMock->shouldReceive('removeMember')->with(1234, $admin->gitlab_id)->once();
-
-
-    $this->app->instance(GitLabManager::class, $mockManager);
 
     installTemplateModule($task);
 
