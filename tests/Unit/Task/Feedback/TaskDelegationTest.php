@@ -57,8 +57,11 @@ function createStudents(int $count, bool $withPushes = true)
 function createTeachers(int $count)
 {
     $count--; // Because each course a born with a teacher, see: beforeEach()
-    test()->teachers = User::factory($count)->hasAttached(test()->course, ['role' => 'teacher'])->create()->each(function(User $user) {
+    $createdTeachers = User::factory($count)->hasAttached(test()->course, ['role' => 'teacher'])->create()->each(function(User $user) {
     });
+    test()->teachers = $createdTeachers;
+
+    return $createdTeachers;
 }
 
 function createGroup()
@@ -93,7 +96,7 @@ function delegateTasks_feedbackFromStudents(int $numberOfProjects) : TaskDelegat
     return $delegation;
 }
 
-function delegateTasks_feedbackFromTeachers(int $numberOfProjects) : TaskDelegation
+function delegateTasks_feedbackFromTeachers(int $numberOfProjects, ?array $excusedTeachers = null) : TaskDelegation
 {
     /** @var TaskDelegation $delegation */
     $delegation = test()->task->delegations()->create([
@@ -104,6 +107,11 @@ function delegateTasks_feedbackFromTeachers(int $numberOfProjects) : TaskDelegat
         'grading'            => 0,
         'deadline_at'        => test()->taskEndsAt->addDays(2),
     ]);
+    if ($excusedTeachers)
+    {
+        $delegation->userPool()->attach($excusedTeachers);
+    }
+
     $delegation->delegate();
 
     $delegation->refresh();
@@ -121,7 +129,25 @@ it('Delegates all projects to all teachers', function () {
     test()->teachers->each(function($teacher) {
         expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(4);
     });
+});
 
+it('Delegates all projects to all teachers except excused teachers', function () {
+    createStudents(4);
+    $teachers = createTeachers(4)->pluck('id')->toArray();
+    test()->excusedTeachers = array_slice($teachers, 1);
+
+    delegateTasks_feedbackFromTeachers(0, test()->excusedTeachers);
+
+    assertDatabaseCount('project_feedback', 8);
+    test()->teachers->each(function($teacher) {
+        if (in_array($teacher->id, test()->excusedTeachers))
+        {
+            expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(0);
+        } else
+        {
+            expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(4);
+        }
+    });
 });
 
 it('Distributes projects evenly amongst teachers', function () {
@@ -133,6 +159,25 @@ it('Distributes projects evenly amongst teachers', function () {
     assertDatabaseCount('project_feedback', 8);
     test()->teachers->each(function($teacher) {
         expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(2);
+    });
+});
+
+it('Distributes projects evenly amongst teachers except excused teachers', function () {
+    createStudents(8);
+    $teachers = createTeachers(4)->pluck('id')->toArray();
+    test()->excusedTeachers = array_slice($teachers, 1);
+
+    delegateTasks_feedbackFromTeachers(1, test()->excusedTeachers);
+
+    assertDatabaseCount('project_feedback', 8);
+    test()->teachers->each(function($teacher) {
+        if (in_array($teacher->id, test()->excusedTeachers))
+        {
+            expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(0);
+        } else
+        {
+            expect(ProjectFeedback::where('user_id', $teacher->id)->get())->toHaveCount(4);
+        }
     });
 });
 

@@ -5,6 +5,7 @@ namespace App\Jobs\Project;
 use App\Models\Enums\ProjectDiffIndexStatus;
 use App\Models\Project;
 use App\Models\ProjectDiffIndex;
+use Clockwork\Request\Log;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -43,26 +44,32 @@ class IndexRepositoryChanges implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->project->task->current_sha == null)
+        \Log::info("Indexing changes in project: ".$this->project->repo_name." (ID: ".$this->project->id.')');
+
+        if ($this->project->task->getSha() == null)
         {
-            $this->fail(new \Exception("Task has no sha and a comparison can't be done."));
+            $this->fail(new \Exception("Task has no sha and a comparison therefor can't be done."));
 
             return;
         }
         /** @var ProjectDiffIndex|null $index */
-        $index = $this->project->changes()->where('from', $this->project->task->current_sha)->where('to', $this->comparisonSha)->first();
+        $index = $this->project->changes()->where('from', $this->project->task->getSha())->where('to', $this->comparisonSha)->first();
         if($index != null && $index->status == ProjectDiffIndexStatus::Success) // don't reindex if already successful
+        {
+        \Log::info("A successful index of the changes is already created, aborting...");
+
             return;
+        }
 
         $accessToken = config('sourcecontrol.users.default.token');
         $sourceControlProject = $this->project->sourceControl();
         $url = Str::of($sourceControlProject->cloneUrl)->replace('://', "://:$accessToken@");
-        exec("docker run jazerix/git-diff:latest $url {$this->project->task->current_sha} $this->comparisonSha 2>&1", $output, $code);
+        exec("docker run jazerix/git-diff:latest $url {$this->project->task->getSha()} $this->comparisonSha 2>&1", $output, $code);
 
         $index = $index == null ? new ProjectDiffIndex() : $index;
         $index->project_id = $this->project->id;
         $index->last_try = now();
-        $index->from = $this->project->task->current_sha;
+        $index->from = $this->project->task->getSha();
         $index->to = $this->comparisonSha;
         if($code != 0)
         {
@@ -74,6 +81,7 @@ class IndexRepositoryChanges implements ShouldQueue
                 default                     => "Unable to index: " . $output
             };
             $index->save();
+            \Log::info("An error occurred while trying to index project: ".$this->project->repo_name." (ID: ".$this->project->id.')\nReason: '.$index->message);
 
             return;
         }
@@ -102,5 +110,6 @@ class IndexRepositoryChanges implements ShouldQueue
         $index->changes = $changes;
         $index->status = ProjectDiffIndexStatus::Success;
         $index->save();
+        \Log::info("Indexing was successful in project: ".$this->project->id." (ID: ".$this->project->id.')');
     }
 }

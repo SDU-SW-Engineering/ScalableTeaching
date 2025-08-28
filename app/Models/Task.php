@@ -565,12 +565,15 @@ class Task extends Model
         );
     }
 
-    public function loadSha(): void
+    public function getSha(): ?string
     {
-        $project = app(SourceControl::class)->showProject((string)$this->source_project_id);
+        $project = app(SourceControl::class)->showProject((string)$this->getGitlabProjectId());
         if($project == null)
-            return;
-        $this->update(['current_sha' => $project->lastSha]);
+        {
+            return null;
+        }
+
+        return $project->lastSha;
     }
 
     /**

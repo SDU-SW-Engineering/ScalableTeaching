@@ -24,6 +24,8 @@
                             </div>
                         @endif
                     </div>
+                    <gitlab-access-dropdown route="{{ route('courses.toggleTeacherGitlabAccess', [$course]) }}"
+                                         :is-accesable="{{ $course->teacher_access_to_gitlab_group ? 'true' : 'false' }}"></gitlab-access-dropdown>
                 </div>
             </div>
         </div>

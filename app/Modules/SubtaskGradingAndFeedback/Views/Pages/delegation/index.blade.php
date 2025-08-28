@@ -62,38 +62,69 @@
                                    class="w-1/4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-r-lg focus:ring-lime-green-500 focus:border-lime-green-500 block p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500"
                                    type="text">
                         </div>
+                </div>
+                    <div class="grid grid-cols-2">
+                        <div class="col">
+                            <span class="text-left text-sm font-bold dark:text-white">Options</span>
+                            <div>
+                                <input @checked(old('options.grade')) name="options[grade]" id="grade" type="checkbox"
+                                    @class([
+                                        "w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer",
+                                        "cursor-not-allowed" => $isGradeDisabled
+                                    ])
+                                    @disabled($isGradeDisabled)>
+                                <label for="grade"
+                                    @class([
+                                         "text-gray-900 dark:text-gray-300 ml-2 font-medium text-sm",
+                                         "dark:text-gray-600 italic font-normal cursor-not-allowed" => $isGradeDisabled
+                                     ])
+                                >Grade</label>
+                            </div>
+                            <div>
+                                <input @checked(old('options.feedback')) id="feedback" type="checkbox"
+                                       name="options[feedback]"
+                                       class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                                <label for="feedback" class="ml-2 font-medium text-gray-900 text-sm dark:text-gray-300">Feedback</label>
+                            </div>
+                            <div>
+                                <input @checked(old('options.moderation')) name="options[moderation]" id="moderation"
+                                       type="checkbox"
+                                       class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                                <label for="moderation"
+                                    @class(['text-gray-900 dark:text-gray-300 ml-2 font-medium text-sm'])
+                                >Feedback moderation</label>
+                            </div>
+                        </div>
+                        @if(request('type') == 'role')
+                        <div class="col" id="exclude_students_container">
+                            <div>
+                                <span class="text-left text-sm font-bold dark:text-white">Exclude Students?</span>
+                            </div>
+                            <div>
+                                <select multiple name="excludedUsers[]"
+                                        class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-lime-green-500 focus:border-lime-green-500 block p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500">
+                                    @foreach($course->students()->orderBy('name')->get() as $user)
+                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col" id="exclude_teachers_container" hidden="">
+                            <div>
+                                <span class="text-left text-sm font-bold dark:text-white">Exclude Teachers?</span>
+                            </div>
+                            <div>
+                                <select multiple name="excludedUsers[]"
+                                        class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-lime-green-500 focus:border-lime-green-500 block p-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-lime-green-500 dark:focus:border-lime-green-500">
+                                    @foreach($course->teachers()->orderBy('name')->get() as $user)
+                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        @endif
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-left text-sm font-bold dark:text-white">Options</span>
-                        <div>
-                            <input @checked(old('options.grade')) name="options[grade]" id="grade" type="checkbox"
-                                @class([
-                                    "w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer",
-                                    "cursor-not-allowed" => $isGradeDisabled
-                                ])
-                                @disabled($isGradeDisabled)>
-                            <label for="grade"
-                                @class([
-                                     "text-gray-900 dark:text-gray-300 ml-2 font-medium text-sm",
-                                     "dark:text-gray-600 italic font-normal cursor-not-allowed" => $isGradeDisabled
-                                 ])
-                            >Grade</label>
-                        </div>
-                        <div>
-                            <input @checked(old('options.feedback')) id="feedback" type="checkbox"
-                                   name="options[feedback]"
-                                   class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                            <label for="feedback" class="ml-2 font-medium text-gray-900 text-sm dark:text-gray-300">Feedback</label>
-                        </div>
-                        <div>
-                            <input @checked(old('options.moderation')) name="options[moderation]" id="moderation"
-                                   type="checkbox"
-                                   class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
-                            <label for="moderation"
-                                @class(['text-gray-900 dark:text-gray-300 ml-2 font-medium text-sm'])
-                            >Feedback moderation</label>
-                        </div>
-                    </div>
+
                     <div id="NOP_delegation_student">
                         <label for="tasks" class="text-left text-sm font-bold dark:text-white">Number of
                             Projects</label>
@@ -177,7 +208,8 @@
                 document.getElementById("NOP_radio_0").disabled = true;
                 document.getElementById("NOP_input").disabled = false;
 
-
+                document.getElementById("exclude_teachers_container").hidden = true;
+                document.getElementById("exclude_students_container").hidden = false;
             } else if(this.value === "teacher"){
                 document.getElementById("NOP_delegation_student").hidden = true;
                 document.getElementById("NOP_delegation_teacher").hidden = false;
@@ -185,6 +217,9 @@
                 document.getElementById("NOP_radio_0").disabled = false;
                 document.getElementById("NOP_radio_0").disabled = false;
                 document.getElementById("NOP_input").disabled = true;
+
+                document.getElementById("exclude_teachers_container").hidden = false;
+                document.getElementById("exclude_students_container").hidden = true;
             }
         }
         const element = document.getElementById("role_selector");

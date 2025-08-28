@@ -46,7 +46,10 @@ Vue.component(
     "exercises",
     require("./components/Course/Management/Exercises").default
 );
-
+Vue.component(
+    "gitlab-access-dropdown",
+    require("./components/Course/GitlabAccessDropdown").default
+);
 Vue.component(
     "group-settings",
     require("./components/Course/Management/GroupSettings").default

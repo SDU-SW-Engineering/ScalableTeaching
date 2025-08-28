@@ -18,6 +18,7 @@ Route::post('/', [CourseController::class, 'store'])->name('store')->can('store'
 
 Route::group(['prefix' => '{course}', 'middleware' => ['can:view,course']], function() {
     Route::get('/', [CourseController::class, 'show'])->name('show');
+    Route::post('/toggleTeacherGitlabAccess', [CourseController::class, 'toggleTeacherGitlabAccess'])->name('toggleTeacherGitlabAccess')->middleware('can:toggleTeacherGitlabAccess,course');
 
     Route::group(['prefix' => 'tasks', 'as' => 'tasks.'], function() {
         Route::get('{task}', [TaskController::class, 'show'])->name('show');

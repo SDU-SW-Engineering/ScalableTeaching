@@ -57,4 +57,9 @@ class CoursePolicy
     {
         return $course->hasTeacher($user);
     }
+
+    public function toggleTeacherGitlabAccess(User $user, Course $course): bool
+    {
+        return $this->manage($user, $course);
+    }
 }

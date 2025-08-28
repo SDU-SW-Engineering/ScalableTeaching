@@ -58,7 +58,7 @@
                     </div>
                 </div>
                 <div>
-                    <div v-if="delegation.grading && true" class="flex-col gap-2">
+                    <div v-if="delegation.grading" class="flex-col gap-2">
                         <p class="dark:text-white text-sm font-medium mt-1">Should unmarked subtasks be set to 0?</p>
                         <div class="flex gap-2">
                             <div class="flex items-center">
@@ -176,7 +176,7 @@ export default {
                 return;
             }
 
-            if (this.shouldSetToZero === "true"){
+            if (this.delegation.grading && this.shouldSetToZero === "true"){
                 for (const subtaskGroup of this.subTasks) {
                     for (const subtask of subtaskGroup.tasks) {
                         if (subtask.points === null){

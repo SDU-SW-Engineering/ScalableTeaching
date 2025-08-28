@@ -192,12 +192,18 @@ class ProjectController extends Controller
         return redirect()->back();
     }
 
-    public function showEditor(Course $course, Task $task, Project $project, ProjectDownload $projectDownload): View
+    public function showEditor(Course $course, Task $task, Project $project): View
     {
+        /** @var ProjectFeedback|null $feedback*/
+        $feedback = $project->feedback()->where('user_id', auth()->id())->first(); // This is the case the user that should be grading/giving feedback is logged in
 
-        /** @var ProjectFeedback|null $feedback */
-        $feedback = $project->feedback()->where('user_id', auth()->id())->first();
-        if ($feedback == null && $projectDownload->ref != null)
+        $projectDownload = null;
+        if (array_key_exists('projectDownload', request()->input()))
+        {
+            $projectDownload = ProjectDownload::find(request('projectDownload'));
+        }
+
+        if ($feedback == null && $projectDownload != null && $projectDownload->ref != null)
         {
             $feedback = $project->feedback()->where('sha', $projectDownload->ref)->first(); // todo, this should probably be based on SHA
         }
@@ -215,6 +221,7 @@ class ProjectController extends Controller
             $feedback->reviewed == false                                              => 'pre-submission',
             $feedback->reviewed                                                       => 'submitted'
         };
+
         $delegation = $feedback->taskDelegation;
         $subTaskStatus = null;
         if($delegation->grading)
@@ -241,7 +248,7 @@ class ProjectController extends Controller
     {
         $projectDownload = $project->download;
         $tree = $projectDownload->fileTree()->trim();
-        $changes = $project->changes()->where('from', $project->task->current_sha)->where('to', $projectDownload->ref)->first()?->changes;
+        $changes = $project->changes()->where('from', $project->task->getSha())->where('to', $projectDownload->ref)->first()?->changes;
         if($changes != null)
         {
             $filesChanged = array_column($changes, 'file');

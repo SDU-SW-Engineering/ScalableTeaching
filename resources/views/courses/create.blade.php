@@ -12,6 +12,12 @@
                 </label>
                 <input value="{{ old('course-name') }}" id="course" type="text" name="course-name" placeholder="Advanced programming"
                        class=" bg-gray-50 flex-grow border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-green-400  block w-full p-2.5 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"/>
+
+                <div class="flex mt-3">
+                    <input type="checkbox" value="{{old('access-to-gitlab-group')}}" name="access-to-gitlab-group" class="w-5 h-5 text-lime-green-600 bg-gray-100 rounded border-gray-300 focus:ring-lime-green-700 dark:focus:ring-lime-green-800 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer" />
+                    <span class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Give teachers admin access to course on Gitlab?</span>
+                </div>
+
                 @if($errors->any())
                     <div class="text-red-800 dark:text-red-500 text-sm font-semibold">
                         <ul>

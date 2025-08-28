@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property bool $teacher_access_to_gitlab_group
  * @method static \Illuminate\Database\Eloquent\Builder|Course newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Course newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Course query()
@@ -44,7 +45,7 @@ class Course extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['max_groups_amount', 'max_groups', 'max_group_size', 'name', 'gitlab_group_id'];
+    protected $fillable = ['max_groups_amount', 'max_groups', 'max_group_size', 'name', 'gitlab_group_id', 'teacher_access_to_gitlab_group'];
     protected $hidden = ['enroll_token'];
 
     // region Relationships

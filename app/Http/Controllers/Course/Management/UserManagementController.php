@@ -54,6 +54,12 @@ class UserManagementController extends Controller
         ]);
 
         $course->members()->updateExistingPivot($validated['user'], ['role' => $validated['role']]);
+
+        if ( ! $course->teacher_access_to_gitlab_group)
+        {
+            return "ok";
+        }
+
         $userToUpdate = User::find($validated['user']);
         if ( ! $userToUpdate)
         {

@@ -93,7 +93,7 @@ class TaskController extends Controller
         $newProjectRoute = route('courses.tasks.createProject', [$course->id, $task->id]);
 
         $download = $project?->download;
-        $codeRoute = $download != null ? route('courses.tasks.show-editor', [$course, $task, $project, $download]) : null;
+        $codeRoute = $download != null ? route('courses.tasks.show-editor', [$course, $task, $project,'projectDownload' => $download]) : null;
 
 
         return view('tasks.show', [
