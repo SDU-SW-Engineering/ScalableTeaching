@@ -61,9 +61,11 @@ class MarkExpiredProjects extends Command
 
             $count = $task->projects()->where('status', 'active')->withTrashed()->each(function(Project $project) {
                 if ($project->pushes()->count() == 0) // If a project has no pushes, and we are after the deadline then the project must not have been handed in thus we set it to overdue
-                {$project->setProjectStatus(ProjectStatus::Overdue);
+                {
+                $project->setProjectStatus(ProjectStatus::Overdue);
                 } else // If there are pushes, and we are after the deadline then the project must be finished
-                {$project->setProjectStatus(ProjectStatus::Finished);
+                {
+                $project->setProjectStatus(ProjectStatus::Finished);
                 }
             });
             $this->info("Marked $count projects as overdue for task $task->name ($task->id).");
