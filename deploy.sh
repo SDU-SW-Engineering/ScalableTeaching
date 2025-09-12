@@ -6,7 +6,10 @@ git pull git@github.com-st:SDU-SW-Engineering/ScalableTeaching.git
 
 php artisan down --refresh=15 # Put app into maintenance mode
 
+
+
 # Build the frontend assets
+sudo chmod +x node_modules/.bin/mix # Make the binaries runnable for npm
 sudo npm run production # Build and minify the frontend assets
 
 # Laravel related commands
