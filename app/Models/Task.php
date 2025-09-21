@@ -194,6 +194,16 @@ class Task extends Model
     {
         return $this->hasManyThrough(ProjectDownload::class, Project::class);
     }
+
+    public function SubTaskGroups(): HasMany
+    {
+        return $this->hasMany(SubTaskGroup::class);
+    }
+
+    public function subTasks(): HasManyThrough{
+        return $this->hasManyThrough(SubTask::class, SubTaskGroup::class);
+    }
+
     // endregion
 
     /**
@@ -777,6 +787,11 @@ class Task extends Model
         return $this->module_configuration->isEnabled(ProtectFiles::class);
     }
 
+    /**
+     * @param Collection $completedSubTaskIds
+     * @return bool
+     * @todo Refactor to use the new SubTask system
+     */
     public function isMissingRequiredSubtasks(Collection $completedSubTaskIds): bool
     {
         if ( ! $this->module_configuration->isEnabled(AutomaticGrading::class))
@@ -793,6 +808,11 @@ class Task extends Model
         return count($missingRequiredSubtaskIds) > 0;
     }
 
+    /**
+     * @param Project $project
+     * @return bool
+     * @todo Refactor to use the new SubTask system
+    */
     public function hasProjectCompletedPointsRequired(Project $project): bool
     {
         if ( ! $this->module_configuration->isEnabled(AutomaticGrading::class))
