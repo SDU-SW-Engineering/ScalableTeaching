@@ -9,6 +9,7 @@ use InvalidArgumentException;
 
 /**
  * @implements Arrayable<int,int|string>
+ * @deprecated The old subTask system where JSON is stored in a field on the parent Task object is replaced in favor of a "free-standing-model" system which uses Laravel model system
  */
 class SubTask implements Arrayable
 {
