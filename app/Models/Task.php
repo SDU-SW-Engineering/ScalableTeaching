@@ -200,7 +200,8 @@ class Task extends Model
         return $this->hasMany(SubTaskGroup::class);
     }
 
-    public function subTasks(): HasManyThrough{
+    public function subTasks(): HasManyThrough
+    {
         return $this->hasManyThrough(SubTask::class, SubTaskGroup::class);
     }
 
