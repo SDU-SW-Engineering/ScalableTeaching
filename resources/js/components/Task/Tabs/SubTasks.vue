@@ -54,7 +54,15 @@
                                 <div class="flex justify-between items-center">
                                     <div class="flex items-center">
                                         <svg
-                                            v-if="ended && (task.pointsAcquired === null || task.pointsAcquired === 0) && projectStatus != null"
+                                            v-if="ended && task.pointsAcquired === null && projectStatus != null"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-4 w-4 text-gray-400 mr-1 flex-shrink-0" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                        <svg
+                                            v-else-if="ended && (task.pointsAcquired === null || task.pointsAcquired === 0) && projectStatus != null"
                                             xmlns="http://www.w3.org/2000/svg"
                                             class="h-4 w-4 text-red-400 mr-1 flex-shrink-0" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -77,24 +85,23 @@
                                         </svg>
                                         <span class="text-xs mr-2 text-black dark:text-gray-300">{{ task.name }}</span>
                                     </div>
-                                    <template v-if="correctionType === 'manual'">
-                                        <span v-if="task.pointsAcquired === null"
-                                              class="text-xs py-0.5 text-black dark:text-gray-400 font-medium">Ungraded</span>
-                                        <span v-else class="text-xs py-0.5 text-black dark:text-gray-300 font-medium">{{
-                                                task.pointsAcquired
-                                            }}/{{ task.points }}</span>
-                                    </template>
-                                    <template v-else>
-                                        <span v-if="task.pointsAcquired === null"
-                                              class="text-xs py-0.5 text-black dark:text-gray-400 font-medium">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-red-400 w-4 h-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
+
+                                    <template>
+                                        <span v-if="ended && task.pointsAcquired === null && projectStatus != null"
+                                              class="text-gray-400 mr-1 flex-shrink-0" fill="none">
+                                            {{task.pointsAcquired}} / {{task.points}}
                                         </span>
-                                        <span v-else class="text-xs py-0.5 text-black dark:text-gray-300 font-medium">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-lime-green-400 w-4 h-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                            </svg>
+                                        <span v-else-if="ended && (task.pointsAcquired === 0) && projectStatus != null"
+                                              class="text-red-400 mr-1 flex-shrink-0" fill="none">
+                                            {{task.pointsAcquired}} / {{task.points}}
+                                        </span>
+                                        <span v-else-if="ended && task.pointsAcquired < task.points  && projectStatus != null"
+                                              class="text-yellow-400 mr-1 flex-shrink-0">
+                                            {{task.pointsAcquired}} / {{task.points}}
+                                        </span>
+                                        <span  v-else-if="ended && task.pointsAcquired === task.points && projectStatus != null"
+                                               class="text-lime-green-600 mr-1 flex-shrink-0">
+                                            {{task.pointsAcquired}} / {{task.points}}
                                         </span>
                                     </template>
                                 </div>
