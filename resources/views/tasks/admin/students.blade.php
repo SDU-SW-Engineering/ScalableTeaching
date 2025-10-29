@@ -56,7 +56,7 @@
                     </td>
                     <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                         @if($student->groups()->where('course_id', $course->id)->first())
-                            <a href="{{route("courses.tasks.manage.groups.show", [$course, $task, $student->groups()->where('course_id', $course->id)->first()])}}">{{ $student->groups()->where('course_id', $course->id)->first()->name}}</a>
+                            <a href="{{route("courses.manage.groups.show", [$course, $student->groups()->where('course_id', $course->id)->first()])}}">{{ $student->groups()->where('course_id', $course->id)->first()->name}}</a>
                         @else
                             <p class="text-gray-600 whitespace-nowrap dark:text-gray-400">Not member of a group</p>
                         @endif
