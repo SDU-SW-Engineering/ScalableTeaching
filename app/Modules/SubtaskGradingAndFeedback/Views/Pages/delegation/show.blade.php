@@ -25,7 +25,7 @@
                     </div>
                     <div class="flex flex-col gap-4">
                         @foreach($groupedByUser[$user->id] as $projectDelegation)
-                            <a href="{{route("courses.tasks.show-editor", [$projectDelegation->project->task->course, $projectDelegation->project->task, $projectDelegation->project])}}">
+                            <a href="{{route("courses.tasks.show-editor", [$projectDelegation->project->task->course, $projectDelegation->project->task, $projectDelegation->project, 'projectDownload' => $projectDelegation->project->download()->first()])}}">
                                 <div
                                     class="bg-white dark:bg-gray-700 border p-1.5 dark:border-none rounded w-72 project-{{ $projectDelegation->project_id }}">
                                     <div class="flex items-center justify-between">
