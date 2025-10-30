@@ -298,6 +298,13 @@ class ProjectController extends Controller
         $isOwner = $project->owners()->contains(fn(User $user) => $user->is(auth()->user()));
         $feedbackIds = $isOwner ? $project->feedback()->reviewed()->pluck('id') : $project->feedback()->where('user_id', auth()->id())->pluck('id');
 
+
+
+        if ($feedbackIds->isEmpty() && $project->task->course->teachers->pluck('id')->contains(auth()->id())){
+            $feedback_id = $project->feedback()->first()->id;
+            return ProjectFeedbackComment::where("project_feedback_id", $feedback_id)->get();
+        }
+
         $query = ProjectFeedbackComment::whereIn('project_feedback_id', $feedbackIds)
             ->orderBy('filename')
             ->orderBy('line');
