@@ -300,8 +300,10 @@ class ProjectController extends Controller
 
 
 
-        if ($feedbackIds->isEmpty() && $project->task->course->teachers->pluck('id')->contains(auth()->id())){
+        if ($feedbackIds->isEmpty() && $project->task->course->teachers->pluck('id')->contains(auth()->id()))
+        {
             $feedback_id = $project->feedback()->first()->id;
+
             return ProjectFeedbackComment::where("project_feedback_id", $feedback_id)->get();
         }
 
