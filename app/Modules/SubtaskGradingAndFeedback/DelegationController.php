@@ -138,13 +138,7 @@ class DelegationController extends BaseController
                 $delegation->userPool()->attach($validated['users']);
             } elseif (array_key_exists('excludedUsers', $validated))
             {
-                if($delegation->course_role_id == 1)
-                {
-                    $delegation->userPool()->attach(array_diff($course->students()->get()->pluck('id')->toArray(), $validated['excludedUsers']));
-                } else
-                {
-                    $delegation->userPool()->attach(array_diff($course->teachers()->get()->pluck('id')->toArray(), $validated['excludedUsers']));
-                }
+                $delegation->userPool()->attach($validated['excludedUsers']);
             }
 
             return redirect()->back();
