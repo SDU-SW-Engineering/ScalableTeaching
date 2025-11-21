@@ -51,10 +51,10 @@
             </button>
         </div>
 
-        <div v-else-if="actions"
+        <div v-else-if="actions && perspective === 'sender'"
              class="flex bg-black rounded-b-md border-b border-r border-l border-gray-600">
 
-            <button @click="edit" v-if="perspective === 'sender'"
+            <button @click="edit"
                     class="w-full flex flex-col items-center py-2 first:rounded-bl-md hover:bg-gray-900">
                 <div class="h-5 w-5 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
@@ -65,7 +65,7 @@
                 </div>
                 <span class="text-xs text-gray-400 font-thin mt-1">Edit</span>
             </button>
-            <button @click="remove" v-if="perspective === 'sender'"
+            <button @click="remove"
                     class="w-full flex flex-col items-center py-2 first:rounded-bl-md hover:bg-gray-900">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                      class="text-gray-300 w-5 h-5">
