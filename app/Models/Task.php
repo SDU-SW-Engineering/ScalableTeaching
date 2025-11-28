@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\GitLabNameSanitizer;
 use App\Models\Casts\SubTaskCollection;
 use App\Models\Enums\CorrectionType;
 use App\Models\Enums\TaskTypeEnum;
@@ -649,7 +650,6 @@ class Task extends Model
             $projectName = $owner == null ? Str::slug("$this->name-" . Str::random(8)) : $owner->projectName;
             $project = $projects->firstWhere('name', $projectName);
 
-
             if ($project == null)
             {
                 $projectId = $this->getGitlabProjectId();
@@ -660,11 +660,11 @@ class Task extends Model
             /** @var Project $dbProject */
             $dbProject = $owner == null ? $this->projects()->create([
                 'gitlab_project_id'        => $project['id'],
-                'repo_name'                => $project['name'],
+                'repo_name'                => GitLabNameSanitizer::sanitize($project['name']),
             ]) : $owner->projects()->updateOrCreate([
                 'gitlab_project_id'        => $project['id'],
                 'task_id'                  => $this->id,
-                'repo_name'                => $project['name'],
+                'repo_name'                => GitLabNameSanitizer::sanitize($project['name']),
             ]);
         } else
         {
@@ -702,10 +702,10 @@ class Task extends Model
         {
             throw new Exception("Failed fetching source gitlab project with id $sourceProjectId - Error: " . $e->getMessage());
         }
-
+        $sanitizedName = GitlabNameSanitizer::sanitize($username);
         $params = [
-            'name'                   => $username,
-            'path'                   => $username,
+            'name'                   => $sanitizedName,
+            'path'                   => $sanitizedName,
             'namespace'              => $groupId,
             //'branches'               => $sourceProject['default_branch'], // Only include the default branch.
         ];
