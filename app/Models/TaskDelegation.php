@@ -271,6 +271,7 @@ class TaskDelegation extends Model
             $this->task->projects->where("status", "finished")->each(function ($project) use ($availableStudents) {
                 $availableStudents->push(...$project->owners()->all());
             });
+
             return $availableStudents;
         }
         if ($this->course_role_id == 1 && $userPoolCount != 0)
@@ -279,6 +280,7 @@ class TaskDelegation extends Model
             $this->task->projects->where("status", "finished")->each(function ($project) use ($availableStudents) {
                 $availableStudents->push(...$project->owners()->all());
             });
+
             return $availableStudents->diff($this->userPool);
         }
         if ($this->course_role_id == 2 && $userPoolCount == 0)
