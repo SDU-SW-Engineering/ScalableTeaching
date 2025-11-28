@@ -17,6 +17,7 @@ use function PHPUnit\Framework\assertEmpty;
 
 uses(RefreshDatabase::class);
 
+
 beforeEach(function () {
     Queue::fake();
 
@@ -86,6 +87,19 @@ it('delegates all projects to all teachers', function () {
     ]);
 });
 
+it('does not delegate to excluded students', function () {
+    $excusedStudents = $this->task->course->students()->take(1)->get();
+    createDelegation($this, 2, 1, $excusedStudents);
+    assertDatabaseCount('project_feedback', 0);
+    Artisan::call('tasks:delegate');
+    assertDatabaseCount('project_feedback', 6);
+    assertDatabaseHas('task_delegations', [
+        'delegated' => true,
+        'task_id'   => $this->task->id,
+    ]);
+    assertEmpty(ProjectFeedback::wherein("task_delegation_id", $this->task->delegations()->pluck("id")->toArray())->whereIn("user_id", $excusedStudents->pluck("id")->toArray())->get());
+});
+
 it('does not delegate to excluded teachers', function () {
     addTeachers($this, 4);
     $excusedTeachers = $this->task->course->teachers()->take(2)->get();
@@ -98,19 +112,6 @@ it('does not delegate to excluded teachers', function () {
         'task_id'   => $this->task->id,
     ]);
     assertEmpty(ProjectFeedback::wherein("task_delegation_id", $this->task->delegations()->pluck("id")->toArray())->whereIn("user_id", $excusedTeachers->pluck("id")->toArray())->get());
-});
-
-it('does not delegate to excluded students', function () {
-    $excusedStudents = $this->task->course->students()->take(1)->get();
-    createDelegation($this, 2, 1, $excusedStudents);
-    assertDatabaseCount('project_feedback', 0);
-    Artisan::call('tasks:delegate');
-    assertDatabaseCount('project_feedback', 6);
-    assertDatabaseHas('task_delegations', [
-        'delegated' => true,
-        'task_id'   => $this->task->id,
-    ]);
-    assertEmpty(ProjectFeedback::wherein("task_delegation_id", $this->task->delegations()->pluck("id")->toArray())->whereIn("user_id", $excusedStudents->pluck("id")->toArray())->get());
 });
 
 /**

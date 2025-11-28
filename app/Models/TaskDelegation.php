@@ -87,7 +87,15 @@ class TaskDelegation extends Model
     {
         return $this->hasManyThrough(ProjectFeedbackComment::class, ProjectFeedback::class);
     }
-
+    /**
+     *
+     * @param Builder<TaskDelegation> $query
+     * @return Builder<TaskDelegation>
+     */
+    public function scopeUndelegated(Builder $query): Builder
+    {
+        return $query->where('delegated', false);
+    }
     /**
      * @throws TaskDelegationException
      * @throws Throwable
@@ -96,7 +104,6 @@ class TaskDelegation extends Model
     {
         throw_if($this->task->ends_at->gt(now()), new TaskDelegationException('Cannot delegate before task has ended.'));
         throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
-
         if ($this->course_role_id != 2 && ($this->number_of_projects === 0 || $this->number_of_projects >= $this->task->projects->count() - 1))
         { // Max cases where all project gets reviewed by all reviewers.
             $this->delegateAllProjects();
@@ -128,7 +135,6 @@ class TaskDelegation extends Model
         {
             $userProject = $this->userProject($delegationUser);
             $ineligibleProjects = $userProject != null ? [$userProject] : [];
-
             $eligibleProjects = $allProjects->except($ineligibleProjects);
             foreach ($eligibleProjects as $project)
             {
@@ -137,9 +143,9 @@ class TaskDelegation extends Model
                  */
                 $this->processProjectUpdate($project, $delegationUser, $delayCounter);
             }
-
         }
     }
+
 
     /**
      * Handles delegating projects if every user should review a subset of projects.
@@ -152,14 +158,13 @@ class TaskDelegation extends Model
     private function delegateCircular(): void
     {
         $delayCounter = 0;
-        $projects = $this->getEligibleProjects(); // Last part is to ensure we don't get preloaded but unused projects to grade and don't get projects where no commits have been made
+        $projects = $this->getEligibleProjects();
         $userPool = $this->delegationUserPool();
         for ($userIndex = 0; $userIndex < $userPool->count(); $userIndex++)
         {
             $delegationUser = $userPool[$userIndex];
             $userProject = $this->userProject($delegationUser);
             $ineligibleProjects = $userProject != null ? [$userProject] : [];
-
             $eligibleProjects = $projects->except($ineligibleProjects);
             for ($projectIndex = 0; $projectIndex < $this->number_of_projects; $projectIndex++)
             {
@@ -262,11 +267,19 @@ class TaskDelegation extends Model
         $userPoolCount = $this->userPool()->count();
         if ($this->course_role_id == 1 && $userPoolCount == 0)
         {
-            return $this->task->course->students->whereIn("id", $this->task->projects->where("status", "finished")->pluck("id")->toArray());
+            $availableStudents = Collection::empty();
+            $this->task->projects->where("status", "finished")->each(function ($project) use ($availableStudents) {
+                $availableStudents->push(...$project->owners()->all());
+            });
+            return $availableStudents;
         }
         if ($this->course_role_id == 1 && $userPoolCount != 0)
         {
-            return $this->task->course->students->whereIn("id", $this->task->projects->where("status", "finished")->pluck("id")->toArray())->diff($this->userPool);
+            $availableStudents = Collection::empty();
+            $this->task->projects->where("status", "finished")->each(function ($project) use ($availableStudents) {
+                $availableStudents->push(...$project->owners()->all());
+            });
+            return $availableStudents->diff($this->userPool);
         }
         if ($this->course_role_id == 2 && $userPoolCount == 0)
         {
@@ -291,6 +304,8 @@ class TaskDelegation extends Model
      */
     public function getEligibleProjects(): Collection
     {
-        return $this->task->projects->keyBy('id')->whereNotNull("ownable_id")->whereNotNull("final_commit_sha");  // To ensure we don't get preloaded but unused projects to grade and don't get projects where no commits have been made
+        return $this->task->projects->keyBy('id')->whereNotNull("ownable_id")->filter(function (Project $project) {
+            return $project->relevantPushes()->count() != 0;
+        });  // To ensure we don't get preloaded but unused projects to grade and don't get projects where no commits have been made
     }
 }
