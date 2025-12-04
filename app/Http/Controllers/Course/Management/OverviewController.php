@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Course\Management;
 
+use App\Helpers\GitLabNameSanitizer;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enums\CorrectionType;
@@ -55,10 +56,12 @@ class OverviewController extends Controller
             'group' => ['string', 'nullable'],
         ]);
 
+        $sanitizedName = GitLabNameSanitizer::sanitize($validated['name']);
+
         // TODO: Move this into the module space, where when LinkRepository module is installed, then set up this gitlab group.
         // TODO: This requires a bit of a refactor, to add a new way to only trigger it on new installs and uninstalls, but not on loads from database.
         // Create a Gitlab sub-group for each task.
-        $gitlabGroup = $sourceControl->createGroup($validated['name'], [
+        $gitlabGroup = $sourceControl->createGroup($sanitizedName, [
             "parent_id" => $course->gitlab_group_id,
         ]);
 
