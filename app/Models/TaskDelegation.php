@@ -310,4 +310,23 @@ class TaskDelegation extends Model
             return $project->relevantPushes()->count() != 0;
         });  // To ensure we don't get preloaded but unused projects to grade and don't get projects where no commits have been made
     }
+
+    public function userPoolCount(): int
+    {
+        return $this->delegationUserPool()->count();
+    }
+
+    public function courseRoleName(): string
+    {
+        if ($this->course_role_id == 1)
+        {
+            return 'Student';
+        }
+        if ($this->course_role_id == 2)
+        {
+            return 'Teacher';
+        }
+
+        return 'User';
+    }
 }
