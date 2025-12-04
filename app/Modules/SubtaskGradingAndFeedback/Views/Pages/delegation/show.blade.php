@@ -1,5 +1,5 @@
 @php
-    $delegationFolderBase = "module-SubtaskGradingAndFeedback::Pages.delegation.";
+    use App\Models\Group;$delegationFolderBase = "module-SubtaskGradingAndFeedback::Pages.delegation.";
 @endphp
 
 @extends('tasks.admin.master')
@@ -16,7 +16,8 @@
                                  src="{{ $user->avatar }}">
                             <div>
                                 <h3 class="font-medium dark:text-white leading-4">{{ $user->name }}</h3>
-                                <span class="text-sm text-lime-green-500">{{ $taskDelegation->course_role_id == 1 ? "Student" : "Teacher" }}</span>
+                                <span
+                                    class="text-sm text-lime-green-500">{{ $taskDelegation->course_role_id == 1 ? "Student" : "Teacher" }}</span>
                             </div>
                         </div>
                         <span
@@ -29,8 +30,24 @@
                                 <div
                                     class="bg-white dark:bg-gray-700 border p-1.5 dark:border-none rounded w-72 project-{{ $projectDelegation->project_id }}">
                                     <div class="flex items-center justify-between">
-                                        <span
-                                            class="text-sm dark:text-gray-300 leading-none">{{ $projectDelegation->project->ownable->name }}</span>
+                                        @if($projectDelegation->project->ownable_type == Group::class)
+                                            <div class="w-full">
+                                                <div class="flex w-full justify-center items-center">
+                                                    <span
+                                                        class="text-lg dark:text-gray-300">
+                                                        {{ $projectDelegation->project->ownable->name }}
+                                                    </span>
+                                                </div>
+                                                <span class="text-sm dark:text-gray-500 leading-none">
+                                                    @foreach($projectDelegation->project->owners() as $student)
+                                                        {{$student->name}}{!!$loop->last ? "" : ",<br>"!!}
+                                                    @endforeach
+                                                </span>
+                                            </div>
+                                        @else
+                                            <span
+                                                class="text-sm dark:text-gray-300 leading-none">{{ $projectDelegation->project->ownable->name }}</span>
+                                        @endif
                                         <div class="flex gap-1">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                  @class(['h-6 w-6', $projectDelegation->reviewed ? 'text-lime-green-300' : 'text-gray-400']) fill="none"
