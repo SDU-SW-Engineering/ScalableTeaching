@@ -39,7 +39,11 @@ beforeEach(function() {
 function createStudents(int $count, bool $withPushes = true)
 {
     test()->students = User::factory($count)->hasAttached(test()->course)->create()->each(function(User $user) use ($withPushes) {
-        $project = Project::factory()->for(test()->task)->for($user, 'ownable')->createQuietly();
+        $project = Project::factory()
+            ->for(test()->task)
+            ->for($user, 'ownable')
+            ->set("status", "finished")
+            ->set("finished_at", test()->taskEndsAt->copy())->createQuietly();
         if ( ! $withPushes)
             return;
         test()->latestPushes[] = ProjectPush::factory()->for($project)->create([
@@ -67,7 +71,11 @@ function createTeachers(int $count)
 function createGroup()
 {
     $group = Group::factory()->for(test()->course)->create();
-    $project = Project::factory()->for(test()->task)->for($group, 'ownable')->createQuietly();
+    $project = Project::factory()
+        ->for(test()->task)
+        ->for($group, 'ownable')
+        ->set("status", "finished")
+        ->set("finished_at", test()->taskEndsAt->copy())->createQuietly();
     test()->latestPushes[] = ProjectPush::factory()->for($project)->create([
         'created_at' => test()->taskEndsAt->copy()->subHours(2), // push needs to be before the deadline of task
     ]);
