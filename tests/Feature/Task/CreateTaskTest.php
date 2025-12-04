@@ -19,7 +19,7 @@ beforeEach(function() {
 });
 
 
-it('creates an  task', closure: function() {
+it('creates a task', closure: function() {
     postJson(route('courses.manage.storeTask', [$this->course]), [
         'name'    => 'Test Assignment',
     ])->assertStatus(200);

@@ -87,8 +87,8 @@ class TaskDelegation extends Model
     {
         return $this->hasManyThrough(ProjectFeedbackComment::class, ProjectFeedback::class);
     }
-
     /**
+     *
      * @param Builder<TaskDelegation> $query
      * @return Builder<TaskDelegation>
      */
@@ -96,7 +96,6 @@ class TaskDelegation extends Model
     {
         return $query->where('delegated', false);
     }
-
     /**
      * @throws TaskDelegationException
      * @throws Throwable
@@ -105,15 +104,16 @@ class TaskDelegation extends Model
     {
         throw_if($this->task->ends_at->gt(now()), new TaskDelegationException('Cannot delegate before task has ended.'));
         throw_if($this->task->course->students()->count() == 1, new TaskDelegationException("Not enough students to delegate."));
-
-
-        if ($this->number_of_projects === 0 || $this->number_of_projects >= $this->task->projects->count() - 1)
+        if ($this->course_role_id != 2 && ($this->number_of_projects === 0 || $this->number_of_projects >= $this->task->projects->count() - 1))
         { // Max cases where all project gets reviewed by all reviewers.
             $this->delegateAllProjects();
-        } elseif ($this->course_role_id == 2)
+        } elseif ($this->course_role_id == 2 && $this->number_of_projects == 0)
+        { // If projects should be equally distributed amongst teachers.
+            $this->delegateAllProjects();
+        } elseif ($this->course_role_id == 2 && $this->number_of_projects == 1)
         { // If projects should be equally distributed amongst teachers.
             $this->delegateSplitEqually();
-        } else if ($this->delegationUserPool()->count() == $this->task->course->students()->count())
+        }else if ($this->course_role_id == 1)
         { // If all students should review "$this->number_of_projects" projects each.
             $this->delegateCircular();
         } else
@@ -130,20 +130,22 @@ class TaskDelegation extends Model
     private function delegateAllProjects(): void
     {
         $delayCounter = 0;
-        $allProjects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade
+        $allProjects = $this->getEligibleProjects(); // Last part is to ensure we don't get preloaded but unused projects to grade and don't get projects where no commits have been made
         foreach ($this->delegationUserPool() as $delegationUser)
         {
             $userProject = $this->userProject($delegationUser);
             $ineligibleProjects = $userProject != null ? [$userProject] : [];
-
             $eligibleProjects = $allProjects->except($ineligibleProjects);
             foreach ($eligibleProjects as $project)
             {
+                /**
+                 * @var Project $project
+                 */
                 $this->processProjectUpdate($project, $delegationUser, $delayCounter);
             }
-
         }
     }
+
 
     /**
      * Handles delegating projects if every user should review a subset of projects.
@@ -156,20 +158,22 @@ class TaskDelegation extends Model
     private function delegateCircular(): void
     {
         $delayCounter = 0;
-        $projects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade;
+        $projects = $this->getEligibleProjects();
         $userPool = $this->delegationUserPool();
         for ($userIndex = 0; $userIndex < $userPool->count(); $userIndex++)
         {
             $delegationUser = $userPool[$userIndex];
             $userProject = $this->userProject($delegationUser);
             $ineligibleProjects = $userProject != null ? [$userProject] : [];
-
             $eligibleProjects = $projects->except($ineligibleProjects);
             for ($projectIndex = 0; $projectIndex < $this->number_of_projects; $projectIndex++)
             {
                 $index = ($userIndex + $projectIndex) % count($eligibleProjects);
 
                 $projectToAssign = $eligibleProjects->slice($index, 1)->first();
+                /**
+                 * @var Project $projectToAssign
+                 */
                 $this->processProjectUpdate($projectToAssign, $delegationUser, $delayCounter);
             }
         }
@@ -179,23 +183,26 @@ class TaskDelegation extends Model
     {
         $delayCounter = 0;
         $userPool = $this->delegationUserPool();
-        $projects = $this->task->projects->keyBy('id')->whereNotNull("ownable_id"); // Last part is to ensure we don't get preloaded but unused projects to grade;
-        $splitProjects = $projects->split($userPool->count());
-        foreach ($userPool as $delegationUser)
+        $remainingProjects = $this->getEligibleProjects();
+        $userIndex = 0;
+        while ($remainingProjects->count() >= 1)
         {
-
-            $userProject = $this->userProject($delegationUser);
-            //TODO:  Account for group projects.
-
-            $ineligibleProjects = $userProject != null ? [$userProject] : [];
-
-            /** @var Collection $eligibleProjects */
-            $eligibleProjects = $splitProjects->shift()->except($ineligibleProjects);
-            foreach ($eligibleProjects as $project)
+            $user = $userPool[$userIndex++ % count($userPool)];
+            $project = $remainingProjects->filter(function (Project $project) use ($user) {return ! $project->owners()->contains($user);})->first();
+            if ( ! $project)
             {
-                /** @var Project $project */
-                $this->processProjectUpdate($project, $delegationUser, $delayCounter);
+                continue;
             }
+            $remainingProjects = $remainingProjects->reject(function (Project $filterProject) use ($project) {
+                /**
+                 * @var Project $project
+                 */
+                return $project->id === $filterProject->id;
+            });
+            /**
+             * @var Project $project
+             */
+            $this->processProjectUpdate($project, $user, $delayCounter);
         }
     }
 
@@ -260,11 +267,21 @@ class TaskDelegation extends Model
         $userPoolCount = $this->userPool()->count();
         if ($this->course_role_id == 1 && $userPoolCount == 0)
         {
-            return $this->task->course->students;
+            $availableStudents = Collection::empty();
+            $this->task->projects->where("status", "finished")->each(function ($project) use ($availableStudents) {
+                $availableStudents->push(...$project->owners()->all());
+            });
+
+            return $availableStudents;
         }
         if ($this->course_role_id == 1 && $userPoolCount != 0)
         {
-            return $this->task->course->students->diff($this->userPool);
+            $availableStudents = Collection::empty();
+            $this->task->projects->where("status", "finished")->each(function ($project) use ($availableStudents) {
+                $availableStudents->push(...$project->owners()->all());
+            });
+
+            return $availableStudents->diff($this->userPool);
         }
         if ($this->course_role_id == 2 && $userPoolCount == 0)
         {
@@ -284,22 +301,13 @@ class TaskDelegation extends Model
         return Collection::empty();
     }
 
-    public function userPoolCount(): int
+    /**
+     * @return Collection<(int|string), Project>
+     */
+    public function getEligibleProjects(): Collection
     {
-        return $this->delegationUserPool()->count();
-    }
-
-    public function courseRoleName(): string
-    {
-        if ($this->course_role_id == 1)
-        {
-            return 'Student';
-        }
-        if ($this->course_role_id == 2)
-        {
-            return 'Teacher';
-        }
-
-        return 'User';
+        return $this->task->projects->keyBy('id')->whereNotNull("ownable_id")->filter(function (Project $project) {
+            return $project->relevantPushes()->count() != 0;
+        });  // To ensure we don't get preloaded but unused projects to grade and don't get projects where no commits have been made
     }
 }

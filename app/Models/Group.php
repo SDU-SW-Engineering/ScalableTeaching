@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\GitLabNameSanitizer;
 use Domain\ActivityLogging\Course\CourseActivityLogging;
 use Domain\ActivityLogging\Course\CourseActivityMessage;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -109,5 +110,13 @@ class Group extends Model
     public function displayName(): string
     {
         return $this->name . ' (' . $this->memberString . ')';
+    }
+
+    /**
+     * @return string The group name sanitized such that it can be used as a repository name in GitLab
+     */
+    public function getSanitizedName(): string
+    {
+        return GitLabNameSanitizer::sanitize($this->name);
     }
 }
