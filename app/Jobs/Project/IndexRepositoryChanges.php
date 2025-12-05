@@ -64,7 +64,7 @@ class IndexRepositoryChanges implements ShouldQueue
         $accessToken = config('sourcecontrol.users.default.token');
         $sourceControlProject = $this->project->sourceControl();
         $url = Str::of($sourceControlProject->cloneUrl)->replace('://', "://:$accessToken@");
-        exec("docker run jazerix/git-diff:latest $url {$this->project->task->getSha()} $this->comparisonSha 2>&1", $output, $code);
+        exec("docker run madswp/git-diff-v2:latest $url {$this->project->task->getSha()} $this->comparisonSha 2>&1", $output, $code);
 
         $index = $index == null ? new ProjectDiffIndex() : $index;
         $index->project_id = $this->project->id;
