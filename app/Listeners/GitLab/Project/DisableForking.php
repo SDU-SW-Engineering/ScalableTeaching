@@ -43,16 +43,15 @@ class DisableForking implements ShouldQueue
 
         Log::info("Disabling GitLab forking for project {$event->project->id}");
 
-        $attempts = 3;
+        $attempts = 5;
         $gitLabManager = app(GitLabManager::class);
         $project = $gitLabManager->projects()->show($event->project->gitlab_project_id);
 
         while (($project['import_error'] != null || $project['import_status'] != 'finished') && $attempts > 1)
         { // The system is sometimes too fast for the Gitlab server, this buys the Gitlab server some more time before Scalable moves on.
-            usleep(250000);
+            usleep(250_000);
             $attempts--;
             $project = $gitLabManager->projects()->show($event->project->gitlab_project_id);
-
         }
 
         if($project['import_error'] != null || $project['import_status'] != 'finished')
