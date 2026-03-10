@@ -37,6 +37,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('tasks:delegate')->everyFifteenMinutes()->sendOutputTo(storage_path('logs/tasks-delegate.log'));
         $schedule->command('pipelines:refresh-stale')->everyThirtyMinutes()->sendOutputTo(storage_path('logs/pipelines-refresh-stale.log'));
         $schedule->command('tasks:preload')->everyThirtyMinutes()->sendOutputTo(storage_path('logs/tasks-preload.log'));
+        $schedule->command('projects:download')->everyThirtyMinutes()->sendOutputTo(storage_path('logs/projects-download.log'));
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
     }
 
