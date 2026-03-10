@@ -52,7 +52,7 @@ it('should throw an exception if the project import is not finished after 3 atte
     $this->project->save();
 
     $this->mock(GitLabManager::class, function (MockInterface $mock) {
-        $mock->shouldReceive('projects->show')->atMost()->times(3)->andReturn([
+        $mock->shouldReceive('projects->show')->atMost()->times(7)->andReturn([
             'import_error'  => 'error',
             'import_status' => 'finished',
         ]);

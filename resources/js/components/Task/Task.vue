@@ -95,7 +95,7 @@
                         class="absolute bg-white p-4 rounded-md shadow-md max-vh70 overflow-x-hidden overflow-scroll dark:bg-gray-800">
                         <div class="prose-sm dark:prose-light"
                              :class="[hideMissingAssignmentWarning || project != null || progress.ended ? '': 'filter blur-sm']"
-                             v-html="task.description"/>
+                             v-html="processDescription(task.description)"/>
                     </div>
                     <div class="absolute flex w-full justify-center"
                          v-if="!hideMissingAssignmentWarning && project == null && !progress.ended">
@@ -227,6 +227,20 @@ import MarkCompleted from "../Widgets/MarkCompleted";
 import ValidationFailed from "../Widgets/ValidationFailed.vue";
 import GoToRepo from "../Widgets/GoToRepo.vue";
 
+function scrambleChar(char) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzæøåABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ';
+
+    return char.replace(/[a-zA-ZæøåÆØÅ]/g, () => {
+        return chars[Math.floor(Math.random() * chars.length)];
+    });
+}
+
+function scrambleText(description) {
+    return description.replace(/>([^<]+)</g, (match, text) => {
+        return `>${scrambleChar(text)}<`;
+    });
+}
+
 export default {
     components: {
         GoToRepo,
@@ -259,6 +273,22 @@ export default {
                 this.errorMessage = e.response.data.message;
                 this.startingAssignment = false;
             }
+        },
+        processDescription: function (description) {
+            const startsAt = new Date(this.task.starts_at)
+            const now = new Date()
+            let returnText = '';
+            
+            if (startsAt > now){
+                returnText = '<h1>You can\'t see the assignment text before the start time!</h1><br>'
+            }
+            if (startsAt > now || !(this.hideMissingAssignmentWarning || this.project != null || this.progress.ended)){
+                returnText += scrambleText(description);
+            } else {
+                returnText += description
+            }
+
+            return returnText;
         },
     },
     data: function () {
