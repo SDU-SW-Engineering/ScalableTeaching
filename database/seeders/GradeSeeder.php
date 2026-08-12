@@ -14,7 +14,8 @@ class GradeSeeder extends Seeder
         Course::all()->each(function (Course $course) {
             $students = $course->students()->get();
 
-            if ($students->isEmpty()) {
+            if ($students->isEmpty())
+            {
                 return;
             }
 
@@ -22,19 +23,21 @@ class GradeSeeder extends Seeder
                 ->where('grouped_by', '!=', 'sidebar')
                 ->get();
 
-            foreach ($tasks as $task) {
+            foreach ($tasks as $task)
+            {
                 $engagement = rand(30, 100) / 100;
 
                 $engagedStudents = $students
                     ->shuffle()
                     ->take((int) round($students->count() * $engagement));
 
-                foreach ($engagedStudents as $student) {
+                foreach ($engagedStudents as $student)
+                {
                     Grade::factory()->create([
-                        'task_id' => $task->id,
-                        'user_id' => $student->id,
+                        'task_id'     => $task->id,
+                        'user_id'     => $student->id,
                         'source_type' => Task::class,
-                        'source_id' => $task->id,
+                        'source_id'   => $task->id,
                     ]);
                 }
             }
