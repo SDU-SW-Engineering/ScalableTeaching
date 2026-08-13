@@ -208,10 +208,11 @@ class Course extends Model
                 ->leftJoin('tasks', 'grades.task_id', '=', 'tasks.id')
                 ->select([DB::raw("count(tasks.id)/$enrolledCount as grade_count"), 'tasks.id', 'tasks.grouped_by', 'tasks.starts_at', 'tasks.name'])
                 ->groupBy('task_id')
+                ->orderBy('tasks.grouped_by')
                 ->orderBy('tasks.starts_at')
                 ->orderBy('tasks.order')
                 ->get()
-                ->mapWithKeys(fn($result) => [$result->grouped_by  => round($result->grade_count, 2)]); // @phpstan-ignore-line
+                ->mapWithKeys(fn($result) => [$result->grouped_by => round($result->grade_count * 100, 2)]); // @phpstan-ignore-line
         });
     }
 
