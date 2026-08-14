@@ -28,7 +28,7 @@ class OverviewController extends Controller
         }
         $finishedCount = $task->projects()->where('status', ProjectStatus::Finished)->count();
         $finishedPercent = $projectCount == 0 ? 0 : $finishedCount / $projectCount * 100;
-        $failedCount = $task->projects()->where('status', ProjectStatus::Overdue)->count();
+        $failedCount = $task->projects()->claimed()->where('status', ProjectStatus::Overdue)->count();
         $failedPercent = $projectCount == 0 ? 0 : $failedCount / $projectCount * 100;
         $buildCount = $task->jobs()->count();
         $buildsToday = $task->jobs()->whereRaw("date(pipelines.created_at) = ?", now()->toDateString())->withTrashedParents()->count();
