@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Intervention\Image\Facades\Image;
 use Laravel\Socialite\Facades\Socialite;
@@ -30,20 +29,25 @@ class GitLabOAuthController extends Controller
         $dbUser->last_login = now();
         $dbUser->gitlab_id = $user->getId();
 
-        try
-        {
-            $avatarResponse = Http::withHeaders(['Authorization' => 'Bearer ' . $user->token])->get($user->avatar);
-            $avatar = Image::make($avatarResponse->body());
+        if (!empty($user->avatar)) {
+            try {
+                $avatarResponse = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $user->token,
+                ])->timeout(10)->get($user->avatar);
 
-            $image = (string)$avatar->resize(100, 100)->encode('data-url');
+                $avatarResponse->throw();
 
-            if(md5($image) != md5($dbUser->avatar))
-                $dbUser->avatar = $image;
+                $avatar = Image::make($avatarResponse->body());
+                $image = (string) $avatar->resize(100, 100)->encode('data-url');
 
-        } catch(\Exception $exception)
-        {
-
+                if ($image !== $dbUser->avatar) {
+                    $dbUser->avatar = $image;
+                }
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
         }
+        
         $dbUser->save();
 
         \Auth::login($dbUser);
