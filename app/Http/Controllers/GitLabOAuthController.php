@@ -29,8 +29,10 @@ class GitLabOAuthController extends Controller
         $dbUser->last_login = now();
         $dbUser->gitlab_id = $user->getId();
 
-        if (!empty($user->avatar)) {
-            try {
+        if ( ! empty($user->avatar))
+        {
+            try
+            {
                 $avatarResponse = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $user->token,
                 ])->timeout(10)->get($user->avatar);
@@ -40,10 +42,12 @@ class GitLabOAuthController extends Controller
                 $avatar = Image::make($avatarResponse->body());
                 $image = (string) $avatar->resize(100, 100)->encode('data-url');
 
-                if ($image !== $dbUser->avatar) {
+                if ($image !== $dbUser->avatar)
+                {
                     $dbUser->avatar = $image;
                 }
-            } catch (\Throwable $exception) {
+            } catch (\Throwable $exception)
+            {
                 report($exception);
             }
         }
